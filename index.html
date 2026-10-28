@@ -10,10 +10,10 @@
 @font-face { font-family: "Nunito"; src: url("fonts/Nunito.ttf") format("truetype"); font-weight: 200 1000; font-display: swap; }
 :root {
   --orange:#fa5b35; --ink:#151a21; --white:#fff; --grey:#666666; --line:#d0d1d3; --surface:#f2f2f2;
-  --lavender:#babde4; --lilac:#ccb1da; --lilac-light:#ebddf5; --lilac-faint:#f6f1f9; --green:#02b089; --red:#d92d20;
+  --lavender:#babde4; --lilac:#ccb1da; --lilac-light:#ebddf5; --lilac-faint:#f6f1f9; --green:#02b089; --green-dark:#00795e; --red:#d92d20;
   --pill:100px; --card:16px; --dur:320ms; --ease:cubic-bezier(.165,.84,.44,1);
 }
-@media (prefers-reduced-motion: reduce) { :root { --dur: 0ms; } }
+@media (prefers-reduced-motion: reduce) { :root { --dur: 0ms; } .schirm { animation: none; } }
 * { box-sizing: border-box; }
 html, body { margin:0; background: var(--white); color: var(--ink); font-family: "Nunito", Arial, sans-serif; font-size: 18px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
 body { min-height: 100dvh; display: flex; flex-direction: column; }
@@ -36,9 +36,9 @@ p.hinweis, .klein { color: var(--grey); font-size: 15px; }
 .opt { display:flex; align-items:center; gap: 12px; padding: 14px 18px; border: 1.5px solid var(--line); border-radius: var(--pill); background: var(--white); cursor:pointer; font: inherit; color: var(--ink); text-align:left; transition: border-color var(--dur), background var(--dur), transform var(--dur); }
 .opt:hover { border-color: var(--ink); }
 .opt:focus-visible { outline: 3px solid var(--lavender); outline-offset: 2px; }
-.opt[aria-pressed="true"], .opt.aktiv { border-color: var(--orange); background: #fff1ec; }
+.opt[aria-checked="true"], .opt.aktiv { border-color: var(--orange); background: #fff1ec; }
 .opt .punkt { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
-.opt[aria-pressed="true"] .punkt { border-color: var(--orange); background: var(--orange); box-shadow: inset 0 0 0 4px #fff; }
+.opt[aria-checked="true"] .punkt { border-color: var(--orange); background: var(--orange); box-shadow: inset 0 0 0 4px #fff; }
 .opt.multi .punkt { border-radius: 6px; }
 .text { width:100%; font: inherit; padding: 14px 18px; border: 1.5px solid var(--line); border-radius: var(--card); margin-top: 8px; }
 .text:focus { outline: 3px solid var(--lavender); border-color: var(--ink); }
@@ -53,17 +53,23 @@ textarea.text { min-height: 110px; resize: vertical; }
 .matrix .skala .opt { padding: 10px 4px; font-size: 15px; background: var(--white); }
 .extra { margin-top: 10px; }
 .nav { display:flex; justify-content:space-between; align-items:center; gap: 12px; margin-top: 28px; }
-.knopf { font: inherit; font-weight: 700; padding: 14px 26px; border-radius: var(--pill); border: 0; background: var(--orange); color: #fff; cursor:pointer; transition: transform var(--dur) var(--ease), opacity var(--dur); }
+.knopf { font: inherit; font-size: 19px; font-weight: 800; padding: 14px 26px; border-radius: var(--pill); border: 0; background: var(--orange); color: #fff; cursor:pointer; transition: transform var(--dur) var(--ease), opacity var(--dur); }
 .knopf:hover { transform: translateY(-1px); }
 .knopf:disabled { opacity: .35; cursor: not-allowed; transform:none; }
 .knopf.leise { background: transparent; color: var(--grey); padding-left: 0; }
 .fehler { color: var(--red); font-size: 15px; min-height: 22px; margin-top: 8px; }
+.fehler:focus { outline: none; }
+.stern { color: var(--orange); margin-left: 4px; }
+.legende { color: var(--grey); font-size: 14px; margin: 6px 0 0; }
+label.feld { display:block; font-weight: 600; margin-top: 8px; }
+.status { margin-top: 16px; }
+.ok { color: var(--green-dark); }
 .botschaft { background: var(--lilac-light); border-radius: 24px; padding: 28px; font-size: clamp(22px, 4vw, 28px); font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; margin: 20px 0; }
 .ende { text-align:center; padding: 40px 0; }
 .ende .gross { font-size: clamp(40px, 10vw, 72px); font-weight: 800; letter-spacing: -0.03em; color: var(--orange); line-height: 1; }
 footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 24px 28px; }
 .sr { position:absolute; left:-9999px; }
-@media (max-width: 520px) { .skala .opt { padding: 12px 2px; font-size: 14px; } .nav { flex-direction: column-reverse; align-items: stretch; } .knopf { width:100%; } }
+@media (max-width: 520px) { .skala .opt { padding: 12px 2px; font-size: 14px; } .skala.worte { grid-template-columns: 1fr; } .skala.worte .opt { justify-content:flex-start; text-align:left; padding: 12px 16px; font-size: 16px; } .nav { flex-direction: column-reverse; align-items: stretch; } .knopf { width:100%; } }
 </style>
 </head>
 <body>
@@ -80,6 +86,8 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = true;
 const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
+const VERSION = "2.1";                   // Stand des Fragebogens, wird mitgespeichert
+const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
 const APPS = ["Yuh","Neon","Zak","Revolut","App meiner Hausbank","andere"];
 const MERKMALE = [
@@ -98,23 +106,29 @@ const BOTSCHAFTEN = {A:"Bei Yuh antwortet dir eine Person in der Schweiz.", B:"B
 const S5 = (a,b)=>({stufen:5, links:a, rechts:b});
 
 /* ---------- Antworten ---------- */
-const A = { id: (new URLSearchParams(location.search).get("id")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,24) || Math.random().toString(36).slice(2,10), variante: ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop" };
+function merk(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
+const idAusAdresse = (new URLSearchParams(location.search).get("id")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,24);
+const A = { id: idAusAdresse || merk("id") || Math.random().toString(36).slice(2,10), variante: merk("variante") || ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop" };
+merk("id", A.id); merk("variante", A.variante);
 const start = Date.now();
 const hauptapp = () => A.t2 || (Array.isArray(A.t1) && A.t1.length === 1 ? A.t1[0] : "");
 const nutztYuh = () => Array.isArray(A.t1) && A.t1.includes("Yuh");
+const anzeige = o => o==="App meiner Hausbank" && A.t1_hausbank ? `${A.t1_hausbank} (App meiner Hausbank)` : (o==="andere" && A.t1_andere ? A.t1_andere : o);
+const hauptappName = () => anzeige(hauptapp());
 
 /* ---------- Bildschirme ---------- */
 const S = [
- {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Anonym, keine Namen, keine Kontodaten. Die Daten werden nur für diese Arbeit verwendet und nach der Bewertung gelöscht. Dauer ${DAUER_TEXT}.`, knopf:"Los"},
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Die Teilnahme ist freiwillig, du kannst jederzeit abbrechen. Anonym, keine Namen, keine Kontodaten. Die Daten werden nur für diese Arbeit verwendet und nach der Notenpublikation gelöscht. Fragen mit <span class="stern" aria-hidden="true">*</span><span class="sr">Stern</span> sind Pflicht. Dauer ${DAUER_TEXT}. Rückfragen an ${KONTAKT}.`, knopf:"Los"},
  {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"t1", art:"mehrfach", pflicht:true, titel:"Welche dieser Banking-Apps nutzt du zurzeit?", hinweis:"Mehrfachauswahl möglich.", optionen:APPS, texte:{"App meiner Hausbank":{key:"t1_hausbank", label:"Welche Bank?"}, "andere":{key:"t1_andere", label:"Welche App?"}}},
  {id:"t2", art:"einfach", pflicht:true, titel:"Welche davon nutzt du am häufigsten?", optionen: () => A.t1, zeigen: () => Array.isArray(A.t1) && A.t1.length > 1},
- {id:"t3", art:"matrix", pflicht:true, titel:"Wie wichtig ist dir jede dieser Eigenschaften beim Kundendienst einer Banking-App?", zeilen:MERKMALE, skala:S5("unwichtig","sehr wichtig"), prefix:"t3_"},
- {id:"t4a", art:"einfach", pflicht:true, titel: () => `Hattest du schon einmal Kontakt mit dem Kundendienst von ${hauptapp()}?`, optionen:["ja","nein"]},
- {id:"t4", art:"matrix", pflicht:true, titel: () => `Wie gut erfüllt der Kundendienst von ${hauptapp()} diese Eigenschaften aus deiner Sicht?`, zeilen:MERKMALE, skala:S5("sehr schlecht","sehr gut"), prefix:"t4_", weissnicht:"kann ich nicht beurteilen"},
- {id:"t4b", art:"matrix", pflicht:true, titel:"Wie gut erfüllt der Kundendienst von Yuh diese Eigenschaften aus deiner Sicht?", zeilen:MERKMALE, skala:S5("sehr schlecht","sehr gut"), prefix:"t4b_", weissnicht:"kann ich nicht beurteilen", zeigen: () => nutztYuh() && hauptapp() !== "Yuh"},
+ {id:"t3", art:"matrix", pflicht:true, titel:"Wie wichtig ist dir jede dieser Eigenschaften beim Kundendienst einer Banking-App?", zeilen:MERKMALE, skala:{...S5("unwichtig","sehr wichtig"), worte:["unwichtig","eher unwichtig","mittel","eher wichtig","sehr wichtig"]}, prefix:"t3_"},
+ {id:"t4a", art:"einfach", pflicht:true, titel: () => `Hattest du schon einmal Kontakt mit dem Kundendienst von ${hauptappName()}?`, optionen:["ja","nein"]},
+ {id:"t4", art:"matrix", pflicht:true, titel: () => `Wie gut erfüllt der Kundendienst von ${hauptappName()} diese Eigenschaften aus deiner Sicht?`, zeilen:MERKMALE, skala:S5("sehr schlecht","sehr gut"), prefix:"t4_", weissnicht:"kann ich nicht beurteilen"},
+ {id:"t4c", art:"einfach", pflicht:true, titel:"Hattest du schon einmal Kontakt mit dem Kundendienst von Yuh?", optionen:["ja","nein"], zeigen: () => nutztYuh() && hauptapp() !== "Yuh"},
+ {id:"t4b", art:"matrix", pflicht:false, titel:"Wie gut erfüllt der Kundendienst von Yuh diese Eigenschaften aus deiner Sicht?", zeilen:MERKMALE, skala:S5("sehr schlecht","sehr gut"), prefix:"t4b_", weissnicht:"kann ich nicht beurteilen", zeigen: () => nutztYuh() && hauptapp() !== "Yuh"},
  {id:"t5", art:"einfach", pflicht:true, titel:"Hattest du in den letzten zwölf Monaten Kontakt mit dem Kundendienst einer Banking-App?", optionen:["ja","nein"]},
  {id:"t6", art:"einfach", pflicht:true, titel:"Bei welchem Anbieter war dein letzter Kontakt?", optionen:APPS, texte:{"App meiner Hausbank":{key:"t6_name", label:"Welche Bank?"}, "andere":{key:"t6_name", label:"Welche App?"}}, zeigen: () => A.t5==="ja"},
  {id:"t7", art:"einfach", pflicht:true, titel:"Über welchen Kanal hast du bei diesem Kontakt zuerst Kontakt aufgenommen?", optionen:["Chat in der App","E-Mail","Telefon","soziale Medien","anderer"], zeigen: () => A.t5==="ja"},
@@ -134,14 +148,14 @@ const S = [
  {id:"t16b", art:"einfach", pflicht:true, titel:"Unterscheidet sich Yuh deiner Meinung nach durch seinen Kundendienst von den anderen Banking-Apps, die du kennst?", optionen:["ja, zum Besseren","ja, zum Schlechteren","nein, kein Unterschied","kann ich nicht beurteilen"], zeigen: () => A.t13a==="ja"},
  {id:"bot", art:"info", kicker:"Freiwillig", titel:"Noch zwei kurze Fragen", text:"Du kannst sie überspringen.", knopf:"Weiter", zeigen: () => BOTSCHAFTEN_AKTIV},
  {id:"t17", art:"skala", pflicht:false, botschaft:true, titel:"Lies diesen Satz.", frage:"Wie glaubwürdig findest du ihn?", skala:S5("gar nicht glaubwürdig","sehr glaubwürdig"), zeigen: () => BOTSCHAFTEN_AKTIV},
- {id:"t18", art:"skala", pflicht:false, botschaft:true, titel:"Derselbe Satz.", frage:"Wie stark weckt er dein Interesse an der App?", skala:S5("gar nicht","sehr stark"), zeigen: () => BOTSCHAFTEN_AKTIV},
+ {id:"t18", art:"skala", pflicht:false, botschaft:true, titel:"Derselbe Satz.", frage:"Wie stark weckt dieser Satz dein Interesse an der App?", skala:S5("gar nicht","sehr stark"), zeigen: () => BOTSCHAFTEN_AKTIV},
  {id:"t20", art:"auswahl", pflicht:true, titel:"In welchem Kanton wohnst du?", optionen:KANTONE},
  {id:"t21", art:"einfach", pflicht:false, titel:"In welcher Sprache nutzt du Banking-Apps?", hinweis:"Freiwillig.", optionen:["Deutsch","Französisch","Italienisch","Englisch","andere"]},
  {id:"ende", art:"ende"}
 ];
 
 /* ---------- Ablauf ---------- */
-let i = 0;
+let i = 0; let fokus = null;
 const main = document.getElementById("main");
 const sichtbar = s => !s.zeigen || s.zeigen();
 const liste = () => S.filter(sichtbar);
@@ -155,45 +169,50 @@ function render() {
   let h = `<section class="schirm">`;
   if (s.kicker) h += `<div class="kicker">${s.kicker}</div>`;
   if (s.art === "ende") { h += endeHtml(); main.innerHTML = h + "</section>"; senden(); return; }
-  h += s.art==="info" ? `<h1>${titel}</h1><p>${s.text||""}</p>` : `<h2>${titel}</h2>`;
+  h += s.art==="info" ? `<h1>${titel}</h1><p>${s.text||""}</p>` : `<h2 id="frage-titel">${titel}${s.pflicht ? '<span class="stern" aria-hidden="true">*</span><span class="sr">(Pflichtfrage)</span>' : ""}</h2>`;
   if (s.hinweis) h += `<p class="hinweis">${s.hinweis}</p>`;
   if (s.botschaft) h += `<div class="botschaft">${BOTSCHAFTEN[A.variante]}</div>`;
   if (s.frage) h += `<p><strong>${s.frage}</strong></p>`;
   if (s.art==="einfach" || s.art==="mehrfach") {
     const opts = typeof s.optionen==="function" ? s.optionen() : s.optionen;
     const multi = s.art==="mehrfach";
-    h += `<div class="optionen" role="${multi?'group':'radiogroup'}">` + opts.map(o => {
+    h += `<div class="optionen" role="${multi?'group':'radiogroup'}" aria-labelledby="frage-titel">` + opts.map(o => {
       const an = multi ? (A[s.id]||[]).includes(o) : A[s.id]===o;
-      let x = `<button type="button" class="opt ${multi?'multi':''}" role="${multi?'checkbox':'radio'}" aria-checked="${an}" aria-pressed="${an}" data-wert="${esc(o)}" aria-label="${esc(o)}"><span class="punkt"></span><span>${esc(o)}</span></button>`;
-      if (s.texte && s.texte[o] && an) x += `<input class="text extra" data-key="${s.texte[o].key}" placeholder="${s.texte[o].label}" value="${esc(A[s.texte[o].key]||"")}" aria-label="${s.texte[o].label}">`;
+      const lab = s.id==="t2" ? anzeige(o) : o;
+      let x = `<button type="button" class="opt ${multi?'multi':''}" role="${multi?'checkbox':'radio'}" aria-checked="${an}" data-wert="${esc(o)}" aria-label="${esc(lab)}"><span class="punkt"></span><span>${esc(lab)}</span></button>`;
+      if (s.texte && s.texte[o] && an) x += `<input class="text extra" data-key="${s.texte[o].key}" maxlength="80" placeholder="${s.texte[o].label}" value="${esc(A[s.texte[o].key]||"")}" aria-label="${s.texte[o].label}">`;
       return x; }).join("") + `</div>`;
   }
   if (s.art==="skala") {
     const st = s.stufen || [1,2,3,4,5];
-    h += `<div class="skala" role="radiogroup">` + st.map((o,k) => `<button type="button" class="opt" role="radio" aria-checked="${A[s.id]===String(k+1)}" aria-pressed="${A[s.id]===String(k+1)}" data-wert="${k+1}" aria-label="${s.stufen ? esc(o) : (k+1)}">${s.stufen ? esc(o) : (k+1)}</button>`).join("") + `</div>`;
+    h += `<div class="skala ${s.stufen ? "worte" : ""}" role="radiogroup" aria-labelledby="frage-titel">` + st.map((o,k) => `<button type="button" class="opt" role="radio" aria-checked="${A[s.id]===String(k+1)}" data-wert="${k+1}" aria-label="${s.stufen ? esc(o) : (k+1) + " von 5, " + (k===0 ? s.skala.links : k===4 ? s.skala.rechts : "")}">${s.stufen ? esc(o) : (k+1)}</button>`).join("") + `</div>`;
     if (s.skala) h += `<div class="skala-enden"><span>${s.skala.links}</span><span>${s.skala.rechts}</span></div>`;
   }
   if (s.art==="matrix") {
-    h += `<div class="matrix">` + s.zeilen.map((z,n) => { const key = s.prefix + (n+1); return `<div class="zeile"><div class="frage">${esc(z)}</div><div class="skala" role="radiogroup" data-key="${key}">` + [1,2,3,4,5].map(k => `<button type="button" class="opt" role="radio" aria-checked="${A[key]===String(k)}" aria-pressed="${A[key]===String(k)}" data-wert="${k}" aria-label="${k} von 5">${k}</button>`).join("") + `</div><div class="skala-enden"><span>${s.skala.links}</span><span>${s.skala.rechts}</span></div>` + (s.weissnicht ? `<div class="optionen zeile" style="margin:8px 0 0"><button type="button" class="opt" role="radio" data-key="${key}" data-wert="0" aria-label="${s.weissnicht}" aria-pressed="${A[key]==="0"}"><span class="punkt"></span><span>${s.weissnicht}</span></button></div>` : "") + `</div>`; }).join("") + `</div>`;
+    const worte = s.skala.worte;
+    if (worte) h += `<p class="legende">${worte.map((w,k) => `${k+1} ${esc(w)}`).join(" · ")}</p>`;
+    h += `<div class="matrix">` + s.zeilen.map((z,n) => { const key = s.prefix + (n+1); const zid = `zeile-${key}`; return `<div class="zeile"><div class="frage" id="${zid}">${esc(z)}</div><div class="skala" role="radiogroup" aria-labelledby="${zid}" data-key="${key}">` + [1,2,3,4,5].map(k => `<button type="button" class="opt" role="radio" aria-checked="${A[key]===String(k)}" data-wert="${k}" aria-label="${worte ? esc(worte[k-1]) : k + " von 5, " + (k===1 ? s.skala.links : k===5 ? s.skala.rechts : "")}">${k}</button>`).join("") + (s.weissnicht ? `<button type="button" class="opt" role="radio" data-wert="0" aria-checked="${A[key]==="0"}" style="grid-column: 1 / -1; justify-content:flex-start; font-weight:400"><span class="punkt"></span><span>${s.weissnicht}</span></button>` : "") + `</div><div class="skala-enden"><span>${s.skala.links}</span><span>${s.skala.rechts}</span></div></div>`; }).join("") + `</div>`;
   }
   if (s.art==="offen") {
-    h += `<textarea class="text" id="offen" aria-label="${esc(titel)}">${esc(A[s.id]||"")}</textarea>`;
-    if (s.kaestchen) h += `<div class="optionen" style="margin-top:12px"><button type="button" class="opt multi" role="checkbox" aria-pressed="${A[s.kaestchen.key]==="ja"}" data-k="${s.kaestchen.key}"><span class="punkt"></span><span>${s.kaestchen.label}</span></button></div>`;
+    h += `<textarea class="text" id="offen" maxlength="1000" aria-labelledby="frage-titel" ${A[s.kaestchen?.key]==="ja" ? "disabled" : ""}>${esc(A[s.id]||"")}</textarea>`;
+    if (s.kaestchen) h += `<div class="optionen" style="margin-top:12px"><button type="button" class="opt multi" role="checkbox" aria-checked="${A[s.kaestchen.key]==="ja"}" data-k="${s.kaestchen.key}"><span class="punkt"></span><span>${s.kaestchen.label}</span></button></div>`;
   }
   if (s.art==="auswahl") {
-    h += `<select class="text" id="auswahl" aria-label="${esc(titel)}"><option value="">Bitte wählen</option>` + s.optionen.map(o => `<option ${A[s.id]===o?'selected':''}>${esc(o)}</option>`).join("") + `</select>`;
+    h += `<select class="text" id="auswahl" aria-labelledby="frage-titel"><option value="">Bitte wählen</option>` + s.optionen.map(o => `<option ${A[s.id]===o?'selected':''}>${esc(o)}</option>`).join("") + `</select>`;
   }
-  h += `<div class="fehler" id="fehler"></div><div class="nav">` + (i>0 && s.art!=="info" ? `<button type="button" class="knopf leise" id="zurueck">Zurück</button>` : `<span></span>`) + `<button type="button" class="knopf" id="weiter">${s.knopf || (s.pflicht ? "Weiter" : "Weiter")}</button></div></section>`;
-  main.innerHTML = h; verdrahten(s); window.scrollTo({top:0, behavior: "smooth"});
+  h += `<div class="fehler" id="fehler" role="alert" tabindex="-1"></div><div class="nav">` + (i>0 && s.art!=="info" ? `<button type="button" class="knopf leise" id="zurueck">Zurück</button>` : `<span></span>`) + `<button type="button" class="knopf" id="weiter">${s.knopf || (s.pflicht ? "Weiter" : "Weiter")}</button></div></section>`;
+  main.innerHTML = h; verdrahten(s); window.scrollTo({top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+  if (fokus) { const f = main.querySelector(`.opt[data-wert="${CSS.escape(fokus)}"]`); if (f) f.focus(); fokus = null; }
 }
 function verdrahten(s) {
   main.querySelectorAll(".opt[data-wert]").forEach(b => b.addEventListener("click", () => {
     const key = b.dataset.key || b.closest("[data-key]")?.dataset.key || s.id; const w = b.dataset.wert;
-    if (s.art==="mehrfach") { const arr = new Set(A[s.id]||[]); arr.has(w) ? arr.delete(w) : arr.add(w); A[s.id] = [...arr]; }
+    if (s.art==="mehrfach") { const arr = new Set(A[s.id]||[]); arr.has(w) ? arr.delete(w) : arr.add(w); A[s.id] = [...arr]; if (s.id==="t1" && A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
     else A[key] = w;
-    if (s.art==="mehrfach" || s.texte) render(); else { const grp = b.closest("[role=radiogroup]") || b.parentElement; (grp.parentElement.querySelectorAll(`.opt[data-wert]`)).forEach(x => { const sameRow = (x.dataset.key||x.closest("[data-key]")?.dataset.key||s.id) === key; if (sameRow) { x.setAttribute("aria-pressed", x===b); x.setAttribute("aria-checked", x===b); } }); }
+    if (s.art==="mehrfach" || s.texte) { fokus = w; render(); } else { const grp = b.closest("[role=radiogroup]") || b.parentElement; grp.querySelectorAll(`.opt[data-wert]`).forEach(x => x.setAttribute("aria-checked", x===b)); }
   }));
-  main.querySelectorAll(".opt[data-k]").forEach(b => b.addEventListener("click", () => { A[b.dataset.k] = A[b.dataset.k]==="ja" ? "" : "ja"; b.setAttribute("aria-pressed", A[b.dataset.k]==="ja"); }));
+  main.querySelectorAll(".opt[data-k]").forEach(b => b.addEventListener("click", () => { const an = A[b.dataset.k]!=="ja"; A[b.dataset.k] = an ? "ja" : ""; b.setAttribute("aria-checked", an); const ta = document.getElementById("offen"); if (ta) { if (an) { ta.value = ""; A[s.id] = ""; } ta.disabled = an; } }));
+  main.querySelectorAll("[role=radiogroup]").forEach(g => g.addEventListener("keydown", e => { const vor = e.key==="ArrowRight" || e.key==="ArrowDown", zur = e.key==="ArrowLeft" || e.key==="ArrowUp"; if (!vor && !zur) return; const bs = [...g.querySelectorAll(".opt")]; const k = bs.indexOf(document.activeElement); if (k < 0) return; e.preventDefault(); const z = bs[(k + (vor ? 1 : bs.length - 1)) % bs.length]; z.focus(); z.click(); }));
   main.querySelectorAll("input.extra").forEach(inp => inp.addEventListener("input", () => A[inp.dataset.key] = inp.value.trim()));
   const offen = document.getElementById("offen"); if (offen) offen.addEventListener("input", () => A[s.id] = offen.value.trim());
   const ausw = document.getElementById("auswahl"); if (ausw) ausw.addEventListener("change", () => A[s.id] = ausw.value);
@@ -202,28 +221,49 @@ function verdrahten(s) {
 }
 function fehlt(s) {
   if (!s.pflicht) return "";
+  if (s.id==="t2" && !(A.t1||[]).includes(A.t2)) return "Bitte wähle eine Antwort.";
   if (s.art==="einfach" || s.art==="skala" || s.art==="auswahl") { if (!A[s.id]) return "Bitte wähle eine Antwort."; if (s.texte && s.texte[A[s.id]] && !A[s.texte[A[s.id]].key]) return "Bitte gib den Namen an."; }
   if (s.art==="mehrfach") { if (!A[s.id] || !A[s.id].length) return "Bitte wähle mindestens eine Antwort."; for (const o of A[s.id]) if (s.texte && s.texte[o] && !A[s.texte[o].key]) return "Bitte gib den Namen an."; }
   if (s.art==="matrix") { for (let n=1; n<=s.zeilen.length; n++) if (!A[s.prefix+n]) return "Bitte beantworte jede Zeile."; }
   return "";
 }
 function weiter(s) {
-  const f = fehlt(s); const fe = document.getElementById("fehler"); if (f) { fe.textContent = f; return; }
+  const f = fehlt(s); const fe = document.getElementById("fehler"); if (f) { fe.textContent = f; fe.focus(); return; }
   if (s.ende && s.ende(A[s.id])) { A.abbruch = s.id; i = S.length - 1; renderEnde(true); return; }
-  if (s.id==="t1" && A.t1.length===1) A.t2 = A.t1[0];
+  if (s.id==="t1") { if (A.t1.length===1) A.t2 = A.t1[0]; else if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
   i++; render();
 }
-function endeHtml() { return `<div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Deine Antworten sind gespeichert.</p><p class="hinweis">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert.</p><input class="text" id="mail" type="email" placeholder="deine@adresse.ch" style="max-width:360px"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus"></div></div>`; }
+function endeHtml() { return `<div class="ende"><div class="gross">Danke</div><p class="status" id="sendestatus" role="status"></p><p class="hinweis">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div>`; }
 function renderEnde(abgebrochen) {
   document.getElementById("balken").style.width = "100%"; document.getElementById("zaehler").textContent = "";
   main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
-  if (!abgebrochen) senden();
+  if (abgebrochen) post({id:A.id, version:VERSION, abbruch:A.abbruch, s1:A.s1, s2:A.s2, s3:A.s3, geraet:A.geraet}); else senden();
 }
 async function post(obj) { if (!ENDPUNKT) { console.log("Antwort (kein Endpunkt gesetzt)", obj); return true; } try { await fetch(ENDPUNKT, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body: JSON.stringify(obj)}); return true; } catch (e) { return false; } }
+// Nur Antworten sichtbarer Fragen werden gesendet. Was durch Zurueckgehen oder einen geaenderten Filter
+// unsichtbar wurde, bleibt weg. t2 wird aus der Hauptapp gesetzt, auch wenn T2 nicht gezeigt wurde.
+function bereinigt() {
+  const out = {id:A.id, version:VERSION, variante: BOTSCHAFTEN_AKTIV ? A.variante : "", geraet:A.geraet, dauer_s: Math.round((Date.now()-start)/1000), abbruch:""};
+  for (const s of liste()) {
+    if (s.art==="info" || s.art==="ende") continue;
+    if (s.art==="matrix") { s.zeilen.forEach((z,n) => { const k = s.prefix+(n+1); if (A[k] !== undefined) out[k] = A[k]; }); continue; }
+    if (A[s.id] !== undefined) out[s.id] = A[s.id];
+    if (s.texte) { const gew = Array.isArray(A[s.id]) ? A[s.id] : [A[s.id]]; for (const o of gew) if (s.texte[o] && A[s.texte[o].key]) out[s.texte[o].key] = A[s.texte[o].key]; }
+    if (s.kaestchen && A[s.kaestchen.key]) out[s.kaestchen.key] = A[s.kaestchen.key];
+  }
+  out.t2 = hauptapp();
+  return out;
+}
+let mailVerdrahtet = false;
 async function senden() {
-  A.dauer_s = Math.round((Date.now()-start)/1000); A.s2 = A.s2; if (!BOTSCHAFTEN_AKTIV) A.variante = "";
-  await post(A);
-  const b = document.getElementById("mailsenden"); if (b) b.addEventListener("click", async () => { const m = document.getElementById("mail").value.trim(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)) { document.getElementById("mailstatus").textContent = "Bitte eine gültige Adresse."; return; } await post({typ:"mail", mail:m}); document.getElementById("mailstatus").style.color = "var(--green)"; document.getElementById("mailstatus").textContent = "Gespeichert, danke."; b.disabled = true; });
+  const st = document.getElementById("sendestatus"); if (!st) return;
+  st.className = "status"; st.textContent = "Deine Antworten werden gespeichert …";
+  const ok = await post(bereinigt());
+  if (!ok) { st.innerHTML = `Die Antworten konnten nicht übertragen werden. Bitte prüfe die Verbindung.<br><button type="button" class="knopf" id="nochmal" style="margin-top:12px">Noch einmal senden</button>`; document.getElementById("nochmal").addEventListener("click", senden); return; }
+  st.className = "status ok"; st.textContent = "Deine Antworten sind gespeichert.";
+  if (mailVerdrahtet) return; mailVerdrahtet = true;
+  const b = document.getElementById("mailsenden"); const ms = document.getElementById("mailstatus");
+  b.addEventListener("click", async () => { const m = document.getElementById("mail").value.trim(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)) { ms.textContent = "Bitte eine gültige Adresse."; document.getElementById("mail").focus(); return; } b.disabled = true; const ok2 = await post({typ:"mail", mail:m}); if (!ok2) { ms.textContent = "Konnte nicht gespeichert werden, bitte noch einmal."; b.disabled = false; return; } ms.className = "fehler ok"; ms.textContent = "Gespeichert, danke."; });
 }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 S[S.length-1].art = "ende"; 
