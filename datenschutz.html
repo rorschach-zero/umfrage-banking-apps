@@ -44,8 +44,9 @@ a { color: var(--ink); }
   <h2>Welche Daten erhoben werden</h2>
   <ul>
     <li>Deine Antworten auf die Fragen der Umfrage, darunter Altersgruppe, Kanton, genutzte Banking-Apps und Bewertungen.</li>
-    <li>Eine zufällige Kennung, die beim Laden der Seite erzeugt wird. Sie enthält keinen Hinweis auf dich und dient nur dazu, doppelte Sendungen zu erkennen. Du siehst sie am Ende der Umfrage.</li>
-    <li>Die Version der Umfrage, die Dauer vom Laden bis zum Senden in Sekunden, und ob du am Handy oder am Computer warst.</li>
+    <li>Eine Kennung. Sie wird beim Laden der Seite zufällig erzeugt oder kommt aus dem Link, über den du die Umfrage geöffnet hast (dann beginnt sie mit einem Kürzel für den Verbreitungsweg, zum Beispiel «SCH-» für die Schule, gefolgt von Zufallszeichen). Sie enthält keinen Hinweis auf deine Person und dient dazu, doppelte Sendungen zu erkennen und den Verbreitungsweg auszuwerten. Du siehst sie am Ende der Umfrage.</li>
+    <li>Die Version der Umfrage, die Dauer vom Laden bis zum Senden in Sekunden, ob du am Handy oder am Computer warst, und der Zeitpunkt, zu dem deine Antworten eingetroffen sind.</li>
+    <li>Gehörst du nicht zur Zielgruppe (Wohnort, Alter, App-Nutzung), endet die Umfrage nach den ersten drei Fragen. Dann werden nur diese drei Antworten, die Kennung, die Version, die Stelle des Ausschlusses und Handy oder Computer gespeichert, ohne weiteren Knopf. Das steht so auch vor dem Start.</li>
     <li>Falls du sie freiwillig angibst: deine Mailadresse, nur um dir die Ergebnisse zu schicken.</li>
   </ul>
   <p>Nicht erhoben werden Name, Kontodaten, IP-Adresse oder Standort durch die Umfrage selbst.</p>
@@ -54,8 +55,8 @@ a { color: var(--ink); }
   <table>
     <tr><th>Schritt</th><th>Dienst</th><th>Was dort anfällt</th></tr>
     <tr><td>Anzeige der Umfrage</td><td>GitHub Pages (GitHub, Inc., USA)</td><td>Technische Zugriffsprotokolle des Hosters, wie bei jeder Website. Darauf hat die Gruppe keinen Zugriff; sie werden nicht ausgewertet.</td></tr>
-    <tr><td>Speicherung der Antworten</td><td>Google Apps Script und Google Sheets im Google-Workspace-Konto der verantwortlichen Person</td><td>Deine Antworten als eine Zeile in einer Tabelle, nur mit der zufälligen Kennung.</td></tr>
-    <tr><td>Mailadressen</td><td>Dieselbe Tabelle, getrenntes Blatt</td><td>Nur Adresse und Datum, ohne Verbindung zu deinen Antworten.</td></tr>
+    <tr><td>Speicherung der Antworten</td><td>Google Apps Script und Google Sheets (Google LLC) im Google-Workspace-Konto der verantwortlichen Person</td><td>Deine Antworten als eine Zeile in einer Tabelle, nur mit der Kennung. Google verarbeitet Daten in eigenen Rechenzentren, auch ausserhalb der Schweiz; Grundlage dafür sind die Vertragsbedingungen von Google Workspace mit den Standarddatenschutzklauseln. Eine Garantie, dass die Daten die Schweiz nicht verlassen, können wir nicht geben.</td></tr>
+    <tr><td>Mailadressen</td><td>Dieselbe Tabelle, getrenntes Blatt</td><td>Nur Adresse und Datum, ohne gemeinsame Kennung mit deinen Antworten. An Tagen mit wenigen Antworten liesse sich über das Datum eine Zuordnung vermuten; deshalb sieht dieses Blatt nur die verantwortliche Person, und es wird zuerst gelöscht.</td></tr>
     <tr><td>Auswertung</td><td>Computer der Gruppe</td><td>Eine Kopie der Antworttabelle, ohne Mailadressen.</td></tr>
   </table>
 
@@ -68,13 +69,13 @@ a { color: var(--ink); }
   </div>
 
   <h2>Wie lange die Daten bleiben</h2>
-  <p>Mailadressen werden gelöscht, sobald die Ergebnisse verschickt sind, spätestens nach der Publikation der Noten. Die Antworten werden nach der Publikation der Noten der Praxisarbeit gelöscht. Die ausgewerteten Ergebnisse bleiben Teil der schriftlichen Arbeit.</p>
+  <p>Mailadressen werden gelöscht, sobald die Ergebnisse verschickt sind, spätestens nach der Publikation der Noten. Die Antworten werden nach der Publikation der Noten der Praxisarbeit gelöscht, und zwar vollständig: die Tabelle bei Google, alle lokalen Kopien und Exporte auf den Computern der Gruppe. Die ausgewerteten Ergebnisse (Anteile, Mittelwerte, bereinigte Zusammenfassungen) bleiben Teil der schriftlichen Arbeit.</p>
 
   <h2>Deine Rechte</h2>
-  <p>Die Teilnahme ist freiwillig. Du kannst jederzeit abbrechen; ohne «Antworten senden» wird nichts gespeichert. Wenn du deine Antworten nachträglich löschen lassen willst, schick die Kennung, die dir am Ende angezeigt wird, an die Kontaktadresse. Ohne Kennung können wir deine Zeile nicht finden, weil wir nicht wissen, welche Zeile zu dir gehört.</p>
+  <p>Die Teilnahme ist freiwillig. Du kannst jederzeit abbrechen; ohne «Antworten senden» werden deine Antworten nicht gespeichert, mit der einen oben genannten Ausnahme beim Ausschluss nach den ersten drei Fragen. Du hast das Recht auf Auskunft, Berichtigung und Löschung deiner Daten. Dafür brauchst du die Kennung, die dir am Ende angezeigt wird, auch beim Ausschluss. Schick sie an die Kontaktadresse. Ohne Kennung können wir deine Zeile nicht finden, weil wir nicht wissen, welche Zeile zu dir gehört.</p>
 
   <h2>Rechtliche Grundlage</h2>
-  <p>Die Erhebung folgt dem Schweizer Datenschutzgesetz (DSG) und den Grundsätzen der Marktforschung (ICC/ESOMAR-Kodex): Freiwilligkeit, Transparenz, Zweckbindung, Datensparsamkeit. Stand dieser Erklärung: 28. Oktober 2026.</p>
+  <p>Die Erhebung folgt dem Schweizer Datenschutzgesetz (DSG) und den Grundsätzen der Marktforschung (ICC/ESOMAR-Kodex): Freiwilligkeit, Transparenz, Zweckbindung, Datensparsamkeit. Stand dieser Erklärung: 28. Oktober 2026, Version 2.9 der Umfrage.</p>
 
   <a class="zurueck" href="index.html">Zurück zur Umfrage</a>
 </main>
