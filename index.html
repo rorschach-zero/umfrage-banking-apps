@@ -98,7 +98,7 @@ const BOTSCHAFTEN = {A:"Bei Yuh antwortet dir eine Person in der Schweiz.", B:"B
 const S5 = (a,b)=>({stufen:5, links:a, rechts:b});
 
 /* ---------- Antworten ---------- */
-const A = { id: Math.random().toString(36).slice(2,10), variante: ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop" };
+const A = { id: (new URLSearchParams(location.search).get("id")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,24) || Math.random().toString(36).slice(2,10), variante: ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop" };
 const start = Date.now();
 const hauptapp = () => A.t2 || (Array.isArray(A.t1) && A.t1.length === 1 ? A.t1[0] : "");
 const nutztYuh = () => Array.isArray(A.t1) && A.t1.includes("Yuh");
