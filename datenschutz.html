@@ -25,7 +25,15 @@ th { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: v
 .kasten { background: var(--lilac-faint); border-radius: var(--card); padding: 16px 18px; margin: 16px 0; }
 a { color: var(--ink); }
 .zurueck { display:inline-block; margin-top: 24px; font-weight: 700; }
-@media (max-width: 520px) { header span { display:none; } }
+@media (max-width: 520px) {
+  header span { display:none; }
+  table, tbody, tr, td { display:block; width:100%; }
+  thead { display:none; }
+  tr { background: var(--lilac-faint); border-radius: var(--card); padding: 10px 14px; margin: 0 0 10px; }
+  td { border: 0; padding: 4px 0; }
+  td::before { content: attr(data-label); display:block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--grey); font-weight: 700; }
+}
+h1, p, li, td { overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
@@ -53,11 +61,13 @@ a { color: var(--ink); }
 
   <h2>Wo die Daten liegen und wer sie verarbeitet</h2>
   <table>
-    <tr><th>Schritt</th><th>Dienst</th><th>Was dort anfällt</th></tr>
-    <tr><td>Anzeige der Umfrage</td><td>GitHub Pages (GitHub, Inc., USA)</td><td>Technische Zugriffsprotokolle des Hosters, wie bei jeder Website. Darauf hat die Gruppe keinen Zugriff; sie werden nicht ausgewertet.</td></tr>
-    <tr><td>Speicherung der Antworten</td><td>Google Apps Script und Google Sheets (Google LLC) im Google-Workspace-Konto der verantwortlichen Person</td><td>Deine Antworten als eine Zeile in einer Tabelle, nur mit der Kennung. Google verarbeitet Daten in eigenen Rechenzentren, auch ausserhalb der Schweiz; Grundlage dafür sind die Vertragsbedingungen von Google Workspace mit den Standarddatenschutzklauseln. Eine Garantie, dass die Daten die Schweiz nicht verlassen, können wir nicht geben.</td></tr>
-    <tr><td>Mailadressen</td><td>Dieselbe Tabelle, getrenntes Blatt</td><td>Nur Adresse und Datum, ohne gemeinsame Kennung mit deinen Antworten. An Tagen mit wenigen Antworten liesse sich über das Datum eine Zuordnung vermuten; deshalb sieht dieses Blatt nur die verantwortliche Person, und es wird zuerst gelöscht.</td></tr>
-    <tr><td>Auswertung</td><td>Computer der Gruppe</td><td>Eine Kopie der Antworttabelle, ohne Mailadressen.</td></tr>
+    <thead><tr><th>Schritt</th><th>Dienst</th><th>Was dort anfällt</th></tr></thead>
+    <tbody>
+    <tr><td data-label="Schritt">Anzeige der Umfrage</td><td data-label="Dienst">GitHub Pages (GitHub, Inc., USA)</td><td data-label="Was dort anfällt">Technische Zugriffsprotokolle des Hosters, wie bei jeder Website. Darauf hat die Gruppe keinen Zugriff; sie werden nicht ausgewertet.</td></tr>
+    <tr><td data-label="Schritt">Speicherung der Antworten</td><td data-label="Dienst">Google Apps Script und Google Sheets (Google LLC) im Google-Workspace-Konto der verantwortlichen Person</td><td data-label="Was dort anfällt">Deine Antworten als eine Zeile in einer Tabelle, nur mit der Kennung. Google verarbeitet Daten in eigenen Rechenzentren, auch ausserhalb der Schweiz; Grundlage dafür sind die Vertragsbedingungen von Google Workspace mit den Standarddatenschutzklauseln. Eine Garantie, dass die Daten die Schweiz nicht verlassen, können wir nicht geben.</td></tr>
+    <tr><td data-label="Schritt">Mailadressen</td><td data-label="Dienst">Dieselbe Tabelle, getrenntes Blatt</td><td data-label="Was dort anfällt">Nur Adresse und Datum, ohne gemeinsame Kennung mit deinen Antworten. An Tagen mit wenigen Antworten liesse sich über das Datum eine Zuordnung vermuten; deshalb sieht dieses Blatt nur die verantwortliche Person, und es wird zuerst gelöscht.</td></tr>
+    <tr><td data-label="Schritt">Auswertung</td><td data-label="Dienst">Computer der Gruppe</td><td data-label="Was dort anfällt">Eine Kopie der Antworttabelle, ohne Mailadressen.</td></tr>
+      </tbody>
   </table>
 
   <h2>Wer die Daten sieht</h2>
