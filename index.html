@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Umfrage Kundendienst von Banking-Apps</title>
+<meta name="description" content="Kurze anonyme Umfrage zum Kundendienst von Banking-Apps, Praxisarbeit HFW.">
+<meta name="robots" content="noindex">
+<style>
+@font-face { font-family: "Nunito"; src: url("fonts/Nunito.ttf") format("truetype"); font-weight: 200 1000; font-display: swap; }
+:root {
+  --orange:#fa5b35; --ink:#151a21; --white:#fff; --grey:#666666; --line:#d0d1d3; --surface:#f2f2f2;
+  --lavender:#babde4; --lilac:#ccb1da; --lilac-light:#ebddf5; --lilac-faint:#f6f1f9; --green:#02b089; --red:#d92d20;
+  --pill:100px; --card:16px; --dur:320ms; --ease:cubic-bezier(.165,.84,.44,1);
+}
+@media (prefers-reduced-motion: reduce) { :root { --dur: 0ms; } }
+* { box-sizing: border-box; }
+html, body { margin:0; background: var(--white); color: var(--ink); font-family: "Nunito", Arial, sans-serif; font-size: 18px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+body { min-height: 100dvh; display: flex; flex-direction: column; }
+header { display:flex; align-items:center; justify-content:space-between; padding: 20px 24px; max-width: 760px; width:100%; margin:0 auto; }
+header .marke { display:flex; align-items:center; gap:12px; color: var(--grey); font-size: 14px; }
+header .marke svg { height: 28px; width:auto; }
+.fortschritt { height: 4px; background: var(--surface); }
+.fortschritt > div { height: 100%; width: 0; background: var(--orange); transition: width var(--dur) var(--ease); }
+main { flex:1; max-width: 760px; width:100%; margin: 0 auto; padding: 24px 24px 48px; }
+.schirm { animation: rein var(--dur) var(--ease); }
+@keyframes rein { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
+.kicker { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--grey); font-weight: 600; margin-bottom: 8px; }
+h1 { font-size: clamp(26px, 5vw, 36px); line-height: 1.1; letter-spacing: -0.02em; font-weight: 800; margin: 0 0 12px; }
+h1::after { content:""; display:block; width: 48px; height: 4px; background: var(--orange); border-radius: 2px; margin-top: 14px; }
+h2 { font-size: clamp(22px, 4vw, 28px); line-height: 1.2; letter-spacing: -0.015em; font-weight: 800; margin: 0 0 8px; }
+p { margin: 0 0 12px; }
+p.hinweis, .klein { color: var(--grey); font-size: 15px; }
+.optionen { display:flex; flex-direction:column; gap: 10px; margin: 20px 0; }
+.optionen.zeile { flex-direction: row; flex-wrap: wrap; }
+.opt { display:flex; align-items:center; gap: 12px; padding: 14px 18px; border: 1.5px solid var(--line); border-radius: var(--pill); background: var(--white); cursor:pointer; font: inherit; color: var(--ink); text-align:left; transition: border-color var(--dur), background var(--dur), transform var(--dur); }
+.opt:hover { border-color: var(--ink); }
+.opt:focus-visible { outline: 3px solid var(--lavender); outline-offset: 2px; }
+.opt[aria-pressed="true"], .opt.aktiv { border-color: var(--orange); background: #fff1ec; }
+.opt .punkt { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
+.opt[aria-pressed="true"] .punkt { border-color: var(--orange); background: var(--orange); box-shadow: inset 0 0 0 4px #fff; }
+.opt.multi .punkt { border-radius: 6px; }
+.text { width:100%; font: inherit; padding: 14px 18px; border: 1.5px solid var(--line); border-radius: var(--card); margin-top: 8px; }
+.text:focus { outline: 3px solid var(--lavender); border-color: var(--ink); }
+textarea.text { min-height: 110px; resize: vertical; }
+.skala { display:grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 16px 0 6px; }
+.skala .opt { justify-content:center; padding: 14px 6px; border-radius: var(--card); font-weight: 700; }
+.skala-enden { display:flex; justify-content:space-between; color: var(--grey); font-size: 14px; }
+.matrix { display:flex; flex-direction:column; gap: 18px; margin: 20px 0; }
+.matrix .zeile { padding: 14px 16px; border-radius: var(--card); background: var(--lilac-faint); }
+.matrix .zeile .frage { font-weight: 600; margin-bottom: 8px; }
+.matrix .skala { margin: 8px 0 4px; }
+.matrix .skala .opt { padding: 10px 4px; font-size: 15px; background: var(--white); }
+.extra { margin-top: 10px; }
+.nav { display:flex; justify-content:space-between; align-items:center; gap: 12px; margin-top: 28px; }
+.knopf { font: inherit; font-weight: 700; padding: 14px 26px; border-radius: var(--pill); border: 0; background: var(--orange); color: #fff; cursor:pointer; transition: transform var(--dur) var(--ease), opacity var(--dur); }
+.knopf:hover { transform: translateY(-1px); }
+.knopf:disabled { opacity: .35; cursor: not-allowed; transform:none; }
+.knopf.leise { background: transparent; color: var(--grey); padding-left: 0; }
+.fehler { color: var(--red); font-size: 15px; min-height: 22px; margin-top: 8px; }
+.botschaft { background: var(--lilac-light); border-radius: 24px; padding: 28px; font-size: clamp(22px, 4vw, 28px); font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; margin: 20px 0; }
+.ende { text-align:center; padding: 40px 0; }
+.ende .gross { font-size: clamp(40px, 10vw, 72px); font-weight: 800; letter-spacing: -0.03em; color: var(--orange); line-height: 1; }
+footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 24px 28px; }
+.sr { position:absolute; left:-9999px; }
+@media (max-width: 520px) { .skala .opt { padding: 12px 2px; font-size: 14px; } .nav { flex-direction: column-reverse; align-items: stretch; } .knopf { width:100%; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="marke"><span>Umfrage für</span><img src="yuh_wortmarke.svg" alt="Yuh" style="height:28px"></div>
+  <div class="klein" id="zaehler"></div>
+</header>
+<div class="fortschritt" aria-hidden="true"><div id="balken"></div></div>
+<main id="main" aria-live="polite"></main>
+<footer>Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · anonym · Daten nur für diese Arbeit</footer>
+
+<script>
+/* ---------- Konfiguration ---------- */
+const ENDPUNKT = "";            // URL der Apps-Script-Web-App, wird nach der Bereitstellung eingetragen
+const BOTSCHAFTEN_AKTIV = false; // erst nach Abstimmung mit Yuh am 16.11.
+const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
+
+const APPS = ["Yuh","Neon","Zak","Revolut","App meiner Hausbank","andere"];
+const MERKMALE = [
+  "Eine Person antwortet innert kurzer Zeit (nicht nur eine automatische Bestätigung)",
+  "Mein Anliegen wird beim ersten Kontakt gelöst",
+  "Ich kann mit einer Mitarbeiterin oder einem Mitarbeiter sprechen, nicht nur mit einem automatisierten Chat",
+  "Erreichbar am Abend",
+  "Erreichbar am Wochenende",
+  "Erreichbar per Telefon",
+  "Die Mitarbeitenden sind in der Schweiz",
+  "Antwort in der Sprache, die ich bevorzuge",
+  "Ich erfahre, wie es mit meinem Anliegen weitergeht"
+];
+const KANTONE = ["Aargau","Appenzell Ausserrhoden","Appenzell Innerrhoden","Basel-Landschaft","Basel-Stadt","Bern","Freiburg","Genf","Glarus","Graubünden","Jura","Luzern","Neuenburg","Nidwalden","Obwalden","Schaffhausen","Schwyz","Solothurn","St. Gallen","Tessin","Thurgau","Uri","Waadt","Wallis","Zug","Zürich"];
+const BOTSCHAFTEN = {A:"Bei Yuh antwortet dir eine Person in der Schweiz.", B:"Bei Yuh erreichst du den Kundendienst auch per Telefon.", C:"Bei Yuh hilft dir der Kundendienst in vier Sprachen."};
+const S5 = (a,b)=>({stufen:5, links:a, rechts:b});
+
+/* ---------- Antworten ---------- */
+const A = { id: Math.random().toString(36).slice(2,10), variante: ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop" };
+const start = Date.now();
+const hauptapp = () => A.t2 || (Array.isArray(A.t1) && A.t1.length === 1 ? A.t1[0] : "");
+const nutztYuh = () => Array.isArray(A.t1) && A.t1.includes("Yuh");
+
+/* ---------- Bildschirme ---------- */
+const S = [
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Anonym, keine Namen, keine Kontodaten. Die Daten werden nur für diese Arbeit verwendet und nach der Bewertung gelöscht. Dauer ${DAUER_TEXT}.`, knopf:"Los"},
+ {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
+ {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
+ {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
+ {id:"t1", art:"mehrfach", pflicht:true, titel:"Welche dieser Banking-Apps nutzt du zurzeit?", hinweis:"Mehrfachauswahl möglich.", optionen:APPS, texte:{"App meiner Hausbank":{key:"t1_hausbank", label:"Welche Bank?"}, "andere":{key:"t1_andere", label:"Welche App?"}}},
+ {id:"t2", art:"einfach", pflicht:true, titel:"Welche davon nutzt du am häufigsten?", optionen: () => A.t1, zeigen: () => Array.isArray(A.t1) && A.t1.length > 1},
+ {id:"t3", art:"matrix", pflicht:true, titel:"Wie wichtig ist dir jede dieser Eigenschaften beim Kundendienst einer Banking-App?", zeilen:MERKMALE, skala:S5("unwichtig","sehr wichtig"), prefix:"t3_"},
+ {id:"t4a", art:"einfach", pflicht:true, titel: () => `Hattest du schon einmal Kontakt mit dem Kundendienst von ${hauptapp()}?`, optionen:["ja","nein"]},
+ {id:"t4", art:"matrix", pflicht:true, titel: () => `Wie gut erfüllt der Kundendienst von ${hauptapp()} diese Eigenschaften aus deiner Sicht?`, zeilen:MERKMALE, skala:S5("sehr schlecht","sehr gut"), prefix:"t4_", weissnicht:"kann ich nicht beurteilen"},
+ {id:"t4b", art:"matrix", pflicht:true, titel:"Wie gut erfüllt der Kundendienst von Yuh diese Eigenschaften aus deiner Sicht?", zeilen:MERKMALE, skala:S5("sehr schlecht","sehr gut"), prefix:"t4b_", weissnicht:"kann ich nicht beurteilen", zeigen: () => nutztYuh() && hauptapp() !== "Yuh"},
+ {id:"t5", art:"einfach", pflicht:true, titel:"Hattest du in den letzten zwölf Monaten Kontakt mit dem Kundendienst einer Banking-App?", optionen:["ja","nein"]},
+ {id:"t6", art:"einfach", pflicht:true, titel:"Bei welchem Anbieter war dein letzter Kontakt?", optionen:APPS, texte:{"App meiner Hausbank":{key:"t6_name", label:"Welche Bank?"}, "andere":{key:"t6_name", label:"Welche App?"}}, zeigen: () => A.t5==="ja"},
+ {id:"t7", art:"einfach", pflicht:true, titel:"Über welchen Kanal hast du bei diesem Kontakt zuerst Kontakt aufgenommen?", optionen:["Chat in der App","E-Mail","Telefon","soziale Medien","anderer"], zeigen: () => A.t5==="ja"},
+ {id:"t8", art:"einfach", pflicht:true, titel:"Worum ging es hauptsächlich?", optionen:["Karte","Anmeldung in der App","Zahlung","Kontoeröffnung oder Kontoschliessung","Geldanlagen","Dokumente","anderes"], zeigen: () => A.t5==="ja"},
+ {id:"t9", art:"einfach", pflicht:true, titel:"Wie lange hast du gewartet, bis eine Person geantwortet hat?", hinweis:"Eine automatische Bestätigung zählt nicht.", optionen:["bis 5 Minuten","6 bis 30 Minuten","31 Minuten bis 2 Stunden","mehr als 2 Stunden bis 1 Tag","mehr als 1 Tag","bis heute keine Antwort","weiss ich nicht mehr"], zeigen: () => A.t5==="ja"},
+ {id:"t10", art:"einfach", pflicht:true, titel:"Wurde dein Anliegen beim ersten Kontakt gelöst?", optionen:["ja","nein"], zeigen: () => A.t5==="ja"},
+ {id:"t10b", art:"einfach", pflicht:true, titel:"Ist dein Anliegen heute gelöst?", optionen:["ja","nein"], zeigen: () => A.t5==="ja" && A.t10==="nein"},
+ {id:"t11", art:"skala", pflicht:true, titel:"Wie zufrieden warst du mit diesem Kontakt insgesamt?", skala:S5("sehr unzufrieden","sehr zufrieden"), zeigen: () => A.t5==="ja"},
+ {id:"t12", art:"offen", pflicht:false, titel:"Was ist dir an diesem Kontakt am stärksten in Erinnerung geblieben, im Guten oder im Schlechten?", hinweis:"Ein Satz genügt. Freiwillig.", zeigen: () => A.t5==="ja"},
+ {id:"t13a", art:"einfach", pflicht:true, titel:"Kennst du die Banking-App Yuh, zumindest dem Namen nach?", optionen:["ja","nein"]},
+ {id:"t13", art:"offen", pflicht:false, titel:"Was unterscheidet Yuh deiner Meinung nach von anderen Banking-Apps?", hinweis:"Schreib, was dir als Erstes einfällt. Freiwillig.", kaestchen:{key:"t13_kein", label:"Mir ist kein Unterschied bekannt"}, zeigen: () => A.t13a==="ja"},
+ {id:"t14a", art:"einfach", pflicht:true, titel:"Wusstest du vor dieser Umfrage, dass der Kundendienst von Yuh von Mitarbeitenden in der Schweiz betreut wird?", optionen:["ja","nein","nicht sicher"]},
+ {id:"t14b", art:"einfach", pflicht:true, titel:"Wusstest du vor dieser Umfrage, dass der Kundendienst von Yuh telefonisch erreichbar ist?", optionen:["ja","nein","nicht sicher"]},
+ {id:"t15", art:"skala", pflicht:true, titel:"Stell dir zwei Banking-Apps vor, die sich nur in einem Punkt unterscheiden: Bei der einen sitzen die Mitarbeitenden des Kundendiensts in der Schweiz, bei der anderen im Ausland. Alles andere ist gleich.", frage:"Was ist der Kundendienst in der Schweiz für dich?", stufen:["grosser Nachteil","eher Nachteil","weder noch","eher Vorteil","grosser Vorteil"]},
+ {id:"t15b", art:"skala", pflicht:true, titel:"Zwei Banking-Apps, gleich in allem, ausser: Die eine ist auch telefonisch erreichbar, die andere nur per Chat und E-Mail.", frage:"Was ist die telefonische Erreichbarkeit für dich?", stufen:["grosser Nachteil","eher Nachteil","weder noch","eher Vorteil","grosser Vorteil"]},
+ {id:"t16", art:"skala", pflicht:true, titel:"Wenn du heute eine Banking-App wählen würdest: Ein Kundendienst mit Mitarbeitenden in der Schweiz würde meine Wahl …", stufen:["stark gegen diese App beeinflussen","eher gegen","nicht beeinflussen","eher für","stark für diese App beeinflussen"]},
+ {id:"t16b", art:"einfach", pflicht:true, titel:"Unterscheidet sich Yuh deiner Meinung nach durch seinen Kundendienst von den anderen Banking-Apps, die du kennst?", optionen:["ja, zum Besseren","ja, zum Schlechteren","nein, kein Unterschied","kann ich nicht beurteilen"], zeigen: () => A.t13a==="ja"},
+ {id:"bot", art:"info", kicker:"Freiwillig", titel:"Noch zwei kurze Fragen", text:"Du kannst sie überspringen.", knopf:"Weiter", zeigen: () => BOTSCHAFTEN_AKTIV},
+ {id:"t17", art:"skala", pflicht:false, botschaft:true, titel:"Lies diesen Satz.", frage:"Wie glaubwürdig findest du ihn?", skala:S5("gar nicht glaubwürdig","sehr glaubwürdig"), zeigen: () => BOTSCHAFTEN_AKTIV},
+ {id:"t18", art:"skala", pflicht:false, botschaft:true, titel:"Derselbe Satz.", frage:"Wie stark weckt er dein Interesse an der App?", skala:S5("gar nicht","sehr stark"), zeigen: () => BOTSCHAFTEN_AKTIV},
+ {id:"t20", art:"auswahl", pflicht:true, titel:"In welchem Kanton wohnst du?", optionen:KANTONE},
+ {id:"t21", art:"einfach", pflicht:false, titel:"In welcher Sprache nutzt du Banking-Apps?", hinweis:"Freiwillig.", optionen:["Deutsch","Französisch","Italienisch","Englisch","andere"]},
+ {id:"ende", art:"ende"}
+];
+
+/* ---------- Ablauf ---------- */
+let i = 0;
+const main = document.getElementById("main");
+const sichtbar = s => !s.zeigen || s.zeigen();
+const liste = () => S.filter(sichtbar);
+function render() {
+  const L = liste(); const s = L[i]; if (!s) return;
+  const fragen = L.filter(x => x.art !== "info" && x.art !== "ende").length;
+  const pos = L.slice(0, i).filter(x => x.art !== "info" && x.art !== "ende").length;
+  document.getElementById("balken").style.width = (pos / fragen * 100) + "%";
+  document.getElementById("zaehler").textContent = (s.art==="info"||s.art==="ende") ? "" : `${pos+1} von ${fragen}`;
+  const titel = typeof s.titel === "function" ? s.titel() : s.titel;
+  let h = `<section class="schirm">`;
+  if (s.kicker) h += `<div class="kicker">${s.kicker}</div>`;
+  if (s.art === "ende") { h += endeHtml(); main.innerHTML = h + "</section>"; senden(); return; }
+  h += s.art==="info" ? `<h1>${titel}</h1><p>${s.text||""}</p>` : `<h2>${titel}</h2>`;
+  if (s.hinweis) h += `<p class="hinweis">${s.hinweis}</p>`;
+  if (s.botschaft) h += `<div class="botschaft">${BOTSCHAFTEN[A.variante]}</div>`;
+  if (s.frage) h += `<p><strong>${s.frage}</strong></p>`;
+  if (s.art==="einfach" || s.art==="mehrfach") {
+    const opts = typeof s.optionen==="function" ? s.optionen() : s.optionen;
+    const multi = s.art==="mehrfach";
+    h += `<div class="optionen" role="${multi?'group':'radiogroup'}">` + opts.map(o => {
+      const an = multi ? (A[s.id]||[]).includes(o) : A[s.id]===o;
+      let x = `<button type="button" class="opt ${multi?'multi':''}" role="${multi?'checkbox':'radio'}" aria-checked="${an}" aria-pressed="${an}" data-wert="${esc(o)}"><span class="punkt"></span><span>${esc(o)}</span></button>`;
+      if (s.texte && s.texte[o] && an) x += `<input class="text extra" data-key="${s.texte[o].key}" placeholder="${s.texte[o].label}" value="${esc(A[s.texte[o].key]||"")}" aria-label="${s.texte[o].label}">`;
+      return x; }).join("") + `</div>`;
+  }
+  if (s.art==="skala") {
+    const st = s.stufen || [1,2,3,4,5];
+    h += `<div class="skala" role="radiogroup">` + st.map((o,k) => `<button type="button" class="opt" role="radio" aria-checked="${A[s.id]===String(k+1)}" aria-pressed="${A[s.id]===String(k+1)}" data-wert="${k+1}">${s.stufen ? esc(o) : (k+1)}</button>`).join("") + `</div>`;
+    if (s.skala) h += `<div class="skala-enden"><span>${s.skala.links}</span><span>${s.skala.rechts}</span></div>`;
+  }
+  if (s.art==="matrix") {
+    h += `<div class="matrix">` + s.zeilen.map((z,n) => { const key = s.prefix + (n+1); return `<div class="zeile"><div class="frage">${esc(z)}</div><div class="skala" role="radiogroup" data-key="${key}">` + [1,2,3,4,5].map(k => `<button type="button" class="opt" role="radio" aria-checked="${A[key]===String(k)}" aria-pressed="${A[key]===String(k)}" data-wert="${k}">${k}</button>`).join("") + `</div><div class="skala-enden"><span>${s.skala.links}</span><span>${s.skala.rechts}</span></div>` + (s.weissnicht ? `<div class="optionen zeile" style="margin:8px 0 0"><button type="button" class="opt" role="radio" data-key="${key}" data-wert="0" aria-pressed="${A[key]==="0"}"><span class="punkt"></span><span>${s.weissnicht}</span></button></div>` : "") + `</div>`; }).join("") + `</div>`;
+  }
+  if (s.art==="offen") {
+    h += `<textarea class="text" id="offen" aria-label="${esc(titel)}">${esc(A[s.id]||"")}</textarea>`;
+    if (s.kaestchen) h += `<div class="optionen" style="margin-top:12px"><button type="button" class="opt multi" role="checkbox" aria-pressed="${A[s.kaestchen.key]==="ja"}" data-k="${s.kaestchen.key}"><span class="punkt"></span><span>${s.kaestchen.label}</span></button></div>`;
+  }
+  if (s.art==="auswahl") {
+    h += `<select class="text" id="auswahl" aria-label="${esc(titel)}"><option value="">Bitte wählen</option>` + s.optionen.map(o => `<option ${A[s.id]===o?'selected':''}>${esc(o)}</option>`).join("") + `</select>`;
+  }
+  h += `<div class="fehler" id="fehler"></div><div class="nav">` + (i>0 && s.art!=="info" ? `<button type="button" class="knopf leise" id="zurueck">Zurück</button>` : `<span></span>`) + `<button type="button" class="knopf" id="weiter">${s.knopf || (s.pflicht ? "Weiter" : "Weiter")}</button></div></section>`;
+  main.innerHTML = h; verdrahten(s); window.scrollTo({top:0, behavior: "smooth"});
+}
+function verdrahten(s) {
+  main.querySelectorAll(".opt[data-wert]").forEach(b => b.addEventListener("click", () => {
+    const key = b.dataset.key || b.closest("[data-key]")?.dataset.key || s.id; const w = b.dataset.wert;
+    if (s.art==="mehrfach") { const arr = new Set(A[s.id]||[]); arr.has(w) ? arr.delete(w) : arr.add(w); A[s.id] = [...arr]; }
+    else A[key] = w;
+    if (s.art==="mehrfach" || s.texte) render(); else { const grp = b.closest("[role=radiogroup]") || b.parentElement; (grp.parentElement.querySelectorAll(`.opt[data-wert]`)).forEach(x => { const sameRow = (x.dataset.key||x.closest("[data-key]")?.dataset.key||s.id) === key; if (sameRow) { x.setAttribute("aria-pressed", x===b); x.setAttribute("aria-checked", x===b); } }); }
+  }));
+  main.querySelectorAll(".opt[data-k]").forEach(b => b.addEventListener("click", () => { A[b.dataset.k] = A[b.dataset.k]==="ja" ? "" : "ja"; b.setAttribute("aria-pressed", A[b.dataset.k]==="ja"); }));
+  main.querySelectorAll("input.extra").forEach(inp => inp.addEventListener("input", () => A[inp.dataset.key] = inp.value.trim()));
+  const offen = document.getElementById("offen"); if (offen) offen.addEventListener("input", () => A[s.id] = offen.value.trim());
+  const ausw = document.getElementById("auswahl"); if (ausw) ausw.addEventListener("change", () => A[s.id] = ausw.value);
+  document.getElementById("weiter").addEventListener("click", () => weiter(s));
+  const z = document.getElementById("zurueck"); if (z) z.addEventListener("click", () => { i = Math.max(0, i-1); render(); });
+}
+function fehlt(s) {
+  if (!s.pflicht) return "";
+  if (s.art==="einfach" || s.art==="skala" || s.art==="auswahl") { if (!A[s.id]) return "Bitte wähle eine Antwort."; if (s.texte && s.texte[A[s.id]] && !A[s.texte[A[s.id]].key]) return "Bitte gib den Namen an."; }
+  if (s.art==="mehrfach") { if (!A[s.id] || !A[s.id].length) return "Bitte wähle mindestens eine Antwort."; for (const o of A[s.id]) if (s.texte && s.texte[o] && !A[s.texte[o].key]) return "Bitte gib den Namen an."; }
+  if (s.art==="matrix") { for (let n=1; n<=s.zeilen.length; n++) if (!A[s.prefix+n]) return "Bitte beantworte jede Zeile."; }
+  return "";
+}
+function weiter(s) {
+  const f = fehlt(s); const fe = document.getElementById("fehler"); if (f) { fe.textContent = f; return; }
+  if (s.ende && s.ende(A[s.id])) { A.abbruch = s.id; i = S.length - 1; renderEnde(true); return; }
+  if (s.id==="t1" && A.t1.length===1) A.t2 = A.t1[0];
+  i++; render();
+}
+function endeHtml() { return `<div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Deine Antworten sind gespeichert.</p><p class="hinweis">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert.</p><input class="text" id="mail" type="email" placeholder="deine@adresse.ch" style="max-width:360px"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus"></div></div>`; }
+function renderEnde(abgebrochen) {
+  document.getElementById("balken").style.width = "100%"; document.getElementById("zaehler").textContent = "";
+  main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
+  if (!abgebrochen) senden();
+}
+async function post(obj) { if (!ENDPUNKT) { console.log("Antwort (kein Endpunkt gesetzt)", obj); return true; } try { await fetch(ENDPUNKT, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body: JSON.stringify(obj)}); return true; } catch (e) { return false; } }
+async function senden() {
+  A.dauer_s = Math.round((Date.now()-start)/1000); A.s2 = A.s2; if (!BOTSCHAFTEN_AKTIV) A.variante = "";
+  await post(A);
+  const b = document.getElementById("mailsenden"); if (b) b.addEventListener("click", async () => { const m = document.getElementById("mail").value.trim(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)) { document.getElementById("mailstatus").textContent = "Bitte eine gültige Adresse."; return; } await post({typ:"mail", mail:m}); document.getElementById("mailstatus").style.color = "var(--green)"; document.getElementById("mailstatus").textContent = "Gespeichert, danke."; b.disabled = true; });
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+S[S.length-1].art = "ende"; 
+S.find(x=>x.id==="ende").art = "ende";
+// Ende-Bildschirm nutzt renderEnde statt render
+const _render = render; render = function(){ const L = liste(); if (L[i] && L[i].art==="ende") { renderEnde(false); return; } _render(); };
+render();
+</script>
+</body>
+</html>
