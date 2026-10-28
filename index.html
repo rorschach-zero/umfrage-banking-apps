@@ -69,7 +69,7 @@ label.feld { display:block; font-weight: 600; margin-top: 8px; }
 .ende .gross { font-size: clamp(40px, 10vw, 72px); font-weight: 800; letter-spacing: -0.03em; color: var(--orange); line-height: 1; }
 footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 24px 28px; }
 .sr { position:absolute; left:-9999px; }
-@media (max-width: 520px) { .skala .opt { padding: 12px 2px; font-size: 14px; } .skala.worte { grid-template-columns: 1fr; } .skala.worte .opt { justify-content:flex-start; text-align:left; padding: 12px 16px; font-size: 16px; } .nav { flex-direction: column-reverse; align-items: stretch; } .knopf { width:100%; } }
+@media (max-width: 520px) { header .marke span { display:none; } .skala .opt { padding: 12px 2px; font-size: 14px; } .skala.worte { grid-template-columns: 1fr; } .skala.worte .opt { justify-content:flex-start; text-align:left; padding: 12px 16px; font-size: 16px; } .nav { flex-direction: column-reverse; align-items: stretch; } .knopf { width:100%; } }
 </style>
 </head>
 <body>
@@ -86,7 +86,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = true;
 const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
-const VERSION = "2.3";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "2.4";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
@@ -120,7 +120,7 @@ const hauptappName = () => anzeige(hauptapp());
 
 /* ---------- Bildschirme ---------- */
 const S = [
- {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Die Teilnahme ist freiwillig, du kannst jederzeit abbrechen. Anonym, keine Namen, keine Kontodaten. Die Rohdaten bleiben bei der Studierendengruppe. Ausgewertete Ergebnisse gehen an die Dozierenden und an den Praxispartner der Arbeit, eine Schweizer Banking-App, die am Ende genannt wird. Löschung nach der Notenpublikation. Fragen mit <span class="stern" aria-hidden="true">*</span><span class="sr">Stern</span> sind Pflicht. Dauer ${DAUER_TEXT}. Mit «Los» stimmst du der Teilnahme zu. Rückfragen an ${KONTAKT}.`, knopf:"Los"},
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Die Teilnahme ist freiwillig, du kannst jederzeit abbrechen. Anonym, keine Namen, keine Kontodaten. Die Rohdaten bleiben bei der Studierendengruppe. Ausgewertete Ergebnisse gehen an die Dozierenden und an den Praxispartner der Arbeit, eine Schweizer Banking-App, die am Ende genannt wird. Löschung nach der Notenpublikation. Fragen mit <span class="stern" aria-hidden="true">*</span><span class="sr">Stern</span> sind Pflicht. Dauer ${DAUER_TEXT}, geschätzt. Mit «Los» stimmst du der Teilnahme zu. Rückfragen an ${KONTAKT}.`, knopf:"Los"},
  {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
@@ -235,11 +235,11 @@ function weiter(s) {
   if (s.id==="t1") { if (A.t1.length===1) A.t2 = A.t1[0]; else if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
   i++; render();
 }
-function endeHtml() { return `<div class="ende"><div class="gross">Danke</div><p class="status" id="sendestatus" role="status"></p><p class="hinweis">Offenlegung: Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh erhält nur ausgewertete Ergebnisse, keine einzelnen Antworten. Die Rohdaten bleiben bei der Studierendengruppe und werden nach der Notenpublikation gelöscht.</p><p class="hinweis">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div>`; }
+function endeHtml() { return `<div class="ende"><div class="kicker">Fast geschafft</div><h2 id="frage-titel" style="margin-bottom:12px">Offenlegung, bevor du sendest</h2><p>Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh erhält nur ausgewertete Ergebnisse, keine einzelnen Antworten. Die Rohdaten bleiben bei der Studierendengruppe und werden nach der Notenpublikation gelöscht.</p><p class="hinweis">Mit «Antworten senden» werden deine Antworten gespeichert. Wenn du nicht sendest, wird nichts gespeichert.</p><div style="margin-top:16px"><button type="button" class="knopf" id="absenden">Antworten senden</button></div><p class="status" id="sendestatus" role="status"></p><div id="nachher" hidden><div class="gross" style="margin-top:24px">Danke</div><p class="hinweis" style="margin-top:12px">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum, und nach dem Versand der Ergebnisse gelöscht, spätestens nach der Notenpublikation.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div></div>`; }
 function renderEnde(abgebrochen) {
   document.getElementById("balken").style.width = "100%"; document.getElementById("zaehler").textContent = "";
-  main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p><p class="hinweis">Von dir werden nur die drei Antworten zum Wohnort, Alter und zur App-Nutzung gezählt, ohne weitere Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
-  if (abgebrochen) post({id:A.id, version:VERSION, abbruch:A.abbruch, s1:A.s1, s2:A.s2, s3:A.s3, geraet:A.geraet}); else senden();
+  main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p><p class="hinweis">Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), eine zufällige Kennung, die Version der Umfrage, die Stelle des Ausschlusses und ob Handy oder Computer. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
+  if (abgebrochen) post({id:A.id, version:VERSION, abbruch:A.abbruch, s1:A.s1, s2:A.s2, s3:A.s3, geraet:A.geraet}); else { const k = document.getElementById("absenden"); k.addEventListener("click", senden); k.focus(); }
 }
 async function post(obj) { if (!ENDPUNKT) { console.log("Antwort (kein Endpunkt gesetzt)", obj); return true; } try { await fetch(ENDPUNKT, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body: JSON.stringify(obj)}); return true; } catch (e) { return false; } }
 // Nur Antworten sichtbarer Fragen werden gesendet. Was durch Zurueckgehen oder einen geaenderten Filter
@@ -259,10 +259,11 @@ function bereinigt() {
 let mailVerdrahtet = false;
 async function senden() {
   const st = document.getElementById("sendestatus"); if (!st) return;
+  const k = document.getElementById("absenden"); if (k) k.disabled = true;
   st.className = "status"; st.textContent = "Deine Antworten werden gespeichert …";
   const ok = await post(bereinigt());
   if (!ok) { st.innerHTML = `Die Antworten konnten nicht übertragen werden. Bitte prüfe die Verbindung.<br><button type="button" class="knopf" id="nochmal" style="margin-top:12px">Noch einmal senden</button>`; document.getElementById("nochmal").addEventListener("click", senden); return; }
-  st.className = "status ok"; st.textContent = "Deine Antworten sind gespeichert.";
+  st.className = "status ok"; st.textContent = "Deine Antworten sind gespeichert."; if (k) k.hidden = true; document.getElementById("nachher").hidden = false;
   if (mailVerdrahtet) return; mailVerdrahtet = true;
   const b = document.getElementById("mailsenden"); const ms = document.getElementById("mailstatus");
   b.addEventListener("click", async () => { const m = document.getElementById("mail").value.trim(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)) { ms.textContent = "Bitte eine gültige Adresse."; document.getElementById("mail").focus(); return; } b.disabled = true; const ok2 = await post({typ:"mail", mail:m}); if (!ok2) { ms.textContent = "Konnte nicht gespeichert werden, bitte noch einmal."; b.disabled = false; return; } ms.className = "fehler ok"; ms.textContent = "Gespeichert, danke."; });
