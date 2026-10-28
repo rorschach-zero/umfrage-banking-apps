@@ -74,7 +74,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 </head>
 <body>
 <header>
-  <div class="marke"><span>Umfrage für</span><img src="yuh_wortmarke.svg" alt="Yuh" style="height:28px"></div>
+  <div class="marke"><img src="kvbsz_wortmarke.png" alt="KV Business School Zürich" style="height:26px"><span>Praxisarbeit HFW</span></div>
   <div class="klein" id="zaehler"></div>
 </header>
 <div class="fortschritt" aria-hidden="true"><div id="balken"></div></div>
@@ -86,7 +86,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = true;
 const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
-const VERSION = "2.1";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "2.2";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
 const APPS = ["Yuh","Neon","Zak","Revolut","App meiner Hausbank","andere"];
@@ -233,7 +233,7 @@ function weiter(s) {
   if (s.id==="t1") { if (A.t1.length===1) A.t2 = A.t1[0]; else if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
   i++; render();
 }
-function endeHtml() { return `<div class="ende"><div class="gross">Danke</div><p class="status" id="sendestatus" role="status"></p><p class="hinweis">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div>`; }
+function endeHtml() { return `<div class="ende"><div class="gross">Danke</div><p class="status" id="sendestatus" role="status"></p><p class="hinweis">Offenlegung: Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh sieht nur die ausgewerteten Ergebnisse, keine einzelnen Antworten.</p><p class="hinweis">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div>`; }
 function renderEnde(abgebrochen) {
   document.getElementById("balken").style.width = "100%"; document.getElementById("zaehler").textContent = "";
   main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
