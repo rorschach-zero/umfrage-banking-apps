@@ -86,10 +86,12 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = true;
 const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
-const VERSION = "2.2";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "2.3";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
-const APPS = ["Yuh","Neon","Zak","Revolut","App meiner Hausbank","andere"];
+const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
+function mischen(a) { const b = a.slice(); for (let k = b.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [b[k], b[j]] = [b[j], b[k]]; } return b; }
+const APPS = mischen(APPS_FEST).concat(["App meiner Hausbank","andere"]); // Reihenfolge je Teilnahme zufaellig, wird als «reihenfolge» gespeichert
 const MERKMALE = [
   "Eine Person antwortet innert kurzer Zeit (nicht nur eine automatische Bestätigung)",
   "Mein Anliegen wird beim ersten Kontakt gelöst",
@@ -109,7 +111,7 @@ const S5 = (a,b)=>({stufen:5, links:a, rechts:b});
 function merk(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
 const idAusAdresse = (new URLSearchParams(location.search).get("id")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,24);
 const A = { id: idAusAdresse || merk("id") || Math.random().toString(36).slice(2,10), variante: merk("variante") || ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop" };
-merk("id", A.id); merk("variante", A.variante);
+merk("id", A.id); merk("variante", A.variante); A.reihenfolge = APPS.slice(0, 4).join("|");
 const start = Date.now();
 const hauptapp = () => A.t2 || (Array.isArray(A.t1) && A.t1.length === 1 ? A.t1[0] : "");
 const nutztYuh = () => Array.isArray(A.t1) && A.t1.includes("Yuh");
@@ -118,7 +120,7 @@ const hauptappName = () => anzeige(hauptapp());
 
 /* ---------- Bildschirme ---------- */
 const S = [
- {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Die Teilnahme ist freiwillig, du kannst jederzeit abbrechen. Anonym, keine Namen, keine Kontodaten. Die Daten werden nur für diese Arbeit verwendet und nach der Notenpublikation gelöscht. Fragen mit <span class="stern" aria-hidden="true">*</span><span class="sr">Stern</span> sind Pflicht. Dauer ${DAUER_TEXT}. Rückfragen an ${KONTAKT}.`, knopf:"Los"},
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Die Teilnahme ist freiwillig, du kannst jederzeit abbrechen. Anonym, keine Namen, keine Kontodaten. Die Rohdaten bleiben bei der Studierendengruppe. Ausgewertete Ergebnisse gehen an die Dozierenden und an den Praxispartner der Arbeit, eine Schweizer Banking-App, die am Ende genannt wird. Löschung nach der Notenpublikation. Fragen mit <span class="stern" aria-hidden="true">*</span><span class="sr">Stern</span> sind Pflicht. Dauer ${DAUER_TEXT}. Mit «Los» stimmst du der Teilnahme zu. Rückfragen an ${KONTAKT}.`, knopf:"Los"},
  {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
@@ -127,8 +129,6 @@ const S = [
  {id:"t3", art:"matrix", pflicht:true, titel:"Wie wichtig ist dir jede dieser Eigenschaften beim Kundendienst einer Banking-App?", zeilen:MERKMALE, skala:{...S5("unwichtig","sehr wichtig"), worte:["unwichtig","eher unwichtig","mittel","eher wichtig","sehr wichtig"]}, prefix:"t3_"},
  {id:"t4a", art:"einfach", pflicht:true, titel: () => `Hattest du schon einmal Kontakt mit dem Kundendienst von ${hauptappName()}?`, optionen:["ja","nein"]},
  {id:"t4", art:"matrix", pflicht:true, titel: () => `Wie gut erfüllt der Kundendienst von ${hauptappName()} diese Eigenschaften aus deiner Sicht?`, zeilen:MERKMALE, skala:S5("sehr schlecht","sehr gut"), prefix:"t4_", weissnicht:"kann ich nicht beurteilen"},
- {id:"t4c", art:"einfach", pflicht:true, titel:"Hattest du schon einmal Kontakt mit dem Kundendienst von Yuh?", optionen:["ja","nein"], zeigen: () => nutztYuh() && hauptapp() !== "Yuh"},
- {id:"t4b", art:"matrix", pflicht:false, titel:"Wie gut erfüllt der Kundendienst von Yuh diese Eigenschaften aus deiner Sicht?", zeilen:MERKMALE, skala:S5("sehr schlecht","sehr gut"), prefix:"t4b_", weissnicht:"kann ich nicht beurteilen", zeigen: () => nutztYuh() && hauptapp() !== "Yuh"},
  {id:"t5", art:"einfach", pflicht:true, titel:"Hattest du in den letzten zwölf Monaten Kontakt mit dem Kundendienst einer Banking-App?", optionen:["ja","nein"]},
  {id:"t6", art:"einfach", pflicht:true, titel:"Bei welchem Anbieter war dein letzter Kontakt?", optionen:APPS, texte:{"App meiner Hausbank":{key:"t6_name", label:"Welche Bank?"}, "andere":{key:"t6_name", label:"Welche App?"}}, zeigen: () => A.t5==="ja"},
  {id:"t7", art:"einfach", pflicht:true, titel:"Über welchen Kanal hast du bei diesem Kontakt zuerst Kontakt aufgenommen?", optionen:["Chat in der App","E-Mail","Telefon","soziale Medien","anderer"], zeigen: () => A.t5==="ja"},
@@ -138,13 +138,15 @@ const S = [
  {id:"t10b", art:"einfach", pflicht:true, titel:"Ist dein Anliegen heute gelöst?", optionen:["ja","nein"], zeigen: () => A.t5==="ja" && A.t10==="nein"},
  {id:"t11", art:"skala", pflicht:true, titel:"Wie zufrieden warst du mit diesem Kontakt insgesamt?", skala:S5("sehr unzufrieden","sehr zufrieden"), zeigen: () => A.t5==="ja"},
  {id:"t12", art:"offen", pflicht:false, titel:"Was ist dir an diesem Kontakt am stärksten in Erinnerung geblieben, im Guten oder im Schlechten?", hinweis:"Ein Satz genügt. Freiwillig.", zeigen: () => A.t5==="ja"},
+ {id:"t4c", art:"einfach", pflicht:true, titel:"Hattest du schon einmal Kontakt mit dem Kundendienst von Yuh?", optionen:["ja","nein"], zeigen: () => nutztYuh() && hauptapp() !== "Yuh"},
+ {id:"t4b", art:"matrix", pflicht:false, titel:"Wie gut erfüllt der Kundendienst von Yuh diese Eigenschaften aus deiner Sicht?", zeilen:MERKMALE, skala:S5("sehr schlecht","sehr gut"), prefix:"t4b_", weissnicht:"kann ich nicht beurteilen", zeigen: () => nutztYuh() && hauptapp() !== "Yuh"},
  {id:"t13a", art:"einfach", pflicht:true, titel:"Kennst du die Banking-App Yuh, zumindest dem Namen nach?", optionen:["ja","nein"]},
  {id:"t13", art:"offen", pflicht:false, titel:"Was unterscheidet Yuh deiner Meinung nach von anderen Banking-Apps?", hinweis:"Schreib, was dir als Erstes einfällt. Freiwillig.", kaestchen:{key:"t13_kein", label:"Mir ist kein Unterschied bekannt"}, zeigen: () => A.t13a==="ja"},
- {id:"t14a", art:"einfach", pflicht:true, titel:"Wusstest du vor dieser Umfrage, dass der Kundendienst von Yuh von Mitarbeitenden in der Schweiz betreut wird?", optionen:["ja","nein","nicht sicher"]},
- {id:"t14b", art:"einfach", pflicht:true, titel:"Wusstest du vor dieser Umfrage, dass der Kundendienst von Yuh telefonisch erreichbar ist?", optionen:["ja","nein","nicht sicher"]},
  {id:"t15", art:"skala", pflicht:true, titel:"Stell dir zwei Banking-Apps vor, die sich nur in einem Punkt unterscheiden: Bei der einen sitzen die Mitarbeitenden des Kundendiensts in der Schweiz, bei der anderen im Ausland. Alles andere ist gleich.", frage:"Was ist der Kundendienst in der Schweiz für dich?", stufen:["grosser Nachteil","eher Nachteil","weder noch","eher Vorteil","grosser Vorteil"]},
  {id:"t15b", art:"skala", pflicht:true, titel:"Zwei Banking-Apps, gleich in allem, ausser: Die eine ist auch telefonisch erreichbar, die andere nur per Chat und E-Mail.", frage:"Was ist die telefonische Erreichbarkeit für dich?", stufen:["grosser Nachteil","eher Nachteil","weder noch","eher Vorteil","grosser Vorteil"]},
  {id:"t16", art:"skala", pflicht:true, titel:"Wenn du heute eine Banking-App wählen würdest: Ein Kundendienst mit Mitarbeitenden in der Schweiz würde meine Wahl …", stufen:["stark gegen diese App beeinflussen","eher gegen","nicht beeinflussen","eher für","stark für diese App beeinflussen"]},
+ {id:"t14a", art:"einfach", pflicht:true, titel:"Wusstest du vor dieser Umfrage, dass der Kundendienst von Yuh von Mitarbeitenden in der Schweiz betreut wird?", optionen:["ja","nein","nicht sicher"]},
+ {id:"t14b", art:"einfach", pflicht:true, titel:"Wusstest du vor dieser Umfrage, dass der Kundendienst von Yuh telefonisch erreichbar ist?", optionen:["ja","nein","nicht sicher"]},
  {id:"t16b", art:"einfach", pflicht:true, titel:"Unterscheidet sich Yuh deiner Meinung nach durch seinen Kundendienst von den anderen Banking-Apps, die du kennst?", optionen:["ja, zum Besseren","ja, zum Schlechteren","nein, kein Unterschied","kann ich nicht beurteilen"], zeigen: () => A.t13a==="ja"},
  {id:"bot", art:"info", kicker:"Freiwillig", titel:"Noch zwei kurze Fragen", text:"Du kannst sie überspringen.", knopf:"Weiter", zeigen: () => BOTSCHAFTEN_AKTIV},
  {id:"t17", art:"skala", pflicht:false, botschaft:true, titel:"Lies diesen Satz.", frage:"Wie glaubwürdig findest du ihn?", skala:S5("gar nicht glaubwürdig","sehr glaubwürdig"), zeigen: () => BOTSCHAFTEN_AKTIV},
@@ -233,17 +235,17 @@ function weiter(s) {
   if (s.id==="t1") { if (A.t1.length===1) A.t2 = A.t1[0]; else if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
   i++; render();
 }
-function endeHtml() { return `<div class="ende"><div class="gross">Danke</div><p class="status" id="sendestatus" role="status"></p><p class="hinweis">Offenlegung: Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh sieht nur die ausgewerteten Ergebnisse, keine einzelnen Antworten.</p><p class="hinweis">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div>`; }
+function endeHtml() { return `<div class="ende"><div class="gross">Danke</div><p class="status" id="sendestatus" role="status"></p><p class="hinweis">Offenlegung: Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh erhält nur ausgewertete Ergebnisse, keine einzelnen Antworten. Die Rohdaten bleiben bei der Studierendengruppe und werden nach der Notenpublikation gelöscht.</p><p class="hinweis">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div>`; }
 function renderEnde(abgebrochen) {
   document.getElementById("balken").style.width = "100%"; document.getElementById("zaehler").textContent = "";
-  main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
+  main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p><p class="hinweis">Von dir werden nur die drei Antworten zum Wohnort, Alter und zur App-Nutzung gezählt, ohne weitere Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
   if (abgebrochen) post({id:A.id, version:VERSION, abbruch:A.abbruch, s1:A.s1, s2:A.s2, s3:A.s3, geraet:A.geraet}); else senden();
 }
 async function post(obj) { if (!ENDPUNKT) { console.log("Antwort (kein Endpunkt gesetzt)", obj); return true; } try { await fetch(ENDPUNKT, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body: JSON.stringify(obj)}); return true; } catch (e) { return false; } }
 // Nur Antworten sichtbarer Fragen werden gesendet. Was durch Zurueckgehen oder einen geaenderten Filter
 // unsichtbar wurde, bleibt weg. t2 wird aus der Hauptapp gesetzt, auch wenn T2 nicht gezeigt wurde.
 function bereinigt() {
-  const out = {id:A.id, version:VERSION, variante: BOTSCHAFTEN_AKTIV ? A.variante : "", geraet:A.geraet, dauer_s: Math.round((Date.now()-start)/1000), abbruch:""};
+  const out = {id:A.id, version:VERSION, variante: BOTSCHAFTEN_AKTIV ? A.variante : "", geraet:A.geraet, dauer_s: Math.round((Date.now()-start)/1000), abbruch:"", reihenfolge:A.reihenfolge};
   for (const s of liste()) {
     if (s.art==="info" || s.art==="ende") continue;
     if (s.art==="matrix") { s.zeilen.forEach((z,n) => { const k = s.prefix+(n+1); if (A[k] !== undefined) out[k] = A[k]; }); continue; }
