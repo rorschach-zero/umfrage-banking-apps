@@ -150,7 +150,7 @@ function render() {
   const fragen = L.filter(x => x.art !== "info" && x.art !== "ende").length;
   const pos = L.slice(0, i).filter(x => x.art !== "info" && x.art !== "ende").length;
   document.getElementById("balken").style.width = (pos / fragen * 100) + "%";
-  document.getElementById("zaehler").textContent = (s.art==="info"||s.art==="ende") ? "" : `${pos+1} von ${fragen}`;
+  document.getElementById("zaehler").textContent = (s.art==="info"||s.art==="ende") ? "" : `Frage ${pos+1}`;
   const titel = typeof s.titel === "function" ? s.titel() : s.titel;
   let h = `<section class="schirm">`;
   if (s.kicker) h += `<div class="kicker">${s.kicker}</div>`;
@@ -164,17 +164,17 @@ function render() {
     const multi = s.art==="mehrfach";
     h += `<div class="optionen" role="${multi?'group':'radiogroup'}">` + opts.map(o => {
       const an = multi ? (A[s.id]||[]).includes(o) : A[s.id]===o;
-      let x = `<button type="button" class="opt ${multi?'multi':''}" role="${multi?'checkbox':'radio'}" aria-checked="${an}" aria-pressed="${an}" data-wert="${esc(o)}"><span class="punkt"></span><span>${esc(o)}</span></button>`;
+      let x = `<button type="button" class="opt ${multi?'multi':''}" role="${multi?'checkbox':'radio'}" aria-checked="${an}" aria-pressed="${an}" data-wert="${esc(o)}" aria-label="${esc(o)}"><span class="punkt"></span><span>${esc(o)}</span></button>`;
       if (s.texte && s.texte[o] && an) x += `<input class="text extra" data-key="${s.texte[o].key}" placeholder="${s.texte[o].label}" value="${esc(A[s.texte[o].key]||"")}" aria-label="${s.texte[o].label}">`;
       return x; }).join("") + `</div>`;
   }
   if (s.art==="skala") {
     const st = s.stufen || [1,2,3,4,5];
-    h += `<div class="skala" role="radiogroup">` + st.map((o,k) => `<button type="button" class="opt" role="radio" aria-checked="${A[s.id]===String(k+1)}" aria-pressed="${A[s.id]===String(k+1)}" data-wert="${k+1}">${s.stufen ? esc(o) : (k+1)}</button>`).join("") + `</div>`;
+    h += `<div class="skala" role="radiogroup">` + st.map((o,k) => `<button type="button" class="opt" role="radio" aria-checked="${A[s.id]===String(k+1)}" aria-pressed="${A[s.id]===String(k+1)}" data-wert="${k+1}" aria-label="${s.stufen ? esc(o) : (k+1)}">${s.stufen ? esc(o) : (k+1)}</button>`).join("") + `</div>`;
     if (s.skala) h += `<div class="skala-enden"><span>${s.skala.links}</span><span>${s.skala.rechts}</span></div>`;
   }
   if (s.art==="matrix") {
-    h += `<div class="matrix">` + s.zeilen.map((z,n) => { const key = s.prefix + (n+1); return `<div class="zeile"><div class="frage">${esc(z)}</div><div class="skala" role="radiogroup" data-key="${key}">` + [1,2,3,4,5].map(k => `<button type="button" class="opt" role="radio" aria-checked="${A[key]===String(k)}" aria-pressed="${A[key]===String(k)}" data-wert="${k}">${k}</button>`).join("") + `</div><div class="skala-enden"><span>${s.skala.links}</span><span>${s.skala.rechts}</span></div>` + (s.weissnicht ? `<div class="optionen zeile" style="margin:8px 0 0"><button type="button" class="opt" role="radio" data-key="${key}" data-wert="0" aria-pressed="${A[key]==="0"}"><span class="punkt"></span><span>${s.weissnicht}</span></button></div>` : "") + `</div>`; }).join("") + `</div>`;
+    h += `<div class="matrix">` + s.zeilen.map((z,n) => { const key = s.prefix + (n+1); return `<div class="zeile"><div class="frage">${esc(z)}</div><div class="skala" role="radiogroup" data-key="${key}">` + [1,2,3,4,5].map(k => `<button type="button" class="opt" role="radio" aria-checked="${A[key]===String(k)}" aria-pressed="${A[key]===String(k)}" data-wert="${k}" aria-label="${k} von 5">${k}</button>`).join("") + `</div><div class="skala-enden"><span>${s.skala.links}</span><span>${s.skala.rechts}</span></div>` + (s.weissnicht ? `<div class="optionen zeile" style="margin:8px 0 0"><button type="button" class="opt" role="radio" data-key="${key}" data-wert="0" aria-label="${s.weissnicht}" aria-pressed="${A[key]==="0"}"><span class="punkt"></span><span>${s.weissnicht}</span></button></div>` : "") + `</div>`; }).join("") + `</div>`;
   }
   if (s.art==="offen") {
     h += `<textarea class="text" id="offen" aria-label="${esc(titel)}">${esc(A[s.id]||"")}</textarea>`;
