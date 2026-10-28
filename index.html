@@ -86,7 +86,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = true;
 const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
-const VERSION = "2.4";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "2.5";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
@@ -109,7 +109,9 @@ const S5 = (a,b)=>({stufen:5, links:a, rechts:b});
 
 /* ---------- Antworten ---------- */
 function merk(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
-const idAusAdresse = (new URLSearchParams(location.search).get("id")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,24);
+let idAusAdresse = (new URLSearchParams(location.search).get("id")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,16);
+// Ein Kanal-Praefix wie «AD-» gilt fuer viele Personen: dann bekommt jede Teilnahme eine eigene Kennung dahinter.
+if (idAusAdresse.endsWith("-")) idAusAdresse = idAusAdresse + Math.random().toString(36).slice(2,8);
 const A = { id: idAusAdresse || merk("id") || Math.random().toString(36).slice(2,10), variante: merk("variante") || ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop" };
 merk("id", A.id); merk("variante", A.variante); A.reihenfolge = APPS.slice(0, 4).join("|");
 const start = Date.now();
@@ -120,7 +122,7 @@ const hauptappName = () => anzeige(hauptapp());
 
 /* ---------- Bildschirme ---------- */
 const S = [
- {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Die Teilnahme ist freiwillig, du kannst jederzeit abbrechen. Anonym, keine Namen, keine Kontodaten. Die Rohdaten bleiben bei der Studierendengruppe. Ausgewertete Ergebnisse gehen an die Dozierenden und an den Praxispartner der Arbeit, eine Schweizer Banking-App, die am Ende genannt wird. Löschung nach der Notenpublikation. Fragen mit <span class="stern" aria-hidden="true">*</span><span class="sr">Stern</span> sind Pflicht. Dauer ${DAUER_TEXT}, geschätzt. Mit «Los» stimmst du der Teilnahme zu. Rückfragen an ${KONTAKT}.`, knopf:"Los"},
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Die Teilnahme ist freiwillig, du kannst jederzeit abbrechen. Anonym, keine Namen, keine Kontodaten. Die Rohdaten bleiben bei der Studierendengruppe. Ausgewertete Ergebnisse gehen an die Dozierenden und an den Praxispartner der Arbeit, eine Schweizer Banking-App, die am Ende genannt wird. Löschung nach der Notenpublikation. Fragen mit <span class="stern" aria-hidden="true">*</span><span class="sr">Stern</span> sind Pflicht. Dauer ${DAUER_TEXT}, geschätzt. Gehörst du nicht zur Zielgruppe, endet die Umfrage nach den ersten drei Fragen; gezählt werden dann nur diese drei Antworten. Mit «Los» stimmst du der Teilnahme zu. Rückfragen an ${KONTAKT}.`, knopf:"Los"},
  {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
