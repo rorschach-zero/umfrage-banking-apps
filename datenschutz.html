@@ -52,9 +52,9 @@ h1, p, li, td { overflow-wrap: anywhere; }
   <h2>Welche Daten erhoben werden</h2>
   <ul>
     <li>Deine Antworten auf die Fragen der Umfrage, darunter Altersgruppe, Kanton, genutzte Banking-Apps und Bewertungen.</li>
-    <li>Eine Kennung. Sie wird beim Laden der Seite zufällig erzeugt oder kommt aus dem Link, über den du die Umfrage geöffnet hast (dann beginnt sie mit einem Kürzel für den Verbreitungsweg, zum Beispiel «SCH-» für die Schule, gefolgt von Zufallszeichen). Sie enthält keinen Hinweis auf deine Person und dient dazu, doppelte Sendungen zu erkennen und den Verbreitungsweg auszuwerten. Du siehst sie am Ende der Umfrage.</li>
+    <li>Eine Kennung. Sie wird beim Laden der Seite zufällig erzeugt oder kommt aus dem Link, über den du die Umfrage geöffnet hast. In unseren Links steht nur ein Kürzel für den Verbreitungsweg, zum Beispiel «SCH-» für die Schule; die Seite hängt Zufallszeichen an. Wir vergeben keine Links mit Personenbezug. Die Kennung dient dazu, doppelte Sendungen zu erkennen und den Verbreitungsweg auszuwerten. Du siehst sie am Ende der Umfrage, auch beim Ausschluss.</li>
     <li>Die Version der Umfrage, die Dauer vom Laden bis zum Senden in Sekunden, ob du am Handy oder am Computer warst, und der Zeitpunkt, zu dem deine Antworten eingetroffen sind.</li>
-    <li>Gehörst du nicht zur Zielgruppe (Wohnort, Alter, App-Nutzung), endet die Umfrage nach den ersten drei Fragen. Dann werden nur diese drei Antworten, die Kennung, die Version, die Stelle des Ausschlusses und Handy oder Computer gespeichert, ohne weiteren Knopf. Das steht so auch vor dem Start.</li>
+    <li>Gehörst du nicht zur Zielgruppe (Wohnort, Alter, App-Nutzung), endet die Umfrage bei der ersten dieser bis zu drei Fragen, die dich ausschliesst. Dann werden nur die bis dahin gegebenen Antworten, die Kennung, die Version, die Stelle des Ausschlusses, Handy oder Computer und der Eingangszeitpunkt gespeichert, ohne weiteren Knopf. Das steht so auch vor dem Start.</li>
     <li>Falls du sie freiwillig angibst: deine Mailadresse, nur um dir die Ergebnisse zu schicken.</li>
   </ul>
   <p>Nicht erhoben werden Name, Kontodaten, IP-Adresse oder Standort durch die Umfrage selbst.</p>
@@ -64,8 +64,8 @@ h1, p, li, td { overflow-wrap: anywhere; }
     <thead><tr><th>Schritt</th><th>Dienst</th><th>Was dort anfällt</th></tr></thead>
     <tbody>
     <tr><td data-label="Schritt">Anzeige der Umfrage</td><td data-label="Dienst">GitHub Pages (GitHub, Inc., USA)</td><td data-label="Was dort anfällt">Technische Zugriffsprotokolle des Hosters, wie bei jeder Website. Darauf hat die Gruppe keinen Zugriff; sie werden nicht ausgewertet.</td></tr>
-    <tr><td data-label="Schritt">Speicherung der Antworten</td><td data-label="Dienst">Google Apps Script und Google Sheets (Google LLC) im Google-Workspace-Konto der verantwortlichen Person</td><td data-label="Was dort anfällt">Deine Antworten als eine Zeile in einer Tabelle, nur mit der Kennung. Google verarbeitet Daten in eigenen Rechenzentren, auch ausserhalb der Schweiz; Grundlage dafür sind die Vertragsbedingungen von Google Workspace mit den Standarddatenschutzklauseln. Eine Garantie, dass die Daten die Schweiz nicht verlassen, können wir nicht geben.</td></tr>
-    <tr><td data-label="Schritt">Mailadressen</td><td data-label="Dienst">Dieselbe Tabelle, getrenntes Blatt</td><td data-label="Was dort anfällt">Nur Adresse und Datum, ohne gemeinsame Kennung mit deinen Antworten. An Tagen mit wenigen Antworten liesse sich über das Datum eine Zuordnung vermuten; deshalb sieht dieses Blatt nur die verantwortliche Person, und es wird zuerst gelöscht.</td></tr>
+    <tr><td data-label="Schritt">Speicherung der Antworten</td><td data-label="Dienst">Google Apps Script und Google Sheets (Google LLC, Mountain View, USA) im Google-Workspace-Konto der verantwortlichen Person</td><td data-label="Was dort anfällt">Deine Antworten als eine Zeile in einer Tabelle, nur mit der Kennung. Google verarbeitet Daten in Rechenzentren in den USA und in der EU, also ausserhalb der Schweiz. Grundlage ist der Datenverarbeitungszusatz von Google Workspace mit den EU-Standardvertragsklauseln und dem Schweizer Zusatz (<a href="https://cloud.google.com/terms/data-processing-addendum/" target="_blank" rel="noopener">Google Cloud Data Processing Addendum</a>). Eine Garantie, dass die Daten die Schweiz nicht verlassen, können wir nicht geben.</td></tr>
+    <tr><td data-label="Schritt">Mailadressen</td><td data-label="Dienst">Dieselbe Tabelle, getrenntes Blatt</td><td data-label="Was dort anfällt">Nur Adresse und Datum, ohne gemeinsame Kennung mit deinen Antworten. An Tagen mit wenigen Antworten liesse sich über das Datum eine Zuordnung vermuten. Darum liegt dieses Blatt nur im Konto der verantwortlichen Person; die Kopien, mit denen die Gruppe arbeitet, enthalten es nicht, und es wird zuerst gelöscht.</td></tr>
     <tr><td data-label="Schritt">Auswertung</td><td data-label="Dienst">Computer der Gruppe</td><td data-label="Was dort anfällt">Eine Kopie der Antworttabelle, ohne Mailadressen.</td></tr>
       </tbody>
   </table>
@@ -85,7 +85,7 @@ h1, p, li, td { overflow-wrap: anywhere; }
   <p>Die Teilnahme ist freiwillig. Du kannst jederzeit abbrechen; ohne «Antworten senden» werden deine Antworten nicht gespeichert, mit der einen oben genannten Ausnahme beim Ausschluss nach den ersten drei Fragen. Du hast das Recht auf Auskunft, Berichtigung und Löschung deiner Daten. Dafür brauchst du die Kennung, die dir am Ende angezeigt wird, auch beim Ausschluss. Schick sie an die Kontaktadresse. Ohne Kennung können wir deine Zeile nicht finden, weil wir nicht wissen, welche Zeile zu dir gehört.</p>
 
   <h2>Rechtliche Grundlage</h2>
-  <p>Die Erhebung folgt dem Schweizer Datenschutzgesetz (DSG) und den Grundsätzen der Marktforschung (ICC/ESOMAR-Kodex): Freiwilligkeit, Transparenz, Zweckbindung, Datensparsamkeit. Stand dieser Erklärung: 28. Oktober 2026, Version 2.9 der Umfrage.</p>
+  <p>Die Erhebung folgt dem Schweizer Datenschutzgesetz (DSG) und den Grundsätzen der Marktforschung (ICC/ESOMAR-Kodex): Freiwilligkeit, Transparenz, Zweckbindung, Datensparsamkeit. Stand dieser Erklärung: 28. Oktober 2026, Version 3.0 der Umfrage.</p>
 
   <a class="zurueck" href="index.html">Zurück zur Umfrage</a>
 </main>
