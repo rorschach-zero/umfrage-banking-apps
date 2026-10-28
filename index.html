@@ -47,8 +47,8 @@ textarea.text { min-height: 110px; resize: vertical; }
 .skala { display:grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 16px 0 6px; }
 .skala .opt { justify-content:center; padding: 14px 6px; border-radius: var(--card); font-weight: 700; }
 .skala-enden { display:flex; justify-content:space-between; color: var(--grey); font-size: 14px; }
-.matrix { display:flex; flex-direction:column; gap: 18px; margin: 20px 0; }
-.matrix .zeile { padding: 14px 16px; border-radius: var(--card); background: var(--lilac-faint); }
+.matrix { display:flex; flex-direction:column; gap: 16px; margin: 24px 0; }
+.matrix .zeile { padding: 16px; border-radius: var(--card); background: var(--lilac-faint); }
 .matrix .zeile .frage { font-weight: 600; margin-bottom: 8px; }
 .matrix .skala { margin: 8px 0 4px; }
 .matrix .skala .opt { padding: 10px 4px; font-size: 15px; background: var(--white); }
@@ -66,12 +66,12 @@ label.feld { display:block; font-weight: 600; margin-top: 8px; }
 .status { margin-top: 16px; }
 .ok { color: var(--green-dark); }
 .botschaft { background: var(--lilac-light); border-radius: 24px; padding: 28px; font-size: clamp(22px, 4vw, 28px); font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; margin: 20px 0; }
-.fakten { display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0 8px; }
-.fakt { background: var(--lilac-faint); border-radius: var(--card); padding: 14px 16px; }
+.fakten { display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 24px 0 8px; }
+.fakt { background: var(--lilac-faint); border-radius: var(--card); padding: 16px; }
 .fakt b { display:block; font-size: 15px; margin-bottom: 2px; }
 .fakt > span { color: var(--grey); font-size: 14px; line-height: 1.35; display:block; }
 details { margin: 14px 0 0; }
-details summary { cursor:pointer; color: var(--ink); font-weight: 600; font-size: 15px; list-style: none; display:flex; align-items:center; gap: 8px; }
+details summary { cursor:pointer; color: var(--ink); font-weight: 600; font-size: 15px; list-style: none; display:flex; align-items:center; gap: 8px; min-height: 44px; padding: 8px 0; }
 details summary::-webkit-details-marker { display:none; }
 details summary::before { content:""; width: 8px; height: 8px; border-right: 2px solid var(--orange); border-bottom: 2px solid var(--orange); transform: rotate(-45deg); transition: transform var(--dur); }
 details[open] summary::before { transform: rotate(45deg); }
@@ -98,7 +98,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = true;
 const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
-const VERSION = "2.6";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "2.7";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
@@ -249,7 +249,7 @@ function weiter(s) {
   if (s.id==="t1") { if (A.t1.length===1) A.t2 = A.t1[0]; else if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
   i++; render();
 }
-function endeHtml() { return `<div class="ende"><div class="kicker">Fast geschafft</div><h2 id="frage-titel" style="margin-bottom:12px">Offenlegung, bevor du sendest</h2><p>Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh erhält nur ausgewertete Ergebnisse, keine einzelnen Antworten. Die Rohdaten bleiben bei der Studierendengruppe und werden nach der Notenpublikation gelöscht.</p><p class="hinweis">Mit «Antworten senden» werden deine Antworten gespeichert. Wenn du nicht sendest, wird nichts gespeichert.</p><div style="margin-top:16px"><button type="button" class="knopf" id="absenden">Antworten senden</button></div><p class="status" id="sendestatus" role="status"></p><div id="nachher" hidden><div class="gross" style="margin-top:24px">Danke</div><p class="hinweis" style="margin-top:12px">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum, und nach dem Versand der Ergebnisse gelöscht, spätestens nach der Notenpublikation.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div></div>`; }
+function endeHtml() { return `<div class="ende"><div class="kicker">Fast geschafft</div><h2 id="frage-titel" style="margin-bottom:12px">Bevor du deine Antworten sendest</h2><p>Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh erhält nur ausgewertete Ergebnisse, keine einzelnen Antworten. Die Rohdaten bleiben bei der Studierendengruppe und werden nach der Notenpublikation gelöscht.</p><p class="hinweis">Mit «Antworten senden» werden deine Antworten gespeichert. Wenn du nicht sendest, wird nichts gespeichert.</p><div style="margin-top:16px"><button type="button" class="knopf" id="absenden">Antworten senden</button></div><p class="status" id="sendestatus" role="status"></p><div id="nachher" hidden><div class="gross" style="margin-top:24px">Danke</div><p class="hinweis" style="margin-top:12px">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum, und nach dem Versand der Ergebnisse gelöscht, spätestens nach der Notenpublikation.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div></div>`; }
 function renderEnde(abgebrochen) {
   document.getElementById("balken").style.width = "100%"; document.getElementById("zaehler").textContent = "";
   main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p><p class="hinweis">Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), eine zufällige Kennung, die Version der Umfrage, die Stelle des Ausschlusses und ob Handy oder Computer. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
