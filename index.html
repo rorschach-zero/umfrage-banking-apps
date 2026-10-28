@@ -19,7 +19,8 @@ html, body { margin:0; background: var(--white); color: var(--ink); font-family:
 body { min-height: 100dvh; display: flex; flex-direction: column; }
 header { display:flex; align-items:center; justify-content:space-between; padding: 20px 24px; max-width: 760px; width:100%; margin:0 auto; }
 header .marke { display:flex; align-items:center; gap:12px; color: var(--grey); font-size: 14px; }
-header .marke svg { height: 28px; width:auto; }
+header .marke img { height: 30px; width:auto; display:block; }
+header .marke span { padding-top: 2px; }
 .fortschritt { height: 4px; background: var(--surface); }
 .fortschritt > div { height: 100%; width: 0; background: var(--orange); transition: width var(--dur) var(--ease); }
 main { flex:1; max-width: 760px; width:100%; margin: 0 auto; padding: 24px 24px 48px; }
@@ -65,6 +66,17 @@ label.feld { display:block; font-weight: 600; margin-top: 8px; }
 .status { margin-top: 16px; }
 .ok { color: var(--green-dark); }
 .botschaft { background: var(--lilac-light); border-radius: 24px; padding: 28px; font-size: clamp(22px, 4vw, 28px); font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; margin: 20px 0; }
+.fakten { display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0 8px; }
+.fakt { background: var(--lilac-faint); border-radius: var(--card); padding: 14px 16px; }
+.fakt b { display:block; font-size: 15px; margin-bottom: 2px; }
+.fakt > span { color: var(--grey); font-size: 14px; line-height: 1.35; display:block; }
+details { margin: 14px 0 0; }
+details summary { cursor:pointer; color: var(--ink); font-weight: 600; font-size: 15px; list-style: none; display:flex; align-items:center; gap: 8px; }
+details summary::-webkit-details-marker { display:none; }
+details summary::before { content:""; width: 8px; height: 8px; border-right: 2px solid var(--orange); border-bottom: 2px solid var(--orange); transform: rotate(-45deg); transition: transform var(--dur); }
+details[open] summary::before { transform: rotate(45deg); }
+details p { margin: 10px 0 0; color: var(--grey); font-size: 15px; }
+@media (max-width: 520px) { .fakten { grid-template-columns: 1fr; } }
 .ende { text-align:center; padding: 40px 0; }
 .ende .gross { font-size: clamp(40px, 10vw, 72px); font-weight: 800; letter-spacing: -0.03em; color: var(--orange); line-height: 1; }
 footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 24px 28px; }
@@ -74,7 +86,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 </head>
 <body>
 <header>
-  <div class="marke"><img src="kvbsz_wortmarke.png" alt="KV Business School Zürich" style="height:26px"><span>Praxisarbeit HFW</span></div>
+  <div class="marke"><img src="kvbsz_wortmarke.svg" alt="KV Business School Zürich"><span>Praxisarbeit HFW</span></div>
   <div class="klein" id="zaehler"></div>
 </header>
 <div class="fortschritt" aria-hidden="true"><div id="balken"></div></div>
@@ -86,7 +98,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = true;
 const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
-const VERSION = "2.5";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "2.6";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
@@ -122,7 +134,7 @@ const hauptappName = () => anzeige(hauptapp());
 
 /* ---------- Bildschirme ---------- */
 const S = [
- {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Kurze Umfrage, erhoben von fünf Studierenden der HFW an der KV Business School Zürich für eine Praxisarbeit. Die Teilnahme ist freiwillig, du kannst jederzeit abbrechen. Anonym, keine Namen, keine Kontodaten. Die Rohdaten bleiben bei der Studierendengruppe. Ausgewertete Ergebnisse gehen an die Dozierenden und an den Praxispartner der Arbeit, eine Schweizer Banking-App, die am Ende genannt wird. Löschung nach der Notenpublikation. Fragen mit <span class="stern" aria-hidden="true">*</span><span class="sr">Stern</span> sind Pflicht. Dauer ${DAUER_TEXT}, geschätzt. Gehörst du nicht zur Zielgruppe, endet die Umfrage nach den ersten drei Fragen; gezählt werden dann nur diese drei Antworten. Mit «Los» stimmst du der Teilnahme zu. Rückfragen an ${KONTAKT}.`, knopf:"Los"},
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Fünf Studierende der HFW an der KV Business School Zürich fragen dich nach deinen Erfahrungen. Deine Antworten fliessen in eine Praxisarbeit.`, html:`<div class="fakten" role="list"><div class="fakt" role="listitem"><b>${DAUER_TEXT}</b><span>geschätzt, meist am Handy</span></div><div class="fakt" role="listitem"><b>Anonym</b><span>keine Namen, keine Kontodaten</span></div><div class="fakt" role="listitem"><b>Freiwillig</b><span>abbrechen jederzeit, Fragen mit <span class="stern" aria-hidden="true">*</span><span class="sr">Stern</span> sind Pflicht</span></div><div class="fakt" role="listitem"><b>Deine Daten</b><span>bleiben bei der Studierendengruppe, Löschung nach der Notenpublikation</span></div></div><details><summary>Wer sieht was, und wer steht dahinter</summary><p>Die Rohdaten bleiben bei der Studierendengruppe. Ausgewertete Ergebnisse gehen an die Dozierenden und an den Praxispartner der Arbeit, eine Schweizer Banking-App, die am Ende der Umfrage genannt wird. Gehörst du nicht zur Zielgruppe, endet die Umfrage nach den ersten drei Fragen; gezählt werden dann nur diese drei Antworten. Rückfragen an ${KONTAKT}.</p></details><p class="hinweis" style="margin-top:16px">Mit «Los» stimmst du der Teilnahme zu.</p>`, knopf:"Los"},
  {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
@@ -173,7 +185,7 @@ function render() {
   let h = `<section class="schirm">`;
   if (s.kicker) h += `<div class="kicker">${s.kicker}</div>`;
   if (s.art === "ende") { h += endeHtml(); main.innerHTML = h + "</section>"; senden(); return; }
-  h += s.art==="info" ? `<h1>${titel}</h1><p>${s.text||""}</p>` : `<h2 id="frage-titel">${titel}${s.pflicht ? '<span class="stern" aria-hidden="true">*</span><span class="sr">(Pflichtfrage)</span>' : ""}</h2>`;
+  h += s.art==="info" ? `<h1>${titel}</h1><p>${s.text||""}</p>${s.html||""}` : `<h2 id="frage-titel">${titel}${s.pflicht ? '<span class="stern" aria-hidden="true">*</span><span class="sr">(Pflichtfrage)</span>' : ""}</h2>`;
   if (s.hinweis) h += `<p class="hinweis">${s.hinweis}</p>`;
   if (s.botschaft) h += `<div class="botschaft">${BOTSCHAFTEN[A.variante]}</div>`;
   if (s.frage) h += `<p><strong>${s.frage}</strong></p>`;
