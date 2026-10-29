@@ -98,7 +98,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
-const VERSION = "3.5";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.6";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
@@ -143,7 +143,9 @@ function sichern() { try { merk("stand", JSON.stringify({v: VERSION, A: A, i: i,
 window.addEventListener("beforeunload", sichern);
 const hauptapp = () => A.t2 || (Array.isArray(A.t1) && A.t1.length === 1 ? A.t1[0] : "");
 const nutztYuh = () => Array.isArray(A.t1) && A.t1.includes("Yuh");
-const anzeige = o => o==="App meiner Hausbank" ? (A.t1_hausbank ? `${A.t1_hausbank}` : "deiner Hausbank") : (o==="andere" && A.t1_andere ? A.t1_andere : o);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+// Eingetippte Namen stehen spaeter in Fragetiteln, die als HTML gesetzt werden: darum hier maskiert.
+const anzeige = o => o==="App meiner Hausbank" ? (A.t1_hausbank ? esc(A.t1_hausbank) : "deiner Hausbank") : (o==="andere" && A.t1_andere ? esc(A.t1_andere) : esc(o));
 const hauptappName = () => anzeige(hauptapp());
 const kenntYuh = () => nutztYuh() || A.t13a === "ja";   // Yuh-Nutzende kennen Yuh; t13a wird fuer sie nicht gezeigt und beim Senden auf «ja» gesetzt
 
@@ -155,9 +157,9 @@ const S = [
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"t1", art:"mehrfach", pflicht:true, titel:"Welche dieser Banking-Apps nutzt du zurzeit?", hinweis:"Mehrfachauswahl möglich.", optionen:APPS, texte:{"App meiner Hausbank":{key:"t1_hausbank", label:"Welche Bank?"}, "andere":{key:"t1_andere", label:"Welche App?"}}},
  {id:"t2", art:"einfach", pflicht:true, titel:"Welche davon nutzt du am häufigsten?", optionen: () => A.t1, zeigen: () => Array.isArray(A.t1) && A.t1.length > 1},
- {id:"t2b", art:"einfach", pflicht:true, titel: () => `Welche Rolle spielt ${hauptappName()} für dich?`, optionen:["meine wichtigste Bankverbindung, der Lohn oder das Haupteinkommen kommt dort an","meine wichtigste Bankverbindung, aber das Haupteinkommen kommt woanders an","ein Zweitkonto für bestimmte Zwecke","keine Angabe"]},
+ {id:"t2b", art:"einfach", pflicht:true, titel: () => `Welche Rolle spielt ${hauptappName()} für dich?`, optionen:["meine wichtigste Bankverbindung, der Lohn oder das Haupteinkommen kommt dort an","meine wichtigste Bankverbindung, aber das Haupteinkommen kommt woanders an","ein Zweitkonto für bestimmte Zwecke","ich habe kein regelmässiges Einkommen","keine Angabe"]},
  {id:"t3b", art:"einfach", pflicht:true, titel: () => `Als du zuletzt ein Problem mit ${hauptappName()} hattest: Was hast du zuerst getan?`, optionen:["Hilfe in der App oder bei den häufigen Fragen gesucht","Im Internet gesucht","Den Chatbot der App genutzt","Den Mitarbeitenden geschrieben, per Chat oder E-Mail","Angerufen","Bekannte gefragt","Zunächst nichts","Anderes","Ich hatte noch nie ein Problem","Weiss ich nicht mehr"]},
- {id:"t3c", art:"einfach", pflicht:true, titel:"Hast du in den letzten zwölf Monaten eine Banking-App wegen eines ungelösten Problems weniger oder gar nicht mehr genutzt, ohne den Kundendienst zu kontaktieren?", optionen:["ja","nein","weiss nicht"]},
+ {id:"t3c", art:"einfach", pflicht:true, titel:"Hast du in den letzten zwölf Monaten eine Banking-App wegen eines ungelösten Problems weniger oder gar nicht mehr genutzt, ohne den Kundendienst zu kontaktieren?", hinweis:"Kontakt heisst: geschrieben, gechattet, auch mit einem Chatbot, oder angerufen. Wenn das bei mehreren Apps vorkam: Denk an die letzte.", optionen:["ja","nein","weiss nicht"]},
  {id:"t3c_app", art:"einfach", pflicht:true, titel:"Welche App war das?", optionen:APPS, texte:{"App meiner Hausbank":{key:"t3c_name", label:"Welche Bank?"}, "andere":{key:"t3c_name", label:"Welche App?"}}, zeigen: () => A.t3c==="ja"},
  {id:"t3", art:"matrix", pflicht:true, titel:"Wie wichtig ist dir jede dieser Eigenschaften, wenn du Hilfe bei einem Problem mit einer Banking-App brauchst?", hinweis:"Automatische Eingangsbestätigungen zählen nicht als Antwort.", zeilen:MERKMALE, weissnicht:"kann ich nicht sagen", skala:{...S5("unwichtig","sehr wichtig"), worte:["unwichtig","eher unwichtig","mittel","eher wichtig","sehr wichtig"]}, prefix:"t3_"},
  {id:"t4a", art:"einfach", pflicht:true, titel: () => `Hattest du schon einmal Kontakt mit dem Kundendienst von ${hauptappName()}?`, hinweis:"Kontakt heisst: Du hast dem Kundendienst geschrieben, mit ihm gechattet, auch mit einem Chatbot, oder angerufen.", optionen:["ja","nein"]},
@@ -168,7 +170,7 @@ const S = [
  {id:"t8", art:"einfach", pflicht:true, titel:"Worum ging es hauptsächlich?", optionen:["Karte","Anmeldung in der App","Zahlung","Kontoeröffnung oder Kontoschliessung","Geldanlagen","Dokumente","anderes"], zeigen: () => A.t5==="ja"},
  {id:"t9", art:"einfach", pflicht:true, titel:"Wie lange hast du gewartet, bis ein Mensch geantwortet hat?", hinweis:"Eine automatische Bestätigung zählt nicht.", optionen:["bis 5 Minuten","mehr als 5 bis 30 Minuten","mehr als 30 Minuten bis 2 Stunden","mehr als 2 Stunden bis 1 Tag","mehr als 1 Tag","bis heute keine Antwort","keine menschliche Antwort nötig","weiss ich nicht mehr"], zeigen: () => A.t5==="ja"},
  {id:"t10", art:"einfach", pflicht:true, titel:"War dein Anliegen nach dem ersten Austausch mit dem Kundendienst gelöst, ohne dass du erneut nachfragen musstest?", optionen:["ja","nein","weiss ich nicht mehr"], zeigen: () => A.t5==="ja" && A.t9 !== "bis heute keine Antwort"},
- {id:"t10b", art:"einfach", pflicht:true, titel:"Ist dein Anliegen heute gelöst?", optionen:["ja","nein"], zeigen: () => A.t5==="ja" && (A.t10==="nein" || A.t9==="bis heute keine Antwort")},
+ {id:"t10b", art:"einfach", pflicht:true, titel:"Ist dein Anliegen heute gelöst?", optionen:["ja","nein"], zeigen: () => A.t5==="ja" && (A.t10==="nein" || A.t10==="weiss ich nicht mehr" || A.t9==="bis heute keine Antwort")},
  {id:"t11", art:"skala", pflicht:true, titel:"Wie zufrieden warst du mit diesem Kontakt insgesamt?", skala:S5("sehr unzufrieden","sehr zufrieden"), zeigen: () => A.t5==="ja"},
  {id:"t12", art:"offen", pflicht:false, titel:"Was ist dir bei diesem Kontakt besonders positiv oder negativ aufgefallen?", hinweis:"Ein Satz genügt. Freiwillig.", zeigen: () => A.t5==="ja"},
  {id:"t4c", art:"einfach", pflicht:true, titel:"Hattest du schon einmal Kontakt mit dem Kundendienst von Yuh?", hinweis:"Kontakt heisst: Du hast dem Kundendienst geschrieben, mit ihm gechattet, auch mit einem Chatbot, oder angerufen.", optionen:["ja","nein"], zeigen: () => nutztYuh() && hauptapp() !== "Yuh"},
@@ -243,8 +245,8 @@ function render() {
 function verdrahten(s) {
   main.querySelectorAll(".opt[data-wert]").forEach(b => b.addEventListener("click", () => {
     const key = b.dataset.key || b.closest("[data-key]")?.dataset.key || s.id; const w = b.dataset.wert;
-    if (s.art==="mehrfach") { const arr = new Set(A[s.id]||[]); arr.has(w) ? arr.delete(w) : arr.add(w); A[s.id] = [...arr]; if (s.id==="t1" && A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
-    else A[key] = w;
+    if (s.art==="mehrfach") { const arr = new Set(A[s.id]||[]); if (arr.has(w)) { arr.delete(w); if (s.texte && s.texte[w]) delete A[s.texte[w].key]; } else arr.add(w); A[s.id] = [...arr]; if (s.id==="t1" && A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
+    else { if (s.texte && A[key] !== w) for (const o in s.texte) delete A[s.texte[o].key]; A[key] = w; }
     if (s.art==="mehrfach" || s.texte) { fokus = w; render(); } else { main.querySelectorAll(`.opt[data-wert]`).forEach(x => { const kx = x.dataset.key || x.closest("[data-key]")?.dataset.key || s.id; if (kx===key) x.setAttribute("aria-checked", x===b); }); }
   }));
   main.querySelectorAll(".opt[data-k]").forEach(b => b.addEventListener("click", () => { const an = A[b.dataset.k]!=="ja"; A[b.dataset.k] = an ? "ja" : ""; b.setAttribute("aria-checked", an); const ta = document.getElementById("offen"); if (ta) { if (an) { ta.value = ""; A[s.id] = ""; } ta.disabled = an; } }));
@@ -266,24 +268,44 @@ function fehlt(s) {
 // Aendert sich die Hauptapp (Zurueckgehen, anderer Haken in T1, andere Wahl in T2), gelten die Antworten zu T2b, T3b, T4a und T4
 // nicht mehr: Sie bezogen sich auf den frueheren Anbieter und werden geloescht, die Person beantwortet sie neu.
 function hauptappGewechselt() {
-  if (A.t2 === undefined || A.t2 === A._hauptapp) return;
+  const jetzt = hauptapp() ? hauptapp() + "|" + (hauptapp()==="App meiner Hausbank" ? (A.t1_hausbank||"") : hauptapp()==="andere" ? (A.t1_andere||"") : "") : undefined;
+  if (jetzt === undefined || jetzt === A._hauptapp) return;
   if (A._hauptapp !== undefined) { ["t2b","t3b","t4a"].forEach(k => delete A[k]); for (let n=1; n<=MERKMALE.length; n++) delete A["t4_"+n]; }
-  A._hauptapp = A.t2;
+  A._hauptapp = jetzt;
+}
+// Dasselbe fuer den letzten Kontakt: Wechselt der Anbieter in T6 (auch nur der eingetippte Name), gelten T7 bis T12 nicht mehr.
+function kontaktGewechselt() {
+  const jetzt = A.t6 === undefined ? undefined : A.t6 + "|" + (A.t6_name || "");
+  if (jetzt === undefined || jetzt === A._kontakt) return;
+  if (A._kontakt !== undefined) ["t7","t8","t9","t10","t10b","t11","t12"].forEach(k => delete A[k]);
+  A._kontakt = jetzt;
 }
 function weiter(s) {
   const f = fehlt(s); const fe = document.getElementById("fehler"); if (f) { fe.textContent = f; fe.focus(); return; }
   if (s.ende && s.ende(A[s.id])) { A.abbruch = s.id; i = S.length - 1; renderEnde(true); return; }
   if (s.id==="t1") { if (A.t1.length===1) A.t2 = A.t1[0]; else if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
   if (s.id==="t1" || s.id==="t2") hauptappGewechselt();
+  if (s.id==="t6") kontaktGewechselt();
   i++; sichern(); render();
 }
 function endeHtml() { return `<div class="ende"><div class="kicker">Fast geschafft</div><h2 id="frage-titel" style="margin-bottom:12px">Bevor du deine Antworten sendest</h2><p>Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh erhält nur ausgewertete Ergebnisse, keine einzelnen Antworten. Die Rohdaten bleiben bei der Studierendengruppe und werden nach der Notenpublikation gelöscht.</p><p class="hinweis">Mit «Antworten senden» werden deine Antworten gespeichert. Wenn du nicht sendest, wird nichts gespeichert.</p><div style="margin-top:16px"><button type="button" class="knopf" id="absenden">Antworten senden</button></div><p class="status" id="sendestatus" role="status"></p><div id="nachher" hidden><div class="gross" style="margin-top:24px">Danke</div><p class="hinweis" style="margin-top:8px">Deine Kennung, falls du deine Antworten später löschen lassen willst: <strong id="kennung"></strong></p><p class="hinweis" style="margin-top:12px">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum, und nach dem Versand der Ergebnisse gelöscht, spätestens nach der Notenpublikation.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div></div>`; }
 function renderEnde(abgebrochen) {
   document.getElementById("balken").style.width = "100%"; document.getElementById("zaehler").textContent = "";
   main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p><p class="hinweis">Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst: <strong>${A.id}</strong>. Mehr dazu auf der Seite <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz zur Umfrage</a>.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
-  if (abgebrochen) post({id:A.id, version:VERSION, abbruch:A.abbruch, s1:A.s1, s2:A.s2, s3:A.s3, geraet:A.geraet}); else { const k = document.getElementById("absenden"); k.addEventListener("click", senden); k.focus(); }
+  if (abgebrochen) { const bis = ["s1","s2","s3"]; const o = {id:A.id, version:VERSION, abbruch:A.abbruch, geraet:A.geraet}; for (const k of bis) { o[k] = A[k]; if (k === A.abbruch) break; } post(o); } else { const k = document.getElementById("absenden"); k.addEventListener("click", senden); k.focus(); }
 }
-async function post(obj) { if (!ENDPUNKT) { console.log("Antwort (kein Endpunkt gesetzt)", obj); return true; } try { await fetch(ENDPUNKT, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body: JSON.stringify(obj)}); return true; } catch (e) { return false; } }
+// Der Empfaenger antwortet mit {ok:true} oder {ok:true, doppelt:true}; nur dann gilt die Antwort als gespeichert.
+// Die Antwort ist lesbar (Google liefert Access-Control-Allow-Origin fuer diese Web-App); bleibt sie aus oder dauert
+// sie laenger als 20 Sekunden, meldet die Seite einen Fehler und bietet «Noch einmal senden» an.
+async function post(obj) {
+  if (!ENDPUNKT) { console.log("Antwort (kein Endpunkt gesetzt)", obj); return true; }
+  const ctrl = new AbortController(); const uhr = setTimeout(() => ctrl.abort(), 20000);
+  try {
+    const r = await fetch(ENDPUNKT, {method:"POST", headers:{"Content-Type":"text/plain"}, body: JSON.stringify(obj), signal: ctrl.signal});
+    const d = await r.json();
+    return !!(d && d.ok);
+  } catch (e) { return false; } finally { clearTimeout(uhr); }
+}
 // Nur Antworten sichtbarer Fragen werden gesendet. Was durch Zurueckgehen oder einen geaenderten Filter
 // unsichtbar wurde, bleibt weg. t2 wird aus der Hauptapp gesetzt, auch wenn T2 nicht gezeigt wurde.
 function bereinigt() {
@@ -311,7 +333,6 @@ async function senden() {
   const b = document.getElementById("mailsenden"); const ms = document.getElementById("mailstatus");
   b.addEventListener("click", async () => { const m = document.getElementById("mail").value.trim(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)) { ms.textContent = "Bitte eine gültige Adresse."; document.getElementById("mail").focus(); return; } b.disabled = true; const ok2 = await post({typ:"mail", mail:m}); if (!ok2) { ms.textContent = "Konnte nicht gespeichert werden, bitte noch einmal."; b.disabled = false; return; } ms.className = "fehler ok"; ms.textContent = "Gespeichert, danke."; });
 }
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 S[S.length-1].art = "ende"; 
 S.find(x=>x.id==="ende").art = "ende";
 // Ende-Bildschirm nutzt renderEnde statt render
