@@ -98,12 +98,12 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
-const VERSION = "3.4";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.5";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
 function mischen(a) { const b = a.slice(); for (let k = b.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [b[k], b[j]] = [b[j], b[k]]; } return b; }
-const APPS = mischen(APPS_FEST).concat(["App meiner Hausbank","andere"]); // Reihenfolge je Teilnahme zufaellig, wird als «reihenfolge» gespeichert
+let APPS = mischen(APPS_FEST).concat(["App meiner Hausbank","andere"]); // Reihenfolge je Teilnahme zufaellig, wird als «reihenfolge» gespeichert
 const MERKMALE = [
   "Ich erhalte rasch eine Antwort von einem Menschen",
   "Mein Anliegen wird beim ersten Kontakt gelöst",
@@ -116,7 +116,7 @@ const MERKMALE = [
   "Ich erfahre, wie es mit meinem Anliegen weitergeht",
   "Ich kann ein Problem selbst in der App lösen, ohne jemanden zu kontaktieren"
 ];
-const MERK_ORDER = mischen([...Array(MERKMALE.length).keys()]); // Zeilen der Matrizen je Teilnahme gemischt, in allen Matrizen gleich; Schluessel bleiben an der Originalzeile
+let MERK_ORDER = mischen([...Array(MERKMALE.length).keys()]); // Zeilen der Matrizen je Teilnahme gemischt, in allen Matrizen gleich; Schluessel bleiben an der Originalzeile
 const KANTONE = ["Aargau","Appenzell Ausserrhoden","Appenzell Innerrhoden","Basel-Landschaft","Basel-Stadt","Bern","Freiburg","Genf","Glarus","Graubünden","Jura","Luzern","Neuenburg","Nidwalden","Obwalden","Schaffhausen","Schwyz","Solothurn","St. Gallen","Tessin","Thurgau","Uri","Waadt","Wallis","Zug","Zürich"];
 const BOTSCHAFTEN = {A:"Bei Yuh antwortet dir eine Person in der Schweiz.", B:"Bei Yuh erreichst du den Kundendienst auch per Telefon.", C:"Bei Yuh hilft dir der Kundendienst in vier Sprachen."};
 const S5 = (a,b)=>({stufen:5, links:a, rechts:b});
@@ -128,7 +128,19 @@ let idAusAdresse = (new URLSearchParams(location.search).get("id")||"").replace(
 if (idAusAdresse.endsWith("-")) idAusAdresse = idAusAdresse + Math.random().toString(36).slice(2,8);
 const A = { id: idAusAdresse || merk("id") || Math.random().toString(36).slice(2,10), variante: merk("variante") || ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop" };
 merk("id", A.id); merk("variante", A.variante); A.reihenfolge = APPS.slice(0, 4).join("|"); A.merkmale_reihenfolge = MERK_ORDER.map(i => i + 1).join("|");
-const start = Date.now();
+let start = Date.now();
+// Neuladen mitten in der Umfrage (am Handy reicht ein Wischen nach unten) darf die Antworten nicht loeschen.
+// Der Stand liegt nur im sessionStorage dieses Tabs: er verlaesst das Geraet nicht und ist mit dem Tab weg.
+let wiederherstellen = null;
+try { const g = JSON.parse(merk("stand") || "null"); if (g && g.v === VERSION && g.A && g.A.id === A.id) wiederherstellen = g; } catch (e) { wiederherstellen = null; }
+if (wiederherstellen) {
+  Object.assign(A, wiederherstellen.A);
+  if (A.reihenfolge) APPS = A.reihenfolge.split("|").concat(["App meiner Hausbank","andere"]);
+  if (A.merkmale_reihenfolge) MERK_ORDER = A.merkmale_reihenfolge.split("|").map(n => Number(n) - 1);
+  if (wiederherstellen.start) start = wiederherstellen.start;
+}
+function sichern() { try { merk("stand", JSON.stringify({v: VERSION, A: A, i: i, start: start})); } catch (e) {} }
+window.addEventListener("beforeunload", sichern);
 const hauptapp = () => A.t2 || (Array.isArray(A.t1) && A.t1.length === 1 ? A.t1[0] : "");
 const nutztYuh = () => Array.isArray(A.t1) && A.t1.includes("Yuh");
 const anzeige = o => o==="App meiner Hausbank" ? (A.t1_hausbank ? `${A.t1_hausbank}` : "deiner Hausbank") : (o==="andere" && A.t1_andere ? A.t1_andere : o);
@@ -178,7 +190,7 @@ const S = [
 ];
 
 /* ---------- Ablauf ---------- */
-let i = 0; let fokus = null;
+let i = wiederherstellen && Number.isInteger(wiederherstellen.i) ? Math.min(wiederherstellen.i, S.length - 1) : 0; let fokus = null;
 const main = document.getElementById("main");
 const sichtbar = s => !s.zeigen || s.zeigen();
 const liste = () => S.filter(sichtbar);
@@ -241,7 +253,7 @@ function verdrahten(s) {
   const offen = document.getElementById("offen"); if (offen) offen.addEventListener("input", () => A[s.id] = offen.value.trim());
   const ausw = document.getElementById("auswahl"); if (ausw) ausw.addEventListener("change", () => A[s.id] = ausw.value);
   document.getElementById("weiter").addEventListener("click", () => weiter(s));
-  const z = document.getElementById("zurueck"); if (z) z.addEventListener("click", () => { i = Math.max(0, i-1); render(); });
+  const z = document.getElementById("zurueck"); if (z) z.addEventListener("click", () => { i = Math.max(0, i-1); sichern(); render(); });
 }
 function fehlt(s) {
   if (!s.pflicht) return "";
@@ -263,7 +275,7 @@ function weiter(s) {
   if (s.ende && s.ende(A[s.id])) { A.abbruch = s.id; i = S.length - 1; renderEnde(true); return; }
   if (s.id==="t1") { if (A.t1.length===1) A.t2 = A.t1[0]; else if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
   if (s.id==="t1" || s.id==="t2") hauptappGewechselt();
-  i++; render();
+  i++; sichern(); render();
 }
 function endeHtml() { return `<div class="ende"><div class="kicker">Fast geschafft</div><h2 id="frage-titel" style="margin-bottom:12px">Bevor du deine Antworten sendest</h2><p>Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh erhält nur ausgewertete Ergebnisse, keine einzelnen Antworten. Die Rohdaten bleiben bei der Studierendengruppe und werden nach der Notenpublikation gelöscht.</p><p class="hinweis">Mit «Antworten senden» werden deine Antworten gespeichert. Wenn du nicht sendest, wird nichts gespeichert.</p><div style="margin-top:16px"><button type="button" class="knopf" id="absenden">Antworten senden</button></div><p class="status" id="sendestatus" role="status"></p><div id="nachher" hidden><div class="gross" style="margin-top:24px">Danke</div><p class="hinweis" style="margin-top:8px">Deine Kennung, falls du deine Antworten später löschen lassen willst: <strong id="kennung"></strong></p><p class="hinweis" style="margin-top:12px">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum, und nach dem Versand der Ergebnisse gelöscht, spätestens nach der Notenpublikation.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div></div>`; }
 function renderEnde(abgebrochen) {
@@ -304,7 +316,8 @@ S[S.length-1].art = "ende";
 S.find(x=>x.id==="ende").art = "ende";
 // Ende-Bildschirm nutzt renderEnde statt render
 const _render = render; render = function(){ const L = liste(); if (L[i] && L[i].art==="ende") { renderEnde(false); return; } _render(); };
-render();
+// Nach einem Ausschluss im Screening bleibt es beim Ausschluss, auch nach Neuladen (der Empfaenger verwirft die doppelte Kennung).
+if (A.abbruch) { i = S.length - 1; renderEnde(true); } else render();
 </script>
 </body>
 </html>
