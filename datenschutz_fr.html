@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protection des données du sondage sur le service clientèle des applications bancaires</title>
+<meta name="robots" content="noindex">
+<style>
+@font-face { font-family: "Nunito"; src: url("fonts/Nunito.ttf") format("truetype"); font-weight: 200 1000; font-display: swap; }
+:root { --orange:#fa5b35; --ink:#151a21; --grey:#666666; --line:#d0d1d3; --lilac-faint:#f6f1f9; --card:16px; }
+* { box-sizing: border-box; }
+html, body { margin:0; background:#fff; color: var(--ink); font-family: "Nunito", Arial, sans-serif; font-size: 18px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+header { display:flex; align-items:center; gap:12px; padding: 20px 24px; max-width: 760px; margin: 0 auto; color: var(--grey); font-size: 14px; }
+header img { height: 44px; width:auto; display:block; }
+main { max-width: 760px; margin: 0 auto; padding: 8px 24px 48px; }
+.kicker { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--grey); font-weight: 600; margin-bottom: 8px; }
+h1 { font-size: clamp(26px, 5vw, 34px); line-height: 1.1; letter-spacing: -0.02em; font-weight: 800; margin: 0 0 12px; }
+h1::after { content:""; display:block; width: 48px; height: 4px; background: var(--orange); border-radius: 2px; margin-top: 14px; }
+h2 { font-size: 20px; font-weight: 800; margin: 28px 0 8px; }
+p, li { margin: 0 0 10px; }
+ul { padding-left: 22px; }
+table { border-collapse: collapse; width: 100%; font-size: 16px; margin: 8px 0 16px; }
+th, td { text-align:left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--grey); }
+.kasten { background: var(--lilac-faint); border-radius: var(--card); padding: 16px 18px; margin: 16px 0; }
+a { color: var(--ink); }
+.zurueck { display:inline-block; margin-top: 24px; font-weight: 700; }
+@media (max-width: 520px) {
+  header span { display:none; }
+  table, tbody, tr, td { display:block; width:100%; }
+  thead { display:none; }
+  tr { background: var(--lilac-faint); border-radius: var(--card); padding: 10px 14px; margin: 0 0 10px; }
+  td { border: 0; padding: 4px 0; }
+  td::before { content: attr(data-label); display:block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--grey); font-weight: 700; }
+}
+h1, p, li, td { overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<header><img src="kvbsz_logo.svg" alt="KV Business School Zürich, mein Bildungspartner"><span>Travail pratique HFW</span></header>
+<main>
+  <div class="kicker">Protection des données</div>
+  <h1>Ce qu'il advient de tes réponses</h1>
+  <p>Cette page fait partie du sondage «Quelle est la qualité du service clientèle de ton application bancaire?». Elle explique en termes clairs qui collecte les données, lesquelles, où elles se trouvent, qui les voit et quand elles sont supprimées.</p>
+  <h2>Qui est responsable</h2>
+  <p>Un groupe de cinq étudiant·e·s de l'École supérieure de gestion (HFW) de la KV Business School Zürich, classe 601/H25-B, dans le cadre d'un travail pratique. Personne responsable et contact pour toute question, demande d'accès ou de suppression: Salah Aouaj, <a href="mailto:salah@hydeout.ch">salah@hydeout.ch</a>.</p>
+  <h2>À quoi servent les données</h2>
+  <p>À un travail pratique réalisé en collaboration avec l'application bancaire Yuh. Yuh est partenaire pratique, pas mandant de la collecte de données. Le travail étudie ce que les client·e·s attendent du service clientèle d'une application bancaire et comment ils le vivent.</p>
+  <h2>Quelles données sont collectées</h2>
+  <ul>
+    <li>Tes réponses aux questions du sondage, dont la tranche d'âge, le canton, les applications bancaires utilisées et tes évaluations.</li>
+    <li>Un identifiant. Il est généré au hasard au chargement de la page ou provient du lien par lequel tu as ouvert le sondage. Nos liens ne contiennent qu'une abréviation du canal de diffusion, par exemple «SCH-» pour l'école; la page y ajoute des caractères aléatoires. Nous n'attribuons aucun lien à caractère personnel. L'identifiant sert à reconnaître les envois en double et à analyser le canal de diffusion. Tu le vois à la fin du sondage, aussi en cas d'exclusion.</li>
+    <li>La version du sondage, la durée entre le chargement et l'envoi en secondes, si tu étais sur un téléphone ou un ordinateur, la langue choisie et l'heure de réception de tes réponses.</li>
+    <li>Si tu ne fais pas partie du public cible (lieu de résidence, âge, utilisation d'une application), le sondage s'arrête à la première de ces trois questions au plus qui t'exclut. Seules sont alors enregistrées les réponses données jusque-là, l'identifiant, la version, l'endroit de l'exclusion, téléphone ou ordinateur et l'heure de réception, sans bouton supplémentaire. C'est indiqué ainsi avant le départ.</li>
+    <li>Si tu la fournis volontairement: ton adresse e-mail, uniquement pour t'envoyer les résultats.</li>
+  </ul>
+  <p>Le sondage lui-même ne collecte ni nom, ni données de compte, ni adresse IP, ni position.</p>
+  <h2>Où se trouvent les données et qui les traite</h2>
+  <table>
+    <thead><tr><th>Étape</th><th>Service</th><th>Ce qui y est généré</th></tr></thead>
+    <tbody>
+    <tr><td data-label="Étape">Affichage du sondage</td><td data-label="Service">GitHub Pages (GitHub, Inc., États-Unis)</td><td data-label="Ce qui y est généré">Journaux d'accès techniques de l'hébergeur, comme sur tout site web. Le groupe n'y a pas accès; ils ne sont pas analysés.</td></tr>
+    <tr><td data-label="Étape">Enregistrement des réponses</td><td data-label="Service">Google Apps Script et Google Sheets (Google LLC, Mountain View, États-Unis) dans le compte Google Workspace de la personne responsable</td><td data-label="Ce qui y est généré">Tes réponses sous forme d'une ligne dans un tableau, uniquement avec l'identifiant. Selon Google, les données Workspace sont traitées dans des centres de données aux États-Unis et dans l'UE, donc hors de Suisse. La base en est l'avenant de traitement des données que la personne responsable a accepté avec son compte Workspace, avec les clauses contractuelles types de l'UE et l'addendum suisse (<a href="https://workspace.google.com/terms/dpa_terms.html" target="_blank" rel="noopener">Google Workspace Data Processing Addendum</a>). Nous ne pouvons pas garantir que les données ne quittent pas la Suisse. La feuille contenant les adresses e-mail n'est pas accessible via l'interface du sondage; seule la personne responsable la voit dans le compte.</td></tr>
+    <tr><td data-label="Étape">Adresses e-mail</td><td data-label="Service">Le même tableau, feuille séparée</td><td data-label="Ce qui y est généré">Uniquement l'adresse et la date, sans identifiant commun avec tes réponses. Les jours avec peu de réponses, la date pourrait laisser supposer une correspondance. C'est pourquoi cette feuille ne se trouve que dans le compte de la personne responsable; les copies avec lesquelles le groupe travaille ne la contiennent pas, et elle est supprimée en premier.</td></tr>
+    <tr><td data-label="Étape">Analyse</td><td data-label="Service">Ordinateurs du groupe</td><td data-label="Ce qui y est généré">Une copie du tableau des réponses, sans adresses e-mail.</td></tr>
+    </tbody>
+  </table>
+  <h2>Qui voit les données</h2>
+  <p>Seuls les cinq étudiant·e·s du groupe voient les données brutes. Les enseignant·e·s de la HFW et Yuh reçoivent des résultats analysés, c'est-à-dire des proportions, des moyennes et des résumés des réponses libres, pas de lignes de réponses individuelles.</p>
+  <h2>Les limites de l'anonymat, en toute honnêteté</h2>
+  <div class="kasten">
+    <p>Le sondage ne demande pas ton nom. Malgré tout: qui écrit quelque chose de personnel dans un champ libre, par exemple un nom ou un incident rare, peut devenir reconnaissable. N'écris donc rien qui t'identifie, toi ou d'autres personnes. La combinaison de la tranche d'âge, du canton et des applications utilisées peut aussi, dans de petits groupes, ne correspondre qu'à quelques personnes. C'est pourquoi les résultats ne sont présentés que pour des groupes comportant suffisamment de réponses, et les textes libres sont nettoyés de toute indication personnelle avant d'être transmis.</p>
+  </div>
+  <h2>Combien de temps les données sont conservées</h2>
+  <p>Les adresses e-mail sont supprimées dès que les résultats sont envoyés, au plus tard après la publication des notes. Les réponses sont supprimées après la publication des notes du travail pratique, et ce intégralement: le tableau chez Google, toutes les copies locales et les exports sur les ordinateurs du groupe. Les résultats analysés (proportions, moyennes, résumés nettoyés) restent partie intégrante du travail écrit.</p>
+  <h2>Tes droits</h2>
+  <p>La participation est facultative. Tu peux arrêter à tout moment; sans «Envoyer les réponses», tes réponses ne sont pas enregistrées, à la seule exception mentionnée ci-dessus en cas d'exclusion après les trois premières questions. Tu as le droit d'accéder à tes données, de les faire rectifier et supprimer. Pour cela, tu as besoin de l'identifiant qui t'est affiché à la fin, aussi en cas d'exclusion. Envoie-le à l'adresse de contact. Sans identifiant, nous ne pouvons pas retrouver ta ligne, car nous ne savons pas quelle ligne est la tienne.</p>
+  <h2>Base légale</h2>
+  <p>La collecte suit la loi fédérale suisse sur la protection des données (LPD) et les principes des études de marché (code ICC/ESOMAR): caractère facultatif, transparence, finalité, minimisation des données. Traduction du texte allemand, qui fait foi en cas de divergence. État de cette déclaration: 30 octobre 2026, version 3.8 du sondage.</p>
+  <a class="zurueck" href="index.html?lang=fr">Retour au sondage</a>
+</main>
+</body>
+</html>
