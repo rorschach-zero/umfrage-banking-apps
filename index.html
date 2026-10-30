@@ -29,7 +29,7 @@ main { flex:1; max-width: 760px; width:100%; margin: 0 auto; padding: 24px 24px 
 @keyframes rein { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
 .kicker { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--grey); font-weight: 600; margin-bottom: 8px; }
 h1 { font-size: clamp(26px, 5vw, 36px); line-height: 1.1; letter-spacing: -0.02em; font-weight: 800; margin: 0 0 12px; }
-h1::after { content:""; display:block; width: 48px; height: 4px; background: var(--orange); border-radius: 2px; margin-top: 14px; }
+h1::after { content:""; display:block; width: 48px; height: 4px; background: var(--orange); border-radius: 2px; margin-top: 10px; }
 h2 { font-size: clamp(22px, 4vw, 28px); line-height: 1.2; letter-spacing: -0.015em; font-weight: 800; margin: 0 0 8px; }
 p { margin: 0 0 12px; }
 p.hinweis, .klein { color: var(--grey); font-size: 15px; }
@@ -67,14 +67,14 @@ label.feld { display:block; font-weight: 600; margin-top: 8px; }
 .status { margin-top: 16px; }
 .ok { color: var(--green-dark); }
 .botschaft { background: var(--lilac-light); border-radius: 24px; padding: 28px; font-size: clamp(22px, 4vw, 28px); font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; margin: 20px 0; }
-.sprachen { display:flex; flex-wrap:wrap; gap: 8px; margin: 4px 0 18px; }
-.sprache { font: inherit; font-size: 14px; font-weight: 700; padding: 8px 14px; border: 1.5px solid var(--line); border-radius: var(--pill); background: var(--white); color: var(--ink); cursor:pointer; }
+.sprachen { display:flex; flex-wrap:wrap; gap: 6px; margin: 2px 0 12px; }
+.sprache { font: inherit; font-size: 13px; font-weight: 700; padding: 7px 11px; border: 1.5px solid var(--line); border-radius: var(--pill); background: var(--white); color: var(--ink); cursor:pointer; }
 .sprache[aria-pressed="true"] { border-color: var(--orange); background: var(--orange); color: #fff; }
 .sprache:focus-visible { outline: 3px solid var(--lavender); outline-offset: 2px; }
-.kurz { margin: 4px 0 14px; color: var(--grey); font-size: 15px; }
+.kurz { margin: 2px 0 10px; color: var(--grey); font-size: 15px; }
 .gewinn { display:inline-block; align-self:flex-start; background: var(--lilac-faint); border-radius: 999px; padding: 8px 14px; font-size: 15px; font-weight: 600; margin: 0 0 4px; }
 .schirm.start { display:flex; flex-direction:column; }
-.schirm.start .start-unten { order: 10; margin-top: 18px; }
+.schirm.start .start-unten { order: 10; margin-top: 12px; }
 .schirm.start .start-unten .hinweis { margin: 0 0 6px; text-align:center; }
 .schirm.start details { margin: 0; border-top: 1px solid #ebebee; }
 .schirm.start details:last-child { border-bottom: 1px solid #ebebee; }
@@ -126,7 +126,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "sechs bis acht Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.23";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.24";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "umfrage@hydeout.ch";    // Kontakt der Studierendengruppe fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
