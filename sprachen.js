@@ -40,7 +40,7 @@ fr: {
   "Link kopieren": "Copier le lien",
   "Teilen": "Partager",
   "Link kopiert.": "Lien copié.",
-  "Kurze anonyme Umfrage zum Kundendienst von Banking-Apps, vier bis acht Minuten, Praxisarbeit HFW. Zu gewinnen gibt es einen Galaxus-Gutschein von 100 Franken:": "Court sondage anonyme sur les applications bancaires, six à huit minutes, travail pratique HFW. À gagner: un bon d'achat Galaxus de 100 francs:",
+  "Kurze Umfrage zum Kundendienst von Banking-Apps, ohne Namen und Kontodaten, sechs bis acht Minuten, Praxisarbeit HFW. Zu gewinnen gibt es einen Galaxus-Gutschein von 100 Franken:": "Court sondage sur le service clientèle des applications bancaires, sans nom ni données de compte, six à huit minutes, travail pratique HFW. À gagner: un bon d'achat Galaxus de 100 francs:",
   "Umfrage Kundendienst von Banking-Apps": "Sondage sur le service clientèle des applications bancaires",
   "Praxisarbeit HFW": "Travail pratique HFW",
   "Stern": "d'une étoile",
@@ -203,7 +203,7 @@ fr: {
   "Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Sprache, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst:": "Seules sont enregistrées tes réponses jusqu'ici (lieu de résidence, âge, utilisation d'une application, dans la mesure où tu as répondu), ton identifiant, la version du sondage, la langue, la question qui t'a exclu·e, si tu étais sur téléphone ou sur ordinateur, et l'heure de réception. Rien d'autre. Le sondage fait partie d'un travail pratique de la HFW en collaboration avec l'application bancaire Yuh. Ton identifiant, au cas où tu voudrais faire supprimer ces données:",
   "Mehr dazu auf der Seite": "Plus d'informations sur la page",
   "Die Angaben bis hierher konnten nicht übertragen werden. Das ist für dich ohne Folgen.": "Les données jusqu'ici n'ont pas pu être transmises. Cela n'a aucune conséquence pour toi.",
-  "Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · anonym · Daten nur für diese Arbeit": "Travail pratique HFW, KV Business School Zürich, classe 601/H25-B · anonyme · données utilisées uniquement pour ce travail",
+  "Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit": "Travail pratique HFW, KV Business School Zürich, classe 601/H25-B · sans nom ni données de compte · données utilisées uniquement pour ce travail",
   "Sprache": "Langue"
 },
 it: {
@@ -244,7 +244,7 @@ it: {
   "Link kopieren": "Copia il link",
   "Teilen": "Condividi",
   "Link kopiert.": "Link copiato.",
-  "Kurze anonyme Umfrage zum Kundendienst von Banking-Apps, vier bis acht Minuten, Praxisarbeit HFW. Zu gewinnen gibt es einen Galaxus-Gutschein von 100 Franken:": "Breve sondaggio anonimo sulle app bancarie, da sei a otto minuti, lavoro pratico HFW. In palio un buono Galaxus da 100 franchi:",
+  "Kurze Umfrage zum Kundendienst von Banking-Apps, ohne Namen und Kontodaten, sechs bis acht Minuten, Praxisarbeit HFW. Zu gewinnen gibt es einen Galaxus-Gutschein von 100 Franken:": "Breve sondaggio sul servizio clienti delle app bancarie, senza nome né dati del conto, da sei a otto minuti, lavoro pratico HFW. In palio un buono Galaxus da 100 franchi:",
   "Umfrage Kundendienst von Banking-Apps": "Sondaggio sul servizio clienti delle app bancarie",
   "Praxisarbeit HFW": "Lavoro pratico HFW",
   "Stern": "asterisco",
@@ -407,7 +407,7 @@ it: {
   "Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Sprache, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst:": "Vengono salvate solo le tue risposte fino a qui (luogo di residenza, età, uso di un'app, per quanto hai risposto), il tuo codice, la versione del sondaggio, la lingua, la domanda che ti ha escluso, cellulare o computer, e l'ora di ricezione. Nient'altro. Il sondaggio fa parte di un lavoro pratico della HFW in collaborazione con l'app bancaria Yuh. Se vuoi far cancellare questi dati, ti serve questo codice:",
   "Mehr dazu auf der Seite": "Maggiori informazioni alla pagina",
   "Die Angaben bis hierher konnten nicht übertragen werden. Das ist für dich ohne Folgen.": "I dati fino a qui non hanno potuto essere trasmessi. Per te non ha alcuna conseguenza.",
-  "Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · anonym · Daten nur für diese Arbeit": "Lavoro pratico HFW, KV Business School Zürich, classe 601/H25-B · anonimo · dati usati solo per questo lavoro",
+  "Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit": "Lavoro pratico HFW, KV Business School Zürich, classe 601/H25-B · senza nome né dati del conto · dati usati solo per questo lavoro",
   "Sprache": "Lingua"
 },
 en: {
@@ -448,7 +448,7 @@ en: {
   "Link kopieren": "Copy link",
   "Teilen": "Share",
   "Link kopiert.": "Link copied.",
-  "Kurze anonyme Umfrage zum Kundendienst von Banking-Apps, vier bis acht Minuten, Praxisarbeit HFW. Zu gewinnen gibt es einen Galaxus-Gutschein von 100 Franken:": "Short anonymous survey on banking apps, six to eight minutes, HFW practical project. A Galaxus voucher worth CHF 100 is up for grabs:",
+  "Kurze Umfrage zum Kundendienst von Banking-Apps, ohne Namen und Kontodaten, sechs bis acht Minuten, Praxisarbeit HFW. Zu gewinnen gibt es einen Galaxus-Gutschein von 100 Franken:": "Short survey on customer service of banking apps, no names or account details, six to eight minutes, HFW practical project. A Galaxus voucher worth CHF 100 is up for grabs:",
   "Umfrage Kundendienst von Banking-Apps": "Survey on the customer service of banking apps",
   "Praxisarbeit HFW": "HFW practical project",
   "Stern": "a star",
@@ -611,7 +611,7 @@ en: {
   "Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Sprache, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst:": "Only your answers up to this point (place of residence, age, app use, as far as answered), your identifier, the survey version, the language, the question at which you were screened out, phone or computer, and the time of receipt are stored. Nothing else. The survey is part of an HFW practical project in collaboration with the banking app Yuh. Your identifier, in case you want this data deleted:",
   "Mehr dazu auf der Seite": "More in the",
   "Die Angaben bis hierher konnten nicht übertragen werden. Das ist für dich ohne Folgen.": "The data up to this point could not be transmitted. This has no consequences for you.",
-  "Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · anonym · Daten nur für diese Arbeit": "HFW practical project, KV Business School Zürich, class 601/H25-B · anonymous · data used only for this project",
+  "Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit": "HFW practical project, KV Business School Zürich, class 601/H25-B · no names or account details · data used only for this project",
   "Sprache": "Language"
 }
 };

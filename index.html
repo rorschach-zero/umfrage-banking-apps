@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Umfrage Kundendienst von Banking-Apps</title>
-<meta name="description" content="Kurze anonyme Umfrage zu Banking-Apps, Praxisarbeit HFW.">
+<meta name="description" content="Kurze Umfrage zu Banking-Apps ohne Namen und Kontodaten, Praxisarbeit HFW.">
 <meta name="robots" content="noindex">
 <style>
 @font-face { font-family: "Nunito"; src: url("fonts/Nunito.ttf") format("truetype"); font-weight: 200 1000; font-display: swap; }
@@ -102,14 +102,14 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 </header>
 <div class="fortschritt" aria-hidden="true"><div id="balken"></div></div>
 <main id="main" aria-live="polite"></main>
-<footer>Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · anonym · Daten nur für diese Arbeit</footer>
+<footer>Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit</footer>
 <script src="sprachen.js"></script>
 <script>
 /* ---------- Konfiguration ---------- */
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "sechs bis acht Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.13";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.14";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
@@ -120,7 +120,7 @@ const tf = (s, app) => t(s).replace("{app}", () => app);
 const tbLink = () => (!SPRACHE || SPRACHE === "de") ? "teilnahmebedingungen.html" : "teilnahmebedingungen_" + SPRACHE + ".html";
 const teilLink = () => "https://rorschach-zero.github.io/umfrage-yuh/?id=TEIL-" + ((SPRACHE && SPRACHE !== "de") ? "&lang=" + SPRACHE : "");
 const dsLink = () => (!SPRACHE || SPRACHE === "de") ? "datenschutz.html" : "datenschutz_" + SPRACHE + ".html";
-function spracheAnwenden() { document.documentElement.lang = (SPRACHE || "de") + (SPRACHE === "de" || !SPRACHE ? "-CH" : ""); document.title = t("Umfrage Kundendienst von Banking-Apps"); const kz = document.getElementById("kopfzeile"); if (kz) kz.textContent = t("Praxisarbeit HFW"); const f = document.querySelector("footer"); if (f) f.textContent = t("Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · anonym · Daten nur für diese Arbeit"); }
+function spracheAnwenden() { document.documentElement.lang = (SPRACHE || "de") + (SPRACHE === "de" || !SPRACHE ? "-CH" : ""); document.title = t("Umfrage Kundendienst von Banking-Apps"); const kz = document.getElementById("kopfzeile"); if (kz) kz.textContent = t("Praxisarbeit HFW"); const f = document.querySelector("footer"); if (f) f.textContent = t("Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit"); }
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
 function mischen(a) { const b = a.slice(); for (let k = b.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [b[k], b[j]] = [b[j], b[k]]; } return b; }
@@ -222,10 +222,10 @@ const S = [
 ];
 
 /* ---------- Ablauf ---------- */
-let i = wiederherstellen && Number.isInteger(wiederherstellen.i) ? Math.max(0, Math.min(wiederherstellen.i, liste().length - 1)) : 0; let fokus = null;
-const main = document.getElementById("main");
 const sichtbar = s => !s.zeigen || s.zeigen();
 const liste = () => S.filter(sichtbar);
+let i = wiederherstellen && Number.isInteger(wiederherstellen.i) ? Math.max(0, Math.min(wiederherstellen.i, liste().length - 1)) : 0; let fokus = null;
+const main = document.getElementById("main");
 function render() {
   const L = liste(); const s = L[i]; if (!s) return;
   const fragen = L.filter(x => x.art !== "info" && x.art !== "ende").length;
@@ -324,7 +324,7 @@ function renderEnde(abgebrochen) {
   document.getElementById("balken").style.width = "100%"; document.getElementById("zaehler").textContent = "";
   main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">${t("Danke")}</div><p style="margin-top:16px">${t("Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.")}</p><p class="hinweis">${t("Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Sprache, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst:")} <strong>${A.id}</strong>. ${t("Mehr dazu auf der Seite")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a>.</p><p class="hinweis" id="abbruchstatus" role="status"></p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
   if (abgebrochen) { const bis = ["s1","s2","s3"]; const o = {id:A.id, version:VERSION, abbruch:A.abbruch, geraet:A.geraet, sprache:SPRACHE}; for (const k of bis) { o[k] = A[k]; if (k === A.abbruch) break; }
-    (async () => { let ok = (await post(o)).ok; if (!ok) ok = (await post(o)).ok; const st = document.getElementById("abbruchstatus"); if (st) st.textContent = ok ? "" : t("Die Angaben bis hierher konnten nicht übertragen werden. Das ist für dich ohne Folgen."); })(); } else { const k = document.getElementById("absenden"); k.addEventListener("click", senden); k.focus(); }
+    (async () => { let r = await post(o); if (!r.ok && r.fehler !== "geschlossen") r = await post(o); const st = document.getElementById("abbruchstatus"); if (st) st.textContent = r.ok ? "" : (r.fehler === "geschlossen" ? t("Die Umfrage ist seit dem 1. Dezember 2026 beendet. Danke für dein Interesse.") : t("Die Angaben bis hierher konnten nicht übertragen werden. Das ist für dich ohne Folgen.")); })(); } else { const k = document.getElementById("absenden"); k.addEventListener("click", senden); k.focus(); }
 }
 // Der Empfaenger antwortet mit {ok:true} oder {ok:true, doppelt:true}; nur dann gilt die Antwort als gespeichert.
 // Die Antwort ist lesbar (Google liefert Access-Control-Allow-Origin fuer diese Web-App); bleibt sie aus oder dauert
@@ -368,7 +368,7 @@ async function senden() {
   st.className = "status ok"; st.textContent = t("Deine Antworten sind gespeichert."); if (k) k.hidden = true; document.getElementById("nachher").hidden = false; document.getElementById("kennung").textContent = A.id;
   if (mailVerdrahtet) return; mailVerdrahtet = true;
   // Teilen: WhatsApp, Link kopieren, Systemdialog. Der geteilte Link traegt die Kennung TEIL- (Weiterleitung) und die Sprache.
-  const teilText = t("Kurze anonyme Umfrage zum Kundendienst von Banking-Apps, vier bis acht Minuten, Praxisarbeit HFW. Zu gewinnen gibt es einen Galaxus-Gutschein von 100 Franken:") + " " + teilLink();
+  const teilText = t("Kurze Umfrage zum Kundendienst von Banking-Apps, ohne Namen und Kontodaten, sechs bis acht Minuten, Praxisarbeit HFW. Zu gewinnen gibt es einen Galaxus-Gutschein von 100 Franken:") + " " + teilLink();
   const wa = document.getElementById("teilen-wa"); if (wa) wa.href = "https://wa.me/?text=" + encodeURIComponent(teilText);
   const kp = document.getElementById("teilen-kopie"); const ts = document.getElementById("teilstatus");
   if (kp) kp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(teilLink()); ts.textContent = t("Link kopiert."); } catch (e) { ts.textContent = teilLink(); } });
@@ -382,6 +382,7 @@ S.find(x=>x.id==="ende").art = "ende";
 const _render = render; render = function(){ const L = liste(); if (L[i] && L[i].art==="ende") { renderEnde(false); return; } _render(); };
 // Nach einem Ausschluss im Screening bleibt es beim Ausschluss, auch nach Neuladen (der Empfaenger verwirft die doppelte Kennung).
 spracheAnwenden();
+if (!beendet()) setInterval(() => { if (beendet()) location.reload(); }, 60000);
 if (beendet()) { main.innerHTML = `<section class="schirm"><div class="ende"><div class="gross">${t("Danke")}</div><p style="margin-top:16px">${t("Die Umfrage ist seit dem 1. Dezember 2026 beendet. Danke für dein Interesse.")}</p></div></section>`; }
 else if (A.abbruch) { i = S.length - 1; renderEnde(true); } else render();
 </script>
