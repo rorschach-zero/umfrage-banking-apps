@@ -4,7 +4,7 @@
 const SPRACHEN = {
 fr: {
   "Umfrage Kundendienst von Banking-Apps": "Sondage sur le service clientèle des applications bancaires",
-  "Praxisarbeit HFW": "Travail pratique ESG",
+  "Praxisarbeit HFW": "Travail pratique HFW",
   "Wie gut ist der Kundendienst deiner Banking-App?": "Quelle est la qualité du service clientèle de ton application bancaire?",
   "Fünf Studierende der HFW an der KV Business School Zürich fragen dich nach deinen Erfahrungen. Deine Antworten fliessen in eine Praxisarbeit.": "Cinq étudiant·e·s de l'École supérieure de gestion (HFW) de la KV Business School Zürich t'interrogent sur tes expériences. Tes réponses alimentent un travail pratique.",
   "vier bis acht Minuten": "quatre à huit minutes",
@@ -189,7 +189,7 @@ fr: {
 },
 it: {
   "Umfrage Kundendienst von Banking-Apps": "Sondaggio sul servizio clienti delle app bancarie",
-  "Praxisarbeit HFW": "Lavoro pratico SSE",
+  "Praxisarbeit HFW": "Lavoro pratico HFW",
   "Wie gut ist der Kundendienst deiner Banking-App?": "Quanto è buono il servizio clienti della tua app bancaria?",
   "Fünf Studierende der HFW an der KV Business School Zürich fragen dich nach deinen Erfahrungen. Deine Antworten fliessen in eine Praxisarbeit.": "Cinque studenti della Scuola specializzata superiore di economia (HFW) della KV Business School Zürich ti chiedono le tue esperienze. Le tue risposte confluiscono in un lavoro pratico.",
   "vier bis acht Minuten": "da quattro a otto minuti",
