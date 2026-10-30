@@ -203,7 +203,7 @@ fr: {
   "Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Sprache, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst:": "Seules sont enregistrées tes réponses jusqu'ici (lieu de résidence, âge, utilisation d'une application, dans la mesure où tu as répondu), ton identifiant, la version du sondage, la langue, la question qui t'a exclu·e, si tu étais sur téléphone ou sur ordinateur, et l'heure de réception. Rien d'autre. Le sondage fait partie d'un travail pratique de la HFW en collaboration avec l'application bancaire Yuh. Ton identifiant, au cas où tu voudrais faire supprimer ces données:",
   "Mehr dazu auf der Seite": "Plus d'informations sur la page",
   "Die Angaben bis hierher konnten nicht übertragen werden. Das ist für dich ohne Folgen.": "Les données jusqu'ici n'ont pas pu être transmises. Cela n'a aucune conséquence pour toi.",
-  "Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit": "Travail pratique HFW, KV Business School Zürich, classe 601/H25-B · sans nom ni données de compte · données utilisées uniquement pour ce travail",
+  "Praxisarbeit HFW von Studierenden der KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit": "Travail pratique HFW d'étudiantes et étudiants de la KV Business School Zürich, classe 601/H25-B · sans nom ni données de compte · données utilisées uniquement pour ce travail",
   "Sprache": "Langue"
 },
 it: {
@@ -407,7 +407,7 @@ it: {
   "Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Sprache, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst:": "Vengono salvate solo le tue risposte fino a qui (luogo di residenza, età, uso di un'app, per quanto hai risposto), il tuo codice, la versione del sondaggio, la lingua, la domanda che ti ha escluso, cellulare o computer, e l'ora di ricezione. Nient'altro. Il sondaggio fa parte di un lavoro pratico della HFW in collaborazione con l'app bancaria Yuh. Se vuoi far cancellare questi dati, ti serve questo codice:",
   "Mehr dazu auf der Seite": "Maggiori informazioni alla pagina",
   "Die Angaben bis hierher konnten nicht übertragen werden. Das ist für dich ohne Folgen.": "I dati fino a qui non hanno potuto essere trasmessi. Per te non ha alcuna conseguenza.",
-  "Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit": "Lavoro pratico HFW, KV Business School Zürich, classe 601/H25-B · senza nome né dati del conto · dati usati solo per questo lavoro",
+  "Praxisarbeit HFW von Studierenden der KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit": "Lavoro pratico HFW di studentesse e studenti della KV Business School Zürich, classe 601/H25-B · senza nome né dati del conto · dati usati solo per questo lavoro",
   "Sprache": "Lingua"
 },
 en: {
@@ -611,7 +611,7 @@ en: {
   "Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Sprache, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst:": "Only your answers up to this point (place of residence, age, app use, as far as answered), your identifier, the survey version, the language, the question at which you were screened out, phone or computer, and the time of receipt are stored. Nothing else. The survey is part of an HFW practical project in collaboration with the banking app Yuh. Your identifier, in case you want this data deleted:",
   "Mehr dazu auf der Seite": "More in the",
   "Die Angaben bis hierher konnten nicht übertragen werden. Das ist für dich ohne Folgen.": "The data up to this point could not be transmitted. This has no consequences for you.",
-  "Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit": "HFW practical project, KV Business School Zürich, class 601/H25-B · no names or account details · data used only for this project",
+  "Praxisarbeit HFW von Studierenden der KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit": "HFW practical project by students of KV Business School Zürich, class 601/H25-B · no names or account details · data used only for this project",
   "Sprache": "Language"
 }
 };

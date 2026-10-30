@@ -102,14 +102,14 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 </header>
 <div class="fortschritt" aria-hidden="true"><div id="balken"></div></div>
 <main id="main" aria-live="polite"></main>
-<footer>Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit</footer>
+<footer>Praxisarbeit HFW von Studierenden der KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit</footer>
 <script src="sprachen.js"></script>
 <script>
 /* ---------- Konfiguration ---------- */
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "sechs bis acht Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.14";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.15";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
@@ -120,7 +120,7 @@ const tf = (s, app) => t(s).replace("{app}", () => app);
 const tbLink = () => (!SPRACHE || SPRACHE === "de") ? "teilnahmebedingungen.html" : "teilnahmebedingungen_" + SPRACHE + ".html";
 const teilLink = () => "https://rorschach-zero.github.io/umfrage-yuh/?id=TEIL-" + ((SPRACHE && SPRACHE !== "de") ? "&lang=" + SPRACHE : "");
 const dsLink = () => (!SPRACHE || SPRACHE === "de") ? "datenschutz.html" : "datenschutz_" + SPRACHE + ".html";
-function spracheAnwenden() { document.documentElement.lang = (SPRACHE || "de") + (SPRACHE === "de" || !SPRACHE ? "-CH" : ""); document.title = t("Umfrage Kundendienst von Banking-Apps"); const kz = document.getElementById("kopfzeile"); if (kz) kz.textContent = t("Praxisarbeit HFW"); const f = document.querySelector("footer"); if (f) f.textContent = t("Praxisarbeit HFW, KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit"); }
+function spracheAnwenden() { document.documentElement.lang = (SPRACHE || "de") + (SPRACHE === "de" || !SPRACHE ? "-CH" : ""); document.title = t("Umfrage Kundendienst von Banking-Apps"); const kz = document.getElementById("kopfzeile"); if (kz) kz.textContent = t("Praxisarbeit HFW"); const f = document.querySelector("footer"); if (f) f.textContent = t("Praxisarbeit HFW von Studierenden der KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit"); }
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
 function mischen(a) { const b = a.slice(); for (let k = b.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [b[k], b[j]] = [b[j], b[k]]; } return b; }
