@@ -66,9 +66,10 @@ label.feld { display:block; font-weight: 600; margin-top: 8px; }
 .status { margin-top: 16px; }
 .ok { color: var(--green-dark); }
 .botschaft { background: var(--lilac-light); border-radius: 24px; padding: 28px; font-size: clamp(22px, 4vw, 28px); font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; margin: 20px 0; }
-.fakten { display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 24px 0 8px; }
-.fakt { background: var(--lilac-faint); border-radius: var(--card); padding: 16px; }
-.fakt b { display:block; font-size: 15px; margin-bottom: 2px; }
+.fakten { display:block; margin: 20px 0 8px; border-top: 1px solid var(--line); }
+.fakt { display:flex; gap: 10px; align-items:baseline; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.fakt::before { content: "✓"; color: var(--orange); font-weight: 700; flex: 0 0 auto; }
+.fakt b { font-size: 15px; white-space: nowrap; }
 .fakt > span { color: var(--grey); font-size: 14px; line-height: 1.35; display:block; }
 details { margin: 14px 0 0; }
 details summary { cursor:pointer; color: var(--ink); font-weight: 600; font-size: 15px; list-style: none; display:flex; align-items:center; gap: 8px; min-height: 44px; padding: 8px 0; }
@@ -76,7 +77,7 @@ details summary::-webkit-details-marker { display:none; }
 details summary::before { content:""; width: 8px; height: 8px; border-right: 2px solid var(--orange); border-bottom: 2px solid var(--orange); transform: rotate(-45deg); transition: transform var(--dur); }
 details[open] summary::before { transform: rotate(45deg); }
 details p { margin: 10px 0 0; color: var(--grey); font-size: 15px; }
-@media (max-width: 520px) { .fakten { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .fakt { flex-wrap: wrap; } }
 .ende { text-align:center; padding: 40px 0; }
 .ende .gross { font-size: clamp(40px, 10vw, 72px); font-weight: 800; letter-spacing: -0.03em; color: var(--orange); line-height: 1; }
 footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 24px 28px; }
@@ -97,13 +98,13 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 /* ---------- Konfiguration ---------- */
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
-const DAUER_TEXT = "rund sechs Minuten"; // nach dem Pretest anpassen
-const VERSION = "3.6";                   // Stand des Fragebogens, wird mitgespeichert
+const DAUER_TEXT = "vier bis acht Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
+const VERSION = "3.7";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
 function mischen(a) { const b = a.slice(); for (let k = b.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [b[k], b[j]] = [b[j], b[k]]; } return b; }
-let APPS = mischen(APPS_FEST).concat(["App meiner Hausbank","andere"]); // Reihenfolge je Teilnahme zufaellig, wird als «reihenfolge» gespeichert
+let APPS = ["App meiner Hausbank"].concat(mischen(APPS_FEST), ["andere"]); // Hausbank zuoberst (Pretest: fast alle suchen sie zuerst), die vier Neobanken gemischt // Reihenfolge je Teilnahme zufaellig, wird als «reihenfolge» gespeichert
 const MERKMALE = [
   "Ich erhalte rasch eine Antwort von einem Menschen",
   "Mein Anliegen wird beim ersten Kontakt gelöst",
@@ -125,9 +126,12 @@ const S5 = (a,b)=>({stufen:5, links:a, rechts:b});
 function merk(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
 let idAusAdresse = (new URLSearchParams(location.search).get("id")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,16);
 // Ein Kanal-Praefix wie «AD-» gilt fuer viele Personen: dann bekommt jede Teilnahme eine eigene Kennung dahinter.
-if (idAusAdresse.endsWith("-")) idAusAdresse = idAusAdresse + Math.random().toString(36).slice(2,8);
+if (idAusAdresse.endsWith("-")) {
+  let fruehere = null; try { const g = JSON.parse(merk("stand") || "null"); if (g && g.A && typeof g.A.id === "string" && g.A.id.startsWith(idAusAdresse)) fruehere = g.A.id; } catch (e) {}
+  idAusAdresse = fruehere || (idAusAdresse + Math.random().toString(36).slice(2,8));
+}
 const A = { id: idAusAdresse || merk("id") || Math.random().toString(36).slice(2,10), variante: merk("variante") || ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop" };
-merk("id", A.id); merk("variante", A.variante); A.reihenfolge = APPS.slice(0, 4).join("|"); A.merkmale_reihenfolge = MERK_ORDER.map(i => i + 1).join("|");
+merk("id", A.id); merk("variante", A.variante); A.reihenfolge = APPS.slice(1, 5).join("|"); A.merkmale_reihenfolge = MERK_ORDER.map(i => i + 1).join("|");
 let start = Date.now();
 // Neuladen mitten in der Umfrage (am Handy reicht ein Wischen nach unten) darf die Antworten nicht loeschen.
 // Der Stand liegt nur im sessionStorage dieses Tabs: er verlaesst das Geraet nicht und ist mit dem Tab weg.
@@ -135,7 +139,7 @@ let wiederherstellen = null;
 try { const g = JSON.parse(merk("stand") || "null"); if (g && g.v === VERSION && g.A && g.A.id === A.id) wiederherstellen = g; } catch (e) { wiederherstellen = null; }
 if (wiederherstellen) {
   Object.assign(A, wiederherstellen.A);
-  if (A.reihenfolge) APPS = A.reihenfolge.split("|").concat(["App meiner Hausbank","andere"]);
+  if (A.reihenfolge) APPS = ["App meiner Hausbank"].concat(A.reihenfolge.split("|"), ["andere"]);
   if (A.merkmale_reihenfolge) MERK_ORDER = A.merkmale_reihenfolge.split("|").map(n => Number(n) - 1);
   if (wiederherstellen.start) start = wiederherstellen.start;
 }
@@ -291,8 +295,9 @@ function weiter(s) {
 function endeHtml() { return `<div class="ende"><div class="kicker">Fast geschafft</div><h2 id="frage-titel" style="margin-bottom:12px">Bevor du deine Antworten sendest</h2><p>Diese Umfrage ist Teil einer Praxisarbeit, die in Zusammenarbeit mit der Banking-App Yuh entsteht. Yuh erhält nur ausgewertete Ergebnisse, keine einzelnen Antworten. Die Rohdaten bleiben bei der Studierendengruppe und werden nach der Notenpublikation gelöscht.</p><p class="hinweis">Mit «Antworten senden» werden deine Antworten gespeichert. Wenn du nicht sendest, wird nichts gespeichert.</p><div style="margin-top:16px"><button type="button" class="knopf" id="absenden">Antworten senden</button></div><p class="status" id="sendestatus" role="status"></p><div id="nachher" hidden><div class="gross" style="margin-top:24px">Danke</div><p class="hinweis" style="margin-top:8px">Deine Kennung, falls du deine Antworten später löschen lassen willst: <strong id="kennung"></strong></p><p class="hinweis" style="margin-top:12px">Möchtest du die Ergebnisse erhalten? Dann hinterlasse eine Mailadresse. Sie wird getrennt von den Antworten gespeichert, nur mit dem Datum, und nach dem Versand der Ergebnisse gelöscht, spätestens nach der Notenpublikation.</p><label class="feld" for="mail">Mailadresse, freiwillig</label><input class="text" id="mail" type="email" maxlength="120" placeholder="deine@adresse.ch" style="max-width:360px" aria-describedby="mailstatus"><div style="margin-top:12px"><button type="button" class="knopf" id="mailsenden">Ergebnisse erhalten</button></div><div class="fehler" id="mailstatus" role="alert"></div></div></div>`; }
 function renderEnde(abgebrochen) {
   document.getElementById("balken").style.width = "100%"; document.getElementById("zaehler").textContent = "";
-  main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p><p class="hinweis">Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst: <strong>${A.id}</strong>. Mehr dazu auf der Seite <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz zur Umfrage</a>.</p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
-  if (abgebrochen) { const bis = ["s1","s2","s3"]; const o = {id:A.id, version:VERSION, abbruch:A.abbruch, geraet:A.geraet}; for (const k of bis) { o[k] = A[k]; if (k === A.abbruch) break; } post(o); } else { const k = document.getElementById("absenden"); k.addEventListener("click", senden); k.focus(); }
+  main.innerHTML = abgebrochen ? `<section class="schirm"><div class="ende"><div class="gross">Danke</div><p style="margin-top:16px">Diese Umfrage richtet sich an Personen in der Schweiz zwischen 16 und 65, die eine Banking-App nutzen. Vielen Dank für dein Interesse.</p><p class="hinweis">Gespeichert werden nur deine Antworten bis hierher (Wohnort, Alter, App-Nutzung, soweit beantwortet), deine Kennung, die Version der Umfrage, die Stelle des Ausschlusses, ob Handy oder Computer, und der Eingangszeitpunkt. Keine weiteren Angaben. Die Umfrage ist Teil einer Praxisarbeit der HFW in Zusammenarbeit mit der Banking-App Yuh. Deine Kennung, falls du diese Angaben löschen lassen willst: <strong>${A.id}</strong>. Mehr dazu auf der Seite <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz zur Umfrage</a>.</p><p class="hinweis" id="abbruchstatus" role="status"></p></div></section>` : `<section class="schirm">${endeHtml()}</section>`;
+  if (abgebrochen) { const bis = ["s1","s2","s3"]; const o = {id:A.id, version:VERSION, abbruch:A.abbruch, geraet:A.geraet}; for (const k of bis) { o[k] = A[k]; if (k === A.abbruch) break; }
+    (async () => { let ok = await post(o); if (!ok) ok = await post(o); const st = document.getElementById("abbruchstatus"); if (st) st.textContent = ok ? "" : "Die Angaben bis hierher konnten nicht übertragen werden. Das ist für dich ohne Folgen."; })(); } else { const k = document.getElementById("absenden"); k.addEventListener("click", senden); k.focus(); }
 }
 // Der Empfaenger antwortet mit {ok:true} oder {ok:true, doppelt:true}; nur dann gilt die Antwort als gespeichert.
 // Die Antwort ist lesbar (Google liefert Access-Control-Allow-Origin fuer diese Web-App); bleibt sie aus oder dauert
