@@ -72,6 +72,12 @@ label.feld { display:block; font-weight: 600; margin-top: 8px; }
 .sprache[aria-pressed="true"] { border-color: var(--orange); background: var(--orange); color: #fff; }
 .sprache:focus-visible { outline: 3px solid var(--lavender); outline-offset: 2px; }
 .kurz { margin: 4px 0 14px; color: var(--grey); font-size: 15px; }
+.gewinn { display:inline-block; align-self:flex-start; background: var(--lilac-faint); border-radius: 999px; padding: 8px 14px; font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.schirm.start { display:flex; flex-direction:column; }
+.schirm.start .start-unten { order: 10; margin-top: 18px; }
+.schirm.start .start-unten .hinweis { margin: 0 0 6px; text-align:center; }
+.schirm.start details { margin: 0; border-top: 1px solid #ebebee; }
+.schirm.start details:last-child { border-bottom: 1px solid #ebebee; }
 .kurz b { color: var(--ink); }
 .verlosung { background: var(--lilac-faint); border-radius: var(--card); padding: 14px 16px; font-size: 15px; line-height: 1.45; }
 .verlosung b { display:block; margin-bottom: 2px; }
@@ -110,7 +116,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "sechs bis acht Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.20";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.21";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
@@ -179,7 +185,7 @@ const kenntYuh = () => nutztYuh() || A.t13a === "ja" || A.t6 === "Yuh" || A.t3c_
 
 /* ---------- Bildschirme ---------- */
 const S = [
- {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Umfrage zu Banking-Apps", text:`Fünf Studierende der HFW an der KV Business School Zürich fragen dich, wie du deine Banking-App nutzt und was du von ihrem Kundendienst erwartest. Deine Antworten fliessen in eine Praxisarbeit.`, html: () => `<div class="sprachen" role="group" aria-label="${t("Sprache")}">${Object.keys(SPRACHEN_LISTE).map(k => `<button type="button" class="sprache" data-lang="${k}" aria-pressed="${SPRACHE===k}" lang="${k}">${SPRACHEN_LISTE[k]}</button>`).join("")}</div><p class="kurz"><b>${t(DAUER_TEXT)}</b> · ${t("ohne Namen und Kontodaten, freiwillig")} · ${t("Fragen mit")} <span class="stern" aria-hidden="true">*</span><span class="sr">${t("Stern")}</span> ${t("sind Pflicht")}</p><div class="verlosung"><b>${t("Gutschein gewinnen")}</b> ${t("Unter allen vollständigen Antworten mit Mailadresse verlosen wir einen Galaxus-Gutschein im Wert von 100 Franken (16 bis 65 Jahre, Wohnsitz Schweiz).")} <a href="${tbLink()}" target="_blank" rel="noopener">${t("Teilnahmebedingungen")}</a></div><p class="hinweis" style="margin-top:14px">${t("Mit «Los» stimmst du der Teilnahme zu.")} ${t("Gehörst du nicht zur Zielgruppe (Schweiz, 16 bis 65, Banking-App), endet die Umfrage nach bis zu drei Fragen; gespeichert werden dann nur diese Antworten.")} ${t("Die Rohdaten bleiben bei der Studierendengruppe, der Praxispartner wird am Ende genannt.")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a></p>`, knopf:"Los"},
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Umfrage zu Banking-Apps", text:`Fünf Studierende der KV Business School Zürich fragen dich nach deiner Banking-App und ihrem Kundendienst.`, html: () => `<div class="sprachen" role="group" aria-label="${t("Sprache")}">${Object.keys(SPRACHEN_LISTE).map(k => `<button type="button" class="sprache" data-lang="${k}" aria-pressed="${SPRACHE===k}" lang="${k}">${SPRACHEN_LISTE[k]}</button>`).join("")}</div><p class="kurz"><b>${t(DAUER_TEXT)}</b> · ${t("ohne Namen und Kontodaten")}</p><p class="gewinn">${t("Zu gewinnen gibt es einen Galaxus-Gutschein von 100 Franken.")}</p><div class="start-unten"><p class="hinweis">${t("Mit «Los» stimmst du der Teilnahme zu.")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a></p><details><summary>${t("Mehr zur Verlosung")}</summary><p>${t("Unter allen vollständigen Antworten mit Mailadresse verlosen wir einen Galaxus-Gutschein im Wert von 100 Franken (16 bis 65 Jahre, Wohnsitz Schweiz).")} <a href="${tbLink()}" target="_blank" rel="noopener">${t("Teilnahmebedingungen")}</a></p></details><details><summary>${t("Datenschutz und Teilnahme")}</summary><p>${t("Gehörst du nicht zur Zielgruppe (Schweiz, 16 bis 65, Banking-App), endet die Umfrage nach bis zu drei Fragen; gespeichert werden dann nur diese Antworten.")} ${t("Die Rohdaten bleiben bei der Studierendengruppe, der Praxispartner wird am Ende genannt.")} ${t("Fragen mit Stern sind Pflicht.")}</p></details></div>`, knopf:"Los"},
  {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
@@ -234,7 +240,7 @@ function render() {
   document.getElementById("balken").style.width = (pos / fragen * 100) + "%";
   document.getElementById("zaehler").textContent = (s.art==="info"||s.art==="ende") ? "" : `${t("Frage")} ${pos+1}`;
   const titel = typeof s.titel === "function" ? s.titel() : t(s.titel);
-  let h = `<section class="schirm">`;
+  let h = `<section class="schirm${s.id==="start" ? " start" : ""}">`;
   if (s.kicker) h += `<div class="kicker">${t(s.kicker)}</div>`;
   if (s.art === "ende") { h += endeHtml(); main.innerHTML = h + "</section>"; senden(); return; }
   h += s.art==="info" ? `<h1>${titel}</h1><p>${t(s.text)||""}</p>${typeof s.html==="function" ? s.html() : (s.html||"")}` : `<h2 id="frage-titel">${titel}${s.pflicht ? `&nbsp;<span class="stern" aria-hidden="true">*</span><span class="sr">(${t("Pflichtfrage")})</span>` : ""}</h2>`;
