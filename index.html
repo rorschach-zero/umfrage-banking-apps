@@ -109,7 +109,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "sechs bis acht Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.15";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.16";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
@@ -118,7 +118,7 @@ let SPRACHE = (new URLSearchParams(location.search).get("lang") || "").toLowerCa
 const t = s => { if (typeof s !== "string" || !SPRACHE || SPRACHE === "de") return s; const w = (typeof SPRACHEN !== "undefined" && SPRACHEN[SPRACHE]) ? SPRACHEN[SPRACHE][s] : undefined; return w === undefined ? s : w; };
 const tf = (s, app) => t(s).replace("{app}", () => app);
 const tbLink = () => (!SPRACHE || SPRACHE === "de") ? "teilnahmebedingungen.html" : "teilnahmebedingungen_" + SPRACHE + ".html";
-const teilLink = () => "https://rorschach-zero.github.io/umfrage-yuh/?id=TEIL-" + ((SPRACHE && SPRACHE !== "de") ? "&lang=" + SPRACHE : "");
+const teilLink = () => "https://rorschach-zero.github.io/umfrage-banking-apps/?id=TEIL-" + ((SPRACHE && SPRACHE !== "de") ? "&lang=" + SPRACHE : "");
 const dsLink = () => (!SPRACHE || SPRACHE === "de") ? "datenschutz.html" : "datenschutz_" + SPRACHE + ".html";
 function spracheAnwenden() { document.documentElement.lang = (SPRACHE || "de") + (SPRACHE === "de" || !SPRACHE ? "-CH" : ""); document.title = t("Umfrage Kundendienst von Banking-Apps"); const kz = document.getElementById("kopfzeile"); if (kz) kz.textContent = t("Praxisarbeit HFW"); const f = document.querySelector("footer"); if (f) f.textContent = t("Praxisarbeit HFW von Studierenden der KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit"); }
 
