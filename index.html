@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Umfrage Kundendienst von Banking-Apps</title>
-<meta name="description" content="Kurze anonyme Umfrage zum Kundendienst von Banking-Apps, Praxisarbeit HFW.">
+<meta name="description" content="Kurze anonyme Umfrage zu Banking-Apps, Praxisarbeit HFW.">
 <meta name="robots" content="noindex">
 <style>
 @font-face { font-family: "Nunito"; src: url("fonts/Nunito.ttf") format("truetype"); font-weight: 200 1000; font-display: swap; }
@@ -108,15 +108,15 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 /* ---------- Konfiguration ---------- */
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
-const DAUER_TEXT = "vier bis acht Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.10";                   // Stand des Fragebogens, wird mitgespeichert
+const DAUER_TEXT = "sechs bis acht Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
+const VERSION = "3.11";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "salah@hydeout.ch";      // verantwortliche Person fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
 const SPRACHEN_LISTE = {de:"Deutsch", fr:"Français", it:"Italiano", en:"English"};
-let SPRACHE = (new URLSearchParams(location.search).get("lang") || "").toLowerCase(); if (!SPRACHEN_LISTE[SPRACHE]) SPRACHE = "";
+let SPRACHE = (new URLSearchParams(location.search).get("lang") || "").toLowerCase(); if (!Object.hasOwn(SPRACHEN_LISTE, SPRACHE)) SPRACHE = "";
 const t = s => { if (typeof s !== "string" || !SPRACHE || SPRACHE === "de") return s; const w = (typeof SPRACHEN !== "undefined" && SPRACHEN[SPRACHE]) ? SPRACHEN[SPRACHE][s] : undefined; return w === undefined ? s : w; };
-const tf = (s, app) => t(s).replace("{app}", app);
+const tf = (s, app) => t(s).replace("{app}", () => app);
 const tbLink = () => (!SPRACHE || SPRACHE === "de") ? "teilnahmebedingungen.html" : "teilnahmebedingungen_" + SPRACHE + ".html";
 const teilLink = () => "https://rorschach-zero.github.io/umfrage-yuh/?id=TEIL-" + ((SPRACHE && SPRACHE !== "de") ? "&lang=" + SPRACHE : "");
 const dsLink = () => (!SPRACHE || SPRACHE === "de") ? "datenschutz.html" : "datenschutz_" + SPRACHE + ".html";
@@ -159,33 +159,36 @@ let wiederherstellen = null;
 try { const g = JSON.parse(merk("stand") || "null"); if (g && g.v === VERSION && g.A && g.A.id === A.id) wiederherstellen = g; } catch (e) { wiederherstellen = null; }
 if (wiederherstellen) {
   Object.assign(A, wiederherstellen.A);
-  if (A.reihenfolge) APPS = ["App meiner Hausbank"].concat(A.reihenfolge.split("|"), ["andere"]);
-  if (A.merkmale_reihenfolge) MERK_ORDER = A.merkmale_reihenfolge.split("|").map(n => Number(n) - 1);
+  const istPerm = (liste, soll) => liste.length === soll.length && soll.every(x => liste.includes(x));
+  if (A.reihenfolge && istPerm(A.reihenfolge.split("|"), APPS_FEST)) APPS = ["App meiner Hausbank"].concat(A.reihenfolge.split("|"), ["andere"]); else A.reihenfolge = APPS.slice(1, 5).join("|");
+  if (A.merkmale_reihenfolge && istPerm(A.merkmale_reihenfolge.split("|").map(Number), [...Array(MERKMALE.length).keys()].map(n => n + 1))) MERK_ORDER = A.merkmale_reihenfolge.split("|").map(n => Number(n) - 1); else A.merkmale_reihenfolge = MERK_ORDER.map(i => i + 1).join("|");
   if (wiederherstellen.start) start = wiederherstellen.start;
-  if (!SPRACHE && SPRACHEN_LISTE[A.sprache]) SPRACHE = A.sprache;
+  if (!SPRACHE && Object.hasOwn(SPRACHEN_LISTE, String(A.sprache))) SPRACHE = A.sprache;
 }
 if (!SPRACHE) SPRACHE = "de"; A.sprache = SPRACHE;
 function sichern() { try { merk("stand", JSON.stringify({v: VERSION, A: A, i: i, start: start})); } catch (e) {} }
-window.addEventListener("beforeunload", sichern);
+window.addEventListener("beforeunload", sichern); window.addEventListener("pagehide", sichern); document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") sichern(); });
 const hauptapp = () => A.t2 || (Array.isArray(A.t1) && A.t1.length === 1 ? A.t1[0] : "");
-const nutztYuh = () => Array.isArray(A.t1) && A.t1.includes("Yuh");
+const nutztYuh = () => Array.isArray(A.t1) && (A.t1.includes("Yuh") || (A.t1.includes("andere") && /yuh/i.test(A.t1_andere || "")));
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 // Eingetippte Namen stehen spaeter in Fragetiteln, die als HTML gesetzt werden: darum hier maskiert.
 const anzeige = o => o==="App meiner Hausbank" ? (A.t1_hausbank ? esc(A.t1_hausbank) : t("deiner Hausbank")) : (o==="andere" && A.t1_andere ? esc(A.t1_andere) : esc(o));
 const hauptappName = () => anzeige(hauptapp());
-const kenntYuh = () => nutztYuh() || A.t13a === "ja";   // Yuh-Nutzende kennen Yuh; t13a wird fuer sie nicht gezeigt und beim Senden auf «ja» gesetzt
+const kenntYuh = () => nutztYuh() || A.t13a === "ja" || A.t6 === "Yuh" || A.t3c_app === "Yuh";   // Yuh-Nutzende kennen Yuh; t13a wird fuer sie nicht gezeigt und beim Senden auf «ja» gesetzt
 
 /* ---------- Bildschirme ---------- */
 const S = [
- {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Wie gut ist der Kundendienst deiner Banking-App?", text:`Fünf Studierende der HFW an der KV Business School Zürich fragen dich nach deinen Erfahrungen. Deine Antworten fliessen in eine Praxisarbeit.`, html: () => `<div class="sprachen" role="group" aria-label="${t("Sprache")}">${Object.keys(SPRACHEN_LISTE).map(k => `<button type="button" class="sprache" data-lang="${k}" aria-pressed="${SPRACHE===k}" lang="${k}">${SPRACHEN_LISTE[k]}</button>`).join("")}</div><p class="kurz"><b>${t(DAUER_TEXT)}</b> · ${t("anonym und freiwillig")} · ${t("Fragen mit")} <span class="stern" aria-hidden="true">*</span><span class="sr">${t("Stern")}</span> ${t("sind Pflicht")}</p><div class="verlosung"><b>${t("Gutschein gewinnen")}</b> ${t("Unter allen vollständigen Antworten mit Mailadresse verlosen wir einen Galaxus-Gutschein im Wert von 100 Franken.")} <a href="${tbLink()}" target="_blank" rel="noopener">${t("Teilnahmebedingungen")}</a></div><p class="hinweis" style="margin-top:14px">${t("Mit «Los» stimmst du der Teilnahme zu.")} ${t("Die Rohdaten bleiben bei der Studierendengruppe, der Praxispartner wird am Ende genannt.")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a></p>`, knopf:"Los"},
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Umfrage zu Banking-Apps", text:`Fünf Studierende der HFW an der KV Business School Zürich fragen dich, wie du deine Banking-App nutzt und was du von ihrem Kundendienst erwartest. Deine Antworten fliessen in eine Praxisarbeit.`, html: () => `<div class="sprachen" role="group" aria-label="${t("Sprache")}">${Object.keys(SPRACHEN_LISTE).map(k => `<button type="button" class="sprache" data-lang="${k}" aria-pressed="${SPRACHE===k}" lang="${k}">${SPRACHEN_LISTE[k]}</button>`).join("")}</div><p class="kurz"><b>${t(DAUER_TEXT)}</b> · ${t("anonym und freiwillig")} · ${t("Fragen mit")} <span class="stern" aria-hidden="true">*</span><span class="sr">${t("Stern")}</span> ${t("sind Pflicht")}</p><div class="verlosung"><b>${t("Gutschein gewinnen")}</b> ${t("Unter allen vollständigen Antworten mit Mailadresse verlosen wir einen Galaxus-Gutschein im Wert von 100 Franken.")} <a href="${tbLink()}" target="_blank" rel="noopener">${t("Teilnahmebedingungen")}</a></div><p class="hinweis" style="margin-top:14px">${t("Mit «Los» stimmst du der Teilnahme zu.")} ${t("Die Rohdaten bleiben bei der Studierendengruppe, der Praxispartner wird am Ende genannt.")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a></p>`, knopf:"Los"},
  {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
+ {id:"t0", art:"offen", pflicht:false, titel:"Welche Banking-Apps kennst du, auch wenn du sie nicht nutzt?", hinweis:"Schreib bis zu drei Namen, die dir als Erstes einfallen. Freiwillig."},
  {id:"t1", art:"mehrfach", pflicht:true, titel:"Welche dieser Banking-Apps nutzt du zurzeit?", hinweis:"Mehrfachauswahl möglich.", optionen:APPS, texte:{"App meiner Hausbank":{key:"t1_hausbank", label:"Welche Bank?"}, "andere":{key:"t1_andere", label:"Welche App?"}}},
  {id:"t2", art:"einfach", pflicht:true, titel:"Welche davon nutzt du am häufigsten?", optionen: () => A.t1, zeigen: () => Array.isArray(A.t1) && A.t1.length > 1},
  {id:"t2b", art:"einfach", pflicht:true, titel: () => tf("Welche Rolle spielt {app} für dich?", hauptappName()), optionen:["meine wichtigste Bankverbindung, der Lohn oder das Haupteinkommen kommt dort an","meine wichtigste Bankverbindung, aber das Haupteinkommen kommt woanders an","ein Zweitkonto für bestimmte Zwecke","ich habe kein regelmässiges Einkommen","keine Angabe"]},
  {id:"t3b", art:"einfach", pflicht:true, titel: () => tf("Als du zuletzt ein Problem mit {app} hattest: Was hast du zuerst getan?", hauptappName()), optionen:["Hilfe in der App oder bei den häufigen Fragen gesucht","Im Internet gesucht","Den Chatbot der App genutzt","Den Mitarbeitenden geschrieben, per Chat oder E-Mail","Angerufen","Bekannte gefragt","Zunächst nichts","Anderes","Ich hatte noch nie ein Problem","Weiss ich nicht mehr"]},
- {id:"t3c", art:"einfach", pflicht:true, titel:"Hast du in den letzten zwölf Monaten eine Banking-App wegen eines ungelösten Problems weniger oder gar nicht mehr genutzt, ohne den Kundendienst zu kontaktieren?", hinweis:"Kontakt heisst: geschrieben, gechattet, auch mit einem Chatbot, oder angerufen. Wenn das bei mehreren Apps vorkam: Denk an die letzte.", optionen:["ja","nein","weiss nicht"]},
+ {id:"t3c", art:"einfach", pflicht:true, titel:"Hast du in den letzten zwölf Monaten eine Banking-App wegen eines Problems, das nicht gelöst wurde, seltener oder gar nicht mehr genutzt?", hinweis:"Wenn das bei mehreren Apps vorkam: Denk an die letzte.", optionen:["ja","nein","weiss nicht"]},
+ {id:"t3c2", art:"einfach", pflicht:true, titel:"Hattest du wegen dieses Problems den Kundendienst dieser App kontaktiert?", hinweis:"Kontakt heisst: geschrieben, gechattet, auch mit einem Chatbot, oder angerufen.", optionen:["ja","nein","weiss nicht"], zeigen: () => A.t3c==="ja"},
  {id:"t3c_app", art:"einfach", pflicht:true, titel:"Welche App war das?", optionen:APPS, texte:{"App meiner Hausbank":{key:"t3c_name", label:"Welche Bank?"}, "andere":{key:"t3c_name", label:"Welche App?"}}, zeigen: () => A.t3c==="ja"},
  {id:"t3", art:"matrix", pflicht:true, titel:"Wie wichtig ist dir jede dieser Eigenschaften, wenn du Hilfe bei einem Problem mit einer Banking-App brauchst?", hinweis:"Automatische Eingangsbestätigungen zählen nicht als Antwort.", zeilen:MERKMALE, weissnicht:"kann ich nicht sagen", skala:{...S5("unwichtig","sehr wichtig"), worte:["unwichtig","eher unwichtig","mittel","eher wichtig","sehr wichtig"]}, prefix:"t3_"},
  {id:"t4a", art:"einfach", pflicht:true, titel: () => tf("Hattest du schon einmal Kontakt mit dem Kundendienst von {app}?", hauptappName()), hinweis:"Kontakt heisst: Du hast dem Kundendienst geschrieben, mit ihm gechattet, auch mit einem Chatbot, oder angerufen.", optionen:["ja","nein"]},
@@ -206,6 +209,7 @@ const S = [
  {id:"t15", art:"skala", pflicht:true, titel:"Zwei Banking-Apps sind in allem gleich. Nur sitzen bei der einen die Mitarbeitenden des Kundendiensts in der Schweiz, bei der anderen im Ausland.", frage:"Ist der Standort Schweiz für dich ein Vorteil oder ein Nachteil?", stufen:["grosser Nachteil","eher Nachteil","weder noch","eher Vorteil","grosser Vorteil"], weissnicht:"kann ich nicht sagen"},
  {id:"t15b", art:"skala", pflicht:true, titel:"Zwei Banking-Apps bieten denselben Kundendienst per Chat und E-Mail. Eine bietet zusätzlich Telefonkontakt.", frage:"Ist das für dich ein Vorteil oder ein Nachteil?", stufen:["grosser Nachteil","eher Nachteil","weder noch","eher Vorteil","grosser Vorteil"], weissnicht:"kann ich nicht sagen"},
  {id:"t16p", art:"einfach", pflicht:true, titel:"Ein Problem lässt sich auf beiden Wegen gleich schnell lösen: Welchen Weg bevorzugst du?", optionen:["selbst in der App","mit Mitarbeitenden des Kundendiensts","beides gleich gern","kommt auf das Problem an","weiss nicht"]},
+ {id:"t16q", art:"einfach", pflicht:true, titel:"Warum lieber selbst in der App?", optionen:["das geht schneller","ich will niemanden bemühen","schlechte Erfahrungen mit Kundendiensten","ich löse Dinge generell lieber selbst","anderes"], zeigen: () => A.t16p==="selbst in der App"},
  {id:"t16b", art:"einfach", pflicht:true, titel:"Unterscheidet sich Yuh deiner Meinung nach durch seinen Kundendienst von den anderen Banking-Apps, die du kennst?", optionen:["ja, zum Besseren","ja, zum Schlechteren","nein, kein Unterschied","kann ich nicht beurteilen"], zeigen: () => kenntYuh()},
  {id:"t14a", art:"einfach", pflicht:true, titel:"Wusstest du vor dieser Umfrage, dass der Kundendienst von Yuh von Mitarbeitenden in der Schweiz betreut wird?", optionen:["ja","nein","nicht sicher"], zeigen: () => kenntYuh()},
  {id:"t14b", art:"einfach", pflicht:true, titel:"Wusstest du vor dieser Umfrage, dass der Kundendienst von Yuh telefonisch erreichbar ist?", optionen:["ja","nein","nicht sicher"], zeigen: () => kenntYuh()},
@@ -218,7 +222,7 @@ const S = [
 ];
 
 /* ---------- Ablauf ---------- */
-let i = wiederherstellen && Number.isInteger(wiederherstellen.i) ? Math.min(wiederherstellen.i, S.length - 1) : 0; let fokus = null;
+let i = wiederherstellen && Number.isInteger(wiederherstellen.i) ? Math.max(0, Math.min(wiederherstellen.i, liste().length - 1)) : 0; let fokus = null;
 const main = document.getElementById("main");
 const sichtbar = s => !s.zeigen || s.zeigen();
 const liste = () => S.filter(sichtbar);
@@ -241,8 +245,8 @@ function render() {
     const multi = s.art==="mehrfach";
     h += `<div class="optionen" role="${multi?'group':'radiogroup'}" aria-labelledby="frage-titel">` + opts.map(o => {
       const an = multi ? (A[s.id]||[]).includes(o) : A[s.id]===o;
-      const lab = s.id==="t2" ? anzeige(o) : t(o);
-      let x = `<button type="button" class="opt ${multi?'multi':''}" role="${multi?'checkbox':'radio'}" aria-checked="${an}" data-wert="${esc(o)}" aria-label="${esc(lab)}"><span class="punkt"></span><span>${esc(lab)}</span></button>`;
+      const lab = s.id==="t2" ? anzeige(o) : esc(t(o)); // anzeige() ist bereits maskiert
+      let x = `<button type="button" class="opt ${multi?'multi':''}" role="${multi?'checkbox':'radio'}" aria-checked="${an}" data-wert="${esc(o)}" aria-label="${lab}"><span class="punkt"></span><span>${lab}</span></button>`;
       if (s.texte && s.texte[o] && an) x += `<input class="text extra" data-key="${s.texte[o].key}" maxlength="80" placeholder="${esc(t(s.texte[o].label))}" value="${esc(A[s.texte[o].key]||"")}" aria-label="${esc(t(s.texte[o].label))}">`;
       return x; }).join("") + `</div>`;
   }
@@ -273,7 +277,7 @@ function verdrahten(s) {
   main.querySelectorAll(".opt[data-wert]").forEach(b => b.addEventListener("click", () => {
     const key = b.dataset.key || b.closest("[data-key]")?.dataset.key || s.id; const w = b.dataset.wert;
     if (s.art==="mehrfach") { const arr = new Set(A[s.id]||[]); if (arr.has(w)) { arr.delete(w); if (s.texte && s.texte[w]) delete A[s.texte[w].key]; } else arr.add(w); A[s.id] = [...arr]; if (s.id==="t1" && A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
-    else { if (s.texte && A[key] !== w) for (const o in s.texte) delete A[s.texte[o].key]; A[key] = w; }
+    else { if (s.texte && A[key] !== w) for (const o in s.texte) delete A[s.texte[o].key]; A[key] = w; if (s.id==="t2") delete A._t2auto; }
     if (s.art==="mehrfach" || s.texte) { fokus = w; render(); } else { main.querySelectorAll(`.opt[data-wert]`).forEach(x => { const kx = x.dataset.key || x.closest("[data-key]")?.dataset.key || s.id; if (kx===key) x.setAttribute("aria-checked", x===b); }); }
   }));
   main.querySelectorAll(".opt[data-k]").forEach(b => b.addEventListener("click", () => { const an = A[b.dataset.k]!=="ja"; A[b.dataset.k] = an ? "ja" : ""; b.setAttribute("aria-checked", an); const ta = document.getElementById("offen"); if (ta) { if (an) { ta.value = ""; A[s.id] = ""; } ta.disabled = an; } }));
@@ -310,7 +314,7 @@ function kontaktGewechselt() {
 function weiter(s) {
   const f = fehlt(s); const fe = document.getElementById("fehler"); if (f) { fe.textContent = f; fe.focus(); return; }
   if (s.ende && s.ende(A[s.id])) { A.abbruch = s.id; i = S.length - 1; renderEnde(true); return; }
-  if (s.id==="t1") { if (A.t1.length===1) A.t2 = A.t1[0]; else if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; }
+  if (s.id==="t1") { if (A.t1.length===1) { A.t2 = A.t1[0]; A._t2auto = true; } else { if (A._t2auto) { delete A.t2; delete A._t2auto; } if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; } }
   if (s.id==="t1" || s.id==="t2") hauptappGewechselt();
   if (s.id==="t6") kontaktGewechselt();
   i++; sichern(); render();
