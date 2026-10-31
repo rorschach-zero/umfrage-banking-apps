@@ -30,8 +30,8 @@ textarea.t { min-height:84px; resize:vertical; }
 .chip:hover { border-color:var(--ink); }
 .chip[aria-pressed="true"] { border-color:var(--orange); background:#fff1ec; }
 .chip:focus-visible, .knopf:focus-visible { outline:3px solid var(--lavender); outline-offset:2px; }
-.knopf { font:inherit; font-weight:800; font-size:16px; padding:12px 22px; border-radius:var(--pill); border:0; background:var(--orange); color:#fff; cursor:pointer; }
-.knopf.zwei { background:var(--ink); } .knopf.hell { background:var(--white); color:var(--ink); border:1.5px solid var(--line); }
+.knopf { font:inherit; font-weight:800; font-size:16px; padding:12px 22px; border-radius:var(--pill); border:0; background:var(--ink); color:#fff; cursor:pointer; box-shadow: inset 0 -3px 0 var(--orange); }
+.knopf.zwei { background:var(--white); color:var(--ink); border:1.5px solid var(--ink); box-shadow:none; } .knopf.hell { background:var(--white); color:var(--ink); border:1.5px solid var(--line); box-shadow:none; }
 .knopf:disabled { opacity:.35; cursor:not-allowed; }
 .zeit { display:flex; gap:8px; } .zeit input { flex:1; } .zeit .knopf { padding:10px 14px; font-size:14px; }
 .balken { height:6px; background:var(--surface); border-radius:3px; overflow:hidden; } .balken > div { height:100%; background:var(--orange); }
@@ -44,7 +44,7 @@ textarea.t { min-height:84px; resize:vertical; }
 .kat { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px; }
 .kat .chip { text-align:left; border-radius:12px; padding:10px 34px 10px 12px; position:relative; }
 .kat .chip b { display:inline-block; min-width:22px; color:var(--grey); }
-.kat .chip .rang { position:absolute; right:8px; top:50%; margin-top:-10px; background:var(--orange); color:#fff; border-radius:50%; width:20px; height:20px; font-size:12px; text-align:center; line-height:20px; }
+.kat .chip .rang { position:absolute; right:8px; top:50%; margin-top:-10px; background:var(--ink); color:#fff; border-radius:50%; width:20px; height:20px; font-size:12px; text-align:center; line-height:20px; }
 .val { display:inline-flex; gap:4px; } .val .chip { padding:4px 12px; }
 .hinweisbox { border-left:4px solid var(--orange); background:#fff7f4; padding:10px 14px; border-radius:8px; font-size:14px; margin:10px 0; }
 details summary { cursor:pointer; font-weight:700; }

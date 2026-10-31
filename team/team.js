@@ -1,4 +1,6 @@
 // Gemeinsame Hilfen fuer die Erfassungsmasken (Schluessel, Abruf, Speichern). Kein Inhalt verlaesst das Geraet ausser an den Empfaenger.
+// Notizen: keine Nummern, Mail- und Netzadressen (gleiche Regel wie im Empfaenger).
+const VERBOTEN = /[\w.+-]+@[\w-]+\.[\w.-]+|https?:\/\/|www\.|\b[\w-]+\.(ch|com|net|org|de|io|app|li)\b|(?:\+|00)?\d[\d\s\/.-]{6,}\d|\bCH\d{2}\s?\d{4}/i;
 const ENDPUNKT = "";   // Web-App-URL des Empfaengers erfassung.gs, nach der Bereitstellung eintragen
 const TEAM = { SA: "Salah", ES: "Ernes", MG: "Melisa", AM: "Arber", LB: "Leonie" };
 function schluessel() {
@@ -6,11 +8,8 @@ function schluessel() {
   if (h) { try { localStorage.setItem("pa6k", h); } catch (e) {} history.replaceState(null, "", location.pathname); return h; }
   try { return localStorage.getItem("pa6k") || ""; } catch (e) { return ""; }
 }
-async function hole(a) {
-  if (!ENDPUNKT) throw new Error("Empfaenger noch nicht eingerichtet");
-  const r = await fetch(ENDPUNKT + "?a=" + encodeURIComponent(a) + "&k=" + encodeURIComponent(schluessel()));
-  const j = await r.json(); if (!j.ok) throw new Error(j.fehler || "Fehler"); return j;
-}
+// Gelesen wird per POST: der Schluessel steht nur im Inhalt der Anfrage, nie in einer Adresse.
+async function hole(a) { return sende({ typ: "lesen", a: a }); }
 async function sende(obj) {
   if (!ENDPUNKT) throw new Error("Empfaenger noch nicht eingerichtet");
   const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 20000);

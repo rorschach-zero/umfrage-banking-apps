@@ -74,6 +74,8 @@ function bild() {
       el("div", { class: "leise", style: "margin-top:8px" }, "Lies die Bewertung auf der Plattform. Nichts kopieren, nichts antworten, kein Konto nötig.")) : el("div", { class: "textbox" }, "Text und Fundort fehlen, bitte Salah melden."),
     el("label", { class: "f" }, "Ausschluss ", el("span", { class: "hilfe" }, "nur wenn die Bewertung nicht codiert wird")),
     chips(AUSSCHLUSS, c.ausschluss, w => { c.ausschluss = w; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }, { abwaehlbar: true }),
+    c.ausschluss ? null : el("div", {}, el("label", { class: "f" }, "Sprache ", el("span", { class: "hilfe" }, "andere Sprachen sind Ausschluss «Sprache»")),
+      chips([["de", "Deutsch"], ["en", "Englisch"], ["fr", "Französisch"]], c.sprache, w => { c.sprache = w; merke(); })),
     x.anbieter === "Zak" && x.quelle === "Trustpilot" ? el("div", {}, el("label", { class: "f" }, "Zak-Bezug"), chips(["ja", "nein"], c.zak_bezug, w => { c.zak_bezug = w; if (w === "nein") { c.ausschluss = "nicht Zak"; c.kats = []; } merke(); })) : null,
     c.ausschluss ? null : el("div", {},
       el("label", { class: "f" }, "Beschreibt der Text einen Kontakt mit dem Kundendienst? ", el("span", { class: "hilfe" }, "Taste J oder N")),
@@ -82,7 +84,7 @@ function bild() {
       el("div", { class: "kat" }, KAT.map(([n, t, d]) => el("button", { type: "button", class: "chip", title: d, "aria-pressed": String(c.kats.includes(n)), on: { click: () => kat(n) } }, el("b", {}, n), " ", t, c.kats.includes(n) ? el("span", { class: "rang" }, c.kats.indexOf(n) + 1) : null))),
       c.kats.length ? el("div", { style: "margin-top:12px" }, c.kats.map((n, r) => el("div", { class: "zeile", style: "margin:6px 0" },
         el("b", { style: "min-width:170px" }, `${r + 1}. ${KAT[n - 1][1]}`),
-        el("div", { class: "val" }, [["-", "Kritik"], ["+", "Lob"], ["0", "neutral"]].map(([w, t]) => el("button", { type: "button", class: "chip", "aria-pressed": String(c.vals[n] === w), on: { click: () => { c.vals[n] = w; merke(); } } }, `${w} ${t}`))),
+        el("div", { class: "val" }, [["-", "Kritik"], ["+", "Lob"], ["0", "neutral oder gemischt"]].map(([w, t]) => el("button", { type: "button", class: "chip", "aria-pressed": String(c.vals[n] === w), on: { click: () => { c.vals[n] = w; merke(); } } }, `${w} ${t}`))),
         r > 0 ? el("button", { type: "button", class: "chip", title: "nach vorne", on: { click: () => { c.kats.splice(r, 1); c.kats.splice(r - 1, 0, n); merke(); } } }, "↑") : null))) : null,
       hinweise().map(h => el("div", { class: "hinweisbox" }, h)),
       def),
@@ -93,7 +95,11 @@ function bild() {
   );
 }
 function pruefe() {
+  const x = q[i];
+  if (x.anbieter === "Zak" && x.quelle === "Trustpilot" && !["ja", "nein"].includes(c.zak_bezug)) return "Zak-Bezug ja oder nein fehlt";
+  if (VERBOTEN.test(c.bemerkung)) return "Bemerkung ohne Nummern und Adressen";
   if (c.ausschluss) return "";
+  if (!["de", "en", "fr"].includes(c.sprache)) return "Sprache wählen oder Ausschluss «Sprache»";
   if (!c.kundendienst_kontakt) return "Kontakt ja oder nein fehlt";
   if (!c.kats.length) return "Mindestens ein Thema oder ein Ausschluss";
   if (c.kats.some(n => !c.vals[n])) return "Valenz fehlt bei einem Thema";
@@ -109,7 +115,7 @@ async function speichern() {
   c.kats.forEach((n, r) => { z["kat_" + (r + 1)] = String(n); z["val_" + (r + 1)] = c.vals[n]; });
   msg.className = "meldung"; msg.textContent = "Speichert …";
   try {
-    await sende({ typ: "codierung", rolle: x.rolle, maske: "c1", zeile: z });
+    await sende({ typ: "codierung", rolle: x.rolle, maske: "c2", zeile: z });
     x.eigen = Object.assign({ codiert_von: wer }, z); try { localStorage.removeItem("c-" + x.rolle + x.nr); } catch (e) {}
     msg.className = "meldung ok"; msg.textContent = "Gespeichert.";
     const n = q.findIndex((y, k) => k > i && !y.eigen); i = n >= 0 ? n : Math.min(i + 1, q.length - 1); zeige();

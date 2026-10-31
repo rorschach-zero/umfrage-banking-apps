@@ -52,25 +52,35 @@ function liste() {
   }
   m.append(el("p", { class: "leise", style: "margin-top:28px" }, "Abend und Wochenende werden nicht beobachtet. Keine Kontodaten, keine Namen, keine Zitate eintragen."));
 }
+function gesperrt() { const l = belastung[aktiv.anbieter] || { nachrichten: 0, minuten: 0 }; return !aktiv.erfasst && (l.nachrichten >= STOPP.nachrichten || l.minuten >= STOPP.minuten); }
 function oeffne(r) {
   aktiv = r;
   z = Object.assign({ nr: r.nr, code: "durchgefuehrt", kanal_angeboten: "ja", sprache_antwort: "Deutsch", stand: "laufend", hinweise: [], elemente: [] }, lokal("b-" + r.nr) || {}, r.erfasst || {});
   if (typeof z.mensch_hinweise === "string") z.hinweise = z.mensch_hinweise ? z.mensch_hinweise.split("|") : [];
+  if (!Array.isArray(z.elemente)) z.elemente = z.elemente ? String(z.elemente).split("|") : [];
+  ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].forEach(k => { if (z[k]) z[k] = String(z[k]).replace(" ", "T").slice(0, 16); });
   formular(); document.getElementById("fuss").hidden = false; scrollTo(0, 0);
+  ["zwischen", "fertig"].forEach(id => document.getElementById(id).disabled = gesperrt());
 }
 function setze(k, v) { z[k] = v; lokal("b-" + aktiv.nr, z); formular(); }
 function vorschlaege() {
+  // Fristen (Testprotokoll, Zeitstempelregel): Telefon und Chat zaehlen die Antwortfrist ab der ersten menschlichen
+  // Antwort, Mail und Formular ab dem Start. Vorschlaege werden nie still uebernommen.
   const f = FRIST[aktiv.kanal], v = {};
   const n = (SKRIPT[aktiv.anliegen] || { elemente: [] }).elemente.length, h = (z.elemente || []).length;
   v.vollstaendig = !z.t_antwort && !h ? "" : h === n ? "vorhanden" : h > 0 ? "teilweise" : "fehlt";
   if (aktiv.kanal === "telefon") v.mensch_status = z.t_mensch ? "Mensch" : "";
   else v.mensch_status = z.auto_selbst ? "Automat" : z.t_mensch ? ((z.hinweise || []).length >= 2 ? "wahrscheinlich Mensch" : "unklar") : "";
-  v.fcr = v.vollstaendig === "vorhanden" && !z.anderer_kanal ? "ja" : v.vollstaendig === "teilweise" ? "unklar" : (z.t_ende ? "nein" : "");
   const bisMensch = minuten(z.t_start, z.t_mensch);
+  const ab = aktiv.kanal === "telefon" || aktiv.kanal === "chat" ? z.t_mensch : z.t_start;
+  const bisAntwort = minuten(ab, z.t_antwort);
+  const inFrist = z.t_antwort && bisMensch !== null && bisMensch <= f.mensch && bisAntwort !== null && bisAntwort <= f.antwort;
+  v.fcr = v.vollstaendig === "vorhanden" && inFrist && !z.anderer_kanal ? "ja" : v.vollstaendig === "teilweise" ? "unklar" : (z.t_ende ? "nein" : "");
   if (z.kanal_angeboten === "nein") v.code = "nicht angeboten";
-  else if (z.t_start && !z.t_mensch && z.t_ende && minuten(z.t_start, z.t_ende) >= f.mensch) v.code = "erfolglos";
-  else if (bisMensch !== null && bisMensch > f.mensch) v.code = "erfolglos";
-  else v.code = "durchgefuehrt";
+  else if (z.kanal_angeboten === "nicht erreichbar") v.code = "erfolglos";
+  else if (z.t_start && (bisMensch === null ? (z.t_ende && minuten(z.t_start, z.t_ende) >= f.mensch) : bisMensch > f.mensch)) v.code = "erfolglos";
+  else if (z.t_start) v.code = "durchgefuehrt";
+  v.inFrist = inFrist;
   return v;
 }
 function zeitfeld(k, titel, hilfe) {
@@ -82,7 +92,8 @@ const ANZEIGE = { durchgefuehrt: "durchgeführt", "nicht zugaenglich": "nicht zu
 function wahl(k, titel, werte, hilfe, vorschlag) {
   return el("div", {}, el("label", { class: "f" }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")),
     chips(werte.map(w => [w, ANZEIGE[w] || w]), z[k] || "", w => setze(k, w), { abwaehlbar: true }),
-    vorschlag && vorschlag !== z[k] ? el("div", { class: "vorschlag" }, "Vorschlag nach Regel: ", el("b", {}, ANZEIGE[vorschlag] || vorschlag), " ", el("button", { type: "button", class: "chip", on: { click: () => setze(k, vorschlag) } }, "übernehmen")) : null);
+    vorschlag && vorschlag !== z[k] ? el("div", { class: "vorschlag" }, "Vorschlag nach Regel: ", el("b", {}, ANZEIGE[vorschlag] || vorschlag), " ", el("button", { type: "button", class: "chip", on: { click: () => setze(k, vorschlag) } }, "übernehmen")) : null,
+    !z[k] && vorschlag ? el("div", { class: "leise" }, "Noch nicht gewählt. Der Vorschlag gilt erst, wenn du ihn übernimmst.") : null);
 }
 function text(k, titel, hilfe, mehr) {
   const a = { class: "t", value: z[k] || "", on: { input: e => { z[k] = e.target.value; lokal("b-" + aktiv.nr, z); } } };
@@ -96,14 +107,16 @@ function formular() {
     el("div", { class: "kicker", style: "margin-top:16px" }, `Kontakt ${r.nr} · Wiederholung ${r.wiederholung}`),
     el("h1", {}, `${r.anbieter} · ${r.anliegen} · ${r.kanal}`),
     el("div", { class: "chips" }, el("span", { class: "pille" }, `Block ${r.block}`), el("span", { class: "pille" }, f.text), lauf !== null && !z.t_ende ? el("span", { class: "pille orange" }, `läuft seit ${lauf} min`) : null),
-    last.nachrichten > STOPP.nachrichten || last.minuten > STOPP.minuten ? el("div", { class: "hinweisbox" }, `Stoppregel erreicht bei ${r.anbieter}: keine weiteren Kontakte, bitte Salah melden.`) : null,
+    gesperrt() ? el("div", { class: "hinweisbox" }, `Stoppregel erreicht bei ${r.anbieter}: dieser Kontakt wird nicht mehr gestartet. Bitte Salah melden.`) : null,
+    v.inFrist === false && z.t_antwort ? el("div", { class: "hinweisbox" }, "Die Mindestantwort kam ausserhalb der Frist. Sie zählt als «nicht in der Frist», nicht im Median.") : null,
 
     el("h2", {}, "1 · Frage stellen"),
     el("div", { class: "karte akzent" }, el("div", { class: "kicker" }, "Fragekern, so wörtlich wie möglich"), el("p", { style: "font-size:19px;font-weight:700;margin:6px 0 10px" }, "«" + s.frage + "»"),
       el("button", { type: "button", class: "chip", on: { click: async e => { try { await navigator.clipboard.writeText(s.frage); e.target.textContent = "Kopiert"; } catch (x) {} } } }, "Frage kopieren")),
     el("p", { class: "leise" }, "Nur diese Frage. Auf Rückfragen wahrheitsgemäss antworten, bedanken, beenden, sobald die Mindestantwort da ist. Auf «Ist das ein Test?» ehrlich antworten. Nie sperren, nachforschen oder etwas ändern lassen."),
     el("div", { class: "gitter" }, text("konto_aktiv_seit", "Konto aktiv seit", "Monat und Jahr"), text("app_version", "App-Version", "aus den Einstellungen")),
-    wahl("kanal_angeboten", "Kanal vorhanden und erreichbar?", ["ja", "nein"], "Nein heisst Code «nicht angeboten», Quelle unten angeben"),
+    el("div", {}, el("label", { class: "f" }, "Kanal vorhanden und erreichbar? ", el("span", { class: "hilfe" }, "«nicht angeboten» laut Anbieter (Quelle angeben), «nicht erreichbar» wenn er existiert, aber nicht funktioniert")),
+      chips([["ja", "ja"], ["nein", "nicht angeboten"], ["nicht erreichbar", "nicht erreichbar"]], z.kanal_angeboten || "", w => setze("kanal_angeboten", w))),
 
     el("h2", {}, "2 · Zeitstempel"),
     el("p", { class: "leise" }, "Auf «Jetzt» tippen, wenn es passiert. Bei Mail und Formular die Zeit aus dem Verlauf eintragen."),
@@ -146,31 +159,49 @@ function formular() {
   );
 }
 function zeile(stand) {
-  const v = vorschlaege(), o = Object.assign({}, z, { stand });
+  const o = Object.assign({}, z, { stand });
   o.mensch_hinweise = (z.hinweise || []).join("|");
-  ["vollstaendig", "fcr", "mensch_status", "code"].forEach(k => { if (!o[k]) o[k] = v[k] || ""; });
+  o.elemente = (z.elemente || []).join("|");
   ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].forEach(k => { if (o[k]) o[k] = o[k].replace("T", " "); });
   o.datum = (o.t_start || "").slice(0, 10);
   o.verlauf = frei(o.verlauf); o.bemerkung = frei(o.bemerkung);
-  delete o.hinweise; delete o.elemente; delete o.auto_selbst; delete o.anderer_kanal; delete o.erfasst;
+  delete o.hinweise; delete o.auto_selbst; delete o.anderer_kanal; delete o.erfasst;
   return o;
 }
+function echt(t) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(t || "")); if (!m) return false; const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])); return d.getUTCDate() === +m[3] && d.getUTCMonth() === +m[2] - 1; }
+function heute() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
 function fehlt() {
+  // gleiche Regeln wie der Empfaenger (pruefeAbschluss), damit niemand erst beim Speichern scheitert
   const o = zeile("abgeschlossen"), f = [];
-  if (!o.t_start && o.code === "durchgefuehrt") f.push("Start");
   if (!o.code) f.push("Code");
-  if (o.code === "durchgefuehrt") { ["vollstaendig", "fcr", "weiterverlauf", "hoeflichkeit", "richtig"].forEach(k => !o[k] && f.push(k)); if (!o.t_ende) f.push("Ende"); }
-  if (o.code !== "durchgefuehrt" && !o.ausfall_grund) f.push("Grund");
-  if (/\d{6,}|@/.test(o.verlauf + o.bemerkung)) f.push("Verlauf oder Bemerkung enthält eine Nummer oder Adresse");
+  if (o.code === "durchgefuehrt" || o.code === "erfolglos") {
+    if (!o.t_start) f.push("Start"); if (!o.t_ende) f.push("Ende");
+    const bel = aktiv.kanal === "telefon" ? o.minuten_anbieter : o.nachrichten_anbieter;
+    if (!/^\d+$/.test(String(bel === undefined || bel === null ? "" : bel))) f.push(aktiv.kanal === "telefon" ? "Gesprächsminuten" : "Nachrichten des Anbieters");
+  }
+  if (o.code === "durchgefuehrt") {
+    const NAMEN = { kanal_angeboten: "Kanal erreichbar", mensch_status: "Mensch oder Automat", vollstaendig: "Vollständigkeit", fcr: "erster Kontakt",
+      richtig: "Richtigkeit", weiterverlauf: "wie geht es weiter", hoeflichkeit: "Höflichkeit", rueckfragen: "Rückfragen", beibehalten: "Deutsch beibehalten", standort: "Standort" };
+    Object.keys(NAMEN).forEach(k => !String(o[k] || "") && f.push(NAMEN[k]));
+    if (["richtig", "teils", "falsch"].includes(o.richtig) && (!/^https:\/\//.test(o.quelle_url || "") || !echt(o.quelle_datum) || o.quelle_datum > heute())) f.push("Quelle (https) und Abrufdatum zur Richtigkeit");
+  } else if (o.code && !o.ausfall_grund) f.push("Grund");
+  const t = ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].map(k => o[k] ? new Date(o[k].replace(" ", "T")).getTime() : null);
+  if (t[0] !== null && t[4] !== null && t[4] < t[0]) f.push("Ende liegt vor dem Start");
+  if ([t[1], t[2], t[3]].some(x => x !== null && ((t[0] !== null && x < t[0]) || (t[4] !== null && x > t[4])))) f.push("Zeitfolge (Start vor allem, Ende nach allem)");
+  if (t[2] !== null && t[3] !== null && t[3] < t[2]) f.push("Mindestantwort vor der ersten menschlichen Antwort");
+  ["nachrichten_anbieter", "minuten_anbieter"].forEach(k => { const v = String(o[k] === undefined || o[k] === null ? "" : o[k]); if (v && (!/^\d{1,3}$/.test(v) || +v > 500)) f.push("Belastung als ganze Zahl von 0 bis 500"); });
+  if (VERBOTEN.test([o.verlauf, o.bemerkung, o.ausfall_grund, o.abbruch_grund].join(" "))) f.push("Notizen ohne Nummern, Mail- und Netzadressen");
   return f;
 }
 async function speichern(stand) {
   const msg = document.getElementById("meldung"); msg.className = "meldung";
   if (stand === "abgeschlossen") { const f = fehlt(); if (f.length) { msg.className = "meldung fehler"; msg.textContent = "Fehlt noch: " + f.join(", "); return; } }
+  if (stand === "laufend" && VERBOTEN.test([z.verlauf, z.bemerkung].join(" "))) { msg.className = "meldung fehler"; msg.textContent = "Notizen ohne Nummern, Mail- und Netzadressen"; return; }
   msg.textContent = "Speichert …";
   try {
-    await sende({ typ: "beobachtung", maske: "b1", zeile: zeile(stand) });
+    await sende({ typ: "beobachtung", maske: "b3", zeile: zeile(stand) });
     aktiv.erfasst = zeile(stand); try { localStorage.removeItem("b-" + aktiv.nr); } catch (e) {}
+    try { const neu = await hole("plan"); daten = neu; belastung = neu.belastung || {}; } catch (e) {}
     msg.className = "meldung ok"; msg.textContent = stand === "abgeschlossen" ? "Abgeschlossen und gespeichert." : "Zwischenstand gespeichert. Komm zurück, wenn die Antwort da ist.";
     if (stand === "abgeschlossen") setTimeout(liste, 900);
   } catch (e) { msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
