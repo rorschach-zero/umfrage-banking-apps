@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
+<title>Codierung Bewertungen</title><link rel="stylesheet" href="../team.css"></head>
+<body>
+<header><div class="innen"><div class="titel"><small>Praxisarbeit HFW · Methode C</small>Codierung öffentlicher Bewertungen</div><div class="zeile"><span id="fort" class="pille">…</span><span id="wer" class="pille">…</span></div></div></header>
+<main id="main"><p class="leise">Wird geladen …</p></main>
+<div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zurueck" title="Pfeil links">‹</button><button class="knopf" id="speichern" title="Enter">Speichern und weiter</button></div></div></div>
+<script src="../team.js"></script>
+<script>
+// Regeln aus 10_pa6a/bewertungen/Codebuch.md, Version 10. Die zweite Person (Rolle B) sieht nie die Codes der ersten.
+const KAT = [
+  [1, "Wartezeit", "Dauer von abgeschickter Anfrage bis Antwort oder Lösung", "nicht: kein Zugang (2); Eröffnung (5), Kartenlieferung (6), Auftrag (9)"],
+  [2, "Erreichbarkeit", "Ob und wie man den Kundendienst überhaupt erreicht", "nicht: Antwortdauer nach abgesetzter Anfrage (1)"],
+  [3, "Antwortqualität", "Inhalt und Haltung einer erhaltenen Antwort, oder pauschales Urteil über den Support", "nicht: Dauer (1), Zugang (2)"],
+  [4, "Sperrung", "Konto, Karte oder Guthaben nach Freischaltung gesperrt, blockiert, gekündigt", "nicht: vor Freischaltung (5); Zahlungsablehnung ohne Sperre (6)"],
+  [5, "Kontoeröffnung", "Vom Antrag bis zur Freischaltung", "nicht: alles nach der Freischaltung (4)"],
+  [6, "Karte", "Karte und Bezahlen damit", "nicht: Kosten (7); ausdrückliche Sperre (4)"],
+  [7, "Preis", "Kosten, Gebühren, Zinsen, Kurse", "nicht: Rendite einer Anlage (9)"],
+  [8, "App", "Technik und Bedienung der App", "nicht: Anlagefunktion (9); Zahlungsablehnung (6)"],
+  [9, "Anlage", "Investieren, Sparen, Krypto, Vorsorge", "nicht: Kosten (7); Absturz (8)"],
+  [10, "Sonstiges", "Nur wenn keine der neun passt", "nie neben einer passenden Kategorie"]
+];
+const GRENZE = {
+  "1-2": "1 gegen 2: 2, solange keine Anfrage abgesetzt werden konnte; 1, sobald eine Anfrage abgeschickt oder eine Verbindung hergestellt war.",
+  "4-5": "4 gegen 5: 5 bis zur Freischaltung; 4 erst ab beschriebener Nutzung (Zahlung, Eingang, Karte benutzt). Unklar heisst 5.",
+  "4-6": "4 gegen 6: ausdrückliche Sperre ist 4; abgelehnte Zahlung ohne Sperre ist 6.",
+  "6-7": "6 gegen 7: Kosten sind immer 7; ein zusätzliches Funktionsproblem der Karte ist 6.",
+  "7-9": "7 gegen 9: Preise, Gebühren, Zinsen, Kurse sind 7; Angebot, Ausführung, Rendite sind 9.",
+  "8-9": "8 gegen 9: technischer Fehler ist 8, auch beim Handel; fehlende Anlagefunktion ist 9."
+};
+const AUSSCHLUSS = ["Sprache", "kein Text", "nicht Zak", "Duplikat", "nicht im Zeitraum"];
+let q = [], i = 0, wer = "", c = null;
+
+async function start() {
+  if (!schluessel()) { document.getElementById("main").replaceChildren(el("h1", {}, "Persönlicher Link fehlt"), el("p", {}, "Öffne die Maske über den Link, den du von Salah bekommen hast.")); return; }
+  try { const j = await hole("queue"); q = j.queue || []; wer = j.person; } catch (e) { document.getElementById("main").replaceChildren(el("h1", {}, "Keine Verbindung"), el("p", { class: "leise" }, e.message)); return; }
+  document.getElementById("wer").textContent = TEAM[wer] || wer;
+  q.sort((a, b) => (a.rolle + a.anbieter + a.quelle + a.schicht + String(a.position).padStart(4, "0")).localeCompare(b.rolle + b.anbieter + b.quelle + b.schicht + String(b.position).padStart(4, "0")));
+  const offen = q.findIndex(x => !x.eigen); i = offen >= 0 ? offen : 0;
+  if (!q.length) { document.getElementById("main").replaceChildren(el("h1", {}, "Noch nichts zugeteilt"), el("p", { class: "leise" }, "Die Ziehung ist am Stichtag 03.11. Danach erscheinen deine Bewertungen hier.")); return; }
+  document.getElementById("fuss").hidden = false; zeige();
+}
+function leer(x) { return { nr: x.nr, ausschluss: "", kundendienst_kontakt: "", kats: [], vals: {}, anker: "", bemerkung: "", zak_bezug: x.anbieter === "Zak" && x.quelle === "Trustpilot" ? "" : "nicht anwendbar", sprache: x.sprache || "" }; }
+function aus(e) { const k = []; const v = {}; [1, 2, 3].forEach(n => { if (e["kat_" + n]) { k.push(Number(e["kat_" + n])); v[e["kat_" + n]] = e["val_" + n]; } }); return Object.assign(leer(q[i]), { ausschluss: e.ausschluss || "", kundendienst_kontakt: e.kundendienst_kontakt || "", kats: k, vals: v, anker: e.anker || "", bemerkung: e.bemerkung || "", zak_bezug: e.zak_bezug || "nicht anwendbar" }); }
+function fortschritt() { const n = q.filter(x => x.eigen).length; document.getElementById("fort").textContent = `${n} von ${q.length}`; }
+function zeige() {
+  const x = q[i]; c = lokal("c-" + x.rolle + x.nr) || (x.eigen ? aus(x.eigen) : leer(x)); fortschritt(); bild();
+}
+function merke() { lokal("c-" + q[i].rolle + q[i].nr, c); bild(); }
+function kat(n) {
+  if (c.ausschluss) return;
+  const a = c.kats.indexOf(n);
+  if (a >= 0) { c.kats.splice(a, 1); delete c.vals[n]; }
+  else if (n === 10) { c.kats = [10]; c.vals = { 10: c.vals[10] || "" }; }
+  else if (c.kats.length < 3) { c.kats = c.kats.filter(k => k !== 10); c.kats.push(n); }
+  merke();
+}
+function hinweise() {
+  const h = [], k = c.kats;
+  for (const key of Object.keys(GRENZE)) { const [a, b] = key.split("-").map(Number); if (k.includes(a) && k.includes(b)) h.push(GRENZE[key]); }
+  if (k.includes(4) && c.kundendienst_kontakt === "ja" && !k.some(n => n <= 3)) h.push("Sperrung zählt nur zum Kundendienst, wenn zusätzlich 1, 2 oder 3 vergeben ist.");
+  if (k.includes(3) && c.kundendienst_kontakt === "nein") h.push("Pauschales Urteil über den Support ohne beschriebenen Kontakt: Kategorie 3 mit Kontakt «nein» ist richtig.");
+  if (k.length > 1) h.push("Reihenfolge: die Kategorie mit den meisten Sätzen zuerst; bei Gleichstand die zuerst genannte. Mit den Pfeilen verschieben.");
+  return h;
+}
+function bild() {
+  const x = q[i], m = document.getElementById("main");
+  const def = el("details", {}, el("summary", {}, "Kategorien und Abgrenzung"), el("table", { class: "def" }, KAT.map(([n, t, d, a]) => el("tr", {}, el("td", {}, el("b", {}, n)), el("td", {}, el("b", {}, t), el("br"), d, el("br"), el("span", { class: "leise" }, a))))));
+  fuelle(m, 
+    el("div", { class: "zeile zw" }, el("div", { class: "kicker" }, `${x.rolle === "B" ? "Zweitcodierung, unabhängig" : "Codierung"} · ${x.anbieter} · ${x.quelle} · ${x.schicht}`), el("span", { class: "pille" }, x.nr)),
+    el("div", { class: "zeile", style: "margin:8px 0 12px" }, el("span", { class: "sterne" }, "★".repeat(Number(x.sterne) || 0) + "☆".repeat(5 - (Number(x.sterne) || 0))), el("span", { class: "leise" }, `${x.datum} · ${x.sprache}`)),
+    x.text ? el("div", { class: "textbox" }, x.text) : x.fundort ? el("div", { class: "textbox" }, /^https:\/\//.test(x.fundort)
+      ? el("a", { href: x.fundort, target: "_blank", rel: "noopener noreferrer", style: "color:var(--ink);font-weight:800" }, "Bewertung öffnen ↗") : x.fundort,
+      el("div", { class: "leise", style: "margin-top:8px" }, "Lies die Bewertung auf der Plattform. Nichts kopieren, nichts antworten, kein Konto nötig.")) : el("div", { class: "textbox" }, "Text und Fundort fehlen, bitte Salah melden."),
+    el("label", { class: "f" }, "Ausschluss ", el("span", { class: "hilfe" }, "nur wenn die Bewertung nicht codiert wird")),
+    chips(AUSSCHLUSS, c.ausschluss, w => { c.ausschluss = w; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }, { abwaehlbar: true }),
+    x.anbieter === "Zak" && x.quelle === "Trustpilot" ? el("div", {}, el("label", { class: "f" }, "Zak-Bezug"), chips(["ja", "nein"], c.zak_bezug, w => { c.zak_bezug = w; if (w === "nein") { c.ausschluss = "nicht Zak"; c.kats = []; } merke(); })) : null,
+    c.ausschluss ? null : el("div", {},
+      el("label", { class: "f" }, "Beschreibt der Text einen Kontakt mit dem Kundendienst? ", el("span", { class: "hilfe" }, "Taste J oder N")),
+      chips(["ja", "nein"], c.kundendienst_kontakt, w => { c.kundendienst_kontakt = w; merke(); }),
+      el("label", { class: "f" }, "Themen, höchstens drei ", el("span", { class: "hilfe" }, "Tasten 1 bis 9, 0 für 10; die erste ist die Hauptkategorie")),
+      el("div", { class: "kat" }, KAT.map(([n, t, d]) => el("button", { type: "button", class: "chip", title: d, "aria-pressed": String(c.kats.includes(n)), on: { click: () => kat(n) } }, el("b", {}, n), " ", t, c.kats.includes(n) ? el("span", { class: "rang" }, c.kats.indexOf(n) + 1) : null))),
+      c.kats.length ? el("div", { style: "margin-top:12px" }, c.kats.map((n, r) => el("div", { class: "zeile", style: "margin:6px 0" },
+        el("b", { style: "min-width:170px" }, `${r + 1}. ${KAT[n - 1][1]}`),
+        el("div", { class: "val" }, [["-", "Kritik"], ["+", "Lob"], ["0", "neutral"]].map(([w, t]) => el("button", { type: "button", class: "chip", "aria-pressed": String(c.vals[n] === w), on: { click: () => { c.vals[n] = w; merke(); } } }, `${w} ${t}`))),
+        r > 0 ? el("button", { type: "button", class: "chip", title: "nach vorne", on: { click: () => { c.kats.splice(r, 1); c.kats.splice(r - 1, 0, n); merke(); } } }, "↑") : null))) : null,
+      hinweise().map(h => el("div", { class: "hinweisbox" }, h)),
+      def),
+    el("div", { class: "gitter" },
+      el("div", {}, el("label", { class: "f" }, "Anker ", el("span", { class: "hilfe" }, "höchstens fünf eigene Wörter, nie Wortlaut")), el("input", { class: "t", value: c.anker, maxlength: "60", on: { input: e => { c.anker = e.target.value; lokal("c-" + q[i].rolle + q[i].nr, c); } } })),
+      el("div", {}, el("label", { class: "f" }, "Bemerkung ", el("span", { class: "hilfe" }, "Zweifel, angewendete Grenzregel")), el("input", { class: "t", value: c.bemerkung, on: { input: e => { c.bemerkung = e.target.value; lokal("c-" + q[i].rolle + q[i].nr, c); } } }))),
+    el("p", { class: "leise", style: "margin-top:20px" }, "Keine Namen, keine Beträge, keine Orte. Die Sterne werden nicht gedeutet; die Valenz gilt je Thema.")
+  );
+}
+function pruefe() {
+  if (c.ausschluss) return "";
+  if (!c.kundendienst_kontakt) return "Kontakt ja oder nein fehlt";
+  if (!c.kats.length) return "Mindestens ein Thema oder ein Ausschluss";
+  if (c.kats.some(n => !c.vals[n])) return "Valenz fehlt bei einem Thema";
+  const w = c.anker.trim().split(/\s+/).filter(Boolean);
+  if (w.length > 5) return "Anker hat mehr als fünf Wörter";
+  if (/\d|@|https?:/i.test(c.anker)) return "Anker ohne Zahlen und Adressen";
+  return "";
+}
+async function speichern() {
+  const msg = document.getElementById("meldung"), f = pruefe();
+  if (f) { msg.className = "meldung fehler"; msg.textContent = f; return; }
+  const x = q[i], z = { nr: x.nr, ausschluss: c.ausschluss, kundendienst_kontakt: c.ausschluss ? "" : c.kundendienst_kontakt, anker: c.anker.trim(), bemerkung: c.bemerkung.trim(), zak_bezug: c.zak_bezug, sprache: c.sprache };
+  c.kats.forEach((n, r) => { z["kat_" + (r + 1)] = String(n); z["val_" + (r + 1)] = c.vals[n]; });
+  msg.className = "meldung"; msg.textContent = "Speichert …";
+  try {
+    await sende({ typ: "codierung", rolle: x.rolle, maske: "c1", zeile: z });
+    x.eigen = Object.assign({ codiert_von: wer }, z); try { localStorage.removeItem("c-" + x.rolle + x.nr); } catch (e) {}
+    msg.className = "meldung ok"; msg.textContent = "Gespeichert.";
+    const n = q.findIndex((y, k) => k > i && !y.eigen); i = n >= 0 ? n : Math.min(i + 1, q.length - 1); zeige();
+    if (q.every(y => y.eigen)) { msg.textContent = "Alles codiert. Danke."; }
+  } catch (e) { msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
+}
+document.getElementById("speichern").addEventListener("click", speichern);
+document.getElementById("zurueck").addEventListener("click", () => { if (i > 0) { i--; zeige(); } });
+document.addEventListener("keydown", e => {
+  if (!c || ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) { if (e.key === "Enter" && document.activeElement.tagName === "INPUT") speichern(); return; }
+  if (/^[0-9]$/.test(e.key)) { kat(e.key === "0" ? 10 : Number(e.key)); e.preventDefault(); }
+  else if (e.key === "j" || e.key === "J") { c.kundendienst_kontakt = "ja"; merke(); }
+  else if (e.key === "n" || e.key === "N") { c.kundendienst_kontakt = "nein"; merke(); }
+  else if ((e.key === "-" || e.key === "+" || e.key === "=") && c.kats.length) { const l = c.kats[c.kats.length - 1]; c.vals[l] = e.key === "-" ? "-" : "+"; merke(); }
+  else if (e.key === "Enter") { speichern(); e.preventDefault(); }
+  else if (e.key === "ArrowLeft" && i > 0) { i--; zeige(); }
+});
+start();
+</script>
+</body></html>

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
+<title>Servicebeobachtung</title><link rel="stylesheet" href="../team.css"></head>
+<body>
+<header><div class="innen"><div class="titel"><small>Praxisarbeit HFW · Methode B</small>Servicebeobachtung</div><div id="wer" class="pille">…</div></div></header>
+<main id="main"><p class="leise">Wird geladen …</p></main>
+<div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zwischen">Zwischenstand</button><button class="knopf" id="fertig">Abschliessen</button></div></div></div>
+<script src="../team.js"></script>
+<script>
+// Regeln aus 10_pa6a/beobachtung/Testprotokoll.md, Version 4. Die Maske schlaegt vor, die Person entscheidet.
+const SKRIPT = {
+  Karte: { frage: "Wenn ich meine Karte im Ausland verliere, was muss ich tun?", elemente: ["Wo man die Karte sperrt", "Wie man Ersatz anfordert"] },
+  Anmeldung: { frage: "Wenn ich ein neues Handy bekomme, wie richte ich die App dort wieder ein?", elemente: ["Neuinstallation", "Identifikation", "Was man dafür braucht"] },
+  Zahlung: { frage: "Wie sehe ich in der App, ob eine Zahlung beim Empfänger angekommen ist?", elemente: ["Ort in der App oder Statusbezeichnung (auch korrekt: Empfang nicht sichtbar, Status «ausgeführt»)"] },
+  Kontodokumente: { frage: "Wo finde ich einen Kontoauszug für die Steuererklärung?", elemente: ["Ort in der App oder Bestellweg"] }
+};
+const FRIST = { // Minuten bis Mensch, danach bis Mindestantwort; Beobachtung gesamt
+  telefon: { mensch: 20, antwort: 15, gesamt: 35, text: "20 min bis eine Person spricht, dann 15 min für die Antwort" },
+  chat: { mensch: 60, antwort: 60, gesamt: 120, text: "60 min bis zur ersten menschlichen Antwort, dann 60 min" },
+  mail: { mensch: 1440, antwort: 4320, gesamt: 4320, text: "24 h bis zur ersten menschlichen Antwort, Beobachtung bis 72 h" },
+  formular: { mensch: 1440, antwort: 4320, gesamt: 4320, text: "24 h bis zur ersten menschlichen Antwort, Beobachtung bis 72 h" }
+};
+const HINWEISE = ["Name oder Kürzel", "Bezug auf ein Detail der Frage", "Sichtbare Tippzeit oder Schreibanzeige", "Freitext ohne Bausteincharakter"];
+const HOEFLICH = [[1, "abweisend oder herablassend"], [2, "einsilbig, geht nicht auf Dank oder Rückfrage ein"], [3, "korrekt und sachlich"], [4, "freundlich, nimmt Bezug auf die Person"], [5, "freundlich und vorausschauend, bietet ungefragt Hilfe an"]];
+const STOPP = { nachrichten: 42, minuten: 140 };
+let daten = null, aktiv = null, z = {}, belastung = {};
+
+function frei(s) { return (s || "").replace(/\s+/g, " ").trim(); }
+async function start() {
+  if (!schluessel()) { document.getElementById("main").replaceChildren(el("h1", {}, "Persönlicher Link fehlt"), el("p", {}, "Öffne die Maske über den Link, den du von Salah bekommen hast. Er enthält deinen Schlüssel.")); return; }
+  try { daten = await hole("plan"); } catch (e) { document.getElementById("main").replaceChildren(el("h1", {}, "Keine Verbindung"), el("p", { class: "leise" }, e.message)); return; }
+  belastung = daten.belastung || {};
+  document.getElementById("wer").textContent = TEAM[daten.person] || daten.person;
+  liste();
+}
+function statusVon(r) { const e = r.erfasst; return !e ? "offen" : e.stand === "abgeschlossen" ? "abgeschlossen" : "laufend"; }
+function liste() {
+  aktiv = null; document.getElementById("fuss").hidden = true;
+  const m = document.getElementById("main"); fuelle(m, );
+  const p = (daten.plan || []).slice().sort((a, b) => (a.tag + a.block).localeCompare(b.tag + b.block));
+  const fertig = p.filter(r => statusVon(r) === "abgeschlossen").length;
+  m.append(el("div", { class: "kicker" }, "Dein Einsatzplan"), el("h1", {}, p.length ? `${fertig} von ${p.length} Kontakten abgeschlossen` : "Noch kein Einsatz zugeteilt"),
+    el("div", { class: "balken" }, el("div", { style: `width:${p.length ? Math.round(100 * fertig / p.length) : 0}%` })));
+  const last = Object.entries(belastung).map(([a, x]) => el("span", { class: "pille " + (x.nachrichten > STOPP.nachrichten * .8 || x.minuten > STOPP.minuten * .8 ? "orange" : "") }, `${a} ${x.nachrichten}/${STOPP.nachrichten} Nachr. · ${x.minuten}/${STOPP.minuten} min`));
+  if (last.length) m.append(el("h2", {}, "Belastung je Anbieter, ganze Gruppe"), el("div", { class: "chips" }, last));
+  for (const gruppe of ["laufend", "offen", "abgeschlossen"]) {
+    const g = p.filter(r => statusVon(r) === gruppe); if (!g.length) continue;
+    m.append(el("h2", {}, { laufend: "Läuft, Antwort ausstehend", offen: "Als Nächstes", abgeschlossen: "Erledigt" }[gruppe]));
+    g.forEach(r => m.append(el("div", { class: "karte klick", tabindex: "0", on: { click: () => oeffne(r), keydown: e => e.key === "Enter" && oeffne(r) } },
+      el("div", { class: "zeile zw" }, el("b", {}, `${r.nr} · ${r.anbieter} · ${r.anliegen}`), el("span", { class: "pille " + (gruppe === "abgeschlossen" ? "gruen" : gruppe === "laufend" ? "orange" : "") }, r.kanal)),
+      el("div", { class: "leise" }, `${r.tag || "Tag offen"} · Block ${r.block} (${r.block === "A" ? "09 bis 12 Uhr" : "13 bis 17 Uhr"}) · Wiederholung ${r.wiederholung}`))));
+  }
+  m.append(el("p", { class: "leise", style: "margin-top:28px" }, "Abend und Wochenende werden nicht beobachtet. Keine Kontodaten, keine Namen, keine Zitate eintragen."));
+}
+function oeffne(r) {
+  aktiv = r;
+  z = Object.assign({ nr: r.nr, code: "durchgefuehrt", kanal_angeboten: "ja", sprache_antwort: "Deutsch", stand: "laufend", hinweise: [], elemente: [] }, lokal("b-" + r.nr) || {}, r.erfasst || {});
+  if (typeof z.mensch_hinweise === "string") z.hinweise = z.mensch_hinweise ? z.mensch_hinweise.split("|") : [];
+  formular(); document.getElementById("fuss").hidden = false; scrollTo(0, 0);
+}
+function setze(k, v) { z[k] = v; lokal("b-" + aktiv.nr, z); formular(); }
+function vorschlaege() {
+  const f = FRIST[aktiv.kanal], v = {};
+  const n = (SKRIPT[aktiv.anliegen] || { elemente: [] }).elemente.length, h = (z.elemente || []).length;
+  v.vollstaendig = !z.t_antwort && !h ? "" : h === n ? "vorhanden" : h > 0 ? "teilweise" : "fehlt";
+  if (aktiv.kanal === "telefon") v.mensch_status = z.t_mensch ? "Mensch" : "";
+  else v.mensch_status = z.auto_selbst ? "Automat" : z.t_mensch ? ((z.hinweise || []).length >= 2 ? "wahrscheinlich Mensch" : "unklar") : "";
+  v.fcr = v.vollstaendig === "vorhanden" && !z.anderer_kanal ? "ja" : v.vollstaendig === "teilweise" ? "unklar" : (z.t_ende ? "nein" : "");
+  const bisMensch = minuten(z.t_start, z.t_mensch);
+  if (z.kanal_angeboten === "nein") v.code = "nicht angeboten";
+  else if (z.t_start && !z.t_mensch && z.t_ende && minuten(z.t_start, z.t_ende) >= f.mensch) v.code = "erfolglos";
+  else if (bisMensch !== null && bisMensch > f.mensch) v.code = "erfolglos";
+  else v.code = "durchgefuehrt";
+  return v;
+}
+function zeitfeld(k, titel, hilfe) {
+  const inp = el("input", { class: "t", type: "datetime-local", value: z[k] || "", on: { change: e => setze(k, e.target.value) } });
+  return el("div", {}, el("label", { class: "f" }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")),
+    el("div", { class: "zeit" }, inp, el("button", { type: "button", class: "knopf zwei", on: { click: () => setze(k, jetztLokal()) } }, "Jetzt")));
+}
+const ANZEIGE = { durchgefuehrt: "durchgeführt", "nicht zugaenglich": "nicht zugänglich", "nicht pruefbar": "nicht prüfbar", "Schritt erklaert": "Schritt erklärt" };
+function wahl(k, titel, werte, hilfe, vorschlag) {
+  return el("div", {}, el("label", { class: "f" }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")),
+    chips(werte.map(w => [w, ANZEIGE[w] || w]), z[k] || "", w => setze(k, w), { abwaehlbar: true }),
+    vorschlag && vorschlag !== z[k] ? el("div", { class: "vorschlag" }, "Vorschlag nach Regel: ", el("b", {}, ANZEIGE[vorschlag] || vorschlag), " ", el("button", { type: "button", class: "chip", on: { click: () => setze(k, vorschlag) } }, "übernehmen")) : null);
+}
+function text(k, titel, hilfe, mehr) {
+  const a = { class: "t", value: z[k] || "", on: { input: e => { z[k] = e.target.value; lokal("b-" + aktiv.nr, z); } } };
+  return el("div", {}, el("label", { class: "f" }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")), mehr ? el("textarea", a, z[k] || "") : el("input", a));
+}
+function formular() {
+  const r = aktiv, s = SKRIPT[r.anliegen] || { frage: "", elemente: [] }, f = FRIST[r.kanal], v = vorschlaege(), m = document.getElementById("main");
+  const lauf = minuten(z.t_start, jetztLokal()), last = belastung[r.anbieter] || { nachrichten: 0, minuten: 0 };
+  fuelle(m, 
+    el("button", { type: "button", class: "knopf hell", on: { click: liste } }, "‹ Einsatzplan"),
+    el("div", { class: "kicker", style: "margin-top:16px" }, `Kontakt ${r.nr} · Wiederholung ${r.wiederholung}`),
+    el("h1", {}, `${r.anbieter} · ${r.anliegen} · ${r.kanal}`),
+    el("div", { class: "chips" }, el("span", { class: "pille" }, `Block ${r.block}`), el("span", { class: "pille" }, f.text), lauf !== null && !z.t_ende ? el("span", { class: "pille orange" }, `läuft seit ${lauf} min`) : null),
+    last.nachrichten > STOPP.nachrichten || last.minuten > STOPP.minuten ? el("div", { class: "hinweisbox" }, `Stoppregel erreicht bei ${r.anbieter}: keine weiteren Kontakte, bitte Salah melden.`) : null,
+
+    el("h2", {}, "1 · Frage stellen"),
+    el("div", { class: "karte akzent" }, el("div", { class: "kicker" }, "Fragekern, so wörtlich wie möglich"), el("p", { style: "font-size:19px;font-weight:700;margin:6px 0 10px" }, "«" + s.frage + "»"),
+      el("button", { type: "button", class: "chip", on: { click: async e => { try { await navigator.clipboard.writeText(s.frage); e.target.textContent = "Kopiert"; } catch (x) {} } } }, "Frage kopieren")),
+    el("p", { class: "leise" }, "Nur diese Frage. Auf Rückfragen wahrheitsgemäss antworten, bedanken, beenden, sobald die Mindestantwort da ist. Auf «Ist das ein Test?» ehrlich antworten. Nie sperren, nachforschen oder etwas ändern lassen."),
+    el("div", { class: "gitter" }, text("konto_aktiv_seit", "Konto aktiv seit", "Monat und Jahr"), text("app_version", "App-Version", "aus den Einstellungen")),
+    wahl("kanal_angeboten", "Kanal vorhanden und erreichbar?", ["ja", "nein"], "Nein heisst Code «nicht angeboten», Quelle unten angeben"),
+
+    el("h2", {}, "2 · Zeitstempel"),
+    el("p", { class: "leise" }, "Auf «Jetzt» tippen, wenn es passiert. Bei Mail und Formular die Zeit aus dem Verlauf eintragen."),
+    zeitfeld("t_start", "Start", "Anruf gewählt, Nachricht gesendet, Mail abgeschickt"),
+    zeitfeld("t_auto", "Erste automatische Reaktion", "Bot, Autoreply, Ansage; leer lassen, wenn keine"),
+    zeitfeld("t_mensch", "Erste menschliche Antwort", r.kanal === "telefon" ? "eine Person spricht, nicht Ansage oder Menü" : "erste Antwort mit Hinweisen auf eine Person"),
+    zeitfeld("t_antwort", "Mindestantwort vollständig", "leer lassen, wenn sie nicht kam"),
+    zeitfeld("t_ende", "Ende", "Antwort erhalten, Abbruch oder Frist abgelaufen"),
+    z.t_start ? el("p", { class: "leise" }, `Bis Mensch: ${minuten(z.t_start, z.t_mensch) ?? "–"} min · bis Mindestantwort: ${minuten(z.t_start, z.t_antwort) ?? "–"} min`) : null,
+
+    r.kanal !== "telefon" ? el("div", {}, el("h2", {}, "3 · Mensch oder Automat"),
+      el("label", { class: "f" }, "Hinweise auf eine Person ", el("span", { class: "hilfe" }, "zwei oder mehr heisst «wahrscheinlich Mensch»")),
+      el("div", { class: "chips" }, HINWEISE.map(h => el("button", { type: "button", class: "chip", "aria-pressed": String((z.hinweise || []).includes(h)), on: { click: () => { const a = new Set(z.hinweise || []); a.has(h) ? a.delete(h) : a.add(h); setze("hinweise", [...a]); } } }, h))),
+      el("label", { class: "f" }, el("input", { type: "checkbox", checked: z.auto_selbst || null, on: { change: e => setze("auto_selbst", e.target.checked) } }), " Antwort gibt sich selbst als automatisch zu erkennen (Bot-Name, Kennzeichnung)")) : el("h2", {}, "3 · Mensch am Telefon wird über den Zeitstempel erfasst"),
+    wahl("mensch_status", "Status", ["Mensch", "wahrscheinlich Mensch", "unklar", "Automat"], "", v.mensch_status),
+
+    el("h2", {}, "4 · Antwort beurteilen"),
+    el("label", { class: "f" }, "Welche Elemente der Mindestantwort kamen?"),
+    el("div", { class: "chips" }, s.elemente.map(x => el("button", { type: "button", class: "chip", "aria-pressed": String((z.elemente || []).includes(x)), on: { click: () => { const a = new Set(z.elemente || []); a.has(x) ? a.delete(x) : a.add(x); setze("elemente", [...a]); } } }, x))),
+    wahl("vollstaendig", "Vollständigkeit", ["vorhanden", "teilweise", "fehlt"], "unabhängig von der Richtigkeit", v.vollstaendig),
+    el("label", { class: "f" }, el("input", { type: "checkbox", checked: z.anderer_kanal || null, on: { change: e => setze("anderer_kanal", e.target.checked) } }), " Rückruf angekündigt, auf anderen Kanal verwiesen oder vertröstet"),
+    wahl("fcr", "Beim ersten Kontakt beantwortet", ["ja", "nein", "unklar"], "gleicher Anruf, Chatverlauf oder Mailfaden", v.fcr),
+    wahl("richtig", "Richtigkeit", ["richtig", "teils", "falsch", "nicht pruefbar", "offen"], "gegen die Hilfeseite des Anbieters; «offen», wenn du später prüfst"),
+    el("div", { class: "gitter" }, text("quelle_url", "Quelle (Hilfeseite, FAQ)", "Adresse"), text("quelle_datum", "Abgerufen am", "JJJJ-MM-TT")),
+    el("label", { class: "f" }, "Rückfragen des Anbieters ", el("span", { class: "hilfe" }, "inhaltlich, Identifikation zählt nicht")),
+    chips(["0", "1", "2", "3", "4+"], String(z.rueckfragen ?? ""), w => setze("rueckfragen", w)),
+    el("div", { class: "gitter" }, text("sprache_antwort", "Sprache der Antwort"), el("div", {}, wahl("beibehalten", "Deutsch beibehalten?", ["ja", "nein"]))),
+    wahl("standort", "Standort genannt", ["Schweiz", "Ausland", "nicht genannt"], "nur, wenn der Anbieter ihn selbst nennt"),
+    wahl("weiterverlauf", "Wie geht es weiter?", ["Schritt erklaert", "Verweis", "nichts"], "nur «Schritt erklärt» zählt als erfüllt"),
+    el("label", { class: "f" }, "Höflichkeit ", el("span", { class: "hilfe" }, "nur Umgangston, kanalgerecht")),
+    el("div", { class: "chips" }, HOEFLICH.map(([n, t]) => el("button", { type: "button", class: "chip", title: t, "aria-pressed": String(String(z.hoeflichkeit) === String(n)), on: { click: () => setze("hoeflichkeit", String(n)) } }, `${n} · ${t}`))),
+
+    el("h2", {}, "5 · Ergebnis und Belastung"),
+    wahl("code", "Code", ["durchgefuehrt", "nicht angeboten", "nicht zugaenglich", "erfolglos", "ausgefallen"], "", v.code),
+    z.code && z.code !== "durchgefuehrt" ? text("ausfall_grund", "Grund", "z. B. Warteschleife 20 min, Kanal fehlt laut Website") : null,
+    text("abbruch_grund", "Abbruch, falls ja", "Nachlauf überschritten, Kanal nicht erreichbar, Anbieter verlangt Kontoänderung, Testperson bricht ab"),
+    el("div", { class: "gitter" }, r.kanal === "telefon" ? text("minuten_anbieter", "Gesprächsminuten mit einer Person", "Zahl") : text("nachrichten_anbieter", "Nachrichten des Anbieters", "Zahl")),
+    text("verlauf", "Verlauf in Stichworten", "Uhrzeit, Schritt, Antwort sinngemäss; keine Namen, keine Zitate", true),
+    text("bemerkung", "Bemerkung", "ein Satz")
+  );
+}
+function zeile(stand) {
+  const v = vorschlaege(), o = Object.assign({}, z, { stand });
+  o.mensch_hinweise = (z.hinweise || []).join("|");
+  ["vollstaendig", "fcr", "mensch_status", "code"].forEach(k => { if (!o[k]) o[k] = v[k] || ""; });
+  ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].forEach(k => { if (o[k]) o[k] = o[k].replace("T", " "); });
+  o.datum = (o.t_start || "").slice(0, 10);
+  o.verlauf = frei(o.verlauf); o.bemerkung = frei(o.bemerkung);
+  delete o.hinweise; delete o.elemente; delete o.auto_selbst; delete o.anderer_kanal; delete o.erfasst;
+  return o;
+}
+function fehlt() {
+  const o = zeile("abgeschlossen"), f = [];
+  if (!o.t_start && o.code === "durchgefuehrt") f.push("Start");
+  if (!o.code) f.push("Code");
+  if (o.code === "durchgefuehrt") { ["vollstaendig", "fcr", "weiterverlauf", "hoeflichkeit", "richtig"].forEach(k => !o[k] && f.push(k)); if (!o.t_ende) f.push("Ende"); }
+  if (o.code !== "durchgefuehrt" && !o.ausfall_grund) f.push("Grund");
+  if (/\d{6,}|@/.test(o.verlauf + o.bemerkung)) f.push("Verlauf oder Bemerkung enthält eine Nummer oder Adresse");
+  return f;
+}
+async function speichern(stand) {
+  const msg = document.getElementById("meldung"); msg.className = "meldung";
+  if (stand === "abgeschlossen") { const f = fehlt(); if (f.length) { msg.className = "meldung fehler"; msg.textContent = "Fehlt noch: " + f.join(", "); return; } }
+  msg.textContent = "Speichert …";
+  try {
+    await sende({ typ: "beobachtung", maske: "b1", zeile: zeile(stand) });
+    aktiv.erfasst = zeile(stand); try { localStorage.removeItem("b-" + aktiv.nr); } catch (e) {}
+    msg.className = "meldung ok"; msg.textContent = stand === "abgeschlossen" ? "Abgeschlossen und gespeichert." : "Zwischenstand gespeichert. Komm zurück, wenn die Antwort da ist.";
+    if (stand === "abgeschlossen") setTimeout(liste, 900);
+  } catch (e) { msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
+}
+document.getElementById("zwischen").addEventListener("click", () => speichern("laufend"));
+document.getElementById("fertig").addEventListener("click", () => speichern("abgeschlossen"));
+start();
+</script>
+</body></html>
