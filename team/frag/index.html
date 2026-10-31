@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
-<title>PA6 Assistent</title><link rel="stylesheet" href="../team.css">
+<title>Pia · PA6</title><link rel="stylesheet" href="../team.css">
 <style>
 main{padding-bottom:150px}
 .verlauf{display:flex;flex-direction:column;gap:12px;margin:8px 0 18px}
@@ -14,9 +14,9 @@ main{padding-bottom:150px}
 .leer{border:1.5px dashed var(--line);border-radius:var(--card);padding:18px}
 </style></head>
 <body>
-<header><div class="innen"><div class="titel"><small>Praxisarbeit HFW · Gruppe 601</small>PA6 Assistent</div><div class="zeile"><span id="wer" class="pille">…</span></div></div></header>
+<header><div class="innen"><div class="titel"><small>Praxisarbeit HFW · Gruppe 601</small>Pia</div><div class="zeile"><button id="leitung" class="pille" hidden type="button" aria-pressed="false">Leitung aus</button><span id="wer" class="pille">…</span></div></div></header>
 <main id="main">
-<div class="karte akzent"><div class="kicker">So funktioniert es</div><p style="margin:6px 0 0">Frag alles zu deinen Aufgaben, Terminen und den Regeln für Testkontakte und Codierung. Der Assistent kennt Briefing, Mappen, Lead-Blätter, Testprotokoll, Codebuch und deinen aktuellen Stand. Er erklärt Regeln, entscheidet aber keinen Einzelfall für dich. Bei Widerspruch gelten Auftrag und Merkmalblatt, dann Testprotokoll und Codebuch, dann Lead-Blatt und Briefing. Ist etwas unklar, frag Salah.</p>
+<div class="karte akzent"><div class="kicker">So funktioniert es</div><p style="margin:6px 0 0">Ich bin Pia. Frag mich alles zu deinen Aufgaben, Fristen, deinem Lead-Blatt, Notion, der 6b, dem Projektmanagement und den Regeln für Testkontakte und Codierung. Ich kenne alle Unterlagen aus dem Unterricht und deinen aktuellen Stand. Ich erkläre Regeln, entscheide aber keinen Einzelfall für dich. Bei Widerspruch gelten Auftrag und Merkmalblatt, dann Testprotokoll und Codebuch, dann Lead-Blatt und Briefing. Ist etwas unklar, frag Salah.</p>
 <p class="leise" style="margin:8px 0 0">Bitte keine Namen, Telefonnummern oder Adressen eingeben. Zur Beantwortung gehen deine Frage, die letzten Nachrichten dieses Gesprächs und dein eigener Stand an Anthropic (USA). Gespeichert wird der Verlauf nur in deinem Browser. Übernimmst du etwas in den Bericht, deklarierst du es als KI-Hilfe, zitierst es und legst den vollständigen Verlauf in den Anhang, dafür gibt es unten «Verlauf als Datei».</p></div>
 <div id="vorschlaege" class="chips" style="margin:14px 0"></div>
 <div id="verlauf" class="verlauf"></div>
@@ -27,13 +27,15 @@ main{padding-bottom:150px}
 </div></div>
 <script src="../team.js"></script>
 <script>
+const VORSCHLAEGE_LEITUNG = ["Wie ist die Lage heute?", "Welche Fristen werden in den nächsten 14 Tagen knapp?", "Wer braucht gerade Unterstützung?", "Was übersehe ich?"];
 const VORSCHLAEGE = ["Was steht für mich als Nächstes an?", "Was mache ich, wenn bei einer Bank niemand abnimmt?", "Wann ist meine Abgabe und wo steht das?", "Was mache ich bei einem Codierkonflikt?", "Was gilt bei der Stoppregel?"];
-const SPEICHER = "pa6frag_" + (schluessel() || "").slice(0, 8);   // je Schluessel getrennt
-let verlauf = lokal(SPEICHER) || [];
+let leitung = false;
+const speicher = () => "pa6frag_" + (schluessel() || "").slice(0, 8) + (leitung ? "_leitung" : "");   // je Schluessel und Rolle getrennt
+let verlauf = lokal(speicher()) || [];
 const V = document.getElementById("verlauf"), T = document.getElementById("text"), B = document.getElementById("senden");
 function zeigen(denkt) {
   fuelle(V, verlauf.length ? verlauf.map(v => el("div", { class: "bl " + (v.rolle === "du" ? "du" : "as") + (v.fehler ? " fehler" : "") }, v.text)) : el("div", { class: "leer leise" }, "Noch keine Frage. Tipp auf einen Vorschlag oder schreib unten."),
-    denkt ? el("div", { class: "denkt" }, "Der Assistent schaut nach …") : null);
+    denkt ? el("div", { class: "denkt" }, "Pia schaut nach …") : null);
   scrollTo(0, document.body.scrollHeight);
 }
 async function fragen(text) {
@@ -41,23 +43,24 @@ async function fragen(text) {
   if (VERBOTEN.test(text)) { verlauf.push({ rolle: "assistent", text: "Bitte ohne Nummern, Mail- und Netzadressen fragen.", fehler: true }); zeigen(); return; }
   verlauf.push({ rolle: "du", text }); T.value = ""; B.disabled = true; zeigen(true);
   try {
-    const r = await sende({ typ: "frage", text, verlauf: verlauf.filter(v => !v.fehler).slice(-7, -1) });
+    const r = await sende({ typ: "frage", text, leitung, verlauf: verlauf.filter(v => !v.fehler).slice(-7, -1) });
     verlauf.push({ rolle: "assistent", text: r.antwort });
   } catch (e) { verlauf.push({ rolle: "assistent", text: String(e.message || e), fehler: true }); }
-  B.disabled = false; lokal(SPEICHER, verlauf.slice(-40)); zeigen(); T.focus();
+  B.disabled = false; lokal(speicher(), verlauf.slice(-40)); zeigen(); T.focus();
 }
 fuelle(document.getElementById("vorschlaege"), VORSCHLAEGE.map(v => el("button", { type: "button", class: "chip", on: { click: () => fragen(v) } }, v)));
 B.addEventListener("click", () => fragen(T.value));
 T.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); fragen(T.value); } });
 T.addEventListener("input", () => { T.style.height = "auto"; T.style.height = Math.min(160, T.scrollHeight) + "px"; document.getElementById("info").textContent = T.value.length > 800 ? T.value.length + " von 1000 Zeichen" : ""; });
-document.getElementById("neu").addEventListener("click", () => { verlauf = []; lokal(SPEICHER, []); zeigen(); });
+document.getElementById("neu").addEventListener("click", () => { verlauf = []; lokal(speicher(), []); zeigen(); });
 document.getElementById("datei").addEventListener("click", () => {
-  const t = "PA6 Assistent, Verlauf vom " + new Date().toLocaleString("de-CH") + "\n\n" + verlauf.map(v => (v.rolle === "du" ? "Frage: " : "Antwort: ") + v.text).join("\n\n");
-  const a = el("a", { href: URL.createObjectURL(new Blob([t], { type: "text/plain" })), download: "PA6_Assistent_Verlauf.txt" }); document.body.append(a); a.click(); a.remove();
+  const t = "Pia, Verlauf vom " + new Date().toLocaleString("de-CH") + "\n\n" + verlauf.map(v => (v.rolle === "du" ? "Frage: " : "Antwort: ") + v.text).join("\n\n");
+  const a = el("a", { href: URL.createObjectURL(new Blob([t], { type: "text/plain" })), download: "Pia_Verlauf.txt" }); document.body.append(a); a.click(); a.remove();
 });
 (async () => {
-  if (!schluessel()) { fuelle(document.getElementById("main"), el("div", { class: "karte" }, "Öffne den Assistenten über deinen persönlichen Link.")); document.querySelector(".fuss").hidden = true; return; }
-  try { const r = await hole("info"); document.getElementById("wer").textContent = TEAM[r.person] || r.person; } catch (e) { document.getElementById("wer").textContent = "kein Zugriff"; }
+  if (!schluessel()) { fuelle(document.getElementById("main"), el("div", { class: "karte" }, "Öffne Pia über deinen persönlichen Link.")); document.querySelector(".fuss").hidden = true; return; }
+  try { const r = await hole("info"); document.getElementById("wer").textContent = TEAM[r.person] || r.person;
+    if (r.person === "SA") { const L = document.getElementById("leitung"); L.hidden = false; L.addEventListener("click", () => { leitung = !leitung; L.setAttribute("aria-pressed", String(leitung)); L.textContent = leitung ? "Leitung an" : "Leitung aus"; verlauf = lokal(speicher()) || []; fuelle(document.getElementById("vorschlaege"), (leitung ? VORSCHLAEGE_LEITUNG : VORSCHLAEGE).map(v => el("button", { type: "button", class: "chip", on: { click: () => fragen(v) } }, v))); zeigen(); }); } } catch (e) { document.getElementById("wer").textContent = "kein Zugriff"; }
   zeigen();
 })();
 </script>
