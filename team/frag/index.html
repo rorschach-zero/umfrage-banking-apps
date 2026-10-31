@@ -16,8 +16,8 @@ main{padding-bottom:150px}
 <body>
 <header><div class="innen"><div class="titel"><small>Praxisarbeit HFW · Gruppe 601</small>PA6 Assistent</div><div class="zeile"><span id="wer" class="pille">…</span></div></div></header>
 <main id="main">
-<div class="karte akzent"><div class="kicker">So funktioniert es</div><p style="margin:6px 0 0">Frag alles zu deinen Aufgaben, Terminen und den Regeln für Testkontakte und Codierung. Der Assistent kennt Briefing, Mappen, Lead-Blätter, Testprotokoll, Codebuch und deinen aktuellen Stand. Er erklärt Regeln, entscheidet aber keinen Einzelfall für dich. Im Zweifel gilt, was Salah sagt.</p>
-<p class="leise" style="margin:8px 0 0">Bitte keine Namen, Telefonnummern oder Adressen eingeben. Die Frage wird zur Beantwortung an Anthropic (USA) übermittelt, der Verlauf bleibt nur in deinem Browser. Übernimmst du etwas in den Bericht, gilt es als KI-Hilfe und braucht die Deklaration, dafür gibt es unten «Verlauf als Datei».</p></div>
+<div class="karte akzent"><div class="kicker">So funktioniert es</div><p style="margin:6px 0 0">Frag alles zu deinen Aufgaben, Terminen und den Regeln für Testkontakte und Codierung. Der Assistent kennt Briefing, Mappen, Lead-Blätter, Testprotokoll, Codebuch und deinen aktuellen Stand. Er erklärt Regeln, entscheidet aber keinen Einzelfall für dich. Bei Widerspruch gelten Auftrag und Merkmalblatt, dann Testprotokoll und Codebuch, dann Lead-Blatt und Briefing. Ist etwas unklar, frag Salah.</p>
+<p class="leise" style="margin:8px 0 0">Bitte keine Namen, Telefonnummern oder Adressen eingeben. Zur Beantwortung gehen deine Frage, die letzten Nachrichten dieses Gesprächs und dein eigener Stand an Anthropic (USA). Gespeichert wird der Verlauf nur in deinem Browser. Übernimmst du etwas in den Bericht, deklarierst du es als KI-Hilfe, zitierst es und legst den vollständigen Verlauf in den Anhang, dafür gibt es unten «Verlauf als Datei».</p></div>
 <div id="vorschlaege" class="chips" style="margin:14px 0"></div>
 <div id="verlauf" class="verlauf"></div>
 </main>
@@ -28,7 +28,8 @@ main{padding-bottom:150px}
 <script src="../team.js"></script>
 <script>
 const VORSCHLAEGE = ["Was steht für mich als Nächstes an?", "Was mache ich, wenn bei einer Bank niemand abnimmt?", "Wann ist meine Abgabe und wo steht das?", "Was mache ich bei einem Codierkonflikt?", "Was gilt bei der Stoppregel?"];
-let verlauf = lokal("pa6frag") || [];
+const SPEICHER = "pa6frag_" + (schluessel() || "").slice(0, 8);   // je Schluessel getrennt
+let verlauf = lokal(SPEICHER) || [];
 const V = document.getElementById("verlauf"), T = document.getElementById("text"), B = document.getElementById("senden");
 function zeigen(denkt) {
   fuelle(V, verlauf.length ? verlauf.map(v => el("div", { class: "bl " + (v.rolle === "du" ? "du" : "as") + (v.fehler ? " fehler" : "") }, v.text)) : el("div", { class: "leer leise" }, "Noch keine Frage. Tipp auf einen Vorschlag oder schreib unten."),
@@ -43,13 +44,13 @@ async function fragen(text) {
     const r = await sende({ typ: "frage", text, verlauf: verlauf.filter(v => !v.fehler).slice(-7, -1) });
     verlauf.push({ rolle: "assistent", text: r.antwort });
   } catch (e) { verlauf.push({ rolle: "assistent", text: String(e.message || e), fehler: true }); }
-  B.disabled = false; lokal("pa6frag", verlauf.slice(-40)); zeigen(); T.focus();
+  B.disabled = false; lokal(SPEICHER, verlauf.slice(-40)); zeigen(); T.focus();
 }
 fuelle(document.getElementById("vorschlaege"), VORSCHLAEGE.map(v => el("button", { type: "button", class: "chip", on: { click: () => fragen(v) } }, v)));
 B.addEventListener("click", () => fragen(T.value));
 T.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); fragen(T.value); } });
 T.addEventListener("input", () => { T.style.height = "auto"; T.style.height = Math.min(160, T.scrollHeight) + "px"; document.getElementById("info").textContent = T.value.length > 800 ? T.value.length + " von 1000 Zeichen" : ""; });
-document.getElementById("neu").addEventListener("click", () => { verlauf = []; lokal("pa6frag", []); zeigen(); });
+document.getElementById("neu").addEventListener("click", () => { verlauf = []; lokal(SPEICHER, []); zeigen(); });
 document.getElementById("datei").addEventListener("click", () => {
   const t = "PA6 Assistent, Verlauf vom " + new Date().toLocaleString("de-CH") + "\n\n" + verlauf.map(v => (v.rolle === "du" ? "Frage: " : "Antwort: ") + v.text).join("\n\n");
   const a = el("a", { href: URL.createObjectURL(new Blob([t], { type: "text/plain" })), download: "PA6_Assistent_Verlauf.txt" }); document.body.append(a); a.click(); a.remove();
