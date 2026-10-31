@@ -1,7 +1,7 @@
 // Gemeinsame Hilfen fuer die Erfassungsmasken (Schluessel, Abruf, Speichern). Kein Inhalt verlaesst das Geraet ausser an den Empfaenger.
 // Notizen: keine Nummern, Mail- und Netzadressen (gleiche Regel wie im Empfaenger).
 const VERBOTEN = /[\w.+-]+@[\w-]+\.[\w.-]+|https?:\/\/|www\.|\b[\w-]+\.(ch|com|net|org|de|io|app|li)\b|(?:\+|00)?\d[\d\s\/.-]{6,}\d|\bCH\d{2}\s?\d{4}/i;
-const ENDPUNKT = "";   // Web-App-URL des Empfaengers erfassung.gs, nach der Bereitstellung eintragen
+const ENDPUNKT = "https://script.google.com/macros/s/AKfycbwKYjD-T2hJvIi84_RlplTnkqDE7ilWuDftVvfRa4ZR61V3s6S83lQ7IcTygDzJkHRI/exec";   // Web-App-URL des Empfaengers erfassung.gs, nach der Bereitstellung eintragen
 const TEAM = { SA: "Salah", ES: "Ernes", MG: "Melisa", AM: "Arber", LB: "Leonie" };
 function schluessel() {
   const h = new URLSearchParams(location.hash.slice(1)).get("k");
