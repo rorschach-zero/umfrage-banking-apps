@@ -8,6 +8,7 @@ const paths = {documents:'M4 3h11l5 5v13H4zM14 3v6h6M8 13h8M8 17h6',profile:'M20
 let view = new URLSearchParams(location.search).get('view') || 'today';
 if (view === 'writing') view = 'tasks';
 if (!labels[view]) view = 'today';
+let noteSaving = false;
 let area = new URLSearchParams(location.search).get('area') || '', pending = null;
 let data = null, state = 'loading', person = 'SA', leadership = false, filter = 'open', key = '', generation = 0, lastLoaded = 0, errorMessage = '';
 const $ = id => document.getElementById(id);
@@ -62,8 +63,12 @@ function piaLink(row, label='Pia fragen') {
   else if (/^(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(row.id||'')) url.searchParams.set('ctx',row.id);
   return el('a',{class:'button secondary pia-link',href:url.pathname+url.search,referrerpolicy:'no-referrer',onClick:rememberPiaRole},label);
 }
+function plainLabel(value) {
+  return String(value||'').replace(/Probecodierung|Schulungsfälle[n]?/gi,'Übungsbewertungen').replace(/Probe B/gi,'Übungskontakt').replace(/Arbeitspakete[n]?/gi,'Aufgaben').replace(/Servicebeobachtung B/g,'Kundenservice testen').replace(/Inhaltsanalyse C/g,'Bewertungen untersuchen').replace(/Maske B/g,'Kontaktmaske').replace(/Maske C/g,'Bewertungsmaske').replace(/\bPSP\b/g,'Aufgabenplan').replace(/\s*\(C\d(?:, C\d)*\)/g,'');
+}
+function areaTitle(module) {return ({b:'Kundenservice testen',c:'Bewertungen untersuchen',writing:'Kapitel schreiben',tasks:'Weitere Aufgaben'})[module.id]||plainLabel(module.title);}
 function shortTitle(row) {
-  let title=(row.title || 'Aufgabe noch offen').replace(/^(?:AP|EA)-[\w-]+\s*[·:–-]?\s*/,'');
+  let title=plainLabel(row.title || 'Aufgabe noch offen').replace(/^(?:AP|EA)-[\w-]+\s*[·:–-]?\s*/,'');
   const ownName=names[data?.person];
   if(ownName)title=title.replace(new RegExp('^'+ownName+'\\s*[·:–-]\\s*'),'');
   return title.replace(/^[ABC](?:\s*[·:–-]\s*|\s+)/,'')
@@ -112,8 +117,8 @@ function workLink(row) {
   const doc=url.protocol==='https:' && url.hostname==='docs.google.com' && /^\/document\//.test(url.pathname);
   const drive=url.protocol==='https:' && url.hostname==='drive.google.com';
   if(!internal&&!doc&&!drive)return null;
-  const label=doc?'Kapitel-Doc öffnen':internal?(url.pathname.includes('/b')?'Maske B öffnen':'Maske C öffnen'):'Unterlagen öffnen';
-  return el('a',{class:'button work-link',href:internal?url.pathname:preview.active()&&doc?url.origin+url.pathname.replace(/(?:\/edit)?\/?$/, '/preview'):url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
+  const label=doc?'Kapitel-Doc öffnen':internal?(url.pathname.includes('/b')?'Kontaktmaske öffnen':'Bewertungsmaske öffnen'):'Unterlagen öffnen';
+  return el('a',{class:'button secondary work-link',href:internal?url.pathname:preview.active()&&doc?url.origin+url.pathname.replace(/(?:\/edit)?\/?$/, '/preview'):url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
 }
 function steps(row) {
   if(cardText(row,"So geht's")==='noch offen')return el('p',{class:'field-open'},'Die Schritte sind noch nicht hinterlegt. Pia hilft dir weiter.');
@@ -121,7 +126,7 @@ function steps(row) {
   return el('ul',{class:'step-list'},values.map(value=>{
     const storageKey=stepKey(row,value), checked=stepDone(row,value);
     const input=el('input',{type:'checkbox','aria-label':value,disabled:preview.active(),onChange:()=>{if(preview.active())return;try{localStorage.setItem(storageKey,input.checked?'1':'0');render();}catch{announce('Der Schritt kann in diesem Browser nicht gespeichert werden.');}}});input.checked=checked;
-    return el('li',{},el('label',{},input,el('span',{},value)));
+    return el('li',{},el('label',{},input,el('span',{},plainLabel(value))));
   }));
 }
 function allTasks(){return [...(data.tasks||[]),...(data.assignments||[]),...(data.chapters||[])];}
@@ -148,23 +153,23 @@ function areaSummary(module){
   return module.done+' von '+module.total+' '+unit+(module.id==='c'?' · Soll bis heute '+module.expected:'');
 }
 function openArea(id){area=id;navigate('tasks');}
-function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'B':module.id==='c'?'C':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},module.title),el('small',{},areaSummary(module))),el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
+function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'↗':module.id==='c'?'≡':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},areaTitle(module)),el('small',{},areaSummary(module))),el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
 function serviceCard(){
   const s=data.service;if(!s||s.error)return null;
-  return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Servicebeobachtung B'),el('p',{},(s.probeDone?'Probe erledigt':'Probe jetzt möglich')+' · '+s.done+' von '+s.config.target+' Kontakten'),el('small',{},'Offizieller Feldbeginn '+date(s.config.official))),el('a',{class:'button secondary',href:'/team/b/'},s.probeDone?'Kontakte öffnen':'Probe und Konten wählen'));
+  return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Kundenservice testen'),el('p',{},(s.probeDone?'Übungskontakt erledigt':'Übungskontakt jetzt möglich')+' · '+s.done+' von '+s.config.target+' Kontakten'),el('small',{},'Die eigentlichen Kontakte beginnen am '+date(s.config.official))),el('a',{class:'button secondary',href:'/team/b/'},s.probeDone?'Kontakte öffnen':'Übungskontakt öffnen'));
 }
 function shareCard(){return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Umfrage teilen'),el('p',{},(data.sharing?.done??'–')+' von 2 Kanälen · ohne Namen im Link')),button('Umfrage teilen',()=>navigate('sharing'),'button secondary'));}
 function fieldLeadership(){
   return el('section',{class:'field-leadership'},el('h2',{},'Erhebung und Verteilung'),
-    data.service?.open?el('p',{},'Offene B-Zellen · '+data.service.open.map(r=>r.provider+' '+r.open).join(' · ')):null,
+    data.service?.open?el('p',{},'Noch offene Kontakte · '+data.service.open.map(r=>r.provider+' '+r.open).join(' · ')):null,
     data.sharing?.people?el('ul',{},data.sharing.people.map(r=>el('li',{},names[r.person]+' · '+r.done+' von 2 Kanälen'))):null,
     el('details',{},el('summary',{},'Übernahmen · '+(data.transfers?.length||0)),el('ul',{},(data.transfers||[]).map(r=>{let change={};try{change=JSON.parse(r.change);}catch{}return el('li',{},r.date+' · '+r.nr+' · '+(names[change.alt]||'frei')+' → '+(names[change.neu]||r.person));}))));
 }
 function practiceCard(){
-  return data.practice?.total ? el('section',{class:'practice-card'},el('div',{},el('strong',{},'Probecodierung · 01./02.11.'),el('p',{},data.practice.done+' von '+data.practice.total+' Schulungsfällen · getrennt von der Erhebung')),el('a',{class:'button secondary',href:'/team/c/'},'Probe codieren')) : null;
+  return data.practice?.total ? el('section',{class:'practice-card'},el('div',{},el('strong',{},'Übungsbewertungen'),el('p',{},data.practice.done+' von '+data.practice.total+' Übungen erledigt')),el('a',{class:'button secondary',href:'/team/c/'},'Bewerten üben')) : null;
 }
 function leadMetric(label,value,field=false){
-  return el('div',{class:'lead-metric'},el('dt',{},label),el('dd',{},value&&value.done!==null?value.done+' / '+value.total:'unbekannt'),field&&value?el('small',{},'Soll '+value.expected+(label==='B'?' · davon erledigt '+value.expectedDone:'')):null);
+  return el('div',{class:'lead-metric'},el('dt',{},label),el('dd',{},value&&value.done!==null?value.done+' / '+value.total:'unbekannt'),field&&value?el('small',{},'Soll '+value.expected+(label==='Kontakte'?' · davon erledigt '+value.expectedDone:'')):null);
 }
 function takeOver(row){
   details(row,'Übernahme prüfen',true);
@@ -180,30 +185,55 @@ function showLeadership(){
   const cards=data.leadership.map(summary=>{
     const issues=(data.blockers||[]).filter(issue=>issue.owner===summary.person),row=allTasks().find(item=>item.id===summary.taskId);
     const labels=[summary.overdue?summary.overdue+' überfällig':null,summary.backlog?'Rückstand unter 80 % Soll':null,summary.blockers?summary.blockers+' Hänger':null,summary.unknown?'Stand teilweise unbekannt':null].filter(Boolean);
-    return el('section',{class:'lead-person','data-person':summary.person,'data-priority':summary.priority},el('div',{class:'lead-person-head'},el('h2',{},names[summary.person]),el('span',{class:'lead-status'+(summary.priority>=2?' urgent':'')},labels.join(' · ')||'Im Plan')),
-      el('dl',{class:'lead-metrics'},leadMetric('B',summary.b,true),leadMetric('C',summary.c,true),leadMetric('Schreiben',summary.writing),leadMetric('Pakete',summary.tasks)),
-      el('div',{class:'lead-next'},el('span',{},row?shortTitle(row)+' · '+relativeDue(row):'Keine offene Aufgabe verknüpft.'),row?button('Ich übernehme',()=>takeOver(row),'button secondary takeover'):null),
-      issues.length?el('details',{class:'lead-issues'},el('summary',{},'Hänger ansehen · '+issues.length),el('ul',{},issues.map(issue=>el('li',{},el('span',{},({b:'B',c:'C',writing:'Schreiben',tasks:'Pakete'}[issue.area]||'Aufgabe')+' · '+issue.text),(()=>{const task=allTasks().find(item=>item.id===issue.taskId);return task?button('Ich übernehme',()=>takeOver(task),'text-button takeover'):el('small',{},'Aufgabe noch nicht verknüpft.');})())))):null);
+    return el('section',{class:'lead-person','data-person':summary.person,'data-priority':summary.priority},el('div',{class:'lead-person-head'},el('h2',{},el('span',{class:'person-avatar','aria-hidden':'true'},names[summary.person][0]),names[summary.person]),el('span',{class:'lead-status'+(summary.priority>=2?' urgent':'')},labels.join(' · ')||'Im Plan')),
+      button('Ansicht öffnen',()=>openPerson(summary.person),'button secondary view-person'),el('dl',{class:'lead-metrics'},leadMetric('Kontakte',summary.b,true),leadMetric('Bewertungen',summary.c,true),leadMetric('Schreiben',summary.writing),leadMetric('Aufgaben',summary.tasks)),
+      el('div',{class:'lead-next'},el('span',{},row?shortTitle(row)+' · '+relativeDue(row):'Keine offene Aufgabe verknüpft.'),row?button('Aufgabe ansehen',()=>details(row),'text-button'):null),
+      issues.length?el('details',{class:'lead-issues'},el('summary',{},'Hänger ansehen · '+issues.length),el('ul',{},issues.map(issue=>el('li',{},el('span',{},({b:'Kontakte',c:'Bewertungen',writing:'Schreiben',tasks:'Aufgaben'}[issue.area]||'Aufgabe')+' · '+issue.text),(()=>{const task=allTasks().find(item=>item.id===issue.taskId);return task?button('Ich übernehme',()=>takeOver(task),'text-button takeover'):el('small',{},'Aufgabe noch nicht verknüpft.');})())))):null);
   });
-  return [heading('Leitungsübersicht','Alle fünf Personen · Dringendes zuerst.'),el('p',{class:'quiet-note'},'B und C: erledigt / zugeteilt, Soll bis gestern. Schreiben: Kapitel als Pate oder Zweitleser. Pakete: eigene Arbeitspakete. Die Probe zählt separat.'),el('div',{class:'lead-people'},cards),fieldLeadership(),serviceCard(),shareCard(),practiceCard()];
+  return [heading('Leitungsübersicht','Alle fünf Personen · Dringendes zuerst.'),el('p',{class:'quiet-note'},'Öffne eine Personensicht oder prüfe eine Aufgabe. Die Personensichten sind nur zum Lesen.'),el('div',{class:'lead-people'},cards),proposalInbox(),fieldLeadership(),serviceCard(),shareCard(),practiceCard()];
+}
+function personalRows() {return allTasks().filter(r=>r.owner===data.person||r.reader===data.person);}
+function weekRows(rows) {
+  const now=new Date(today()+'T12:00:00Z'),start=new Date(now),end=new Date(now);
+  start.setUTCDate(start.getUTCDate()-((now.getUTCDay()+6)%7));end.setUTCDate(start.getUTCDate()+6);
+  const first=start.toISOString().slice(0,10),last=end.toISOString().slice(0,10);
+  return sortRows(rows.filter(r=>r.due&&day(r.due)<=last&&(!completed(r)||day(r.due)>=first))).slice(0,5);
+}
+function nextFocus(rows) {
+  const open=sortRows(rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'));
+  const urgent=open.find(r=>overdue(r)||day(r.start||r.due)<=today());
+  const task=r=>({title:shortTitle(r),description:overdue(r)?'Die Frist ist überschritten. Öffne die Aufgabe und melde deinen Stand.':'Öffne die Aufgabe. Dort siehst du, was als Nächstes zu tun ist.',duration:'Etwa 2 Min. zum Prüfen und Starten · Schätzung',label:'Aufgabe öffnen →',action:()=>details(r)});
+  if(urgent)return task(urgent);
+  if(data.sharing&&Number.isFinite(data.sharing.done)&&data.sharing.done<2)return {title:'Teile die Umfrage',description:'Wähle einen passenden Kanal und schicke den Link weiter.',duration:'Etwa 5 Min. · Schätzung',label:'Jetzt teilen →',action:()=>navigate('sharing')};
+  if(data.service&&!data.service.error&&!data.service.probeDone)return {title:'Übe deinen ersten Kontakt',description:'Gehe einen Übungskontakt durch, bevor die eigentlichen Kontakte beginnen.',duration:'Etwa 10 Min. · Schätzung',label:'Übungskontakt öffnen →',href:'/team/b/'};
+  if(data.practice&&data.practice.done<data.practice.total)return {title:'Übe das Bewerten',description:'Ordne eine Übungsbewertung zu und lerne die Eingabe kennen.',duration:'Etwa 5 Min. je Bewertung · Schätzung',label:'Übungsbewertungen öffnen →',href:'/team/c/'};
+  if(open.length)return task(open[0]);
+  if(state!=='ready'||data.workspaceState!=='ready')return {title:'Prüfe deinen aktuellen Stand',description:'Ein Teil deiner Aufgaben ist noch unbekannt. Lade den Stand erneut.',duration:'Etwa 1 Min. · Schätzung',label:'Stand erneut laden →',action:()=>load()};
+  return {title:rows.some(r=>r.status==='in Prüfung')?'Deine Aufgaben sind in Prüfung':'Für heute ist nichts offen',description:rows.some(r=>r.status==='in Prüfung')?'Salah schaut sich deine Meldungen an.':'In Meine Arbeit findest du deine Bereiche und erledigten Aufgaben.',duration:'Etwa 1 Min. für deinen Überblick · Schätzung',label:'Meine Arbeit öffnen →',action:()=>{area='';navigate('tasks');}};
+}
+function weeklyRow(row) {
+  const item=taskRow(row);item.classList.add('week-row');
+  const due=item.querySelector('.due-chip');due.textContent=date(row.due);
+  if(overdue(row)){item.classList.add('is-overdue');item.querySelector('.status-dot').setAttribute('aria-label','Überfällig');if(canReport(row))item.append(button('Fertig melden',()=>report(row),'text-button quick-report'));}
+  return item;
 }
 function showToday(){
   if(leadership && data.person==='SA')return showLeadership();
-  const open=sortRows(allTasks().filter(r=>!completed(r)&&r.status!=='in Prüfung'&&(r.owner===data.person||r.reader===data.person)));
-  const focus=nextActions(open)[0], blockers=(data.blockers||[]).filter(b=>b.owner===data.person), count=blockers.length;
-  const status=count?count+' '+(count===1?'Sache hängt.':'Dinge hängen.'):data.workspaceState==='ready'?'Du bist im Plan.':'Ein Teil deines Stands ist noch unbekannt.';
-  return [heading('Hallo, '+names[data.person]+'.',status),blockerList(blockers),serviceCard(),shareCard(),practiceCard(),
-    el('section',{class:'focus-card'},el('p',{class:'eyebrow'},'Dein nächster Schritt'),el('h2',{},focus?focus.title:'Zeit für deinen Überblick'),el('p',{},focus?(focus.description==='noch offen'?'Öffne die Aufgabe und kläre deinen nächsten Schritt.':focus.description):'Öffne deine Arbeitsbereiche und sieh, wo du stehst.'),focus?el('span',{class:'focus-due'},relativeDue(focus)):null,focus?.tool?el('a',{class:'button',href:focus.tool},'Kontakt erfassen'):button(focus?'Aufgabe ansehen':'Meine Arbeit öffnen',()=>focus?details(focus.row):navigate('tasks'))),
-    el('section',{class:'area-overview'},el('h2',{},'Deine Arbeitsbereiche'),(data.areas||[]).map(areaLine),!(data.areas||[]).length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null),
-    open.length>1?el('section',{class:'next-list'},el('h2',{},'Danach'),taskList(open.filter(row=>row.id!==focus?.row?.id).slice(0,3))):null,
-    el('p',{class:'group-line'},data.group?'Gemeinsam · '+(data.group.done??'Stand unbekannt')+' von '+data.group.total+' Arbeitspaketen erledigt':'Gruppenstand unbekannt')];
+  const rows=personalRows(),week=weekRows(rows),late=rows.filter(overdue).length,focus=nextFocus(rows);
+  const known=state==='ready'&&data.workspaceState==='ready'&&Object.values(data.sources).every(s=>s.state==='ready');
+  const issues=(data.blockers||[]).filter(b=>b.owner===data.person&&b.type!=='overdue');
+  const status=late?late+(late===1?' Sache ist überfällig ›':' Sachen sind überfällig ›'):!known?'Dein Stand ist teilweise unbekannt':issues.length?'Deine Aufgaben brauchen Aufmerksamkeit ›':'Alles im Plan';
+  const head=heading('Hallo '+names[data.person]+'.','');head.firstChild.append(late||issues.length?button(status,()=>{area='';navigate('tasks');},'text-button today-status'+(late?' overdue':'')):el('p',{class:'subtitle today-status'},status));
+  return [head,el('section',{class:'focus-card'},el('p',{class:'eyebrow'},'Als Nächstes'),el('h2',{},focus.title),el('p',{},focus.description),el('span',{class:'focus-duration'},focus.duration),focus.href?el('a',{class:'button',href:focus.href},focus.label):button(focus.label,focus.action)),
+    el('section',{class:'week-list'},el('div',{class:'list-heading'},el('h2',{},'Diese Woche'),el('small',{},week.filter(completed).length+' von '+week.length+' erledigt')),week.length?el('ul',{class:'task-list'},week.map(weeklyRow)):el('p',{class:'quiet-note'},'Diese Woche sind keine Aufgaben fällig.'),button('Alle Aufgaben ansehen →',()=>{area='';navigate('tasks');},'text-button')),
+    el('p',{class:'group-line'},data.group&&data.group.done!==null?'Gemeinsam · '+data.group.done+' von '+data.group.total+' Aufgaben erledigt':'Gruppenstand unbekannt')];
 }
-function groupedTasks(rows){
+function groupedTasks(rows,compact=false){
   const now=new Date(today()+'T12:00:00Z'),end=new Date(now);end.setUTCDate(end.getUTCDate()+(7-(now.getUTCDay()||7)));
   const week=end.toISOString().slice(0,10),soon=new Date(end.getTime()+14*86400000).toISOString().slice(0,10);
   const groups={'Diese Woche':[],Demnächst:[],Später:[],Erledigt:[]};
   sortRows(rows).forEach(r=>groups[completed(r)?'Erledigt':r.due&&day(r.due)<=week?'Diese Woche':r.due&&day(r.due)<=soon?'Demnächst':'Später'].push(r));
-  return Object.entries(groups).filter(([,list])=>list.length).map(([label,list])=>label==='Erledigt'?el('details',{class:'done-list'},el('summary',{},'Erledigt · '+list.length),taskList(list)):el('section',{class:'task-group'},el('h3',{},label,el('span',{},list.length)),taskList(list)));
+  return Object.entries(groups).filter(([,list])=>list.length).map(([label,list])=>label==='Erledigt'||compact&&label!=='Diese Woche'?el('details',{class:label==='Erledigt'?'done-list':'future-list'},el('summary',{},label+' · '+list.length),taskList(list)):el('section',{class:'task-group'},el('h3',{},label,el('span',{},list.length)),taskList(list)));
 }
 function blockerNote(blocker){
   const module=(data.areas||[]).find(item=>item.id===blocker.area),row=allTasks().find(item=>item.id===blocker.taskId);
@@ -217,13 +247,13 @@ function areaBlockers(id){return blockerList((data.blockers||[]).filter(b=>b.are
 function showTasks(){
   const modules=data.areas||[],selected=modules.find(m=>m.id===area);
   const rows=selected?areaRows(selected):allTasks(), done=rows.filter(completed).length;
-  if(!selected)return [heading('Meine Arbeit','Deine Bereiche. Dein nächster Schritt.'),el('div',{class:'work-modules'},modules.map(module=>el('section',{class:'work-module'},areaLine(module),el('div',{class:'module-foot'},el('span',{},areaRows(module).filter(r=>!completed(r)).length+' offene Aufgaben'),button('Bereich öffnen',()=>openArea(module.id),'text-button'))))),!modules.length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null];
+  if(!selected)return [heading('Meine Arbeit','Alle Aufgaben und Werkzeuge an einem Ort.'),el('section',{class:'all-work'},el('h2',{},'Deine Aufgaben'),...groupedTasks(leadership?allTasks():personalRows(),true)),el('details',{class:'work-tools',open:true},el('summary',{},'Deine Werkzeuge'),shareCard(),practiceCard(),serviceCard()),el('div',{class:'work-modules'},modules.map(module=>el('section',{class:'work-module'},areaLine(module),el('div',{class:'module-foot'},el('span',{},areaRows(module).filter(r=>!completed(r)).length+' offene Aufgaben'),button('Bereich öffnen',()=>openArea(module.id),'text-button'))))),!modules.length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null];
   const next=selected.next;
-  return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(selected.title,''),window.createPurposeCard(area,rememberPiaRole),areaBlockers(area),
+  return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(areaTitle(selected),''),window.createPurposeCard(area,rememberPiaRole),areaBlockers(area),
     selected.id==='writing'?writingFolderLink():null,selected.id==='b'?serviceCard():null,
     progress(selected.done,selected.total,areaSummary(selected)),
     next?el('p',{class:'next-contact'},'Nächster '+date(next.date)+' · Block '+next.block+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Formular'}[next.channel]||next.channel)):null,
-    selected.tool?el('a',{class:'button area-tool',href:selected.tool},area==='b'?'Nächsten Kontakt erfassen':'Weiter codieren'):selected.id==='writing'?workLink(sortRows(rows).find(row=>!completed(row)&&/^https:\/\/docs.google.com\/document\//.test(row.Wo||''))||{}):null,
+    selected.tool?el('a',{class:'button area-tool',href:selected.tool},area==='b'?'Nächsten Kontakt erfassen':'Bewertungen öffnen'):selected.id==='writing'?workLink(sortRows(rows).find(row=>!completed(row)&&/^https:\/\/docs.google.com\/document\//.test(row.Wo||''))||{}):null,
     el('div',{class:'list-heading'},el('h2',{},'Meine Aufgaben'),el('small',{},done+' von '+rows.length+' erledigt')),
     ...groupedTasks(rows),!rows.length?el('p',{class:'quiet-note'},'Deine Einsätze findest du direkt im Werkzeug.'):null];
 }
@@ -279,22 +309,61 @@ function openPia() {
   if (config.demo) return modal('Mit Pia klären',el('p',{},'Im Echtbetrieb öffnet dieser Einstieg deine bestehende Pia-Seite mit demselben persönlichen Zugang.'),el('p',{},'Beispiel für deinen Einstieg: «Was steht als Nächstes an?»'),el('p',{},'Dies ist die lokale Vorschau. Es wurde keine Verbindung aufgebaut.'),button('Zurück zu Heute',()=>{$('detail').close();navigate('today');}));
   rememberPiaRole(); location.assign(config.piaPath);
 }
-function modal(title,...content) {$('detail-body').replaceChildren(el('h2',{id:'detail-title'},title),...content.flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false)); if(!$('detail').open)$('detail').showModal();}
+function modal(title,...content) {$('detail').classList.remove('task-detail');$('detail-body').replaceChildren(el('h2',{id:'detail-title'},title),...content.flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false)); if(!$('detail').open)$('detail').showModal();}
+function statusSteps(row) {
+  const states=['offen','läuft','in Prüfung','fertig'],index=completed(row)?3:states.indexOf(row.status);
+  return el('ol',{class:'status-steps','aria-label':'Aufgabenstatus'},['Offen','Läuft','In Prüfung','Fertig'].map((label,i)=>el('li',{class:i===index?'current':i<index?'passed':'','aria-current':i===index?'step':null},el('span',{'aria-hidden':'true'},i<index?'✓':String(i+1)),label)));
+}
+function canReview(row) {return !preview.active()&&state==='ready'&&leadership&&row.status==='in Prüfung'&&['psp','assignments'].includes(row.source);}
+function taskFooter(row,takeover) {
+  const footer=el('footer',{class:'task-footer'});let primary;
+  if(preview.active()||takeover)primary=el('p',{class:'footer-state'},'Diese Ansicht ist nur zum Lesen.');
+  else if(canReport(row))primary=button(row.status==='offen'?'Ich fange an':'Fertig melden ✓',()=>report(row,row.status==='offen'?'läuft':'in Prüfung'),'button primary-action');
+  else if(canReview(row)){primary=button('Abnehmen ✓',()=>report(row,'fertig'),'button primary-action');footer.append(button('Zurückgeben',()=>report(row,'läuft'),'text-button return-task'));}
+  else if(!['psp','assignments'].includes(row.source)&&workLink(row)&&state==='ready'){primary=workLink(row);primary.className='button primary-action';}
+  else {primary=button(completed(row)?'Fertig ✓':row.status==='in Prüfung'?'Wartet auf Salah':state!=='ready'?'Aktuellen Stand laden':'Werkzeug noch nicht verknüpft',()=>{},'button primary-action');primary.disabled=true;}
+  if(primary.tagName==='BUTTON'&&(pending||noteSaving))primary.disabled=true;footer.append(primary);return footer;
+}
+function proposalNotes(row) {
+  const notes=(data.deadlineProposals||[]).filter(n=>n.id===row.id);
+  return notes.length?el('section',{class:'proposal-notes'},el('h3',{},'Vorschläge an Salah'),notes.map(n=>el('p',{},'Vorgeschlagen: '+date(n.date)+' · '+n.text,el('small',{},'Von '+(names[n.person]||'Teammitglied')+' · '+date(n.created&&String(n.created).replace(' ','T'),true)+' · Frist unverändert')))):null;
+}
 function details(row,origin='Projektplanung',takeover=false){
+  if(pending){announce('Die Meldung wird gespeichert. Du kannst noch Rückgängig wählen.');return;}
   $('detail').dataset.owner=row.owner||data.person;
   const notion=leadership&&/^[a-f0-9-]{32,36}$/i.test(row.id||'')?el('a',{class:'source notion-link',href:'https://www.notion.so/'+row.id.replace(/-/g,''),rel:'noopener noreferrer'},'In Notion öffnen'):null;
-  modal(shortTitle(row),preview.active()?el('p',{class:'read-only-note'},'Ansicht von '+names[data.person]+' · nur lesen'):null,el('p',{class:'detail-what'},cardText(row,'Was')==='noch offen'?shortTitle(row):row.Was),
-    el('p',{class:'detail-due'+(overdue(row)?' overdue':'')},relativeDue(row),' · ',row.status||'Status unbekannt'),
+  const late=overdue(row)?el('section',{class:'late-note'},el('strong',{},'Frist überschritten'),el('p',{},relativeDue(row)),canReport(row)&&!takeover?button('Jetzt fertig melden',()=>report(row),'text-button'):null,canReport(row)&&!takeover?button('Neue Frist vorschlagen',()=>deadlineProposal(row),'text-button'):null):null;
+  const scroll=el('div',{class:'detail-scroll'},statusSteps(row),el('h2',{id:'detail-title'},shortTitle(row)),el('p',{class:'detail-due'},relativeDue(row)),late,
     row.waitingOn?el('p',{class:'quiet-note dependency-wait'},'Startet nach: '+row.waitingOn):null,
     el('p',{class:'acceptance'},el('strong',{},'Fertig, wenn … '),cardText(row,'Fertig wenn')),
-    el('h3',{},'So geht’s'),steps(row),el('p',{class:'local-note'},preview.active()?'Lokale Schritte der Person werden in dieser Ansicht nicht verändert.':'Deine Schritte bleiben auf diesem Gerät gespeichert.'),
-    el('div',{class:'task-actions'},workLink(row),piaLink(row)),
-    !workLink(row)?el('p',{class:'quiet-note'},'Das Werkzeug ist noch nicht verknüpft. Pia hilft dir beim Einstieg.'):null,
-    !takeover&&canReport(row)&&row.status==='offen'?button('Bearbeitung starten',()=>report(row,'läuft'),'text-button start-detail'):null,
-    !takeover&&canReport(row)?button('Als erledigt melden',()=>report(row),'text-button report-detail'):null,
-    !takeover&&leadership&&row.status==='in Prüfung'&&['psp','assignments'].includes(row.source)?button('Prüfung abschliessen',()=>report(row,'fertig'),'text-button'):null,
-    el('details',{class:'more'},el('summary',{},'Mehr'),el('h3',{},'Warum'),el('p',{},cardText(row,'Warum')),el('p',{class:'source'},cardText(row,'Auftragsquelle')),el('p',{class:'source'},cardText(row,'Herkunft')),el('p',{class:'source'},origin+' · '+(row.ref||'')),el('p',{class:'source'},'Start '+date(row.start,true)+' · Frist '+date(row.due,true)),notion));
-  $('detail-title').className='sr-only';
+    el('h3',{},'So geht’s'),steps(row),el('p',{class:'local-note'},preview.active()?'Diese Ansicht ist nur zum Lesen.':'Deine Schritte bleiben auf diesem Gerät gespeichert.'),
+    el('div',{class:'task-actions'},workLink(row),piaLink(row)),proposalNotes(row),
+    el('details',{class:'more'},el('summary',{},'Auftrag und Quellen'),el('h3',{},'Auftrag im Wortlaut'),el('p',{},cardText(row,'Was')),el('h3',{},'Warum'),el('p',{},cardText(row,'Warum')),el('p',{class:'source'},cardText(row,'Auftragsquelle')),el('p',{class:'source'},cardText(row,'Herkunft')),el('p',{class:'source'},origin+' · '+(row.ref||'')),notion));
+  $('detail').classList.add('task-detail');$('detail-body').replaceChildren(scroll,taskFooter(row,takeover));if(!$('detail').open)$('detail').showModal();scroll.scrollTop=0;
+  $('detail').querySelector('.primary-action:not(:disabled)')?.focus({preventScroll:true});
+}
+function proposalInbox() {
+  if(data.deadlineProposals===null)return el('p',{class:'quiet-note'},'Fristvorschläge sind gerade unbekannt.');
+  const notes=data.deadlineProposals||[];
+  return notes.length?el('section',{class:'proposal-inbox'},el('h2',{},'Neue Fristvorschläge'),el('p',{class:'quiet-note'},'Vorschläge zur Besprechung. Die bisherigen Fristen gelten weiter.'),notes.map(n=>{const row=allTasks().find(r=>r.id===n.id);return el('div',{class:'proposal-note'},el('p',{},(names[n.person]||'Teammitglied')+' · '+(row?shortTitle(row):'Aufgabe')+' · '+date(n.date)),el('p',{},n.text),row?button('Aufgabe ansehen',()=>details(row),'text-button'):null);})):null;
+}
+function deadlineProposal(row) {
+  if(!canReport(row)||pending||noteSaving)return;
+  const dateInput=el('input',{type:'date',required:true,min:today(),id:'proposal-date'}),note=el('textarea',{id:'proposal-text',required:true,maxlength:500,rows:3}),feedback=el('p',{role:'status'});
+  const form=el('form',{class:'deadline-form'},el('p',{},'Salah sieht deinen Vorschlag als Notiz. Die bisherige Frist gilt weiter.'),el('label',{for:'proposal-date'},'Vorgeschlagene Frist'),dateInput,el('label',{for:'proposal-text'},'Kurze Begründung'),note,feedback);
+  const save=el('button',{type:'submit',class:'button'},'Vorschlag an Salah speichern');
+  const back=button('Zurück zur Aufgabe',()=>details(row),'text-button');form.append(save,back);
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();if(!form.reportValidity()||!note.value.trim()||noteSaving)return;
+    if(config.demo){feedback.textContent='In der Vorschau wird keine Notiz gespeichert.';return;}
+    const access=key,identity=data.person;noteSaving=true;save.disabled=true;back.disabled=true;
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);
+    try {const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'deadline_proposal',k:access,leitung:leadership,id:row.id,date:dateInput.value,text:note.value.trim()}),signal:controller.signal,referrerPolicy:'no-referrer'}),result=await response.json();if(!response.ok||!result.ok||result.id!==row.id)throw Error(result.fehler||'Vorschlag nicht bestätigt.');
+      if(key!==access||data?.person!==identity)return;
+      $('detail').close();toast('✓ Vorschlag für Salah gespeichert. Die Frist bleibt unverändert.');await load();
+    }catch(error){feedback.textContent=error.name==='AbortError'?'Verbindung unterbrochen. Bitte vor erneutem Speichern den Stand laden.':error.message;}finally{clearTimeout(timer);noteSaving=false;save.disabled=false;back.disabled=false;render();}
+  });
+  modal('Neue Frist vorschlagen',form);dateInput.focus();
 }
 function toast(text,action){$('toast').replaceChildren(el('span',{},text),action||[]);$('toast').hidden=false;}
 async function postStatus(row,from,to,access,lead){
@@ -307,19 +376,20 @@ async function postStatus(row,from,to,access,lead){
   }finally{clearTimeout(timer);}
 }
 function report(row,target='in Prüfung'){
-  if(preview.active()||pending||state!=='ready'||(!canReport(row)&&!(leadership&&row.status==='in Prüfung'&&target==='fertig')))return;
+  if(preview.active()||pending||noteSaving||state!=='ready'||(!canReport(row)&&!(canReview(row)&&['fertig','läuft'].includes(target))))return;
   if(config.demo){toast('In der Vorschau wird kein Status gespeichert.');return;}
   const access=key,lead=leadership,identity=data.person;
   pending={id:row.id,timer:null};
+  const returning=row.status==='in Prüfung'&&target==='läuft';
   const undo=button('Rückgängig',()=>{clearTimeout(pending.timer);pending=null;toast('Meldung zurückgenommen.');render();},'toast-undo');
-  toast('Meldung wird in 5 Sekunden gesendet.',undo);$('detail').close();render();
+  toast((returning?'Zurückgeben':target==='läuft'?'Start':target==='fertig'?'Abnahme':'Fertigmeldung')+' wird in 5 Sekunden gespeichert.',undo);$('detail').close();render();
   pending.timer=setTimeout(async()=>{
     if(key!==access||data?.person!==identity){pending=null;toast('Zugang geändert. Meldung zurückgenommen.');return;}
     toast('Wird gespeichert …');
     try{
       if(row.status==='offen'&&target==='in Prüfung')await postStatus(row,'offen','läuft',access,lead);
       await postStatus(row,row.status,target,access,lead);
-      toast(target==='fertig'?'✓ Prüfung abgeschlossen.':target==='läuft'?'✓ Bearbeitung gestartet.':'✓ Zur Prüfung gemeldet. Gut gemacht.');$('toast').classList.add('success');
+      toast(target==='fertig'?'✓ Prüfung abgeschlossen.':returning?'✓ Zur Bearbeitung zurückgegeben.':target==='läuft'?'✓ Bearbeitung gestartet.':'✓ Zur Prüfung gemeldet. Gut gemacht.');$('toast').classList.add('success');
     }catch(error){toast((error.name==='AbortError'?'Verbindung unterbrochen. Bitte Stand prüfen.':error.message));}
     finally{pending=null;await load();setTimeout(()=>$('toast').classList.remove('success'),700);}
   },5000);
@@ -378,9 +448,9 @@ function render() {
   $('breadcrumb').textContent=labels[view]; document.title=labels[view]+' · Unser Projekt';
   $('nav').replaceChildren(...['today','tasks','documents','deadlines','pia','profile'].map(name=>el('a',{href:'?view='+name,class:'nav-link','aria-current':(view===name)?'page':null,onClick:event=>{event.preventDefault();navigate(name);}},icon(name),el('span',{},labels[name]))));
   document.body.dataset.person=data?.person||'';
-  $('person').textContent=data?names[data.person]:'Dein Zugang';$('person').setAttribute('aria-label','Profil öffnen');
+  $('person').textContent=data?names[data.person]:'Dein Zugang';$('person').setAttribute('aria-label','Profilmenü öffnen');$('person').setAttribute('aria-expanded',String(!$('profile-menu')?.hidden&&!!$('profile-menu')));$('person').disabled=!!pending||noteSaving;
   renderViewSelector();
-  $('role').hidden=preview.active()||!(data?.person==='SA'); $('role').textContent=leadership?'Leitung an':'Leitung aus'; $('role').setAttribute('aria-pressed',String(leadership));
+  $('role').hidden=preview.active()||!(data?.person==='SA'); $('role').replaceChildren(el('span',{class:!leadership?'selected':''},'Meine Sicht'),el('span',{'aria-hidden':'true'},' | '),el('span',{class:leadership?'selected':''},'Leitung'));$('role').setAttribute('aria-label',leadership?'Zu Meine Sicht wechseln':'Zur Leitung wechseln');$('role').disabled=!!pending||noteSaving; $('role').setAttribute('aria-pressed',String(leadership));
   $('refresh').disabled=state==='loading';
   $('source-note').textContent=config.demo?'Nachbau · Planungsstand 01.11.2026':data?'Zuletzt geladen '+date(data.fetchedAt,true)+(data.cached?' · Zwischenspeicher':''):'Planungsstand unbekannt';
   const content=$('content'); content.setAttribute('aria-busy',String(state==='loading'));
@@ -466,8 +536,20 @@ async function load(reset=false) {
   }catch(error){if(ticket!==generation)return;data=previous;state=previous?'stale':'error';errorMessage=error.name==='AbortError'?'Die Verbindung dauert zu lange. Bitte versuche es erneut.':error.message;}
   finally{clearTimeout(timeout);if(ticket===generation)render();}
 }
-$('person').addEventListener('click',()=>navigate('profile'));
-$('role').addEventListener('click',()=>{leadership=!leadership;data=null;if(leadership){view='today';const url=new URL(location.href);url.searchParams.set('view','today');url.searchParams.delete('area');history.replaceState({},'',url);}load(true);});
+function openPerson(id) {if(pending||noteSaving)return;preview.select(id);}
+function switchView() {
+  if(pending||noteSaving||!(data?.person==='SA'||data?.viewer==='SA'))return;
+  modal('Ansicht wechseln',el('p',{},'Öffne die persönliche Ansicht eines Teammitglieds. Sie ist nur zum Lesen.'),el('div',{class:'person-picker'},Object.entries(names).map(([id,name])=>button(name+' · Ansicht öffnen',()=>openPerson(id),'button secondary'))));
+}
+function closeProfileMenu() {const menu=$('profile-menu');if(menu)menu.hidden=true;$('person').setAttribute('aria-expanded','false');}
+$('person').addEventListener('click',()=>{
+  let menu=$('profile-menu');if(!menu){menu=el('div',{id:'profile-menu',class:'profile-menu',hidden:true});document.querySelector('.identity').append(menu);$('person').setAttribute('aria-controls','profile-menu');}
+  if(!menu.hidden){closeProfileMenu();return;}
+  menu.replaceChildren(button('Mein Profil',()=>{closeProfileMenu();navigate('profile');},'text-button'),...(data?.person==='SA'||data?.viewer==='SA'?[button('Ansicht wechseln',()=>{closeProfileMenu();switchView();},'text-button')]:[]));menu.hidden=false;$('person').setAttribute('aria-expanded','true');menu.querySelector('button').focus();
+});
+document.addEventListener('click',event=>{if(!event.target.closest('.identity'))closeProfileMenu();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('profile-menu')&&!$('profile-menu').hidden){closeProfileMenu();$('person').focus();}});
+$('role').addEventListener('click',()=>{if(pending||noteSaving)return;leadership=!leadership;data=null;if(leadership){view='today';const url=new URL(location.href);url.searchParams.set('view','today');url.searchParams.delete('area');history.replaceState({},'',url);}load(true);});
 $('refresh').addEventListener('click',()=>load());
 $('demo-person').addEventListener('change',()=>{leadership=false;data=null;load(true);});
 $('demo-state').addEventListener('change',()=>{data=null;load(true);});
