@@ -2,8 +2,8 @@
 (() => {
 const config = window.TEAM_CONFIG;
 const names = {SA:'Salah',ES:'Ernes',MG:'Melisa',AM:'Arber',LB:'Leonie'};
-const labels = {today:'Heute',tasks:'Meine Arbeit',deadlines:'Fristen',pia:'Pia',profile:'Profil'};
-const paths = {profile:'M20 21v-2a7 7 0 0 0-14 0v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',today:'M3 10 12 3l9 7M5 9v12h5v-7h4v7h5V9',tasks:'M9 6h12M9 12h12M9 18h12M3 6l1 1 2-3M3 12l1 1 2-3M3 18l1 1 2-3',deadlines:'M4 5h16v16H4zM4 10h16M8 3v4M16 3v4',pia:'M21 11a8 8 0 0 1-8 8H8l-5 3 1-6a8 8 0 1 1 17-5Z'};
+const labels = {today:'Heute',tasks:'Meine Arbeit',deadlines:'Fristen',pia:'Pia',documents:'Unterlagen',profile:'Profil'};
+const paths = {documents:'M4 3h11l5 5v13H4zM14 3v6h6M8 13h8M8 17h6',profile:'M20 21v-2a7 7 0 0 0-14 0v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',today:'M3 10 12 3l9 7M5 9v12h5v-7h4v7h5V9',tasks:'M9 6h12M9 12h12M9 18h12M3 6l1 1 2-3M3 12l1 1 2-3M3 18l1 1 2-3',deadlines:'M4 5h16v16H4zM4 10h16M8 3v4M16 3v4',pia:'M21 11a8 8 0 0 1-8 8H8l-5 3 1-6a8 8 0 1 1 17-5Z'};
 let view = new URLSearchParams(location.search).get('view') || 'today';
 if (view === 'writing') view = 'tasks';
 if (!labels[view]) view = 'today';
@@ -208,17 +208,40 @@ function showTasks(){
   if(!selected)return [heading('Meine Arbeit','Deine Bereiche. Dein nächster Schritt.'),el('div',{class:'work-modules'},modules.map(module=>el('section',{class:'work-module'},areaLine(module),el('div',{class:'module-foot'},el('span',{},areaRows(module).filter(r=>!completed(r)).length+' offene Aufgaben'),button('Bereich öffnen',()=>openArea(module.id),'text-button'))))),!modules.length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null];
   const next=selected.next;
   return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(selected.title,''),areaBlockers(area),
+    selected.id==='writing'?writingFolderLink():null,
     progress(selected.done,selected.total,areaSummary(selected)),
     next?el('p',{class:'next-contact'},'Nächster '+date(next.date)+' · Block '+next.block+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Formular'}[next.channel]||next.channel)):null,
     selected.tool?el('a',{class:'button area-tool',href:selected.tool},area==='b'?'Nächsten Kontakt erfassen':'Weiter codieren'):selected.id==='writing'?workLink(sortRows(rows).find(row=>!completed(row)&&/^https:\/\/docs.google.com\/document\//.test(row.Wo||''))||{}):null,
     el('div',{class:'list-heading'},el('h2',{},'Meine Aufgaben'),el('small',{},done+' von '+rows.length+' erledigt')),
     ...groupedTasks(rows),!rows.length?el('p',{class:'quiet-note'},'Deine Einsätze findest du direkt im Werkzeug.'):null];
 }
+function writingFolderLink(){
+  return /^https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]+$/.test(data.writingFolder||'')
+    ?el('a',{class:'button secondary writing-folder',href:data.writingFolder,target:'_blank',rel:'noopener noreferrer'},'Ordner Schreibwerk öffnen')
+    :el('p',{class:'quiet-note'},'Der Schreibwerk-Ordner ist noch nicht verbunden.');
+}
+function documentRow(row,chapter=false){
+  const url=chapter?row.doc:row.url;
+  const valid=chapter?/^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+(?:\/edit)?$/.test(url||''):/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view$/.test(url||'');
+  return el('li',{class:'document-row'},el('div',{class:'document-copy'},el('h3',{},row.title),el('p',{},chapter?((row.owner===data.person?'Als Pate':row.reader===data.person?'Als Zweitleser:in':'Leitungsübersicht')+' · '+(row.ref||'')):'Wozu: '+row.purpose)),
+    el('div',{class:'document-actions'},valid?el('a',{class:'button secondary document-open',href:url,target:'_blank',rel:'noopener noreferrer'},'Öffnen'):el('button',{class:'button secondary',disabled:true,title:'Datei oder Leselink noch nicht verfügbar'},'Öffnen'),piaLink({...row,'Pia-Frage':'Erklär mir das Wichtigste aus '+row.title+'.'})),
+    valid?null:el('p',{class:'quiet-note'},'Datei oder Leselink noch nicht verfügbar.'));
+}
+function showDocuments(){
+  const documents=data.documents,chapters=data.chapters;
+  const groups=Array.isArray(documents)?[...new Set(documents.map(row=>row.group))]:[];
+  return [heading('Unterlagen','Die Grundlagen für unsere Arbeit. An einem Ort.'),
+    ...groups.map(group=>el('section',{class:'document-group'},el('h2',{},group),el('ul',{class:'document-list'},documents.filter(row=>row.group===group).map(row=>documentRow(row))))),
+    !groups.length?unknown('Die Unterlagen sind noch nicht verbunden.'):null,
+    el('section',{class:'document-group'},el('h2',{},'Meine Kapitel-Docs'),el('p',{class:'quiet-note'},leadership?'Alle Kapitel der Gruppe.':'Deine Kapitel als Pate oder Zweitleser:in.'),writingFolderLink(),
+      chapters===null||chapters===undefined?unknown('Die Kapitel konnten nicht geladen werden.'):chapters.length?el('ul',{class:'document-list'},[...chapters].sort((a,b)=>(a.ref||'').localeCompare(b.ref||'','de',{numeric:true})).map(row=>documentRow(row,true))):empty('Noch keine Kapitel zugeteilt.','Sobald deine Zuteilung hinterlegt ist, findest du hier deine Docs.'))];
+}
 function showProfile(){
   const profile=data.profile||{},chapters=data.chapters||[],own=allTasks().filter(r=>r.owner===data.person||r.reader===data.person);
   const section=(label,rows)=>el('section',{class:'profile-section'},el('h2',{},label),rows.length?taskList(rows):el('p',{class:'quiet-note'},'Noch keine Zuteilung hinterlegt.'));
   return [heading('Dein Profil','Deine Rolle im gemeinsamen Projekt.'),el('section',{class:'profile-intro'},el('span',{class:'avatar-large'},names[data.person].slice(0,1)),el('div',{},el('h2',{},profile.role||'Rolle noch offen'),el('p',{},profile.text||'Dein Lead-Blatt ist noch nicht erreichbar.'),el('small',{class:'source'},profile.source||'Lead-Blatt'))),
     piaLink({'Pia-Frage':'Erklär mir meine Rolle und meinen Lead-Bereich. Wofür bin ich verantwortlich?'},'Pia: Erklär mir meine Rolle'),
+    button('Unterlagen öffnen',()=>navigate('documents'),'button secondary'),
     section('Kapitel als Pate',chapters.filter(r=>r.owner===data.person)),section('Kapitel als Zweitleser:in',chapters.filter(r=>r.reader===data.person)),
     section('Deine Erhebungsaufträge',(data.assignments||[]).filter(r=>r.owner===data.person)),section('Deine nächsten drei Fristen',sortRows(own.filter(r=>!completed(r)&&r.due)).slice(0,3))];
 }
@@ -294,7 +317,7 @@ function privacy() {
 function logout() {try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
 function render() {
   $('breadcrumb').textContent=labels[view]; document.title=labels[view]+' · Unser Projekt';
-  $('nav').replaceChildren(...['today','tasks','deadlines','pia','profile'].map(name=>el('a',{href:'?view='+name,class:'nav-link','aria-current':(view===name)?'page':null,onClick:event=>{event.preventDefault();navigate(name);}},icon(name),el('span',{},labels[name]))));
+  $('nav').replaceChildren(...['today','tasks','documents','deadlines','pia','profile'].map(name=>el('a',{href:'?view='+name,class:'nav-link','aria-current':(view===name)?'page':null,onClick:event=>{event.preventDefault();navigate(name);}},icon(name),el('span',{},labels[name]))));
   document.body.dataset.person=data?.person||'';
   $('person').textContent=data?names[data.person]:'Dein Zugang';$('person').setAttribute('aria-label','Profil öffnen');
   $('role').hidden=!(data?.person==='SA'); $('role').textContent=leadership?'Leitung an':'Leitung aus'; $('role').setAttribute('aria-pressed',String(leadership));
@@ -308,7 +331,7 @@ function render() {
   const notices=[];
   if(state==='stale')notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Verbindung unterbrochen. Veralteter Stand vom '+date(data.fetchedAt,true)+'. Aktuelle Aufgaben sind unbekannt.'),button('Erneut laden',()=>load(),'text-button')));
   if(Object.values(data.sources).some(source=>source.state!=='ready'))notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Ein Teil des Projektstands ist unbekannt. Fehlende Quellen zählen nicht als leer.'),button('Erneut laden',()=>load(),'text-button')));
-  const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,profile:showProfile};
+  const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,profile:showProfile,documents:showDocuments};
   content.replaceChildren(...[...notices,...screens[view]()].flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false)); announce(labels[view]+': '+(state==='stale'?'veralteter Stand.':'Projektstand angezeigt.'));
 }
 function announce(text){$('announcement').textContent=text;}
@@ -344,6 +367,8 @@ function validResponse(result) {
     if(result.role!=='leitung'||!Array.isArray(result.leadership)||result.leadership.length!==5||new Set(result.leadership.map(row=>row.person)).size!==5||result.leadership.some(row=>!names[row.person]||!count(row.overdue)||!Number.isInteger(row.blockers)||row.blockers<0||!Number.isInteger(row.priority)||row.priority<0||row.priority>5||!['b','c','writing','tasks'].every(k=>row[k]===null||row[k]&&count(row[k].done)&&count(row[k].total))))return false;
   }
   if(result.practice!==undefined&&result.practice!==null&&(!Number.isInteger(result.practice.total)||!Number.isInteger(result.practice.done)||result.practice.done<0||result.practice.done>result.practice.total))return false;
+  if(result.documents!==undefined&&(!Array.isArray(result.documents)||result.documents.some(row=>!row||['id','group','title','purpose'].some(k=>typeof row[k]!=='string')||!['ready','unavailable'].includes(row.state)||(row.state==='ready'?!/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view$/.test(row.url||''):row.url!==null))))return false;
+  if(result.writingFolder!==undefined&&!/^https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]+$/.test(result.writingFolder))return false;
   if(result.profile!==undefined&&(!result.profile||typeof result.profile.role!=='string'||typeof result.profile.text!=='string'))return false;
   if(result.role==='mitglied'&&(result.assignments||[]).some(row=>row.owner!==result.person))return false;
   if(result.role==='mitglied'&&(result.chapters||[]).some(row=>row.owner!==result.person&&row.reader!==result.person))return false;
