@@ -200,15 +200,15 @@ function weekRows(rows) {
   const first=start.toISOString().slice(0,10),last=end.toISOString().slice(0,10);
   return sortRows(rows.filter(r=>r.due&&day(r.due)<=last&&(!completed(r)||day(r.due)>=first))).slice(0,5);
 }
-// Heute (Claudette 01.11.2026): ein Satz Lage, genau eine Hauptaktion, drei Fäden A/B/C, nur diese Woche.
+// Today: one summary, one primary action, three workstreams and the current week.
 // Feste Schritte aus dem Feldplan; abgehakt wird automatisch aus den Serverdaten, nie von Hand.
 const fixedSteps=[
   {id:'probe-c',area:'c',title:'10 Übungsfälle codieren',why:'Alle codieren dieselben zehn Fälle. So sehen wir, wo das Codebuch noch unklar ist, bevor es zählt.',when:'2026-11-02',whenText:'nach dem Coaching',minutes:30,href:'/team/c/',cta:'Probe starten',
     skip:()=>!data.practice?.total,done:()=>data.practice.done>=data.practice.total,count:()=>data.practice.done+' von '+data.practice.total},
   {id:'banken',area:'b',title:'Zwei Banken für den Servicetest wählen',why:'Nur Banken mit eigenem, aktivem Konto. Danach teilt dir die App deine Kontakte zu.',when:'2026-11-06',minutes:3,href:'/team/b/',cta:'Banken wählen',
-    skip:()=>!data.service||!!data.service.error,done:()=>(data.service.selected?.length||0)>=2,count:()=>(data.service.selected?.length||0)+' von 2'},
+    skip:()=>!data.service||!!data.service.error||!Array.isArray(data.service.selected),done:()=>data.service.selected.length>=2,count:()=>data.service.selected.length+' von 2'},
   {id:'probe-b',area:'b',title:'Probe B durchspielen',why:'Ein Übungskontakt ohne Bank. Danach sitzt das Erfassen beim echten Kontakt.',when:'2026-11-06',minutes:15,href:'/team/b/',cta:'Probe starten',
-    skip:()=>!data.service||!!data.service.error,done:()=>!!data.service.probeDone},
+    skip:()=>!data.service||!!data.service.error||typeof data.service.probeDone!=='boolean',done:()=>data.service.probeDone},
   {id:'teilen',area:'a',title:'Umfrage in zwei Kanälen teilen',why:'Jeder neue Kanal bringt andere Menschen in die Umfrage. Das macht die Antworten breiter.',minutes:5,view:'sharing',cta:'Kanal wählen',
     skip:()=>!Number.isFinite(data.sharing?.done),done:()=>data.sharing.done>=2,count:()=>data.sharing.done+' von 2'},
 ];
@@ -230,22 +230,33 @@ function taskFocus(row){
     meta:row.due?'Frist '+date(row.due):'',cta:'Aufgabe ansehen',act:()=>details(row),report:canReport(row)?()=>report(row):null};
 }
 // Reihenfolge (mit Salah abgestimmt): Termin innert 48 h > Überfälliges > was den Feldstart B blockiert > Umfrage unter 2 Kanälen > nächste Aufgabe.
+function todayKnown(){
+  const sv=data.service;
+  return ['ready','cached'].includes(state)&&data.workspaceState==='ready'&&Object.values(data.sources).every(s=>s.state==='ready')&&
+    Number.isFinite(data.sharing?.done)&&!!sv&&!sv.error&&Number.isFinite(sv.done)&&Number.isFinite(sv.config?.target)&&Array.isArray(sv.selected)&&typeof sv.probeDone==='boolean'&&Number.isFinite(data.practice?.done)&&Number.isFinite(data.practice?.total)&&data.practice.total>0;
+}
+function dueMs(value){return Date.parse(value.includes('T')?value:value+'T23:59:59+01:00');}
 function nowItem(rows){
   const steps=fixedSteps.filter(stepOpen);
   const open=sortRows(rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'));
-  const soon=steps.find(s=>s.when&&(Date.parse(s.when+'T23:59:00+01:00')-nowMs())<=48*3600000);
-  if(soon)return stepFocus(soon);
-  const late=open.find(overdue);if(late)return taskFocus(late);
+  const upcoming=[...steps.filter(s=>s.when).map(s=>({due:s.when,focus:()=>stepFocus(s)})),
+    ...open.filter(r=>r.due).map(r=>({due:r.due,focus:()=>taskFocus(r)})),
+    ...(data.meetings||[]).filter(m=>m.due).map(m=>({due:m.due,focus:()=>({area:null,chips:['Termin',date(m.due,true)],title:shortTitle(m),why:'Bereite dich auf diesen Termin vor.',meta:'',cta:'Termin ansehen',act:()=>navigate('deadlines')})}))]
+    .filter(item=>dueMs(item.due)>=nowMs()&&dueMs(item.due)-nowMs()<=48*3600000).sort((a,b)=>dueMs(a.due)-dueMs(b.due));
+  if(upcoming.length)return upcoming[0].focus();
+  const late=[...open.filter(overdue).map(r=>({due:r.due,focus:()=>taskFocus(r)})),...steps.filter(s=>s.when&&daysUntil(s.when)<0).map(s=>({due:s.when,focus:()=>stepFocus(s)}))].sort((a,b)=>dueMs(a.due)-dueMs(b.due));
+  if(late.length)return late[0].focus();
   const fieldB=steps.find(s=>s.area==='b');if(fieldB)return stepFocus(fieldB);
   const share=steps.find(s=>s.id==='teilen');if(share)return stepFocus(share);
   if(open.length)return taskFocus(open[0]);
+  if(!todayKnown())return {area:null,chips:[],title:'Stand unbekannt',why:'Ein Teil deiner Aufgaben oder Felddaten fehlt.',meta:'',cta:'Stand aktualisieren',act:()=>load(),calm:true,unknown:true};
   const review=rows.some(r=>r.status==='in Prüfung');
   return {area:null,chips:[],title:review?'Deine Meldungen sind bei Salah':'Für heute ist alles erledigt',why:review?'Salah prüft sie. Du musst nichts tun.':'Gut gemacht. Neue Aufgaben erscheinen hier, sobald sie dran sind.',meta:'',cta:'Meine Arbeit ansehen',act:()=>{area='';navigate('tasks');},calm:true};
 }
 function focusSection(f){
   const chips=f.chips.filter(Boolean).map((text,i)=>el('span',{class:'chip'+(i===0&&f.area?' area-'+f.area:'')+(i===1&&f.late?' is-late':'')},text));
   return el('section',{class:'focus-card now-card'+(f.area?' area-'+f.area:'')+(f.calm?' is-calm':'')},
-    el('div',{class:'now-top'},el('span',{class:'now-label'},f.calm?'Alles ruhig':'Jetzt dran'),...chips),
+    el('div',{class:'now-top'},el('span',{class:'now-label'},f.unknown?'Stand offen':f.calm?'Alles ruhig':'Jetzt dran'),...chips),
     el('h2',{},f.title),el('p',{class:'now-why'},f.why),
     el('div',{class:'now-actions'},button(f.cta,f.act,'button'),f.report?button('Fertig melden',f.report,'text-button'):null,f.meta?el('span',{class:'now-meta'},f.meta):null));
 }
@@ -254,16 +265,16 @@ function threadTile(id,value,total,unit,note,act){
   return el('button',{type:'button',class:'thread area-'+id,onClick:act},
     el('span',{class:'thread-head'},el('span',{class:'thread-letter','aria-hidden':'true'},id.toUpperCase()),areaNames[id].split(' · ')[1]),
     el('span',{class:'thread-value'},known?String(value):'–',el('small',{},known?' / '+total+' '+unit:' Stand offen')),
-    (()=>{const bar=el('i');bar.style.width=(known?Math.max(3,Math.min(100,Math.round(value/total*100))):0)+'%';return el('span',{class:'thread-bar','aria-hidden':'true'},bar);})(),
+    known?el('progress',{class:'thread-bar',max:total,value:Math.max(0,Math.min(total,value)),'aria-hidden':'true'}):null,
     el('span',{class:'thread-note'},note));
 }
 function threadsSection(){
   const sh=data.sharing,sv=data.service&&!data.service.error?data.service:null,pr=data.practice,c=(data.areas||[]).find(m=>m.id==='c');
   const a=threadTile('a',sh?.done,2,'Kanäle',!Number.isFinite(sh?.done)?'Stand unbekannt':sh.done>=2?'Ziel erreicht · mehr ist willkommen':'Nächster Schritt · Kanal wählen',()=>navigate('sharing'));
-  const b=threadTile('b',sv?.done,sv?.config?.target,'Kontakte',!sv?'Stand unbekannt':!sv.probeDone?'Probe offen · Feld ab '+date(sv.config.official):(sv.selected?.length||0)<2?'Noch zwei Banken wählen':sv.next?'Nächster Kontakt '+date(sv.next.tag)+' · Block '+sv.next.block:'Kontakte zuteilen',()=>{location.href='/team/b/';});
+  const b=threadTile('b',sv?.done,sv?.config?.target,'Kontakte',!sv||!Number.isFinite(sv.done)||!sv.config||!Array.isArray(sv.selected)||typeof sv.probeDone!=='boolean'?'Stand unbekannt':sv.selected.length<2?'Noch '+(2-sv.selected.length)+(sv.selected.length===1?' Bank':' Banken')+' wählen':!sv.probeDone?'Probe offen · Feld ab '+date(sv.config.official):sv.next?'Nächster Kontakt '+date(sv.next.tag)+' · Block '+sv.next.block:sv.done>=sv.config.target?'Ziel erreicht':'Kontakte zuteilen',()=>{location.href='/team/b/';});
   const cReady=c&&c.state==='ready'&&c.total>0;
-  const cTile=cReady?threadTile('c',c.done,c.total,'Bewertungen','Soll bis heute '+c.expected,()=>{location.href='/team/c/';})
-    :threadTile('c',pr?.done,pr?.total,'Probe',today()<'2026-11-03'?'Eigene Fälle ab Di 03.11.':'Eigene Fälle folgen nach der Ziehung',()=>{location.href='/team/c/';});
+  const cTile=cReady?threadTile('c',c.done,c.total,'Bewertungen',Number.isFinite(c.expected)?'Soll bis heute '+c.expected:'Soll bis heute unbekannt',()=>{location.href='/team/c/';})
+    :threadTile('c',pr?.done,pr?.total,'Übungen',!Number.isFinite(pr?.done)||!pr?.total?'Stand unbekannt':today()<'2026-11-03'?'Eigene Fälle ab Di 03.11.':'Eigene Fälle folgen nach der Ziehung',()=>{location.href='/team/c/';});
   return el('section',{class:'threads-block'},el('div',{class:'block-head'},el('h2',{},'Deine drei Fäden'),el('small',{},'A · B · C')),el('div',{class:'threads'},a,b,cTile));
 }
 function stepRow(step){
@@ -280,31 +291,31 @@ function weekTaskRow(row){
 }
 function weekSection(rows){
   const sunday=sundayIso();
-  const tasks=sortRows(rows.filter(r=>!completed(r)&&r.due&&(overdue(r)||day(r.due)<=sunday)));
+  const tasks=sortRows(rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'&&r.due&&(overdue(r)||day(r.due)<=sunday)));
   const steps=fixedSteps.filter(s=>s.when&&s.when<=sunday&&(()=>{try{return !s.skip();}catch{return false;}})());
   const items=[...tasks.filter(overdue).map(r=>({d:'0',n:weekTaskRow(r)})),...steps.map(s=>({d:s.when,n:stepRow(s)})),...tasks.filter(r=>!overdue(r)).map(r=>({d:day(r.due),n:weekTaskRow(r)}))]
     .sort((x,y)=>x.d.localeCompare(y.d)).map(x=>x.n);
-  const later=rows.filter(r=>!completed(r)&&(!r.due||day(r.due)>sunday)).length;
+  const later=rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'&&(!r.due||day(r.due)>sunday)).length;
   const openCount=tasks.length+steps.filter(stepOpen).length;
-  return el('section',{class:'week-block'},el('div',{class:'block-head'},el('h2',{},'Bis Sonntag'),el('small',{},date(sunday)+' · '+(openCount?openCount+' offen':'alles erledigt'))),
-    items.length?el('ul',{class:'task-list week-list-new'},items):el('p',{class:'quiet-note'},'Bis Sonntag ist nichts fällig.'),
+  return el('section',{class:'week-block'},el('div',{class:'block-head'},el('h2',{},'Bis Sonntag'),el('small',{},date(sunday)+' · '+(openCount?openCount+' offen'+(!todayKnown()?' · Stand teilweise unbekannt':''):todayKnown()?'alles erledigt':'Stand unbekannt'))),
+    items.length?el('ul',{class:'task-list week-list-new'},items):el('p',{class:'quiet-note'},todayKnown()?'Bis Sonntag ist nichts fällig.':'Stand unbekannt · fehlende Daten zählen nicht als erledigt.'),
     later?button('Später · '+later+(later===1?' Aufgabe':' Aufgaben')+' →',()=>{area='';navigate('tasks');},'text-button later-link'):null);
 }
 function nextMeeting(){
-  const soon=(data.meetings||[]).filter(m=>m.due&&daysUntil(m.due)>=0&&daysUntil(m.due)<=1).sort((a,b)=>a.due.localeCompare(b.due))[0];
+  const soon=(data.meetings||[]).filter(m=>m.due&&dueMs(m.due)>=nowMs()&&daysUntil(m.due)>=0&&daysUntil(m.due)<=1).sort((a,b)=>a.due.localeCompare(b.due))[0];
   if(!soon)return null;
   const time=soon.due.includes('T')?new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',hour:'2-digit',minute:'2-digit'}).format(new Date(soon.due))+' ':'';
   return (daysUntil(soon.due)===0?'heute ':'morgen ')+time+shortTitle(soon).replace(/^\d{4}-\d{2}-\d{2}\s*[·\-–]\s*/,'');
 }
-function greeting(){const h=Number(new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',hour:'2-digit',hour12:false}).format(new Date(nowMs())));return h<11?'Guten Morgen':h<17?'Hallo':'Guten Abend';}
+function greeting(){const h=Number(new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',hour:'2-digit',hour12:false}).formatToParts(new Date(nowMs())).find(part=>part.type==='hour').value);return h<11?'Guten Morgen':h<17?'Hallo':'Guten Abend';}
 function showToday(){
   if(leadership && data.person==='SA')return showLeadership();
-  const rows=personalRows(),sunday=sundayIso(),late=rows.filter(overdue).length;
-  const due=rows.filter(r=>!completed(r)&&r.due&&!overdue(r)&&day(r.due)<=sunday).length+fixedSteps.filter(s=>s.when&&s.when<=sunday&&stepOpen(s)).length;
-  const known=['ready','cached'].includes(state)&&data.workspaceState==='ready'&&Object.values(data.sources).every(s=>s.state==='ready');
-  const parts=[due?el('b',{},due+(due===1?' Sache':' Dinge')+' bis Sonntag'):el('span',{},'Bis Sonntag nichts offen'),
+  const rows=personalRows(),sunday=sundayIso(),open=rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'),late=open.filter(overdue).length+fixedSteps.filter(s=>stepOpen(s)&&s.when&&daysUntil(s.when)<0).length;
+  const due=open.filter(r=>r.due&&day(r.due)<=sunday).length+fixedSteps.filter(s=>s.when&&s.when<=sunday&&stepOpen(s)).length;
+  const known=todayKnown();
+  const parts=[due?el('b',{},due+(due===1?' Sache':' Dinge')+' bis Sonntag'):el('span',{},known?'Bis Sonntag nichts offen':'Stand unbekannt'),
     late?button(late+' überfällig',()=>{area='';navigate('tasks');},'text-button summary-late'):null,
-    nextMeeting()?el('span',{},nextMeeting()):null,!known?el('span',{},'Stand teilweise unbekannt'):null].filter(Boolean);
+    nextMeeting()?el('span',{},nextMeeting()):null,!known&&due?el('span',{},'Stand teilweise unbekannt'):null].filter(Boolean);
   const summary=el('p',{class:'today-summary'});parts.forEach((p,i)=>{if(i)summary.append(el('span',{class:'sep','aria-hidden':'true'},' · '));summary.append(p);});
   const head=el('div',{class:'heading today-head'},el('div',{},el('h1',{},greeting()+', '+names[data.person]),summary),el('span',{class:'date-label'},date(today())));
   return [head,focusSection(nowItem(rows)),threadsSection(),weekSection(rows),
