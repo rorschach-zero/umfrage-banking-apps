@@ -222,6 +222,7 @@ function details(row,origin='Projektplanung'){
   const notion=leadership&&/^[a-f0-9-]{32,36}$/i.test(row.id||'')?el('a',{class:'source notion-link',href:'https://www.notion.so/'+row.id.replace(/-/g,''),rel:'noopener noreferrer'},'In Notion öffnen'):null;
   modal(shortTitle(row),el('p',{class:'detail-what'},cardText(row,'Was')==='noch offen'?shortTitle(row):row.Was),
     el('p',{class:'detail-due'+(overdue(row)?' overdue':'')},relativeDue(row),' · ',row.status||'Status unbekannt'),
+    row.waitingOn?el('p',{class:'quiet-note dependency-wait'},'Startet nach: '+row.waitingOn):null,
     el('p',{class:'acceptance'},el('strong',{},'Fertig, wenn … '),cardText(row,'Fertig wenn')),
     el('h3',{},'So geht’s'),steps(row),el('p',{class:'local-note'},'Deine Schritte bleiben auf diesem Gerät gespeichert.'),
     el('div',{class:'task-actions'},workLink(row),piaLink(row)),
