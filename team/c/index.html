@@ -45,11 +45,12 @@ async function start() {
 }
 function leer(x) { return { nr: x.nr, ausschluss: "", kundendienst_kontakt: "", kats: [], vals: {}, anker: "", bemerkung: "", zak_bezug: x.anbieter === "Zak" && x.quelle === "Trustpilot" ? "" : "nicht anwendbar", sprache: x.sprache || "" }; }
 function aus(e) { const k = []; const v = {}; [1, 2, 3].forEach(n => { if (e["kat_" + n]) { k.push(Number(e["kat_" + n])); v[e["kat_" + n]] = e["val_" + n]; } }); return Object.assign(leer(q[i]), { ausschluss: e.ausschluss || "", kundendienst_kontakt: e.kundendienst_kontakt || "", kats: k, vals: v, anker: e.anker || "", bemerkung: e.bemerkung || "", zak_bezug: e.zak_bezug || "nicht anwendbar" }); }
-function fortschritt() { const n = q.filter(x => x.eigen).length; document.getElementById("fort").textContent = `${n} von ${q.length}`; }
+function fortschritt() { const n = q.filter(x => x.eigen).length; document.getElementById("fort").textContent = `${q.every(x => x.probe) ? "Probe · " : ""}${n} von ${q.length}`; }
+function draftKey(x) { return "c-" + wer + ":" + x.rolle + ":" + x.nr; }
 function zeige() {
-  const x = q[i]; c = lokal("c-" + x.rolle + x.nr) || (x.eigen ? aus(x.eigen) : leer(x)); fortschritt(); bild();
+  const x = q[i]; c = lokal(draftKey(x)) || (x.eigen ? aus(x.eigen) : leer(x)); fortschritt(); bild();
 }
-function merke() { lokal("c-" + q[i].rolle + q[i].nr, c); bild(); }
+function merke() { lokal(draftKey(q[i]), c); bild(); }
 function kat(n) {
   if (c.ausschluss) return;
   const a = c.kats.indexOf(n);
@@ -69,12 +70,13 @@ function hinweise() {
 function bild() {
   const x = q[i], m = document.getElementById("main");
   const def = el("details", {}, el("summary", {}, "Kategorien und Abgrenzung"), el("table", { class: "def" }, KAT.map(([n, t, d, a]) => el("tr", {}, el("td", {}, el("b", {}, n)), el("td", {}, el("b", {}, t), el("br"), d, el("br"), el("span", { class: "leise" }, a))))));
-  fuelle(m, 
+  fuelle(m,
+    x.probe ? el("div", {class:"hinweisbox",role:"note"}, el("b", {}, "Probecodierung 01./02.11. · Schulung"), el("p", {}, "Dieser Fall liegt absichtlich ausserhalb der Ziehungsfenster. Codiere die Themen regulär; wähle nicht allein wegen des alten Datums «nicht im Zeitraum». Deine Probe zählt nicht zur Erhebung. Erstcodes sind nach zehn Minuten gesperrt.")) : null,
     el("div", { class: "zeile zw" }, el("div", { class: "kicker" }, `${x.rolle === "B" ? "Zweitcodierung, unabhängig" : "Codierung"} · ${x.anbieter} · ${x.quelle} · ${x.schicht}`), el("span", { class: "pille" }, x.nr)),
     el("div", { class: "zeile", style: "margin:8px 0 12px" }, el("span", { class: "sterne" }, "★".repeat(Number(x.sterne) || 0) + "☆".repeat(5 - (Number(x.sterne) || 0))), el("span", { class: "leise" }, `${x.datum} · ${x.sprache}`)),
     x.text ? el("div", { class: "textbox" }, x.text) : x.fundort ? el("div", { class: "textbox" }, /^https:\/\//.test(x.fundort)
       ? el("a", { href: x.fundort, target: "_blank", rel: "noopener noreferrer", style: "color:var(--ink);font-weight:800" }, "Bewertung öffnen ↗") : x.fundort,
-      el("div", { class: "leise", style: "margin-top:8px" }, "Lies die Bewertung auf der Plattform. Nichts kopieren, nichts antworten, kein Konto nötig.")) : el("div", { class: "textbox" }, "Text und Fundort fehlen, bitte Salah melden."),
+      el("div", { class: "leise", style: "margin-top:8px" }, "Lies die Bewertung auf der Plattform (Datum und Sterne oben). Nichts kopieren, nichts antworten, kein Konto nötig.")) : el("div", { class: "textbox" }, "Text und Fundort fehlen, bitte Salah melden."),
     el("label", { class: "f" }, "Ausschluss ", el("span", { class: "hilfe" }, "nur wenn die Bewertung nicht codiert wird")),
     chips(AUSSCHLUSS, c.ausschluss, w => { c.ausschluss = w; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }, { abwaehlbar: true }),
     c.ausschluss ? null : el("div", {}, el("label", { class: "f" }, "Sprache ", el("span", { class: "hilfe" }, "andere Sprachen sind Ausschluss «Sprache»")),
@@ -92,8 +94,8 @@ function bild() {
       hinweise().map(h => el("div", { class: "hinweisbox" }, h)),
       def),
     el("div", { class: "gitter" },
-      el("div", {}, el("label", { class: "f" }, "Anker ", el("span", { class: "hilfe" }, "höchstens fünf eigene Wörter, nie Wortlaut")), el("input", { class: "t", value: c.anker, maxlength: "60", on: { input: e => { c.anker = e.target.value; lokal("c-" + q[i].rolle + q[i].nr, c); } } })),
-      el("div", {}, el("label", { class: "f" }, "Bemerkung ", el("span", { class: "hilfe" }, "Zweifel, angewendete Grenzregel")), el("input", { class: "t", value: c.bemerkung, on: { input: e => { c.bemerkung = e.target.value; lokal("c-" + q[i].rolle + q[i].nr, c); } } }))),
+      el("div", {}, el("label", { class: "f" }, "Anker ", el("span", { class: "hilfe" }, "höchstens fünf eigene Wörter, nie Wortlaut")), el("input", { class: "t", value: c.anker, maxlength: "60", on: { input: e => { c.anker = e.target.value; lokal(draftKey(q[i]), c); } } })),
+      el("div", {}, el("label", { class: "f" }, "Bemerkung ", el("span", { class: "hilfe" }, "Zweifel, angewendete Grenzregel")), el("input", { class: "t", value: c.bemerkung, on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); } } }))),
     el("p", { class: "leise", style: "margin-top:20px" }, "Keine Namen, keine Beträge, keine Orte. Die Sterne werden nicht gedeutet; die Valenz gilt je Thema.")
   );
 }
@@ -120,7 +122,7 @@ async function speichern() {
   try {
     await sende({ typ: "codierung", rolle: x.rolle, maske: "c2", zeile: z });
     window.dispatchEvent(new Event("workspace-saved"));
-    x.eigen = Object.assign({ codiert_von: wer }, z); try { localStorage.removeItem("c-" + x.rolle + x.nr); } catch (e) {}
+    x.eigen = Object.assign({ codiert_von: wer }, z); try { localStorage.removeItem(draftKey(x)); } catch (e) {}
     msg.className = "meldung ok"; msg.textContent = "Gespeichert.";
     const n = q.findIndex((y, k) => k > i && !y.eigen); i = n >= 0 ? n : Math.min(i + 1, q.length - 1); zeige();
     if (q.every(y => y.eigen)) { msg.textContent = "Alles codiert. Danke."; }

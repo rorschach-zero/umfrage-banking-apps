@@ -35,3 +35,7 @@ function lokal(k, v) { try { if (v === undefined) return JSON.parse(localStorage
 function jetztLokal() { const d = new Date(); d.setSeconds(0, 0); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); }
 function minuten(a, b) { if (!a || !b) return null; return Math.round((new Date(b) - new Date(a)) / 60000); }
 function fuelle(ziel, ...kinder) { ziel.replaceChildren(...kinder.flat(Infinity).filter(k => k !== null && k !== undefined && k !== false)); }
+
+// A new personal link must replace the displayed queue before any further save.
+window.addEventListener("hashchange", () => { if (new URLSearchParams(location.hash.slice(1)).has("k")) location.reload(); });
+window.addEventListener("storage", event => { if (event.key === "pa6k") location.reload(); });

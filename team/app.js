@@ -148,11 +148,39 @@ function areaSummary(module){
 }
 function openArea(id){area=id;navigate('tasks');}
 function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'B':module.id==='c'?'C':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},module.title),el('small',{},areaSummary(module))),el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
+function practiceCard(){
+  return data.practice?.total ? el('section',{class:'practice-card'},el('div',{},el('strong',{},'Probecodierung · 01./02.11.'),el('p',{},data.practice.done+' von '+data.practice.total+' Schulungsfällen · getrennt von der Erhebung')),el('a',{class:'button secondary',href:'/team/c/'},'Probe codieren')) : null;
+}
+function leadMetric(label,value,field=false){
+  return el('div',{class:'lead-metric'},el('dt',{},label),el('dd',{},value&&value.done!==null?value.done+' / '+value.total:'unbekannt'),field&&value?el('small',{},'Soll '+value.expected+(label==='B'?' · davon erledigt '+value.expectedDone:'')):null);
+}
+function takeOver(row){
+  details(row,'Übernahme prüfen',true);
+  const storageKey='pa6-takeover:SA:'+row.id;
+  let saved='';try{saved=localStorage.getItem(storageKey)||'';}catch{}
+  const note=el('textarea',{id:'takeover-note',rows:3,maxlength:500,placeholder:'Was möchtest du übernehmen?'});note.value=saved;
+  const feedback=el('p',{class:'local-note',role:'status'},'Notiz nur auf diesem Gerät. Die Zuständigkeit bleibt bei '+(names[row.owner]||'der eingetragenen Person')+'.');
+  $('detail-body').prepend(el('section',{class:'takeover-note'},el('h3',{},'Übernahme vormerken'),el('p',{},'Aufgabe von '+(names[row.owner]||'der eingetragenen Person')+'. Kläre die Übernahme mit der Person und bestätige die neue Zuteilung separat.'),el('label',{for:'takeover-note'},'Deine Notiz'),note,
+    button('Notiz auf diesem Gerät speichern',()=>{try{localStorage.setItem(storageKey,note.value);feedback.textContent='Notiz lokal gespeichert. Keine Zuteilung und kein Status geändert.';}catch{feedback.textContent='Notiz konnte auf diesem Gerät nicht gespeichert werden.';}},'text-button'),feedback));
+}
+function showLeadership(){
+  if(!Array.isArray(data.leadership))return [heading('Leitungsübersicht','Der Personenstand ist noch unbekannt.'),unknown('Bitte den aktuellen Empfängerstand laden.')];
+  const cards=data.leadership.map(summary=>{
+    const issues=(data.blockers||[]).filter(issue=>issue.owner===summary.person),row=allTasks().find(item=>item.id===summary.taskId);
+    const labels=[summary.overdue?summary.overdue+' überfällig':null,summary.backlog?'Rückstand unter 80 % Soll':null,summary.blockers?summary.blockers+' Hänger':null,summary.unknown?'Stand teilweise unbekannt':null].filter(Boolean);
+    return el('section',{class:'lead-person','data-person':summary.person,'data-priority':summary.priority},el('div',{class:'lead-person-head'},el('h2',{},names[summary.person]),el('span',{class:'lead-status'+(summary.priority>=2?' urgent':'')},labels.join(' · ')||'Im Plan')),
+      el('dl',{class:'lead-metrics'},leadMetric('B',summary.b,true),leadMetric('C',summary.c,true),leadMetric('Schreiben',summary.writing),leadMetric('Pakete',summary.tasks)),
+      el('div',{class:'lead-next'},el('span',{},row?shortTitle(row)+' · '+relativeDue(row):'Keine offene Aufgabe verknüpft.'),row?button('Ich übernehme',()=>takeOver(row),'button secondary takeover'):null),
+      issues.length?el('details',{class:'lead-issues'},el('summary',{},'Hänger ansehen · '+issues.length),el('ul',{},issues.map(issue=>el('li',{},el('span',{},({b:'B',c:'C',writing:'Schreiben',tasks:'Pakete'}[issue.area]||'Aufgabe')+' · '+issue.text),(()=>{const task=allTasks().find(item=>item.id===issue.taskId);return task?button('Ich übernehme',()=>takeOver(task),'text-button takeover'):el('small',{},'Aufgabe noch nicht verknüpft.');})())))):null);
+  });
+  return [heading('Leitungsübersicht','Alle fünf Personen · Dringendes zuerst.'),el('p',{class:'quiet-note'},'B und C: erledigt / zugeteilt, Soll bis gestern. Schreiben: Kapitel als Pate oder Zweitleser. Pakete: eigene Arbeitspakete. Die Probe zählt separat.'),el('div',{class:'lead-people'},cards),practiceCard()];
+}
 function showToday(){
+  if(leadership && data.person==='SA')return showLeadership();
   const open=sortRows(allTasks().filter(r=>!completed(r)&&r.status!=='in Prüfung'&&(r.owner===data.person||r.reader===data.person)));
   const focus=nextActions(open)[0], blockers=(data.blockers||[]).filter(b=>b.owner===data.person), count=blockers.length;
   const status=count?count+' '+(count===1?'Sache hängt.':'Dinge hängen.'):data.workspaceState==='ready'?'Du bist im Plan.':'Ein Teil deines Stands ist noch unbekannt.';
-  return [heading('Hallo, '+names[data.person]+'.',status),blockerList(blockers),
+  return [heading('Hallo, '+names[data.person]+'.',status),blockerList(blockers),practiceCard(),
     el('section',{class:'focus-card'},el('p',{class:'eyebrow'},'Dein nächster Schritt'),el('h2',{},focus?focus.title:'Zeit für deinen Überblick'),el('p',{},focus?(focus.description==='noch offen'?'Öffne die Aufgabe und kläre deinen nächsten Schritt.':focus.description):'Öffne deine Arbeitsbereiche und sieh, wo du stehst.'),focus?el('span',{class:'focus-due'},relativeDue(focus)):null,focus?.tool?el('a',{class:'button',href:focus.tool},'Kontakt erfassen'):button(focus?'Aufgabe ansehen':'Meine Arbeit öffnen',()=>focus?details(focus.row):navigate('tasks'))),
     el('section',{class:'area-overview'},el('h2',{},'Deine Arbeitsbereiche'),(data.areas||[]).map(areaLine),!(data.areas||[]).length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null),
     open.length>1?el('section',{class:'next-list'},el('h2',{},'Danach'),taskList(open.filter(row=>row.id!==focus?.row?.id).slice(0,3))):null,
@@ -217,7 +245,7 @@ function openPia() {
   rememberPiaRole(); location.assign(config.piaPath);
 }
 function modal(title,...content) {$('detail-body').replaceChildren(el('h2',{id:'detail-title'},title),...content.flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false)); if(!$('detail').open)$('detail').showModal();}
-function details(row,origin='Projektplanung'){
+function details(row,origin='Projektplanung',takeover=false){
   $('detail').dataset.owner=row.owner||data.person;
   const notion=leadership&&/^[a-f0-9-]{32,36}$/i.test(row.id||'')?el('a',{class:'source notion-link',href:'https://www.notion.so/'+row.id.replace(/-/g,''),rel:'noopener noreferrer'},'In Notion öffnen'):null;
   modal(shortTitle(row),el('p',{class:'detail-what'},cardText(row,'Was')==='noch offen'?shortTitle(row):row.Was),
@@ -227,9 +255,9 @@ function details(row,origin='Projektplanung'){
     el('h3',{},'So geht’s'),steps(row),el('p',{class:'local-note'},'Deine Schritte bleiben auf diesem Gerät gespeichert.'),
     el('div',{class:'task-actions'},workLink(row),piaLink(row)),
     !workLink(row)?el('p',{class:'quiet-note'},'Das Werkzeug ist noch nicht verknüpft. Pia hilft dir beim Einstieg.'):null,
-    canReport(row)&&row.status==='offen'?button('Bearbeitung starten',()=>report(row,'läuft'),'text-button start-detail'):null,
-    canReport(row)?button('Als erledigt melden',()=>report(row),'text-button report-detail'):null,
-    leadership&&row.status==='in Prüfung'&&['psp','assignments'].includes(row.source)?button('Prüfung abschliessen',()=>report(row,'fertig'),'text-button'):null,
+    !takeover&&canReport(row)&&row.status==='offen'?button('Bearbeitung starten',()=>report(row,'läuft'),'text-button start-detail'):null,
+    !takeover&&canReport(row)?button('Als erledigt melden',()=>report(row),'text-button report-detail'):null,
+    !takeover&&leadership&&row.status==='in Prüfung'&&['psp','assignments'].includes(row.source)?button('Prüfung abschliessen',()=>report(row,'fertig'),'text-button'):null,
     el('details',{class:'more'},el('summary',{},'Mehr'),el('h3',{},'Warum'),el('p',{},cardText(row,'Warum')),el('p',{class:'source'},cardText(row,'Auftragsquelle')),el('p',{class:'source'},cardText(row,'Herkunft')),el('p',{class:'source'},origin+' · '+(row.ref||'')),el('p',{class:'source'},'Start '+date(row.start,true)+' · Frist '+date(row.due,true)),notion));
   $('detail-title').className='sr-only';
 }
@@ -311,6 +339,11 @@ function validResponse(result) {
     if(!Array.isArray(result.areas)||result.areas.some(a=>!a||!['b','c','writing','tasks'].includes(a.id)||typeof a.title!=='string'||!['ready','unknown'].includes(a.state)||!Array.isArray(a.taskIds)||a.taskIds.some(id=>typeof id!=='string')||['done','total','expected'].some(k=>a[k]!==null&&(!Number.isInteger(a[k])||a[k]<0))))return false;
   }
   if(result.blockers!==undefined&&(!Array.isArray(result.blockers)||result.blockers.some(b=>!b||typeof b.text!=='string'||typeof b.question!=='string'||!/^hang:(overdue|dependency|backlog|contact|stop|consensus):([a-f0-9-]{32,36}|b|c|writing|tasks)$/.test(b.ctx)||result.role==='mitglied'&&b.owner!==result.person)))return false;
+  if(result.leadership!==undefined&&result.leadership!==null){
+    const count=v=>v===null||Number.isInteger(v)&&v>=0;
+    if(result.role!=='leitung'||!Array.isArray(result.leadership)||result.leadership.length!==5||new Set(result.leadership.map(row=>row.person)).size!==5||result.leadership.some(row=>!names[row.person]||!count(row.overdue)||!Number.isInteger(row.blockers)||row.blockers<0||!Number.isInteger(row.priority)||row.priority<0||row.priority>5||!['b','c','writing','tasks'].every(k=>row[k]===null||row[k]&&count(row[k].done)&&count(row[k].total))))return false;
+  }
+  if(result.practice!==undefined&&result.practice!==null&&(!Number.isInteger(result.practice.total)||!Number.isInteger(result.practice.done)||result.practice.done<0||result.practice.done>result.practice.total))return false;
   if(result.profile!==undefined&&(!result.profile||typeof result.profile.role!=='string'||typeof result.profile.text!=='string'))return false;
   if(result.role==='mitglied'&&(result.assignments||[]).some(row=>row.owner!==result.person))return false;
   if(result.role==='mitglied'&&(result.chapters||[]).some(row=>row.owner!==result.person&&row.reader!==result.person))return false;
@@ -347,7 +380,7 @@ async function load(reset=false) {
   finally{clearTimeout(timeout);if(ticket===generation)render();}
 }
 $('person').addEventListener('click',()=>navigate('profile'));
-$('role').addEventListener('click',()=>{leadership=!leadership;data=null;load(true);});
+$('role').addEventListener('click',()=>{leadership=!leadership;data=null;if(leadership){view='today';const url=new URL(location.href);url.searchParams.set('view','today');url.searchParams.delete('area');history.replaceState({},'',url);}load(true);});
 $('refresh').addEventListener('click',()=>load());
 $('demo-person').addEventListener('change',()=>{leadership=false;data=null;load(true);});
 $('demo-state').addEventListener('change',()=>{data=null;load(true);});
