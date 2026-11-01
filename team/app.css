@@ -26,3 +26,13 @@ body{--person-color:#365e94;--person-wash:#edf3fc}
 
 .task-due.field-open,.task-detail .task-due.field-open{font-size:14px;font-weight:600;letter-spacing:0;color:var(--muted)}
 .task-title h3.field-open,.task-field p.field-open,.task-detail p.field-open{font-size:13px;font-weight:400;color:var(--muted)}
+
+/* Profile agreements use native, keyboard-accessible disclosure controls. */
+.team-agreement{border:1px solid var(--line);border-radius:16px;background:var(--paper);margin:12px 0}
+.team-agreement summary{cursor:pointer;padding:18px 20px;font-weight:800;min-height:56px;line-height:1.4}
+.team-agreement summary:focus-visible{outline:3px solid #736490;outline-offset:3px;border-radius:14px}
+.team-agreement[open] summary{border-bottom:1px solid var(--line)}
+.team-agreement .agreement-content{padding:6px 20px 18px;line-height:1.6;overflow-wrap:anywhere}
+.team-agreement p{margin:12px 0}.team-agreement ul{padding-left:22px}.team-agreement li{margin:10px 0}
+
+.sync-status{font-size:12px;line-height:1.5;color:var(--muted);margin:8px 0 0;font-weight:400}

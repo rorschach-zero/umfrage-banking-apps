@@ -11,6 +11,7 @@ if (!labels[view]) view = 'today';
 let noteSaving = false;
 let area = new URLSearchParams(location.search).get('area') || '', pending = null;
 let data = null, state = 'loading', person = 'SA', leadership = false, filter = 'open', key = '', generation = 0, lastLoaded = 0, errorMessage = '';
+let refreshing=false, cacheNamespace='', activeRequest=null;
 const $ = id => document.getElementById(id);
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -208,7 +209,7 @@ function nextFocus(rows) {
   if(data.service&&!data.service.error&&!data.service.probeDone)return {title:'Übe deinen ersten Kontakt',description:'Gehe einen Übungskontakt durch, bevor die eigentlichen Kontakte beginnen.',duration:'Etwa 10 Min. · Schätzung',label:'Übungskontakt öffnen →',href:'/team/b/'};
   if(data.practice&&data.practice.done<data.practice.total)return {title:'Übe das Bewerten',description:'Ordne eine Übungsbewertung zu und lerne die Eingabe kennen.',duration:'Etwa 5 Min. je Bewertung · Schätzung',label:'Übungsbewertungen öffnen →',href:'/team/c/'};
   if(open.length)return task(open[0]);
-  if(state!=='ready'||data.workspaceState!=='ready')return {title:'Prüfe deinen aktuellen Stand',description:'Ein Teil deiner Aufgaben ist noch unbekannt. Lade den Stand erneut.',duration:'Etwa 1 Min. · Schätzung',label:'Stand erneut laden →',action:()=>load()};
+  if(!['ready','cached'].includes(state)||data.workspaceState!=='ready')return {title:'Prüfe deinen aktuellen Stand',description:'Ein Teil deiner Aufgaben ist noch unbekannt. Lade den Stand erneut.',duration:'Etwa 1 Min. · Schätzung',label:'Stand erneut laden →',action:()=>load()};
   return {title:rows.some(r=>r.status==='in Prüfung')?'Deine Aufgaben sind in Prüfung':'Für heute ist nichts offen',description:rows.some(r=>r.status==='in Prüfung')?'Salah schaut sich deine Meldungen an.':'In Meine Arbeit findest du deine Bereiche und erledigten Aufgaben.',duration:'Etwa 1 Min. für deinen Überblick · Schätzung',label:'Meine Arbeit öffnen →',action:()=>{area='';navigate('tasks');}};
 }
 function weeklyRow(row) {
@@ -220,7 +221,7 @@ function weeklyRow(row) {
 function showToday(){
   if(leadership && data.person==='SA')return showLeadership();
   const rows=personalRows(),week=weekRows(rows),late=rows.filter(overdue).length,focus=nextFocus(rows);
-  const known=state==='ready'&&data.workspaceState==='ready'&&Object.values(data.sources).every(s=>s.state==='ready');
+  const known=['ready','cached'].includes(state)&&data.workspaceState==='ready'&&Object.values(data.sources).every(s=>s.state==='ready');
   const issues=(data.blockers||[]).filter(b=>b.owner===data.person&&b.type!=='overdue');
   const status=late?late+(late===1?' Sache ist überfällig ›':' Sachen sind überfällig ›'):!known?'Dein Stand ist teilweise unbekannt':issues.length?'Deine Aufgaben brauchen Aufmerksamkeit ›':'Alles im Plan';
   const head=heading('Hallo '+names[data.person]+'.','');head.firstChild.append(late||issues.length?button(status,()=>{area='';navigate('tasks');},'text-button today-status'+(late?' overdue':'')):el('p',{class:'subtitle today-status'},status));
@@ -273,16 +274,32 @@ function showDocuments(){
   const documents=data.documents,chapters=data.chapters;
   const groups=Array.isArray(documents)?[...new Set(documents.map(row=>row.group))]:[];
   return [heading('Unterlagen','Die Grundlagen für unsere Arbeit. An einem Ort.'),
+    el('section',{class:'document-group'},el('h2',{},'Zusammenarbeit'),el('ul',{class:'document-list'},el('li',{class:'document-row'},el('div',{class:'document-copy'},el('h3',{},'Unsere Spielregeln'),el('p',{},'Eine Seite zu Rollen, Hilfe und unseren Teamabmachungen.')),el('div',{class:'document-actions'},el('a',{class:'button secondary document-open',href:'/team/spielregeln.html',target:'_blank',rel:'noopener noreferrer'},'Öffnen →'))))),
     ...groups.map(group=>el('section',{class:'document-group'},el('h2',{},group),el('ul',{class:'document-list'},documents.filter(row=>row.group===group).map(row=>documentRow(row))))),
     !groups.length?unknown('Die Unterlagen sind noch nicht verbunden.'):null,
     el('section',{class:'document-group'},el('h2',{},'Meine Kapitel-Docs'),el('p',{class:'quiet-note'},leadership?'Alle Kapitel der Gruppe.':'Deine Kapitel als Pate oder Zweitleser:in.'),writingFolderLink(),
       chapters===null||chapters===undefined?unknown('Die Kapitel konnten nicht geladen werden.'):chapters.length?el('ul',{class:'document-list'},[...chapters].sort((a,b)=>(a.ref||'').localeCompare(b.ref||'','de',{numeric:true})).map(row=>documentRow(row,true))):empty('Noch keine Kapitel zugeteilt.','Sobald deine Zuteilung hinterlegt ist, findest du hier deine Docs.'))];
 }
+function profileAgreements(){
+  const people={"SA": {"name": "Salah", "role": "Projektleitung und Yuh", "sentence": "Du hältst Entscheide, Verteilung und den Kontakt zu Schule und Yuh zusammen.", "work": ["Du hältst Entscheide mit Datum in Notion fest.", "Du verteilst offene Arbeit nach bestätigten Angaben neu.", "Ungeprüfte Zugänge oder Resultate als bestätigt behandeln."]}, "ES": {"name": "Ernes", "role": "Lead Servicebeobachtung B", "sentence": "Du koordinierst Probe, Kontakte und Nachläufe; alle fünf erheben mit.", "work": ["Du prüfst im Feld täglich Kontakte und Nachläufe.", "Du sammelst unklare Felder und holst Hilfe bei Salah.", "Bei einer Stoppregel weitere Kontakte starten."]}, "MG": {"name": "Melisa", "role": "Lead Bewertungen C", "sentence": "Du leitest die Probe und klärst Unterschiede nach den unabhängigen Erstcodes.", "work": ["Du hältst Erstcodes und Konsens getrennt fest.", "Du klärst Grenzfälle gemeinsam am Codebuch.", "Erstcodes angleichen oder durch Konsens ersetzen."]}, "AM": {"name": "Arber", "role": "Lead Umfrage A und Reichweite", "sentence": "Du koordinierst die Verteilung und hilfst der Gruppe bei Lücken in der Reichweite.", "work": ["Du schaust sonntags auf Kanäle und Zwischenziele.", "Du schlägst bei Lücken neue Verteilorte vor.", "Echte Umfrageantworten selbst ausfüllen oder lenken."]}, "LB": {"name": "Leonie", "role": "Lead Qualität und Formales", "sentence": "Du koordinierst Quellen, Zweitlesungen und die vollständige Abgabe.", "work": ["Du führst die Lesungsliste mit Pate und Zweitlesung.", "Du gibst fehlende Belege an die zuständige Person zurück.", "Quellen erfinden oder für andere unterschreiben."]}};
+  const current=people[data.person];
+  if(!current)return [];
+  const fold=(label,...children)=>el('details',{class:'team-agreement'},el('summary',{},label),el('div',{class:'agreement-content'},...children));
+  return [
+    fold('Deine Rolle und dein Lead',el('p',{},el('strong',{},current.role),' · ',current.sentence),el('p',{},'Dein Lead koordiniert. Bei A, B und C packen alle mit an.'),el('p',{},'Deine Aufgaben, Schreibkarten und Fristen stehen weiter unten mit ihrem aktuellen Stand.')),
+    fold('So arbeitest du',...['So läuft’s','Gern gesehen','Lieber nicht'].map((label,i)=>el('p',{},el('strong',{},label),el('br'),current.work[i]))),
+    fold('Wenn’s klemmt',el('p',{},el('strong',{},'Pia → zuständiger Lead → Salah')),el('p',{},"A Arber · B Ernes · C Melisa · Schreiben Leonie"),el('p',{},data.person==='SA'?'Offene Vorgaben klärst du mit der Quelle oder der zuständigen Ansprechperson.':'Als Lead gehst du bei offenen Fragen zu Salah. Zugang oder Ausfall direkt Salah.'),el('a',{class:'button secondary',href:'/team/frag/'},'Pia öffnen →')),
+    fold('Was wir voneinander erwarten',el('ul',{},["Wir halten Fristen ein oder melden früh, wenn es klemmt.", "Wir fragen für den Einstieg Pia und klären offene Punkte mit dem Lead.", "Wir beobachten und codieren ergebnisoffen; Zugänge und private Daten bleiben geschützt.", "Wir setzen den Stand ehrlich auf «in Prüfung», solange die Prüfung offen ist.", "Wir schauen wöchentlich auf den Stand und erfassen ab 16.11. unsere echte Arbeitszeit."].map(text=>el('li',{},text)))),
+    fold('Was du Salah fragen kannst',...[["Entscheide & Zuteilungen", "Wer übernimmt was? Was gilt bei zwei Vorschlägen?"], ["Ausfälle & Zugang", "Du fällst aus oder kommst nicht rein? Direkt zu Salah."], ["Unklarer Auftrag", "Vorgaben fehlen oder widersprechen sich? Salah klärt sie."]].map(([label,text])=>el('p',{},el('strong',{},label),el('br'),text)),el('p',{class:'quiet-note'},"Pia erklärt Schritte und Quellen. Zuteilungen, Ausfälle und Freigaben klärt Salah; Zielcodes und Wunschresultate bleiben draussen.")),
+    el('a',{class:'button secondary',href:'/team/spielregeln.html',target:'_blank',rel:'noopener noreferrer'},'Unsere Spielregeln →')
+  ];
+}
 function showProfile(){
   const profile=data.profile||{},chapters=data.chapters||[],own=allTasks().filter(r=>r.owner===data.person||r.reader===data.person);
   const section=(label,rows)=>el('section',{class:'profile-section'},el('h2',{},label),rows.length?taskList(rows):el('p',{class:'quiet-note'},'Noch keine Zuteilung hinterlegt.'));
   return [heading('Dein Profil','Deine Rolle im gemeinsamen Projekt.'),el('section',{class:'profile-intro'},el('span',{class:'avatar-large'},names[data.person].slice(0,1)),el('div',{},el('h2',{},profile.role||'Rolle noch offen'),el('p',{},profile.text||'Dein Lead-Blatt ist noch nicht erreichbar.'),el('small',{class:'source'},profile.source||'Lead-Blatt'))),
-    piaLink({'Pia-Frage':'Erklär mir meine Rolle und meinen Lead-Bereich. Wofür bin ich verantwortlich?'},'Pia: Erklär mir meine Rolle'),
+    ...profileAgreements(),
+    piaLink({'Pia-Frage':'Erklär mir meine Rolle und meinen Lead-Bereich. Wofür bin ich verantwortlich?'},'Pia erklärt dir deine Rolle'),
     button('Unterlagen öffnen',()=>navigate('documents'),'button secondary'),button('Umfrage teilen',()=>navigate('sharing'),'button secondary'),
     section('Kapitel als Pate',chapters.filter(r=>r.owner===data.person)),section('Kapitel als Zweitleser:in',chapters.filter(r=>r.reader===data.person)),
     section('Deine Erhebungsaufträge',(data.assignments||[]).filter(r=>r.owner===data.person)),section('Deine nächsten drei Fristen',sortRows(own.filter(r=>!completed(r)&&r.due)).slice(0,3))];
@@ -379,19 +396,26 @@ function report(row,target='in Prüfung'){
   if(preview.active()||pending||noteSaving||state!=='ready'||(!canReport(row)&&!(canReview(row)&&['fertig','läuft'].includes(target))))return;
   if(config.demo){toast('In der Vorschau wird kein Status gespeichert.');return;}
   const access=key,lead=leadership,identity=data.person;
-  pending={id:row.id,timer:null};
-  const returning=row.status==='in Prüfung'&&target==='läuft';
-  const undo=button('Rückgängig',()=>{clearTimeout(pending.timer);pending=null;toast('Meldung zurückgenommen.');render();},'toast-undo');
+  const before=structuredClone(data), serverRow={...row};
+  ++generation;if(activeRequest)activeRequest.abort();refreshing=false;
+  const operation={id:row.id,timer:null};pending=operation;
+  setLocalStatus(row.id,target);
+  const returning=serverRow.status==='in Prüfung'&&target==='läuft';
+  const undo=button('Rückgängig',()=>{if(pending!==operation)return;clearTimeout(operation.timer);data=before;pending=null;toast('Meldung zurückgenommen.');render();},'toast-undo');
   toast((returning?'Zurückgeben':target==='läuft'?'Start':target==='fertig'?'Abnahme':'Fertigmeldung')+' wird in 5 Sekunden gespeichert.',undo);$('detail').close();render();
-  pending.timer=setTimeout(async()=>{
+  operation.timer=setTimeout(async()=>{
+    if(pending!==operation)return;
     if(key!==access||data?.person!==identity){pending=null;toast('Zugang geändert. Meldung zurückgenommen.');return;}
     toast('Wird gespeichert …');
     try{
-      if(row.status==='offen'&&target==='in Prüfung')await postStatus(row,'offen','läuft',access,lead);
-      await postStatus(row,row.status,target,access,lead);
+      if(serverRow.status==='offen'&&target==='in Prüfung')await postStatus(serverRow,'offen','läuft',access,lead);
+      if(pending!==operation)return;
+      await postStatus(serverRow,serverRow.status,target,access,lead);
+      if(pending!==operation||key!==access||data?.person!==identity)return;
+      clearResponses(cacheNamespace);setLocalStatus(row.id,target);
       toast(target==='fertig'?'✓ Prüfung abgeschlossen.':returning?'✓ Zur Bearbeitung zurückgegeben.':target==='läuft'?'✓ Bearbeitung gestartet.':'✓ Zur Prüfung gemeldet. Gut gemacht.');$('toast').classList.add('success');
-    }catch(error){toast((error.name==='AbortError'?'Verbindung unterbrochen. Bitte Stand prüfen.':error.message));}
-    finally{pending=null;await load();setTimeout(()=>$('toast').classList.remove('success'),700);}
+    }catch(error){if(pending===operation&&key===access&&data?.person===identity){data=before;setLocalStatus(row.id,serverRow.status);clearResponses(cacheNamespace);toast((error.name==='AbortError'?'Verbindung unterbrochen. Bitte Stand prüfen.':error.message));}}
+    finally{if(pending===operation){pending=null;await load();setTimeout(()=>$('toast').classList.remove('success'),700);}}
   },5000);
 }
 
@@ -408,7 +432,7 @@ function showSharing(){
     if(choices)choices.addEventListener('change',update);update();
     const dateInput=el('input',{type:'date',value:today(),min:'2026-10-29',max:today(),'aria-label':'Datum '+title}),reach=el('input',{type:'number',min:0,max:9999999,step:1,placeholder:'optional','aria-label':'Gruppengrösse '+title}),check=el('input',{type:'checkbox','aria-label':'Ich habe geteilt in '+title});
     const save=button('Teilen bestätigen',async()=>{
-      if(preview.active())return;
+      if(preview.active()||state!=='ready')return;
       if(!check.checked){feedback.textContent='Bestätige zuerst, dass du hier geteilt hast.';return;}
       if(institution&&!choices.value){feedback.textContent='Wähle die verwendete Institution.';return;}
       if(!dateInput.checkValidity()||!reach.checkValidity()){feedback.textContent='Prüfe Datum und geschätzte Gruppengrösse.';return;}
@@ -423,16 +447,16 @@ function showSharing(){
     return el('section',{class:'share-channel','data-channel':channel},el('h2',{},title),institution?el('p',{class:'quiet-note'},'Bestehenden Versandentscheid beachten. Die Institutionskennung ist keine Personenkennung.'):null,
       channel==='t'?el('p',{class:'quiet-note'},'Nur für technische Tests. Zählt nicht zum Ziel von zwei Kanälen.'):null,
       choices,el('p',{class:'share-call'},call),link,el('div',{class:'share-actions'},copy,share),el('details',{class:'share-code'},el('summary',{},'QR-Code anzeigen'),qr),
-      el('fieldset',{disabled:preview.active()},el('legend',{},'Deine Verteilung festhalten'),el('label',{class:'share-check'},check,'Ich habe geteilt in '+title),el('label',{},'Datum',dateInput),el('label',{},'Geschätzte Gruppengrösse',reach),save),
+      el('fieldset',{disabled:preview.active()||state!=='ready'},el('legend',{},'Deine Verteilung festhalten'),el('label',{class:'share-check'},check,'Ich habe geteilt in '+title),el('label',{},'Datum',dateInput),el('label',{},'Geschätzte Gruppengrösse',reach),save),
       sent.length?el('small',{},'Bereits erfasst am '+sent.map(r=>r.datum).join(', ')):null,feedback);
   });
   return [heading('Umfrage teilen','Teile in mindestens zwei passenden Kanälen. Der Link enthält keinen Namen.'),window.createPurposeCard('a',rememberPiaRole),el('p',{id:'sharing-count',class:'sharing-count'},(data.sharing?.done??'–')+' von 2 Kanälen'),el('p',{class:'quiet-note'},'Gruppengrössen sind freiwillige Schätzungen. Überschneidungen sind möglich. Antworten werden nur je Kanal gezählt und keiner verteilenden Person zugeordnet.'),el('div',{class:'share-grid'},cards)];
 }
 
 function privacy() {
-  modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Projektstände werden hier nur im Arbeitsspeicher gehalten. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden an Notion gesendet und protokolliert. Der Server speichert Antworten höchstens 60 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Beim Teilen speichert das Verteilungsprotokoll deine Person, den Kanal, das Datum und eine freiwillige Reichweitenschätzung. Es verknüpft keine Umfrageantwort mit dir. QR-Codes werden auf deinem Gerät erzeugt.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
+  modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Der letzte Projektstand bleibt für deine Person und Ansicht auf diesem Gerät gespeichert, damit er beim Wiederöffnen sofort erscheint. Beim Abmelden werden diese gespeicherten Projektstände gelöscht. Nutze dafür ein persönliches Gerät. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden an Notion gesendet und protokolliert. Der Server speichert Antworten höchstens 600 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Beim Teilen speichert das Verteilungsprotokoll deine Person, den Kanal, das Datum und eine freiwillige Reichweitenschätzung. Es verknüpft keine Umfrageantwort mit dir. QR-Codes werden auf deinem Gerät erzeugt.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
 }
-function logout() {preview.clear();try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
+function logout() {if(pending){clearTimeout(pending.timer);pending=null;}$('toast').hidden=true;clearResponses();cacheNamespace='';refreshing=false;if(activeRequest)activeRequest.abort();preview.clear();try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
 function renderViewSelector() {
   let slot = $('view-as-selector');
   if (!slot) { slot = el('div',{id:'view-as-selector',class:'view-as-selector'});document.querySelector('.topbar').after(slot); }
@@ -451,9 +475,9 @@ function render() {
   $('person').textContent=data?names[data.person]:'Dein Zugang';$('person').setAttribute('aria-label','Profilmenü öffnen');$('person').setAttribute('aria-expanded',String(!$('profile-menu')?.hidden&&!!$('profile-menu')));$('person').disabled=!!pending||noteSaving;
   renderViewSelector();
   $('role').hidden=preview.active()||!(data?.person==='SA'); $('role').replaceChildren(el('span',{class:!leadership?'selected':''},'Meine Sicht'),el('span',{'aria-hidden':'true'},' | '),el('span',{class:leadership?'selected':''},'Leitung'));$('role').setAttribute('aria-label',leadership?'Zu Meine Sicht wechseln':'Zur Leitung wechseln');$('role').disabled=!!pending||noteSaving; $('role').setAttribute('aria-pressed',String(leadership));
-  $('refresh').disabled=state==='loading';
-  $('source-note').textContent=config.demo?'Nachbau · Planungsstand 01.11.2026':data?'Zuletzt geladen '+date(data.fetchedAt,true)+(data.cached?' · Zwischenspeicher':''):'Planungsstand unbekannt';
-  const content=$('content'); content.setAttribute('aria-busy',String(state==='loading'));
+  $('refresh').disabled=refreshing||state==='loading';
+  $('source-note').textContent=config.demo?'Nachbau · Planungsstand 01.11.2026':data?'Stand '+new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',hour:'2-digit',minute:'2-digit'}).format(new Date(data.fetchedAt))+(refreshing?' · aktualisiert…':state==='stale'?' · offline':''):'Planungsstand unbekannt';
+  const content=$('content'); content.setAttribute('aria-busy',String(state==='loading'||refreshing));
   if(state==='loading') {content.replaceChildren(heading('Ein Moment.','Dein Projektstand wird geladen.'),el('div',{'aria-hidden':'true'},el('span',{class:'skeleton short'}),el('span',{class:'skeleton big'}),el('span',{class:'skeleton'}),el('span',{class:'skeleton short'}))); announce('Projektstand wird geladen.');return;}
   if(state==='unauthorized'||!data) {
     content.replaceChildren(el('section',{class:'error-panel card'},el('div',{class:'empty-symbol','aria-hidden':'true'},state==='unauthorized'?'↗':'!'),el('h2',{},state==='unauthorized'?'Dein persönlicher Zugang.':'Der Stand ist gerade unbekannt.'),el('p',{},state==='unauthorized'?'Öffne deinen persönlichen Team-Link. Wenn er nicht mehr funktioniert, hilft dir Salah weiter.':errorMessage||'Die Verbindung hat nicht geklappt. Deine Aufgaben sind dadurch nicht verschwunden.'),state!=='unauthorized'?button('Erneut versuchen',()=>load()):button('Datenschutz & Zugang',privacy,'button secondary')));announce(state==='unauthorized'?'Persönlichen Zugang öffnen.':'Laden fehlgeschlagen. Stand unbekannt.');return;
@@ -462,14 +486,16 @@ function render() {
   if(state==='stale')notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Verbindung unterbrochen. Veralteter Stand vom '+date(data.fetchedAt,true)+'. Aktuelle Aufgaben sind unbekannt.'),button('Erneut laden',()=>load(),'text-button')));
   if(Object.values(data.sources).some(source=>source.state!=='ready'))notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Ein Teil des Projektstands ist unbekannt. Fehlende Quellen zählen nicht als leer.'),button('Erneut laden',()=>load(),'text-button')));
   const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,profile:showProfile,documents:showDocuments,sharing:showSharing};
-  content.replaceChildren(...[...notices,...screens[view]()].flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false)); announce(labels[view]+': '+(state==='stale'?'veralteter Stand.':'Projektstand angezeigt.'));
+  content.replaceChildren(...[...notices,...screens[view]()].flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false));
+  content.querySelector('.heading > div')?.append(el('p',{class:'sync-status',role:'status'},$('source-note').textContent));
+  announce(labels[view]+': '+(state==='stale'?'veralteter Stand.':'Projektstand angezeigt.'));
 }
 function announce(text){$('announcement').textContent=text;}
 function readKey() {
   const fragment=new URLSearchParams(location.hash.slice(1)), incoming=fragment.get('k');
   if(location.hash){const url=new URL(location.href);url.hash='';history.replaceState({},'',url);}
   if(config.demo)return '';
-  if(incoming){preview.clear();try{localStorage.setItem('pa6k',incoming);}catch{}return incoming;}
+  if(incoming){preview.clear();try{if(localStorage.getItem('pa6k')!==incoming)clearResponses();localStorage.setItem('pa6k',incoming);}catch{}return incoming;}
   try{return localStorage.getItem('pa6k')||key||'';}catch{return key||'';}
 }
 function validResponse(result) {
@@ -506,12 +532,52 @@ function validResponse(result) {
   if(result.group&&['total','active','done','unassigned','unknownStatus'].some(name=>!(result.group[name]===null&&['active','done'].includes(name))&&(!Number.isInteger(result.group[name])||result.group[name]<0)))return false;
   return true;
 }
+// Only server responses are persisted. The non-reversible namespace binds them to this access.
+const snapshotPrefix='pa6-team-v1:';
+async function responseNamespace(access) {
+  try {
+    const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(access));
+    return snapshotPrefix+Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('')+':';
+  } catch {return '';}
+}
+function clearResponses(namespace=snapshotPrefix) {
+  if(!namespace)return;
+  try {for(const name of Object.keys(localStorage))if(name.startsWith(namespace))localStorage.removeItem(name);} catch {}
+}
+function responseSlot(result) {return cacheNamespace+result.person+':'+result.role+':'+(result.readOnly?'preview':'own');}
+function saveResponse(result) {
+  if(!cacheNamespace||!validResponse(result))return;
+  try {localStorage.setItem(responseSlot(result),JSON.stringify(result));} catch {}
+}
+function restoreResponse() {
+  if(!cacheNamespace)return null;
+  try {
+    const candidates=Object.keys(localStorage).filter(name=>name.startsWith(cacheNamespace)).map(name=>{
+      try {return JSON.parse(localStorage.getItem(name));} catch {return null;}
+    }).filter(result=>validResponse(result)&&Date.parse(result.fetchedAt)<=Date.now()&&
+      (preview.active()?result.readOnly===true&&result.viewer==='SA'&&result.person===preview.target()&&result.role==='mitglied':
+        !result.readOnly&&!result.viewer&&result.role===(leadership?'leitung':'mitglied')));
+    return candidates.sort((a,b)=>Date.parse(b.fetchedAt)-Date.parse(a.fetchedAt))[0]||null;
+  } catch {return null;}
+}
+function setLocalStatus(id, status) {
+  for(const field of ['tasks','assignments','writing'])for(const row of data?.[field]||[])if(row.id===id)row.status=status;
+}
 async function load(reset=false) {
-  const ticket=++generation, nextKey=readKey();
+  if(pending&&!reset)return;
+  const opening=!key, ticket=++generation, nextKey=readKey();
+  if(activeRequest)activeRequest.abort();
+  if(pending){clearTimeout(pending.timer);pending=null;$('toast').hidden=true;}
+  if(nextKey!==key){leadership=false;cacheNamespace='';}
   if(reset||nextKey!==key){data=null;leadership=reset?leadership:false;} key=nextKey;
   if(preview.returning() && !preview.active() && !data)leadership=true;
+  if(!config.demo&&key){
+    const namespace=await responseNamespace(key);if(ticket!==generation)return;cacheNamespace=namespace;
+    if(opening&&!leadership&&!preview.active()){try{leadership=sessionStorage.getItem(namespace+'role')==='leitung';}catch{}}
+    if(!data)data=restoreResponse();
+  }
   const previous=data;
-  state='loading';render();
+  refreshing=!!key&&!config.demo;state=data?'cached':'loading';render();
   if(config.demo){
     await new Promise(resolve=>setTimeout(resolve,250));if(ticket!==generation)return;
     const chosen=$('demo-state').value; person=$('demo-person').value;
@@ -522,19 +588,19 @@ async function load(reset=false) {
     if(state==='error'||state==='unauthorized')data=null;
     lastLoaded=Date.now();render();return;
   }
-  if(!key){data=null;state='unauthorized';render();return;}
-  const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),60000);
+  if(!key){data=null;refreshing=false;state='unauthorized';render();return;}
+  const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),60000);activeRequest=controller;
   try{
     if(!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(config.endpoint))throw Error('Der Projektzugang ist noch nicht verbunden.');
     const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(preview.request({typ:'team',k:key,leitung:leadership})),signal:controller.signal,referrerPolicy:'no-referrer',cache:'no-store'});
     if(!response.ok)throw Error('Der Projektstand ist vorübergehend nicht erreichbar.');
     const result=await response.json(); if(ticket!==generation)return;
-    if(result?.code==='unauthorized'){data=null;state='unauthorized';leadership=false;render();return;}
+    if(result?.code==='unauthorized'||result?.code==='forbidden'){clearResponses(cacheNamespace||snapshotPrefix);data=null;state=result.code==='unauthorized'?'unauthorized':'error';errorMessage=result.fehler||'Personenansicht nicht freigegeben.';leadership=false;preview.clear();render();return;}
     if(preview.active() && (result.readOnly!==true || result.viewer!=='SA' || result.person!==preview.target() || result.role!=='mitglied'))throw Error(result.fehler||'Personenansicht nicht freigegeben.');
     if(!validResponse(result))throw Error('Die Antwort ist unvollständig. Der aktuelle Stand bleibt unbekannt.');
-    data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();
+    data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();saveResponse(result);
   }catch(error){if(ticket!==generation)return;data=previous;state=previous?'stale':'error';errorMessage=error.name==='AbortError'?'Die Verbindung dauert zu lange. Bitte versuche es erneut.':error.message;}
-  finally{clearTimeout(timeout);if(ticket===generation)render();}
+  finally{clearTimeout(timeout);if(ticket===generation){refreshing=false;activeRequest=null;render();}}
 }
 function openPerson(id) {if(pending||noteSaving)return;preview.select(id);}
 function switchView() {
@@ -549,14 +615,14 @@ $('person').addEventListener('click',()=>{
 });
 document.addEventListener('click',event=>{if(!event.target.closest('.identity'))closeProfileMenu();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('profile-menu')&&!$('profile-menu').hidden){closeProfileMenu();$('person').focus();}});
-$('role').addEventListener('click',()=>{if(pending||noteSaving)return;leadership=!leadership;data=null;if(leadership){view='today';const url=new URL(location.href);url.searchParams.set('view','today');url.searchParams.delete('area');history.replaceState({},'',url);}load(true);});
+$('role').addEventListener('click',()=>{if(pending||noteSaving)return;leadership=!leadership;try{sessionStorage.setItem(cacheNamespace+'role',leadership?'leitung':'mitglied');}catch{}data=null;if(leadership){view='today';const url=new URL(location.href);url.searchParams.set('view','today');url.searchParams.delete('area');history.replaceState({},'',url);}load(true);});
 $('refresh').addEventListener('click',()=>load());
 $('demo-person').addEventListener('change',()=>{leadership=false;data=null;load(true);});
 $('demo-state').addEventListener('change',()=>{data=null;load(true);});
 $('privacy-button').addEventListener('click',privacy);$('privacy-footer').addEventListener('click',privacy);
 window.addEventListener('popstate',()=>{area=new URLSearchParams(location.search).get('area')||'';navigate(new URLSearchParams(location.search).get('view'),false);});
 window.addEventListener('hashchange',()=>load(true));
-window.addEventListener('storage',event=>{if(event.key==='pa6k'){key='';data=null;leadership=false;load(true);}});
+window.addEventListener('storage',event=>{if(event.key==='pa6k'){clearResponses();cacheNamespace='';key='';data=null;leadership=false;load(true);}});
 document.addEventListener('click',event=>{
   const link=event.target.closest('a[href]');
   if(pending&&link&&new URL(link.href).pathname!==location.pathname){event.preventDefault();announce('Die Meldung wird noch gespeichert. Warte kurz oder wähle Rückgängig.');}
