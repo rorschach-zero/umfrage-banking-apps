@@ -45,7 +45,14 @@ async function start() {
 }
 function leer(x) { return { nr: x.nr, ausschluss: "", kundendienst_kontakt: "", kats: [], vals: {}, anker: "", bemerkung: "", zak_bezug: x.anbieter === "Zak" && x.quelle === "Trustpilot" ? "" : "nicht anwendbar", sprache: x.sprache || "" }; }
 function aus(e) { const k = []; const v = {}; [1, 2, 3].forEach(n => { if (e["kat_" + n]) { k.push(Number(e["kat_" + n])); v[e["kat_" + n]] = e["val_" + n]; } }); return Object.assign(leer(q[i]), { ausschluss: e.ausschluss || "", kundendienst_kontakt: e.kundendienst_kontakt || "", kats: k, vals: v, anker: e.anker || "", bemerkung: e.bemerkung || "", zak_bezug: e.zak_bezug || "nicht anwendbar" }); }
-function fortschritt() { const n = q.filter(x => x.eigen).length; document.getElementById("fort").textContent = `${q.every(x => x.probe) ? "Probe · " : ""}${n} von ${q.length}`; }
+function renderExtraCases() {
+  let box=document.getElementById('extra-cases');if(box)box.remove();
+  if(!q.length||!q.every(row=>row.eigen)||!q.some(row=>!row.probe))return;
+  box=el('section',{id:'extra-cases',class:'karte'},el('h2',{},'Deine Warteschlange ist abgeschlossen'),el('p',{},'Du kannst unbegonnene Fälle von Personen im Rückstand übernehmen. Bestehende Codierungen bleiben geschützt.'));
+  const message=el('p',{role:'status'}),button=el('button',{class:'knopf',on:{click:async()=>{button.disabled=true;try{const result=await sende({typ:'take_more',area:'c'});await start();window.dispatchEvent(new Event('workspace-saved'));(document.querySelector('#extra-cases [role=status]')||document.getElementById('meldung')).textContent=result.assigned+' Fälle übernommen.';}catch(error){message.textContent=error.message;}finally{button.disabled=false;}}}},'Weitere Fälle übernehmen');
+  box.append(button,message);document.getElementById('workspace-progress').after(box);
+}
+function fortschritt() { renderExtraCases(); const n = q.filter(x => x.eigen).length; document.getElementById("fort").textContent = `${q.every(x => x.probe) ? "Probe · " : ""}${n} von ${q.length}`; }
 function draftKey(x) { return "c-" + wer + ":" + x.rolle + ":" + x.nr; }
 function zeige() {
   const x = q[i]; c = lokal(draftKey(x)) || (x.eigen ? aus(x.eigen) : leer(x)); fortschritt(); bild();
@@ -125,6 +132,7 @@ async function speichern() {
     x.eigen = Object.assign({ codiert_von: wer }, z); try { localStorage.removeItem(draftKey(x)); } catch (e) {}
     msg.className = "meldung ok"; msg.textContent = "Gespeichert.";
     const n = q.findIndex((y, k) => k > i && !y.eigen); i = n >= 0 ? n : Math.min(i + 1, q.length - 1); zeige();
+    renderExtraCases();
     if (q.every(y => y.eigen)) { msg.textContent = "Alles codiert. Danke."; }
   } catch (e) { msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
 }

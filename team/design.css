@@ -13,3 +13,18 @@ header{background:rgba(248,248,245,.96);border-bottom:1px solid var(--line)}
 @media(max-width:600px){header .innen{flex-wrap:wrap;gap:8px}.project-return{order:3;flex-basis:100%}.pia-page .project-label{display:none}}
 .stat .unknown-value{font-size:16px;line-height:2}
 .workspace-progress{max-width:1040px;margin:24px auto 0;padding:0 24px;font-size:12px;color:#68736c}.workspace-progress>a{color:#496641;text-decoration:none;font-weight:700;display:inline-block;min-height:32px}.workspace-meter{display:flex;gap:20px;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #e0e4dc}.workspace-meter progress{appearance:none;border:0;border-radius:5px;height:5px;width:120px;background:#e9eee4}.workspace-meter progress::-webkit-progress-bar{background:#e9eee4}.workspace-meter progress::-webkit-progress-value{background:#829d67}.workspace-progress p{font-size:12px;line-height:1.6}.workspace-progress p a{color:#6c5680}.project-return{font-size:12px}.karte{box-shadow:none;border-radius:14px}.knopf{border-radius:10px}@media(max-width:600px){.workspace-progress{padding:0 20px;margin-top:17px}.workspace-meter{gap:12px}.workspace-meter progress{width:65px;flex-shrink:0}}
+
+.service-setup { margin:24px 0; }
+.service-setup h2 { margin-top:0; }
+.bank-options { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border:1px solid #deddd5;border-radius:12px;padding:16px;margin:24px 0 8px; }
+.bank-options label,.checkline { display:flex;align-items:flex-start;gap:10px;line-height:1.5; }
+.bank-options input,.checkline input { width:20px;height:20px;flex:none;margin:2px 0; }
+.service-setup input:not([type=checkbox]),.service-setup select,.service-schedule input { display:block;width:100%;max-width:100%;box-sizing:border-box;padding:12px;border:1px solid #bbb;border-radius:8px;font:inherit; }
+.service-setup label { margin-top:12px; }
+.service-setup button { margin:10px 8px 0 0; }
+.service-status { font-weight:700; }
+.service-schedule { display:flex;flex-wrap:wrap;gap:8px;margin:-4px 0 24px; }
+.service-schedule input { width:auto;min-width:0; }
+.channel-setup { margin-top:24px; }
+#extra-cases { max-width:900px;margin:20px auto;padding:24px; }
+#service-message { color:#8b361c;overflow-wrap:anywhere; }

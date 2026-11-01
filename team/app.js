@@ -2,7 +2,7 @@
 (() => {
 const config = window.TEAM_CONFIG;
 const names = {SA:'Salah',ES:'Ernes',MG:'Melisa',AM:'Arber',LB:'Leonie'};
-const labels = {today:'Heute',tasks:'Meine Arbeit',deadlines:'Fristen',pia:'Pia',documents:'Unterlagen',profile:'Profil'};
+const labels = {sharing:'Umfrage teilen',today:'Heute',tasks:'Meine Arbeit',deadlines:'Fristen',pia:'Pia',documents:'Unterlagen',profile:'Profil'};
 const paths = {documents:'M4 3h11l5 5v13H4zM14 3v6h6M8 13h8M8 17h6',profile:'M20 21v-2a7 7 0 0 0-14 0v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',today:'M3 10 12 3l9 7M5 9v12h5v-7h4v7h5V9',tasks:'M9 6h12M9 12h12M9 18h12M3 6l1 1 2-3M3 12l1 1 2-3M3 18l1 1 2-3',deadlines:'M4 5h16v16H4zM4 10h16M8 3v4M16 3v4',pia:'M21 11a8 8 0 0 1-8 8H8l-5 3 1-6a8 8 0 1 1 17-5Z'};
 let view = new URLSearchParams(location.search).get('view') || 'today';
 if (view === 'writing') view = 'tasks';
@@ -148,6 +148,17 @@ function areaSummary(module){
 }
 function openArea(id){area=id;navigate('tasks');}
 function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'B':module.id==='c'?'C':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},module.title),el('small',{},areaSummary(module))),el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
+function serviceCard(){
+  const s=data.service;if(!s||s.error)return null;
+  return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Servicebeobachtung B'),el('p',{},(s.probeDone?'Probe erledigt':'Probe jetzt möglich')+' · '+s.done+' von '+s.config.target+' Kontakten'),el('small',{},'Offizieller Feldbeginn '+date(s.config.official))),el('a',{class:'button secondary',href:'/team/b/'},s.probeDone?'Kontakte öffnen':'Probe und Konten wählen'));
+}
+function shareCard(){return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Umfrage teilen'),el('p',{},(data.sharing?.done??'–')+' von 2 Kanälen · ohne Namen im Link')),button('Umfrage teilen',()=>navigate('sharing'),'button secondary'));}
+function fieldLeadership(){
+  return el('section',{class:'field-leadership'},el('h2',{},'Erhebung und Verteilung'),
+    data.service?.open?el('p',{},'Offene B-Zellen · '+data.service.open.map(r=>r.provider+' '+r.open).join(' · ')):null,
+    data.sharing?.people?el('ul',{},data.sharing.people.map(r=>el('li',{},names[r.person]+' · '+r.done+' von 2 Kanälen'))):null,
+    el('details',{},el('summary',{},'Übernahmen · '+(data.transfers?.length||0)),el('ul',{},(data.transfers||[]).map(r=>{let change={};try{change=JSON.parse(r.change);}catch{}return el('li',{},r.date+' · '+r.nr+' · '+(names[change.alt]||'frei')+' → '+(names[change.neu]||r.person));}))));
+}
 function practiceCard(){
   return data.practice?.total ? el('section',{class:'practice-card'},el('div',{},el('strong',{},'Probecodierung · 01./02.11.'),el('p',{},data.practice.done+' von '+data.practice.total+' Schulungsfällen · getrennt von der Erhebung')),el('a',{class:'button secondary',href:'/team/c/'},'Probe codieren')) : null;
 }
@@ -173,14 +184,14 @@ function showLeadership(){
       el('div',{class:'lead-next'},el('span',{},row?shortTitle(row)+' · '+relativeDue(row):'Keine offene Aufgabe verknüpft.'),row?button('Ich übernehme',()=>takeOver(row),'button secondary takeover'):null),
       issues.length?el('details',{class:'lead-issues'},el('summary',{},'Hänger ansehen · '+issues.length),el('ul',{},issues.map(issue=>el('li',{},el('span',{},({b:'B',c:'C',writing:'Schreiben',tasks:'Pakete'}[issue.area]||'Aufgabe')+' · '+issue.text),(()=>{const task=allTasks().find(item=>item.id===issue.taskId);return task?button('Ich übernehme',()=>takeOver(task),'text-button takeover'):el('small',{},'Aufgabe noch nicht verknüpft.');})())))):null);
   });
-  return [heading('Leitungsübersicht','Alle fünf Personen · Dringendes zuerst.'),el('p',{class:'quiet-note'},'B und C: erledigt / zugeteilt, Soll bis gestern. Schreiben: Kapitel als Pate oder Zweitleser. Pakete: eigene Arbeitspakete. Die Probe zählt separat.'),el('div',{class:'lead-people'},cards),practiceCard()];
+  return [heading('Leitungsübersicht','Alle fünf Personen · Dringendes zuerst.'),el('p',{class:'quiet-note'},'B und C: erledigt / zugeteilt, Soll bis gestern. Schreiben: Kapitel als Pate oder Zweitleser. Pakete: eigene Arbeitspakete. Die Probe zählt separat.'),el('div',{class:'lead-people'},cards),fieldLeadership(),serviceCard(),shareCard(),practiceCard()];
 }
 function showToday(){
   if(leadership && data.person==='SA')return showLeadership();
   const open=sortRows(allTasks().filter(r=>!completed(r)&&r.status!=='in Prüfung'&&(r.owner===data.person||r.reader===data.person)));
   const focus=nextActions(open)[0], blockers=(data.blockers||[]).filter(b=>b.owner===data.person), count=blockers.length;
   const status=count?count+' '+(count===1?'Sache hängt.':'Dinge hängen.'):data.workspaceState==='ready'?'Du bist im Plan.':'Ein Teil deines Stands ist noch unbekannt.';
-  return [heading('Hallo, '+names[data.person]+'.',status),blockerList(blockers),practiceCard(),
+  return [heading('Hallo, '+names[data.person]+'.',status),blockerList(blockers),serviceCard(),shareCard(),practiceCard(),
     el('section',{class:'focus-card'},el('p',{class:'eyebrow'},'Dein nächster Schritt'),el('h2',{},focus?focus.title:'Zeit für deinen Überblick'),el('p',{},focus?(focus.description==='noch offen'?'Öffne die Aufgabe und kläre deinen nächsten Schritt.':focus.description):'Öffne deine Arbeitsbereiche und sieh, wo du stehst.'),focus?el('span',{class:'focus-due'},relativeDue(focus)):null,focus?.tool?el('a',{class:'button',href:focus.tool},'Kontakt erfassen'):button(focus?'Aufgabe ansehen':'Meine Arbeit öffnen',()=>focus?details(focus.row):navigate('tasks'))),
     el('section',{class:'area-overview'},el('h2',{},'Deine Arbeitsbereiche'),(data.areas||[]).map(areaLine),!(data.areas||[]).length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null),
     open.length>1?el('section',{class:'next-list'},el('h2',{},'Danach'),taskList(open.filter(row=>row.id!==focus?.row?.id).slice(0,3))):null,
@@ -208,7 +219,7 @@ function showTasks(){
   if(!selected)return [heading('Meine Arbeit','Deine Bereiche. Dein nächster Schritt.'),el('div',{class:'work-modules'},modules.map(module=>el('section',{class:'work-module'},areaLine(module),el('div',{class:'module-foot'},el('span',{},areaRows(module).filter(r=>!completed(r)).length+' offene Aufgaben'),button('Bereich öffnen',()=>openArea(module.id),'text-button'))))),!modules.length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null];
   const next=selected.next;
   return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(selected.title,''),areaBlockers(area),
-    selected.id==='writing'?writingFolderLink():null,
+    selected.id==='writing'?writingFolderLink():null,selected.id==='b'?serviceCard():null,
     progress(selected.done,selected.total,areaSummary(selected)),
     next?el('p',{class:'next-contact'},'Nächster '+date(next.date)+' · Block '+next.block+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Formular'}[next.channel]||next.channel)):null,
     selected.tool?el('a',{class:'button area-tool',href:selected.tool},area==='b'?'Nächsten Kontakt erfassen':'Weiter codieren'):selected.id==='writing'?workLink(sortRows(rows).find(row=>!completed(row)&&/^https:\/\/docs.google.com\/document\//.test(row.Wo||''))||{}):null,
@@ -241,7 +252,7 @@ function showProfile(){
   const section=(label,rows)=>el('section',{class:'profile-section'},el('h2',{},label),rows.length?taskList(rows):el('p',{class:'quiet-note'},'Noch keine Zuteilung hinterlegt.'));
   return [heading('Dein Profil','Deine Rolle im gemeinsamen Projekt.'),el('section',{class:'profile-intro'},el('span',{class:'avatar-large'},names[data.person].slice(0,1)),el('div',{},el('h2',{},profile.role||'Rolle noch offen'),el('p',{},profile.text||'Dein Lead-Blatt ist noch nicht erreichbar.'),el('small',{class:'source'},profile.source||'Lead-Blatt'))),
     piaLink({'Pia-Frage':'Erklär mir meine Rolle und meinen Lead-Bereich. Wofür bin ich verantwortlich?'},'Pia: Erklär mir meine Rolle'),
-    button('Unterlagen öffnen',()=>navigate('documents'),'button secondary'),
+    button('Unterlagen öffnen',()=>navigate('documents'),'button secondary'),button('Umfrage teilen',()=>navigate('sharing'),'button secondary'),
     section('Kapitel als Pate',chapters.filter(r=>r.owner===data.person)),section('Kapitel als Zweitleser:in',chapters.filter(r=>r.reader===data.person)),
     section('Deine Erhebungsaufträge',(data.assignments||[]).filter(r=>r.owner===data.person)),section('Deine nächsten drei Fristen',sortRows(own.filter(r=>!completed(r)&&r.due)).slice(0,3))];
 }
@@ -311,8 +322,42 @@ function report(row,target='in Prüfung'){
     finally{pending=null;await load();setTimeout(()=>$('toast').classList.remove('success'),700);}
   },5000);
 }
+
+const shareChannels={w:'WhatsApp',i:'Instagram',f:'Facebook',l:'LinkedIn',r:'Reddit',g:'Arbeit / Geschäft',c:'Verein / Club',j:'Jodel und andere',k:'Klasse',s:'Schulhaus',a:'Anzeigen',d:'Dozierende und Sekretariat',h:'Andere Schulen',o:'Organisationen',t:'Test'};
+function showSharing(){
+  const cards=Object.entries(shareChannels).map(([channel,title])=>{
+    const institution=window.SHARING_INSTITUTIONS?.[channel], choices=institution?el('select',{'aria-label':'Institution '+title},el('option',{value:''},'Vorhandene Institution wählen'),Object.entries(institution).map(([name,code])=>el('option',{value:code},name))):null;
+    const url=()=> 'https://umfrage.hydeout.ch/'+channel+(institution?'/?s='+encodeURIComponent(choices.value):'');
+    const call='Wir sind Studierende der Klasse 601/H25-B an der KV Business School Zürich. Für unsere Praxisarbeit untersuchen wir Erfahrungen mit Banking-Apps. Mach bei unserer anonymen Umfrage mit und teile deine Sicht. Vielen Dank!';
+    const link=el('p',{class:'share-url'}),qr=el('img',{class:'share-qr',width:164,height:164,alt:'QR-Code für '+title}),feedback=el('p',{role:'status','aria-live':'polite'});
+    const copy=button('Link kopieren',async()=>{try{await navigator.clipboard.writeText(url());feedback.textContent='Link kopiert.';}catch{feedback.textContent='Kopieren nicht möglich. Markiere den angezeigten Link.';}},'button secondary');
+    const share=button('Teilen',async()=>{try{if(navigator.share){await navigator.share({title:'Umfrage zu Banking-Apps',text:call,url:url()});feedback.textContent='Teilen geöffnet. Bestätige den verwendeten Kanal unten selbst.';}else{await navigator.clipboard.writeText(call+' '+url());feedback.textContent='Aufruf und Link kopiert. Füge sie in deinem Kanal ein.';}}catch(error){feedback.textContent=error.name==='AbortError'?'Teilen abgebrochen.':'Teilen nicht verfügbar. Kopiere Aufruf und Link.';}},'button');
+    function update(){const valid=!institution||!!choices.value;copy.disabled=!valid;share.disabled=!valid;link.textContent=valid?url():'Wähle die vorhandene Institutionskennung.';qr.hidden=!valid;if(valid){const code=qrcode(0,'M');code.addData(url());code.make();qr.src=code.createDataURL(4,16);}}
+    if(choices)choices.addEventListener('change',update);update();
+    const dateInput=el('input',{type:'date',value:today(),min:'2026-10-29',max:today(),'aria-label':'Datum '+title}),reach=el('input',{type:'number',min:0,max:9999999,step:1,placeholder:'optional','aria-label':'Gruppengrösse '+title}),check=el('input',{type:'checkbox','aria-label':'Ich habe geteilt in '+title});
+    const save=button('Teilen bestätigen',async()=>{
+      if(!check.checked){feedback.textContent='Bestätige zuerst, dass du hier geteilt hast.';return;}
+      if(institution&&!choices.value){feedback.textContent='Wähle die verwendete Institution.';return;}
+      if(!dateInput.checkValidity()||!reach.checkValidity()){feedback.textContent='Prüfe Datum und geschätzte Gruppengrösse.';return;}
+      if(config.demo){feedback.textContent='Die Vorschau speichert keine Verteilung.';return;}
+      save.disabled=true;
+      try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);let result;
+        try{const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'share',k:key,channel,day:dateInput.value,reach:reach.value}),signal:controller.signal});result=await response.json();if(!response.ok||!result.ok)throw Error(result.fehler||'Nicht gespeichert.');}finally{clearTimeout(timer);}
+        data.sharing=result.sharing;document.getElementById('sharing-count').textContent=result.sharing.done+' von 2 Kanälen';feedback.textContent='Gespeichert. Die Reichweite ist eine Schätzung.';
+      }catch(error){feedback.textContent=error.message;}finally{save.disabled=false;}
+    },'button secondary');
+    const sent=(data.sharing?.rows||[]).filter(r=>r.kanal===channel);
+    return el('section',{class:'share-channel','data-channel':channel},el('h2',{},title),institution?el('p',{class:'quiet-note'},'Bestehenden Versandentscheid beachten. Die Institutionskennung ist keine Personenkennung.'):null,
+      channel==='t'?el('p',{class:'quiet-note'},'Nur für technische Tests. Zählt nicht zum Ziel von zwei Kanälen.'):null,
+      choices,el('p',{class:'share-call'},call),link,el('div',{class:'share-actions'},copy,share),el('details',{class:'share-code'},el('summary',{},'QR-Code anzeigen'),qr),
+      el('fieldset',{},el('legend',{},'Deine Verteilung festhalten'),el('label',{class:'share-check'},check,'Ich habe geteilt in '+title),el('label',{},'Datum',dateInput),el('label',{},'Geschätzte Gruppengrösse',reach),save),
+      sent.length?el('small',{},'Bereits erfasst am '+sent.map(r=>r.datum).join(', ')):null,feedback);
+  });
+  return [heading('Umfrage teilen','Teile in mindestens zwei passenden Kanälen. Der Link enthält keinen Namen.'),el('p',{id:'sharing-count',class:'sharing-count'},(data.sharing?.done??'–')+' von 2 Kanälen'),el('p',{class:'quiet-note'},'Gruppengrössen sind freiwillige Schätzungen. Überschneidungen sind möglich. Antworten werden nur je Kanal gezählt und keiner verteilenden Person zugeordnet.'),el('div',{class:'share-grid'},cards)];
+}
+
 function privacy() {
-  modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Projektstände werden hier nur im Arbeitsspeicher gehalten. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden an Notion gesendet und protokolliert. Der Server speichert Antworten höchstens 60 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
+  modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Projektstände werden hier nur im Arbeitsspeicher gehalten. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden an Notion gesendet und protokolliert. Der Server speichert Antworten höchstens 60 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Beim Teilen speichert das Verteilungsprotokoll deine Person, den Kanal, das Datum und eine freiwillige Reichweitenschätzung. Es verknüpft keine Umfrageantwort mit dir. QR-Codes werden auf deinem Gerät erzeugt.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
 }
 function logout() {try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
 function render() {
@@ -331,7 +376,7 @@ function render() {
   const notices=[];
   if(state==='stale')notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Verbindung unterbrochen. Veralteter Stand vom '+date(data.fetchedAt,true)+'. Aktuelle Aufgaben sind unbekannt.'),button('Erneut laden',()=>load(),'text-button')));
   if(Object.values(data.sources).some(source=>source.state!=='ready'))notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Ein Teil des Projektstands ist unbekannt. Fehlende Quellen zählen nicht als leer.'),button('Erneut laden',()=>load(),'text-button')));
-  const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,profile:showProfile,documents:showDocuments};
+  const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,profile:showProfile,documents:showDocuments,sharing:showSharing};
   content.replaceChildren(...[...notices,...screens[view]()].flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false)); announce(labels[view]+': '+(state==='stale'?'veralteter Stand.':'Projektstand angezeigt.'));
 }
 function announce(text){$('announcement').textContent=text;}
