@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
 <title>Codierung Bewertungen</title><link rel="stylesheet" href="../team.css"><link rel="stylesheet" href="../design.css">
-<link rel="stylesheet" href="../view-as.css">
+<link rel="stylesheet" href="../view-as.css"><link rel="stylesheet" href="../flow.css">
 </head>
 <body>
-<header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=c">← Meine Arbeit</a><div class="titel"><small>Praxisarbeit HFW · Methode C</small>Codierung öffentlicher Bewertungen</div><div class="zeile"><span id="fort" class="pille">…</span><span id="wer" class="pille">…</span></div></div></header>
+<header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=c">← Meine Arbeit</a><div class="titel"><small>C · Bewertungen</small>Bewertungen codieren</div><div class="zeile"><span id="fort" class="pille">…</span><span id="wer" class="pille">…</span></div></div></header>
 <div class="purpose-slot" data-purpose-area="c"></div>
-<section id="workspace-progress" class="workspace-progress" aria-live="polite"></section>
+<section id="workspace-progress" class="workspace-progress" aria-live="polite" hidden></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zurueck" title="Pfeil links">‹</button><button class="knopf" id="speichern" title="Enter">Speichern und weiter</button></div></div></div>
 <script src="../view-as.js"></script>
@@ -78,36 +78,43 @@ function hinweise() {
   if (k.length > 1) h.push("Reihenfolge: die Kategorie mit den meisten Sätzen zuerst; bei Gleichstand die zuerst genannte. Mit den Pfeilen verschieben.");
   return h;
 }
+// Darstellung als nummerierter Ablauf (Claudette 01.11.2026). Felder, Regeln und Tasten unverändert nach Codebuch.
+function frage(nr, titel, hilfe, fertig, ...inhalt) {
+  return el("section", { class: "c-q" + (fertig ? " is-done" : "") }, el("div", { class: "c-q-head" }, el("span", { class: "c-q-num" }, fertig ? "✓" : String(nr)), el("div", {}, el("h2", {}, titel), hilfe ? el("p", { class: "leise" }, hilfe) : null)), el("div", { class: "c-q-body" }, inhalt));
+}
 function bild() {
-  const x = q[i], m = document.getElementById("main");
-  const def = el("details", {}, el("summary", {}, "Kategorien und Abgrenzung"), el("table", { class: "def" }, KAT.map(([n, t, d, a]) => el("tr", {}, el("td", {}, el("b", {}, n)), el("td", {}, el("b", {}, t), el("br"), d, el("br"), el("span", { class: "leise" }, a))))));
-  fuelle(m,
-    x.probe ? el("div", {class:"hinweisbox",role:"note"}, el("b", {}, "Probecodierung 01./02.11. · Schulung"), el("p", {}, "Dieser Fall liegt absichtlich ausserhalb der Ziehungsfenster. Codiere die Themen regulär; wähle nicht allein wegen des alten Datums «nicht im Zeitraum». Deine Probe zählt nicht zur Erhebung. Erstcodes sind nach zehn Minuten gesperrt.")) : null,
-    el("div", { class: "zeile zw" }, el("div", { class: "kicker" }, `${x.rolle === "B" ? "Zweitcodierung, unabhängig" : "Codierung"} · ${x.anbieter} · ${x.quelle} · ${x.schicht}`), el("span", { class: "pille" }, x.nr)),
-    el("div", { class: "zeile", style: "margin:8px 0 12px" }, el("span", { class: "sterne" }, "★".repeat(Number(x.sterne) || 0) + "☆".repeat(5 - (Number(x.sterne) || 0))), el("span", { class: "leise" }, `${x.datum} · ${x.sprache}`)),
-    x.text ? el("div", { class: "textbox" }, x.text) : x.fundort ? el("div", { class: "textbox" }, /^https:\/\//.test(x.fundort)
-      ? el("a", { href: x.fundort, target: "_blank", rel: "noopener noreferrer", style: "color:var(--ink);font-weight:800" }, "Bewertung öffnen ↗") : x.fundort,
-      el("div", { class: "leise", style: "margin-top:8px" }, "Lies die Bewertung auf der Plattform (Datum und Sterne oben). Nichts kopieren, nichts antworten, kein Konto nötig.")) : el("div", { class: "textbox" }, "Text und Fundort fehlen, bitte Salah melden."),
-    el("label", { class: "f" }, "Ausschluss ", el("span", { class: "hilfe" }, "nur wenn die Bewertung nicht codiert wird")),
-    chips(AUSSCHLUSS, c.ausschluss, w => { c.ausschluss = w; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }, { abwaehlbar: true }),
-    c.ausschluss ? null : el("div", {}, el("label", { class: "f" }, "Sprache ", el("span", { class: "hilfe" }, "andere Sprachen sind Ausschluss «Sprache»")),
-      chips([["de", "Deutsch"], ["en", "Englisch"], ["fr", "Französisch"]], c.sprache, w => { c.sprache = w; merke(); })),
-    x.anbieter === "Zak" && x.quelle === "Trustpilot" ? el("div", {}, el("label", { class: "f" }, "Zak-Bezug"), chips(["ja", "nein"], c.zak_bezug, w => { c.zak_bezug = w; if (w === "nein") { c.ausschluss = "nicht Zak"; c.kats = []; } merke(); })) : null,
-    c.ausschluss ? null : el("div", {},
-      el("label", { class: "f" }, "Beschreibt der Text einen Kontakt mit dem Kundendienst? ", el("span", { class: "hilfe" }, "Taste J oder N")),
-      chips(["ja", "nein"], c.kundendienst_kontakt, w => { c.kundendienst_kontakt = w; merke(); }),
-      el("label", { class: "f" }, "Themen, höchstens drei ", el("span", { class: "hilfe" }, "Tasten 1 bis 9, 0 für 10; die erste ist die Hauptkategorie")),
-      el("div", { class: "kat" }, KAT.map(([n, t, d]) => el("button", { type: "button", class: "chip", title: d, "aria-pressed": String(c.kats.includes(n)), on: { click: () => kat(n) } }, el("b", {}, n), " ", t, c.kats.includes(n) ? el("span", { class: "rang" }, c.kats.indexOf(n) + 1) : null))),
-      c.kats.length ? el("div", { style: "margin-top:12px" }, c.kats.map((n, r) => el("div", { class: "zeile", style: "margin:6px 0" },
-        el("b", { style: "min-width:170px" }, `${r + 1}. ${KAT[n - 1][1]}`),
-        el("div", { class: "val" }, [["-", "Kritik"], ["+", "Lob"], ["0", "neutral oder gemischt"]].map(([w, t]) => el("button", { type: "button", class: "chip", "aria-pressed": String(c.vals[n] === w), on: { click: () => { c.vals[n] = w; merke(); } } }, `${w} ${t}`))),
-        r > 0 ? el("button", { type: "button", class: "chip", title: "nach vorne", on: { click: () => { c.kats.splice(r, 1); c.kats.splice(r - 1, 0, n); merke(); } } }, "↑") : null))) : null,
-      hinweise().map(h => el("div", { class: "hinweisbox" }, h)),
-      def),
-    el("div", { class: "gitter" },
-      el("div", {}, el("label", { class: "f" }, "Anker ", el("span", { class: "hilfe" }, "höchstens fünf eigene Wörter, nie Wortlaut")), el("input", { class: "t", value: c.anker, maxlength: "60", on: { input: e => { c.anker = e.target.value; lokal(draftKey(q[i]), c); } } })),
-      el("div", {}, el("label", { class: "f" }, "Bemerkung ", el("span", { class: "hilfe" }, "Zweifel, angewendete Grenzregel")), el("input", { class: "t", value: c.bemerkung, on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); } } }))),
-    el("p", { class: "leise", style: "margin-top:20px" }, "Keine Namen, keine Beträge, keine Orte. Die Sterne werden nicht gedeutet; die Valenz gilt je Thema.")
+  const x = q[i], m = document.getElementById("main"), n = q.filter(y => y.eigen).length, probe = q.every(y => y.probe);
+  const def = el("details", { class: "c-defs" }, el("summary", {}, "Alle Abgrenzungen ansehen"), el("table", { class: "def" }, KAT.map(([k, t, d, a]) => el("tr", {}, el("td", {}, el("b", {}, k)), el("td", {}, el("b", {}, t), el("br"), d, el("br"), el("span", { class: "leise" }, a))))));
+  const offen = pruefe(), zak = x.anbieter === "Zak" && x.quelle === "Trustpilot";
+  const prog = el("div", { class: "c-progress" }, el("div", { class: "c-progress-top" }, el("b", {}, (probe ? "Übung " : "Fall ") + (i + 1) + " von " + q.length), el("span", { class: "leise" }, n + " gespeichert")), el("progress", { max: q.length, value: n }));
+  fuelle(m, prog,
+    x.probe ? el("p", { class: "c-probe" }, el("b", {}, "Übungsfall, zählt nicht. "), "Das Datum ist absichtlich alt. Codiere trotzdem normal und wähle nicht «nicht im Zeitraum» nur wegen des Datums.") : null,
+    el("section", { class: "c-review" },
+      el("div", { class: "c-review-meta" }, el("span", {}, `${x.anbieter} · ${x.quelle}`), el("span", { class: "sterne" }, "★".repeat(Number(x.sterne) || 0) + "☆".repeat(5 - (Number(x.sterne) || 0))), el("span", { class: "leise" }, `${x.datum} · ${x.sprache}`), x.rolle === "B" ? el("span", { class: "pille" }, "Zweitcodierung, unabhängig") : null),
+      x.text ? el("div", { class: "textbox" }, x.text) : x.fundort && /^https:\/\//.test(x.fundort)
+        ? el("a", { class: "knopf c-open", href: x.fundort, target: "_blank", rel: "noopener noreferrer", "data-read-navigation": true }, "Bewertung lesen ↗") : el("div", { class: "textbox" }, x.fundort || "Text und Fundort fehlen, bitte Salah melden."),
+      el("p", { class: "leise" }, "Nur lesen. Nichts kopieren, nichts antworten, kein Konto nötig.")),
+    frage(1, "Zählt diese Bewertung?", "Normalerweise ja. Nur ausschliessen, wenn einer dieser Gründe zutrifft.", !!c.ausschluss || ["de", "en", "fr"].includes(c.sprache),
+      chips(AUSSCHLUSS, c.ausschluss, w => { c.ausschluss = w; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }, { abwaehlbar: true }),
+      c.ausschluss ? el("p", { class: "c-excluded" }, "Ausgeschlossen: " + c.ausschluss + ". Fertig, speichern und weiter.") : el("div", {}, el("label", { class: "f" }, "Sprache"), chips([["de", "Deutsch"], ["en", "Englisch"], ["fr", "Französisch"]], c.sprache, w => { c.sprache = w; merke(); })),
+      zak ? el("div", {}, el("label", { class: "f" }, "Geht es wirklich um Zak?"), chips(["ja", "nein"], c.zak_bezug, w => { c.zak_bezug = w; if (w === "nein") { c.ausschluss = "nicht Zak"; c.kats = []; } merke(); })) : null),
+    c.ausschluss ? null : frage(2, "Beschreibt sie einen Kontakt mit dem Kundendienst?", "Also eine Anfrage, einen Chat, ein Telefonat oder eine Antwort. Taste J oder N.", !!c.kundendienst_kontakt,
+      chips(["ja", "nein"], c.kundendienst_kontakt, w => { c.kundendienst_kontakt = w; merke(); })),
+    c.ausschluss ? null : frage(3, "Worum geht es?", "Höchstens drei Themen, das wichtigste zuerst. Tasten 1 bis 9, 0 für Sonstiges. Pro Thema: Kritik, Lob oder gemischt.", c.kats.length > 0 && c.kats.every(k => c.vals[k]),
+      el("div", { class: "c-themes" }, KAT.map(([k, t, d]) => el("button", { type: "button", class: "c-theme", "aria-pressed": String(c.kats.includes(k)), on: { click: () => kat(k) } },
+        el("span", { class: "c-theme-top" }, el("span", { class: "c-key" }, k === 10 ? "0" : String(k)), el("b", {}, t), c.kats.includes(k) ? el("span", { class: "rang" }, "#" + (c.kats.indexOf(k) + 1)) : null),
+        el("span", { class: "c-theme-def" }, d)))),
+      c.kats.length ? el("div", { class: "c-vals" }, c.kats.map((k, r) => el("div", { class: "c-val-row" },
+        el("b", {}, `${r + 1}. ${KAT[k - 1][1]}`),
+        el("div", { class: "val chips" }, [["-", "Kritik"], ["+", "Lob"], ["0", "gemischt"]].map(([w, tx]) => el("button", { type: "button", class: "chip", "aria-pressed": String(c.vals[k] === w), on: { click: () => { c.vals[k] = w; merke(); } } }, tx))),
+        r > 0 ? el("button", { type: "button", class: "chip", title: "nach vorne", "aria-label": "nach vorne", on: { click: () => { c.kats.splice(r, 1); c.kats.splice(r - 1, 0, k); merke(); } } }, "↑") : null))) : null,
+      hinweise().map(h => el("div", { class: "hinweisbox" }, h)), def),
+    c.ausschluss ? null : frage(4, "Kurz festhalten", "Optional. Anker sind höchstens fünf eigene Wörter, nie der Wortlaut.", false,
+      el("div", { class: "gitter" },
+        el("div", {}, el("label", { class: "f" }, "Anker"), el("input", { class: "t", value: c.anker, maxlength: "60", placeholder: "z. B. Antwort kam nach drei Tagen", on: { input: e => { c.anker = e.target.value; lokal(draftKey(q[i]), c); } } })),
+        el("div", {}, el("label", { class: "f" }, "Bemerkung"), el("input", { class: "t", value: c.bemerkung, placeholder: "Zweifel oder Grenzregel", on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); } } })))),
+    el("p", { class: "c-ready" + (offen ? "" : " ok") }, offen ? "Noch offen: " + offen : "Bereit. Enter oder «Speichern und weiter»."),
+    el("p", { class: "leise c-rules" }, "Keine Namen, Beträge oder Orte. Die Sterne werden nicht gedeutet.")
   );
 }
 function pruefe() {
