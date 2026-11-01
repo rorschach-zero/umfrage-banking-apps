@@ -10,3 +10,5 @@ body{background:var(--paper)}main{max-width:1120px;padding-top:42px}.heading .ey
 .subtitle:empty{display:none}.back-link+.heading{margin-bottom:20px}.area-tool{margin-bottom:18px}.blocker-note{padding-top:13px;padding-bottom:13px}.extra-hints{margin-bottom:12px}.task-group{margin-bottom:18px}
 
 dialog .detail-what{font-size:27px;line-height:1.35;margin:44px 0 16px;letter-spacing:-.7px;color:var(--ink);font-weight:750}@media(max-width:700px){dialog .detail-what{font-size:24px;margin-top:40px}}
+
+.blocker-list{margin:0 0 26px}.blocker-list ul{list-style:none;padding:0;margin:0}.blocker-list .blocker-note{margin-bottom:8px}.blocker-list .blocker-note p{line-height:1.5}.blocker-list .extra-hints{margin:0}.blocker-list .pia-link{min-height:44px;display:flex;align-items:center}.blocker-list .blocker-note>div{min-width:0;overflow-wrap:anywhere}

@@ -61,7 +61,48 @@ function piaLink(row, label='Pia fragen') {
   else if (/^(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(row.id||'')) url.searchParams.set('ctx',row.id);
   return el('a',{class:'button secondary pia-link',href:url.pathname+url.search,referrerpolicy:'no-referrer',onClick:rememberPiaRole},label);
 }
-function shortTitle(row) {return (row.title || 'Aufgabe noch offen').replace(/^(?:AP|EA)-[\w-]+\s*[·:–-]?\s*/,'').replace(/(?:ab|bis|am)?\s*\d{2}\.(?:\d{2}\.)?(?:[–-]\d{2}\.\d{2}\.)?/g,'').replace(/\s+/g,' ').trim().split(/\s+/).slice(0,8).join(' ');}
+function shortTitle(row) {
+  let title=(row.title || 'Aufgabe noch offen').replace(/^(?:AP|EA)-[\w-]+\s*[·:–-]?\s*/,'');
+  const ownName=names[data?.person];
+  if(ownName)title=title.replace(new RegExp('^'+ownName+'\\s*[·:–-]\\s*'),'');
+  return title.replace(/^[ABC](?:\s*[·:–-]\s*|\s+)/,'')
+    .replace(/(?:ab|bis|am)?\s*\d{2}\.(?:[–-]\d{2}\.)?\d{2}\.(?:\d{4})?/g,'')
+    .replace(/\s+/g,' ').replace(/^[\s·,]+|[\s·,]+$/g,'').trim().split(/\s+/).slice(0,8).join(' ');
+}
+function stepValues(row) {
+  return cardText(row,"So geht's")==='noch offen'?[]:cardText(row,"So geht's").split(/\n+|\s+(?=\d+[.)]\s)/).map(v=>v.replace(/^\s*(?:\d+[.)]|[-•])\s*/,'').trim()).filter(Boolean);
+}
+function stepKey(row,value){return 'pa6-step:'+data.person+':'+row.id+':'+value;}
+function stepDone(row,value){try{return localStorage.getItem(stepKey(row,value))==='1';}catch{return false;}}
+function stepDate(value,row) {
+  const match=value.match(/\b(\d{2})\.(?:[–-]\d{2}\.)?(\d{2})\.(\d{4})?/);
+  if(!match)return null;
+  const anchor=row.start||row.due;
+  if(!match[3]&&!anchor)return null;
+  const year=match[3]||anchor.slice(0,4), result=year+'-'+match[2]+'-'+match[1];
+  if(!Number.isFinite(Date.parse(result))||new Date(result).toISOString().slice(0,10)!==result)return null;
+  // A yearless date crossing two planning years is ambiguous; retain the package date.
+  if(!match[3]&&row.start&&row.due&&row.start.slice(0,4)!==row.due.slice(0,4))return null;
+  return result;
+}
+function nextActions(rows) {
+  const actions=[];
+  rows.forEach(row=>{
+    const values=stepValues(row), candidates=values.flatMap((value,index)=>{
+      if(stepDone(row,value))return [];
+      const due=stepDate(value,row)||(index===0?row.start:null);
+      return due?[{row,due,title:shortTitle(row),description:value}]:[];
+    });
+    if(candidates.length)actions.push(...candidates);
+    else if(!values.length||!stepDone(row,values[0]))actions.push({row,due:row.start||row.due,title:shortTitle(row),description:values[0]||cardText(row,'Was')});
+    else actions.push({row,due:row.due,title:shortTitle(row),description:values.some(value=>!stepDone(row,value))?'Öffne die Aufgabe und erledige die verbleibenden Schritte.':'Die Schritte sind abgehakt. Prüfe den Auftrag und melde ihn zur Prüfung.'});
+  });
+  (data.areas||[]).filter(module=>module.next&&module.next.date).forEach(module=>{
+    const next=module.next;
+    actions.push({due:next.date,title:module.title,description:'Nächster Kontakt · Block '+next.block+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Formular'}[next.channel]||next.channel),tool:module.tool});
+  });
+  return sortRows(actions);
+}
 function workLink(row) {
   const raw=cardText(row,'Wo');let url;
   try {url=new URL(raw,location.origin);}catch{}
@@ -75,11 +116,10 @@ function workLink(row) {
 }
 function steps(row) {
   if(cardText(row,"So geht's")==='noch offen')return el('p',{class:'field-open'},'Die Schritte sind noch nicht hinterlegt. Pia hilft dir weiter.');
-  const values=cardText(row,"So geht's").split(/\n+|\s+(?=\d+[.)]\s)/).map(v=>v.replace(/^\s*(?:\d+[.)]|[-•])\s*/,'').trim()).filter(Boolean);
+  const values=stepValues(row);
   return el('ul',{class:'step-list'},values.map(value=>{
-    const storageKey='pa6-step:'+data.person+':'+row.id+':'+value;let checked=false;
-    try{checked=localStorage.getItem(storageKey)==='1';}catch{}
-    const input=el('input',{type:'checkbox','aria-label':value,onChange:()=>{try{localStorage.setItem(storageKey,input.checked?'1':'0');}catch{announce('Der Schritt kann in diesem Browser nicht gespeichert werden.');}}});input.checked=checked;
+    const storageKey=stepKey(row,value), checked=stepDone(row,value);
+    const input=el('input',{type:'checkbox','aria-label':value,onChange:()=>{try{localStorage.setItem(storageKey,input.checked?'1':'0');render();}catch{announce('Der Schritt kann in diesem Browser nicht gespeichert werden.');}}});input.checked=checked;
     return el('li',{},el('label',{},input,el('span',{},value)));
   }));
 }
@@ -110,12 +150,12 @@ function openArea(id){area=id;navigate('tasks');}
 function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'B':module.id==='c'?'C':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},module.title),el('small',{},areaSummary(module))),el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
 function showToday(){
   const open=sortRows(allTasks().filter(r=>!completed(r)&&r.status!=='in Prüfung'&&(r.owner===data.person||r.reader===data.person)));
-  const focus=open[0], count=(data.blockers||[]).filter(b=>b.owner===data.person).length;
+  const focus=nextActions(open)[0], blockers=(data.blockers||[]).filter(b=>b.owner===data.person), count=blockers.length;
   const status=count?count+' '+(count===1?'Sache hängt.':'Dinge hängen.'):data.workspaceState==='ready'?'Du bist im Plan.':'Ein Teil deines Stands ist noch unbekannt.';
-  return [heading('Hallo, '+names[data.person]+'.',status),
-    el('section',{class:'focus-card'},el('p',{class:'eyebrow'},'Dein nächster Schritt'),el('h2',{},focus?shortTitle(focus):'Zeit für deinen Überblick'),el('p',{},focus?(cardText(focus,'Was')==='noch offen'?'Öffne die Aufgabe und kläre deinen nächsten Schritt.':focus.Was):'Öffne deine Arbeitsbereiche und sieh, wo du stehst.'),focus?el('span',{class:'focus-due'},relativeDue(focus)):null,button(focus?'Aufgabe ansehen':'Meine Arbeit öffnen',()=>focus?details(focus):navigate('tasks'))),
+  return [heading('Hallo, '+names[data.person]+'.',status),blockerList(blockers),
+    el('section',{class:'focus-card'},el('p',{class:'eyebrow'},'Dein nächster Schritt'),el('h2',{},focus?focus.title:'Zeit für deinen Überblick'),el('p',{},focus?(focus.description==='noch offen'?'Öffne die Aufgabe und kläre deinen nächsten Schritt.':focus.description):'Öffne deine Arbeitsbereiche und sieh, wo du stehst.'),focus?el('span',{class:'focus-due'},relativeDue(focus)):null,focus?.tool?el('a',{class:'button',href:focus.tool},'Kontakt erfassen'):button(focus?'Aufgabe ansehen':'Meine Arbeit öffnen',()=>focus?details(focus.row):navigate('tasks'))),
     el('section',{class:'area-overview'},el('h2',{},'Deine Arbeitsbereiche'),(data.areas||[]).map(areaLine),!(data.areas||[]).length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null),
-    open.length>1?el('section',{class:'next-list'},el('h2',{},'Danach'),taskList(open.slice(1,4))):null,
+    open.length>1?el('section',{class:'next-list'},el('h2',{},'Danach'),taskList(open.filter(row=>row.id!==focus?.row?.id).slice(0,3))):null,
     el('p',{class:'group-line'},data.group?'Gemeinsam · '+(data.group.done??'Stand unbekannt')+' von '+data.group.total+' Arbeitspaketen erledigt':'Gruppenstand unbekannt')];
 }
 function groupedTasks(rows){
@@ -125,20 +165,23 @@ function groupedTasks(rows){
   sortRows(rows).forEach(r=>groups[completed(r)?'Erledigt':r.due&&day(r.due)<=week?'Diese Woche':r.due&&day(r.due)<=soon?'Demnächst':'Später'].push(r));
   return Object.entries(groups).filter(([,list])=>list.length).map(([label,list])=>label==='Erledigt'?el('details',{class:'done-list'},el('summary',{},'Erledigt · '+list.length),taskList(list)):el('section',{class:'task-group'},el('h3',{},label,el('span',{},list.length)),taskList(list)));
 }
-function blockerNote(blocker){return el('div',{class:'blocker-note'},el('div',{},el('strong',{},'Hier hängt es'),el('p',{},blocker.text)),piaLink({ctx:blocker.ctx,'Pia-Frage':blocker.question},'Pia hilft'));}
-function areaBlockers(id){
-  const blockers=(data.blockers||[]).filter(b=>b.area===id);
-  return blockers.length?[blockerNote(blockers[0]),blockers.length>1?el('details',{class:'extra-hints'},el('summary',{},'Weitere Hinweise · '+(blockers.length-1)),blockers.slice(1).map(blockerNote)):null]:[];
+function blockerNote(blocker){
+  const module=(data.areas||[]).find(item=>item.id===blocker.area),row=allTasks().find(item=>item.id===blocker.taskId);
+  const label=module?.title||'Arbeitsbereich', title=row?shortTitle(row):'';
+  return el('li',{class:'blocker-note'},el('div',{},el('strong',{},label),el('p',{},title?title+': '+blocker.text:blocker.text)),piaLink({ctx:blocker.ctx,'Pia-Frage':blocker.question},'Pia hilft'));
 }
+function blockerList(blockers){
+  return blockers.length?el('section',{class:'blocker-list','aria-label':'Hier hängt es'},el('ul',{},blockers.slice(0,3).map(blockerNote)),blockers.length>3?el('details',{class:'extra-hints'},el('summary',{},'Weitere anzeigen · '+(blockers.length-3)),el('ul',{},blockers.slice(3).map(blockerNote))):null):null;
+}
+function areaBlockers(id){return blockerList((data.blockers||[]).filter(b=>b.area===id));}
 function showTasks(){
   const modules=data.areas||[],selected=modules.find(m=>m.id===area);
   const rows=selected?areaRows(selected):allTasks(), done=rows.filter(completed).length;
   if(!selected)return [heading('Meine Arbeit','Deine Bereiche. Dein nächster Schritt.'),el('div',{class:'work-modules'},modules.map(module=>el('section',{class:'work-module'},areaLine(module),el('div',{class:'module-foot'},el('span',{},areaRows(module).filter(r=>!completed(r)).length+' offene Aufgaben'),button('Bereich öffnen',()=>openArea(module.id),'text-button'))))),!modules.length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null];
   const next=selected.next;
-  return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(selected.title,''),
+  return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(selected.title,''),areaBlockers(area),
     progress(selected.done,selected.total,areaSummary(selected)),
     next?el('p',{class:'next-contact'},'Nächster '+date(next.date)+' · Block '+next.block+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Formular'}[next.channel]||next.channel)):null,
-    ...areaBlockers(area),
     selected.tool?el('a',{class:'button area-tool',href:selected.tool},area==='b'?'Nächsten Kontakt erfassen':'Weiter codieren'):selected.id==='writing'?workLink(sortRows(rows).find(row=>!completed(row)&&/^https:\/\/docs.google.com\/document\//.test(row.Wo||''))||{}):null,
     el('div',{class:'list-heading'},el('h2',{},'Meine Aufgaben'),el('small',{},done+' von '+rows.length+' erledigt')),
     ...groupedTasks(rows),!rows.length?el('p',{class:'quiet-note'},'Deine Einsätze findest du direkt im Werkzeug.'):null];
