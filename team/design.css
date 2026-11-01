@@ -28,3 +28,16 @@ header{background:rgba(248,248,245,.96);border-bottom:1px solid var(--line)}
 .channel-setup { margin-top:24px; }
 #extra-cases { max-width:900px;margin:20px auto;padding:24px; }
 #service-message { color:#8b361c;overflow-wrap:anywhere; }
+
+/* Shared purpose cards for the three research areas. */
+.purpose-slot{max-width:880px;margin:20px auto 0;padding:0 20px}
+.purpose-card{margin:0 0 22px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font-size:14px;line-height:1.55}
+.purpose-card>summary{padding:14px 16px;min-height:48px;cursor:pointer;font-size:15px;font-weight:750}
+.purpose-card>summary::marker{color:#6c5680}
+.purpose-body{padding:0 16px 16px}
+.purpose-card .purpose-section{margin:0 0 9px;font-size:14px;line-height:1.55}
+.purpose-section strong{font-weight:800}
+.purpose-card .purpose-connection{margin:12px 0;font-size:13px;line-height:1.55;color:#60645e}
+.purpose-pia{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:10px;font-size:13px;font-weight:750;color:var(--ink);text-decoration:none;background:var(--paper)}
+.purpose-pia:hover{border-color:#6c5680;background:var(--lilac-faint)}
+@media(max-width:600px){.purpose-card .purpose-section,.purpose-card .purpose-connection{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}.purpose-body{padding:0 12px 12px}.purpose-card>summary{padding:12px}}

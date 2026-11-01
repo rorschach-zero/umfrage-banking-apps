@@ -218,7 +218,7 @@ function showTasks(){
   const rows=selected?areaRows(selected):allTasks(), done=rows.filter(completed).length;
   if(!selected)return [heading('Meine Arbeit','Deine Bereiche. Dein nächster Schritt.'),el('div',{class:'work-modules'},modules.map(module=>el('section',{class:'work-module'},areaLine(module),el('div',{class:'module-foot'},el('span',{},areaRows(module).filter(r=>!completed(r)).length+' offene Aufgaben'),button('Bereich öffnen',()=>openArea(module.id),'text-button'))))),!modules.length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null];
   const next=selected.next;
-  return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(selected.title,''),areaBlockers(area),
+  return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(selected.title,''),window.createPurposeCard(area,rememberPiaRole),areaBlockers(area),
     selected.id==='writing'?writingFolderLink():null,selected.id==='b'?serviceCard():null,
     progress(selected.done,selected.total,areaSummary(selected)),
     next?el('p',{class:'next-contact'},'Nächster '+date(next.date)+' · Block '+next.block+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Formular'}[next.channel]||next.channel)):null,
@@ -353,7 +353,7 @@ function showSharing(){
       el('fieldset',{},el('legend',{},'Deine Verteilung festhalten'),el('label',{class:'share-check'},check,'Ich habe geteilt in '+title),el('label',{},'Datum',dateInput),el('label',{},'Geschätzte Gruppengrösse',reach),save),
       sent.length?el('small',{},'Bereits erfasst am '+sent.map(r=>r.datum).join(', ')):null,feedback);
   });
-  return [heading('Umfrage teilen','Teile in mindestens zwei passenden Kanälen. Der Link enthält keinen Namen.'),el('p',{id:'sharing-count',class:'sharing-count'},(data.sharing?.done??'–')+' von 2 Kanälen'),el('p',{class:'quiet-note'},'Gruppengrössen sind freiwillige Schätzungen. Überschneidungen sind möglich. Antworten werden nur je Kanal gezählt und keiner verteilenden Person zugeordnet.'),el('div',{class:'share-grid'},cards)];
+  return [heading('Umfrage teilen','Teile in mindestens zwei passenden Kanälen. Der Link enthält keinen Namen.'),window.createPurposeCard('a',rememberPiaRole),el('p',{id:'sharing-count',class:'sharing-count'},(data.sharing?.done??'–')+' von 2 Kanälen'),el('p',{class:'quiet-note'},'Gruppengrössen sind freiwillige Schätzungen. Überschneidungen sind möglich. Antworten werden nur je Kanal gezählt und keiner verteilenden Person zugeordnet.'),el('div',{class:'share-grid'},cards)];
 }
 
 function privacy() {
