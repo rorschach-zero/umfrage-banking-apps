@@ -561,7 +561,7 @@ function renderViewSelector() {
 }
 function render() {
   $('breadcrumb').textContent=labels[view]; document.title=labels[view]+' · Unser Projekt';
-  $('nav').replaceChildren(...['today','tasks','documents','deadlines','pia','profile'].map(name=>el('a',{href:'?view='+name,class:'nav-link','aria-current':(view===name)?'page':null,onClick:event=>{event.preventDefault();navigate(name);}},icon(name),el('span',{},labels[name]))));
+  $('nav').replaceChildren(...['today','tasks','deadlines','documents','pia','profile'].map(name=>el('a',{href:'?view='+name,class:'nav-link','aria-current':(view===name)?'page':null,onClick:event=>{event.preventDefault();navigate(name);}},icon(name),el('span',{},labels[name]))));
   document.body.dataset.person=data?.person||'';
   $('person').textContent=data?names[data.person]:'Dein Zugang';$('person').setAttribute('aria-label','Profilmenü öffnen');$('person').setAttribute('aria-expanded',String(!$('profile-menu')?.hidden&&!!$('profile-menu')));$('person').disabled=!!pending||noteSaving;
   renderViewSelector();
