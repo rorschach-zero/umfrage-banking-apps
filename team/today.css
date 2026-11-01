@@ -1,0 +1,60 @@
+/* Heute, Consumer-Grade-Fassung (01.11.2026). Eine Hauptaktion, drei Fäden, diese Woche. */
+:root{--area-a:#4f6fd8;--area-a-wash:#edf1fc;--area-b:#27684e;--area-b-wash:#e6f0e9;--area-c:#8a63b5;--area-c-wash:#f1ebf8;--late:#c4492b;--late-wash:#fdeee8;--line-soft:#e6e9e2}
+.today-head{align-items:flex-end;margin-bottom:26px}
+.today-head h1{margin:0}
+.today-summary{margin:8px 0 0;color:var(--muted);font-size:15px;display:flex;flex-wrap:wrap;align-items:center;gap:0}
+.today-summary b{color:var(--ink);font-weight:800}
+.today-summary .sep{color:#b9beb6;padding:0 6px}
+.summary-late{color:var(--late)!important;font-weight:800;padding:0;min-height:0;font-size:15px;background:none;border:0;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+
+.now-card{position:relative;background:#fff;border:1px solid var(--line-soft);border-radius:18px;padding:24px 26px 22px;box-shadow:0 1px 2px rgba(20,30,24,.04),0 10px 28px rgba(20,30,24,.06);overflow:hidden}
+.now-card:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--ink)}
+.now-card.area-a:before{background:var(--area-a)}.now-card.area-b:before{background:var(--area-b)}.now-card.area-c:before{background:var(--area-c)}
+.now-card.is-calm{box-shadow:none;background:var(--paper)}.now-card.is-calm:before{background:#b9c7bb}
+.now-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.now-label{font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:2px}
+.chip{display:inline-flex;align-items:center;font-size:12px;font-weight:750;line-height:1;padding:6px 10px;border-radius:999px;background:#f1f3ee;color:var(--ink)}
+.chip.area-a{background:var(--area-a-wash);color:var(--area-a)}.chip.area-b{background:var(--area-b-wash);color:var(--area-b)}.chip.area-c{background:var(--area-c-wash);color:var(--area-c)}
+.chip.is-late{background:var(--late-wash);color:var(--late)}
+.now-card h2{font-size:24px;line-height:1.25;letter-spacing:-.4px;margin:12px 0 6px;font-weight:850}
+.now-why{margin:0 0 18px;color:var(--muted);max-width:60ch}
+.now-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.now-actions .button{min-height:44px;padding:10px 18px;border-radius:12px}
+.now-actions .text-button{min-height:44px}
+.now-meta{margin-left:auto;font-size:13px;color:#8b928a}
+
+.block-head{display:flex;align-items:baseline;justify-content:space-between;margin:34px 0 10px}
+.block-head h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:850}
+.block-head small{font-size:13px;color:#8b928a}
+.threads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.thread{all:unset;box-sizing:border-box;cursor:pointer;background:#fff;border:1px solid var(--line-soft);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .15s ease,transform .15s ease,border-color .15s ease}
+.thread:hover{box-shadow:0 8px 22px rgba(20,30,24,.08);transform:translateY(-1px)}
+.thread:focus-visible{outline:3px solid #736490;outline-offset:2px}
+.thread-head{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px}
+.thread-letter{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:900}
+.area-a .thread-letter{background:var(--area-a)}.area-b .thread-letter{background:var(--area-b)}.area-c .thread-letter{background:var(--area-c)}
+.thread-value{font-size:26px;font-weight:900;letter-spacing:-.6px;line-height:1}
+.thread-value small{font-size:13px;font-weight:700;color:#8b928a;letter-spacing:0}
+.thread-bar{height:5px;border-radius:9px;background:#eef0eb;overflow:hidden}.thread-bar i{display:block;height:100%;border-radius:9px;background:var(--ink);transition:width .4s ease}
+.area-a .thread-bar i{background:var(--area-a)}.area-b .thread-bar i{background:var(--area-b)}.area-c .thread-bar i{background:var(--area-c)}
+.thread-note{font-size:13px;color:var(--muted);line-height:1.4}
+
+.week-block .task-list{background:#fff;border:1px solid var(--line-soft);border-radius:16px;overflow:hidden;margin:0;padding:0}
+.week-block .task-line{border-top:1px solid var(--line-soft);padding:4px 12px;margin:0}
+.week-block .task-line:first-child{border-top:0}
+.week-block .task-name small{display:block;font-size:12px;font-weight:600;color:#8b928a;margin-top:1px}
+.week-block .is-overdue .due-chip,.week-block .due-chip.overdue{color:var(--late);font-weight:800;background:none}
+.task-check.auto{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.6px dashed #b7bfb6;color:#fff;font-size:12px;flex:none;margin:0 11px}
+.task-check.auto.is-done{background:var(--area-b);border:1.6px solid var(--area-b)}
+.step-row.is-done .task-name{color:#8b928a;text-decoration:line-through}
+.later-link{margin-top:10px;font-weight:750}
+
+@media(max-width:700px){
+  .today-head{align-items:flex-start}
+  .now-card{padding:20px 18px 18px;border-radius:16px}.now-card h2{font-size:21px}
+  .now-meta{margin-left:0;width:100%}
+  .threads{grid-template-columns:1fr}
+  .thread{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"head value" "note note";align-items:center;gap:6px 12px}
+  .thread-head{grid-area:head}.thread-value{grid-area:value;justify-self:end;font-size:22px}.thread-bar{display:none}.thread-note{grid-area:note}
+}
+@media(prefers-reduced-motion:reduce){.thread,.thread-bar i{transition:none}}
