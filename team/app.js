@@ -336,18 +336,83 @@ function blockerList(blockers){
   return blockers.length?el('section',{class:'blocker-list','aria-label':'Hier hängt es'},el('ul',{},blockers.slice(0,3).map(blockerNote)),blockers.length>3?el('details',{class:'extra-hints'},el('summary',{},'Weitere anzeigen · '+(blockers.length-3)),el('ul',{},blockers.slice(3).map(blockerNote))):null):null;
 }
 function areaBlockers(id){return blockerList((data.blockers||[]).filter(b=>b.area===id));}
+// Meine Arbeit (Claudette 01.11.2026): eine Liste wie Linear «My Issues». Filter statt Bereichsseiten,
+// Zeitgruppen, Marken 6a/6b und Pate/Zweitleser, Werkzeug je Filter genau einmal.
+const workFilters=[['','Alle'],['a','A · Umfrage'],['b','B · Servicetest'],['c','C · Bewertungen'],['writing','Schreiben'],['tasks','Projekt']];
+let workRole='mine';
+function workBucket(row){
+  if(row.area==='b'||row.area==='c'||row.area==='writing')return row.area;
+  if(/umfrage|befragung|verteil/i.test(String(row.title||'')))return 'a';
+  return 'tasks';
+}
+function workPart(row){
+  if(row.part&&/6[ab]/i.test(row.part))return String(row.part).match(/6[ab]/i)[0].toLowerCase();
+  const m=/^pa(6[ab])/i.exec(String(row.deliverable||''));return m?m[1].toLowerCase():null;
+}
+function workRoleOf(row){return row.owner===data.person?(row.source==='chapters'?'Pate':null):row.reader===data.person?'Zweitleser':null;}
+function workRows(){
+  const rows=leadership?allTasks():personalRows();
+  return rows.filter(r=>workRole==='read'?r.reader===data.person:leadership||r.owner===data.person);
+}
+function workGroups(rows){
+  const sunday=sundayIso(),two=new Date(sunday+'T12:00:00Z');two.setUTCDate(two.getUTCDate()+14);const twoIso=two.toISOString().slice(0,10);
+  const g=[['Überfällig',[]],['Diese Woche',[]],['Nächste zwei Wochen',[]],['Bis Abgabe 6a · 12.12.',[]],['Bis Abgabe 6b · 27.02.',[]],['Ohne Frist',[]],['In Prüfung',[]],['Erledigt',[]]];
+  const put=(i,r)=>g[i][1].push(r);
+  sortRows(rows).forEach(r=>{
+    if(completed(r))return put(7,r);
+    if(r.status==='in Prüfung')return put(6,r);
+    if(!r.due)return put(5,r);
+    if(overdue(r))return put(0,r);
+    const d=day(r.due);
+    if(d<=sunday)return put(1,r);if(d<=twoIso)return put(2,r);if(d<='2026-12-12')return put(3,r);return put(4,r);
+  });
+  return g.filter(([,list])=>list.length);
+}
+function workRow(row){
+  const item=taskRow(row),name=item.querySelector('.task-name'),bucket=workBucket(row),part=workPart(row),role=workRoleOf(row);
+  item.classList.add('work-row','area-'+(bucket==='tasks'?'p':bucket));
+  const tags=el('span',{class:'work-tags'},
+    bucket!=='tasks'?el('span',{class:'work-tag area'},bucket==='writing'?'Schreiben':bucket.toUpperCase()):null,
+    part?el('span',{class:'work-tag'},part):null,
+    role?el('span',{class:'work-tag role'},role):null,
+    leadership&&row.owner?el('span',{class:'work-tag who','data-owner':row.owner},names[row.owner]):null);
+  if(tags.childNodes.length)name.append(tags);
+  const due=item.querySelector('.due-chip');if(due&&row.due)due.textContent=overdue(row)?whenWord(row.due):date(row.due);
+  if(row.doc)item.insertBefore(el('a',{class:'work-doc',href:row.doc,target:'_blank',rel:'noopener','aria-label':'Doc öffnen: '+shortTitle(row),title:'Doc öffnen'},'Doc ↗'),item.querySelector('.status-dot'));
+  return item;
+}
+function workHeader(id){
+  if(id==='a'){const sh=data.sharing;return el('section',{class:'work-tool area-a'},el('div',{},el('strong',{},'A · Umfrage teilen'),el('span',{},Number.isFinite(sh?.done)?sh.done+' von 2 Kanälen geteilt':'Stand unbekannt')),button('Umfrage teilen',()=>navigate('sharing'),'button'));}
+  if(id==='b'){const sv=data.service&&!data.service.error?data.service:null;
+    const line=!sv?'Stand unbekannt':sv.done+' von '+sv.config.target+' Kontakten · '+(!sv.probeDone?'Probe offen':(sv.selected?.length||0)<2?'Banken wählen':sv.next?'nächster '+date(sv.next.tag)+' · Block '+sv.next.block:'Feld ab '+date(sv.config.official));
+    return el('section',{class:'work-tool area-b'},el('div',{},el('strong',{},'B · Servicetest'),el('span',{},line)),el('a',{class:'button',href:'/team/b/'},'Servicetest öffnen'));}
+  if(id==='c'){const c=(data.areas||[]).find(m=>m.id==='c'),pr=data.practice;
+    const line=c&&c.state==='ready'&&c.total>0?c.done+' von '+c.total+' Bewertungen · Soll bis heute '+c.expected:Number.isFinite(pr?.done)&&pr?.total?pr.done+' von '+pr.total+' Übungen · eigene Fälle ab 03.11.':'Stand unbekannt';
+    return el('section',{class:'work-tool area-c'},el('div',{},el('strong',{},'C · Bewertungen'),el('span',{},line)),el('a',{class:'button',href:'/team/c/'},'Bewertungen öffnen'));}
+  if(id==='writing')return el('section',{class:'work-tool area-writing'},el('div',{},el('strong',{},'Schreibwerk'),el('span',{},'Ein Google-Doc pro Kapitel · «Doc ↗» in der Zeile öffnet deins')),data.writingFolder?el('a',{class:'button secondary',href:data.writingFolder,target:'_blank',rel:'noopener'},'Ordner öffnen ↗'):null);
+  return null;
+}
 function showTasks(){
-  const modules=data.areas||[],selected=modules.find(m=>m.id===area);
-  const rows=selected?areaRows(selected):allTasks(), done=rows.filter(completed).length;
-  if(!selected)return [heading('Meine Arbeit','Alle Aufgaben und Werkzeuge an einem Ort.'),el('section',{class:'all-work'},el('h2',{},'Deine Aufgaben'),...groupedTasks(leadership?allTasks():personalRows(),true)),el('details',{class:'work-tools',open:true},el('summary',{},'Deine Werkzeuge'),shareCard(),practiceCard(),serviceCard()),el('div',{class:'work-modules'},modules.map(module=>el('section',{class:'work-module'},areaLine(module),el('div',{class:'module-foot'},el('span',{},areaRows(module).filter(r=>!completed(r)).length+' offene Aufgaben'),button('Bereich öffnen',()=>openArea(module.id),'text-button'))))),!modules.length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null];
-  const next=selected.next;
-  return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(areaTitle(selected),''),window.createPurposeCard(area,rememberPiaRole),areaBlockers(area),
-    selected.id==='writing'?writingFolderLink():null,selected.id==='b'?serviceCard():null,
-    progress(selected.done,selected.total,areaSummary(selected)),
-    next?el('p',{class:'next-contact'},'Nächster '+date(next.date)+' · Block '+next.block+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Formular'}[next.channel]||next.channel)):null,
-    selected.tool?el('a',{class:'button area-tool',href:selected.tool},area==='b'?'Nächsten Kontakt erfassen':'Bewertungen öffnen'):selected.id==='writing'?workLink(sortRows(rows).find(row=>!completed(row)&&/^https:\/\/docs.google.com\/document\//.test(row.Wo||''))||{}):null,
-    el('div',{class:'list-heading'},el('h2',{},'Meine Aufgaben'),el('small',{},done+' von '+rows.length+' erledigt')),
-    ...groupedTasks(rows),!rows.length?el('p',{class:'quiet-note'},'Deine Einsätze findest du direkt im Werkzeug.'):null];
+  const all=workRows(),filter=workFilters.some(([k])=>k===area)?area:'';
+  const rows=filter?all.filter(r=>workBucket(r)===filter):all;
+  const open=r=>!completed(r);
+  const tabs=el('div',{class:'work-tabs',role:'tablist','aria-label':'Bereich filtern'},workFilters.map(([k,label])=>{
+    const n=(k?all.filter(r=>workBucket(r)===k):all).filter(open).length;
+    return el('button',{type:'button',role:'tab','aria-selected':String(filter===k),class:'work-tab'+(filter===k?' is-on':''),onClick:()=>{area=k;navigate('tasks');}},label,el('span',{class:'work-count'},String(n)));
+  }));
+  const roleSwitch=leadership?null:el('div',{class:'work-role',role:'group','aria-label':'Rolle'},
+    button('Zuständig',()=>{workRole='mine';render();},'work-role-btn'+(workRole==='mine'?' is-on':'')),
+    button('Gegenlesen',()=>{workRole='read';render();},'work-role-btn'+(workRole==='read'?' is-on':'')));
+  const groups=workGroups(rows);
+  const list=rows.length?groups.map(([label,items])=>{
+    const ul=el('ul',{class:'task-list work-list'},items.map(workRow));
+    const head=el('span',{class:'work-group-head'},label,el('span',{class:'work-count'},String(items.length)));
+    return ['Erledigt','In Prüfung','Bis Abgabe 6b · 27.02.','Ohne Frist'].includes(label)
+      ?el('details',{class:'work-group folded'},el('summary',{},head),ul)
+      :el('section',{class:'work-group'},el('h2',{},head),ul);
+  }):el('p',{class:'quiet-note'},workRole==='read'?'Du liest hier gerade nichts gegen.':'In diesem Bereich ist nichts für dich offen.');
+  return [el('div',{class:'heading work-head'},el('div',{},el('h1',{},leadership?'Arbeit der Gruppe':'Meine Arbeit'),el('p',{class:'subtitle'},all.filter(open).length+' offen'+(leadership?' · alle fünf':''))),roleSwitch),
+    tabs,workHeader(filter),filter?areaBlockers(filter):null,filter&&filter!=='tasks'?window.createPurposeCard(filter,rememberPiaRole):null,...[list].flat()];
 }
 function writingFolderLink(){
   return /^https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]+$/.test(data.writingFolder||'')
@@ -710,7 +775,7 @@ $('role').addEventListener('click',()=>{if(pending||noteSaving)return;leadership
 $('refresh').addEventListener('click',()=>load());
 $('demo-person').addEventListener('change',()=>{leadership=false;data=null;load(true);});
 $('demo-state').addEventListener('change',()=>{data=null;load(true);});
-$('privacy-button').addEventListener('click',privacy);$('privacy-footer').addEventListener('click',privacy);
+$('privacy-button').addEventListener('click',privacy);$('tool-sharing')?.addEventListener('click',event=>{event.preventDefault();navigate('sharing');});$('privacy-footer').addEventListener('click',privacy);
 window.addEventListener('popstate',()=>{area=new URLSearchParams(location.search).get('area')||'';navigate(new URLSearchParams(location.search).get('view'),false);});
 window.addEventListener('hashchange',()=>load(true));
 window.addEventListener('storage',event=>{if(event.key==='pa6k'){clearResponses();cacheNamespace='';key='';data=null;leadership=false;load(true);}});
