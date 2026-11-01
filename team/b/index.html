@@ -154,6 +154,7 @@ function formular() {
 ];
   const teile = [[
     r.nr.startsWith('PROBE-B-') ? simulationNotice() : !r.erfasst?.t_start && r.status!=='nicht angeboten' ? startNotice(r) : null,
+    !r.nr.startsWith('PROBE-B-') && kanalInfo(r.anbieter, r.kanal) ? el("div", { class: "kanal-hinweis" }, el("b", {}, "So erreichst du " + r.anbieter + ": "), kanalInfo(r.anbieter, r.kanal).text, " ", el("a", { href: kanalInfo(r.anbieter, r.kanal).quelle, target: "_blank", rel: "noopener", "data-read-navigation": true }, "Quelle ↗")) : null,
     el("div", { class: "karte akzent" }, el("div", { class: "kicker" }, "Fragekern, so wörtlich wie möglich"), el("p", { style: "font-size:19px;font-weight:700;margin:6px 0 10px" }, "«" + s.frage + "»"),
       el("button", { type: "button", class: "chip", on: { click: async e => { try { await navigator.clipboard.writeText(s.frage); e.target.textContent = "Kopiert"; } catch (x) {} } } }, "Frage kopieren")),
     el("p", { class: "leise" }, "Nur diese Frage. Auf Rückfragen wahrheitsgemäss antworten, bedanken, beenden, sobald die Mindestantwort da ist. Auf «Ist das ein Test?» ehrlich antworten. Nie sperren, nachforschen oder etwas ändern lassen."),

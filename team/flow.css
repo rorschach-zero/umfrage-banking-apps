@@ -82,3 +82,13 @@
 
 .b-stepper-item:focus-visible,.c-theme:focus-visible{outline:3px solid #8a63b5;outline-offset:2px}
 .b-step-title,.b-step-body,.c-q-body{min-width:0;overflow-wrap:anywhere}
+/* Belegte Kanäle */
+.kanal-vorschlaege{display:grid;gap:8px;margin-bottom:8px}
+.kanal-titel{font-weight:850;margin:0}
+.kanal-karte{border:1px solid var(--soft);border-radius:12px;padding:10px 12px;display:grid;gap:6px;background:#fafbf8}
+.kanal-karte p{margin:0}
+.kanal-option{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:14px}
+.kanal-option span{flex:1;min-width:200px}
+.kanal-option a{font-size:13px;font-weight:700;color:#4f6fd8}
+.kanal-hinweis{background:var(--area-b-wash);border-radius:12px;padding:10px 14px;font-size:15px}
+.kanal-hinweis a{font-weight:700;color:var(--area-b);margin-left:4px}
