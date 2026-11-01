@@ -299,7 +299,7 @@ function details(row,origin='Projektplanung',takeover=false){
 function toast(text,action){$('toast').replaceChildren(el('span',{},text),action||[]);$('toast').hidden=false;}
 async function postStatus(row,from,to,access,lead){
   if(preview.active())throw Error('Diese Personenansicht ist nur zum Lesen.');
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);
   try{
     const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'status',k:access,leitung:lead,id:row.id,from,to}),signal:controller.signal,referrerPolicy:'no-referrer'});
     const result=await response.json();if(!response.ok||!result.ok||result.id!==row.id||result.status!==to)throw Error(result.fehler||'Änderung nicht bestätigt.');
@@ -344,7 +344,7 @@ function showSharing(){
       if(!dateInput.checkValidity()||!reach.checkValidity()){feedback.textContent='Prüfe Datum und geschätzte Gruppengrösse.';return;}
       if(config.demo){feedback.textContent='Die Vorschau speichert keine Verteilung.';return;}
       save.disabled=true;
-      try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);let result;
+      try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);let result;
         try{const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'share',k:key,channel,day:dateInput.value,reach:reach.value}),signal:controller.signal});result=await response.json();if(!response.ok||!result.ok)throw Error(result.fehler||'Nicht gespeichert.');}finally{clearTimeout(timer);}
         data.sharing=result.sharing;document.getElementById('sharing-count').textContent=result.sharing.done+' von 2 Kanälen';feedback.textContent='Gespeichert. Die Reichweite ist eine Schätzung.';
       }catch(error){feedback.textContent=error.message;}finally{save.disabled=false;}
@@ -453,7 +453,7 @@ async function load(reset=false) {
     lastLoaded=Date.now();render();return;
   }
   if(!key){data=null;state='unauthorized';render();return;}
-  const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),20000);
+  const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),60000);
   try{
     if(!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(config.endpoint))throw Error('Der Projektzugang ist noch nicht verbunden.');
     const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(preview.request({typ:'team',k:key,leitung:leadership})),signal:controller.signal,referrerPolicy:'no-referrer',cache:'no-store'});
