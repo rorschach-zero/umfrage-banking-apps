@@ -2,10 +2,12 @@
 (() => {
 const config = window.TEAM_CONFIG;
 const names = {SA:'Salah',ES:'Ernes',MG:'Melisa',AM:'Arber',LB:'Leonie'};
-const labels = {today:'Heute',tasks:'Meine Aufgaben',deadlines:'Fristen',pia:'Pia',writing:'Schreibwerk'};
-const paths = {today:'M3 10 12 3l9 7M5 9v12h5v-7h4v7h5V9',tasks:'M9 6h12M9 12h12M9 18h12M3 6l1 1 2-3M3 12l1 1 2-3M3 18l1 1 2-3',deadlines:'M4 5h16v16H4zM4 10h16M8 3v4M16 3v4',pia:'M21 11a8 8 0 0 1-8 8H8l-5 3 1-6a8 8 0 1 1 17-5Z'};
+const labels = {today:'Heute',tasks:'Meine Arbeit',deadlines:'Fristen',pia:'Pia',profile:'Profil'};
+const paths = {profile:'M20 21v-2a7 7 0 0 0-14 0v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',today:'M3 10 12 3l9 7M5 9v12h5v-7h4v7h5V9',tasks:'M9 6h12M9 12h12M9 18h12M3 6l1 1 2-3M3 12l1 1 2-3M3 18l1 1 2-3',deadlines:'M4 5h16v16H4zM4 10h16M8 3v4M16 3v4',pia:'M21 11a8 8 0 0 1-8 8H8l-5 3 1-6a8 8 0 1 1 17-5Z'};
 let view = new URLSearchParams(location.search).get('view') || 'today';
+if (view === 'writing') view = 'tasks';
 if (!labels[view]) view = 'today';
+let area = new URLSearchParams(location.search).get('area') || '', pending = null;
 let data = null, state = 'loading', person = 'SA', leadership = false, filter = 'open', key = '', generation = 0, lastLoaded = 0, errorMessage = '';
 const $ = id => document.getElementById(id);
 function el(tag, attrs = {}, ...children) {
@@ -25,14 +27,15 @@ function icon(name) {
 function button(text, action, cls='button') {return el('button',{type:'button',class:cls,onClick:action},text);}
 function navigate(next, push=true) {
   view = labels[next] ? next : 'today';
-  if (push) {const url=new URL(location.href); url.searchParams.set('view',view); url.hash=''; history.pushState({},'',url);}
+  if(!pending)$('toast').hidden=true;
+  if (push) {const url=new URL(location.href); url.searchParams.set('view',view); if(view==='tasks'&&area)url.searchParams.set('area',area);else url.searchParams.delete('area'); url.hash=''; history.pushState({},'',url);}
   render(); $('content').focus({preventScroll:true}); window.scrollTo({top:0,behavior:'instant'});
 }
 function today() {return config.demo ? '2026-11-01' : new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Zurich',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
 function day(value) {if (!value) return null; return value.includes('T') ? new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Zurich',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value)) : value;}
 function date(value, time=false) {
   if (!value) return 'Termin unbekannt';
-  const text = new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',day:'2-digit',month:'2-digit',year:'numeric',...(time&&value.includes('T')?{hour:'2-digit',minute:'2-digit'}:{})}).format(new Date(value.includes('T')?value:value+'T12:00:00+01:00'));
+  const text = new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',weekday:'short',day:'2-digit',month:'2-digit',...(time&&value.includes('T')?{hour:'2-digit',minute:'2-digit'}:{})}).format(new Date(value.includes('T')?value:value+'T12:00:00+01:00'));
   return text;
 }
 function completed(row) {return ['fertig','erledigt'].includes(row.status);}
@@ -54,54 +57,99 @@ function rememberPiaRole() {try {sessionStorage.setItem('pa6_pia_role',leadershi
 function piaLink(row, label='Pia fragen') {
   const url=new URL(config.piaPath,location.origin);
   url.searchParams.set('q',safeQuestion(cardText(row,'Pia-Frage')));
-  if (/^(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(row.id||'')) url.searchParams.set('ctx',row.id);
+  if(row.ctx)url.searchParams.set('ctx',row.ctx);
+  else if (/^(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(row.id||'')) url.searchParams.set('ctx',row.id);
   return el('a',{class:'button secondary pia-link',href:url.pathname+url.search,referrerpolicy:'no-referrer',onClick:rememberPiaRole},label);
 }
+function shortTitle(row) {return (row.title || 'Aufgabe noch offen').replace(/^(?:AP|EA)-[\w-]+\s*[·:–-]?\s*/,'').replace(/(?:ab|bis|am)?\s*\d{2}\.(?:\d{2}\.)?(?:[–-]\d{2}\.\d{2}\.)?/g,'').replace(/\s+/g,' ').trim().split(/\s+/).slice(0,8).join(' ');}
 function workLink(row) {
-  const raw=cardText(row,'Wo'); let url;
-  try {url=new URL(raw,location.origin);} catch {}
-  const safe=url && ((url.origin===location.origin && /^\/team(?:\/|$)/.test(url.pathname)) || (url.protocol==='https:' && /^(?:www\.)?(?:notion\.so|notion\.site|app\.notion\.com|docs\.google\.com|drive\.google\.com)$/.test(url.hostname)));
-  return safe && !url.username && !url.password ? el('a',{class:'button work-link',href:url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},'Arbeitsort öffnen ↗') : el('span',{class:'field-open'},'Wo · noch offen');
+  const raw=cardText(row,'Wo');let url;
+  try {url=new URL(raw,location.origin);}catch{}
+  if (!url || url.username || url.password || /notion\.(so|site)|app\.notion/.test(url.hostname)) return null;
+  const internal=(url.origin===location.origin || url.hostname==='umfrage.hydeout.ch') && /^\/team\/(?:b|c)(?:\/|$)/.test(url.pathname);
+  const doc=url.protocol==='https:' && url.hostname==='docs.google.com' && /^\/document\//.test(url.pathname);
+  const drive=url.protocol==='https:' && url.hostname==='drive.google.com';
+  if(!internal&&!doc&&!drive)return null;
+  const label=doc?'Kapitel-Doc öffnen':internal?(url.pathname.includes('/b')?'Maske B öffnen':'Maske C öffnen'):'Unterlagen öffnen';
+  return el('a',{class:'button work-link',href:internal?url.pathname:url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
 }
 function steps(row) {
-  if (cardText(row,"So geht's")==="noch offen") return el('p',{class:'field-open'},'noch offen');
-  const values=cardText(row,"So geht's").split(/\n+|\s+(?=\d+[.)]\s)/).map(value=>value.replace(/^\s*(?:\d+[.)]|[-•])\s*/, '').trim()).filter(Boolean);
-  return el('ol',{class:'task-steps'},values.map(value=>el('li',{},value)));
+  if(cardText(row,"So geht's")==='noch offen')return el('p',{class:'field-open'},'Die Schritte sind noch nicht hinterlegt. Pia hilft dir weiter.');
+  const values=cardText(row,"So geht's").split(/\n+|\s+(?=\d+[.)]\s)/).map(v=>v.replace(/^\s*(?:\d+[.)]|[-•])\s*/,'').trim()).filter(Boolean);
+  return el('ul',{class:'step-list'},values.map(value=>{
+    const storageKey='pa6-step:'+data.person+':'+row.id+':'+value;let checked=false;
+    try{checked=localStorage.getItem(storageKey)==='1';}catch{}
+    const input=el('input',{type:'checkbox','aria-label':value,onChange:()=>{try{localStorage.setItem(storageKey,input.checked?'1':'0');}catch{announce('Der Schritt kann in diesem Browser nicht gespeichert werden.');}}});input.checked=checked;
+    return el('li',{},el('label',{},input,el('span',{},value)));
+  }));
 }
-function taskRow(row) {
-  const status=overdue(row)?'Überfällig':row.status||'Status unbekannt';
-  return el('li',{class:'task-card','data-owner':row.owner||data.person},
-    el('div',{class:'task-card-top'},el('span',{class:'eyebrow'},row.ref||'Kennung noch offen'),el('span',{class:'badge '+(overdue(row)?'warning':'')},status)),
-    el('p',{class:'task-due'+(row.due?'':' field-open')},el('span',{},'Frist'),date(row.due)),
-    el('button',{type:'button',class:'row task-title',onClick:()=>details(row)},el('h3',{class:cardText(row,'Was')==='noch offen'?'field-open':null},cardText(row,'Was')),el('span',{'aria-hidden':'true'},'↗')),
-    el('p',{class:'task-label'},row.title||'Auftrag noch offen'),
-    el('div',{class:'task-field'},el('h4',{},'Fertig wenn'),el('p',{class:cardText(row,'Fertig wenn')==='noch offen'?'field-open':null},cardText(row,'Fertig wenn'))),
-    el('div',{class:'task-field'},el('h4',{},"So geht’s"),steps(row)),
-    el('div',{class:'task-actions'},workLink(row),piaLink(row)),
-    el('p',{class:'task-owner'},names[row.owner]||'Zuteilung noch offen'));
+function allTasks(){return [...(data.tasks||[]),...(data.assignments||[]),...(data.chapters||[])];}
+function relativeDue(row){
+  if(!row.due)return 'Frist noch offen';
+  const diff=Math.round((Date.parse(day(row.due)+'T12:00:00Z')-Date.parse(today()+'T12:00:00Z'))/86400000);
+  return (diff<0?'Überfällig':diff===0?'Heute':diff===1?'Morgen':'in '+diff+' Tagen')+' · '+date(row.due);
 }
-function taskList(rows, all=false) {
-  if (rows === null) return unknown();
-  const filtered=sortRows(rows.filter(row=>all||!completed(row)));
-  return filtered.length ? el('ul',{class:'rows task-grid'},filtered.map(taskRow)) : empty('Hier ist noch nichts zugeteilt.','Es sind keine passenden Aufgaben hinterlegt. Das bedeutet nicht, dass nichts zu tun ist. Kläre die Zuteilung mit Salah.');
+function canReport(row){return state==='ready' && ['psp','assignments'].includes(row.source) && ['offen','läuft'].includes(row.status) && (row.owner===data.person||leadership);}
+function taskRow(row){
+  const waiting=pending?.id===row.id;
+  const check=button(completed(row)?'✓':row.status==='in Prüfung'?'·':'',()=>report(row),'task-check'+(waiting?' is-pending':'')+(completed(row)?' is-done':''));
+  check.disabled=!canReport(row)||!!pending;check.setAttribute('aria-label',completed(row)?'Erledigt':row.status==='in Prüfung'?'In Prüfung':'Als erledigt melden: '+shortTitle(row));
+  return el('li',{class:'task-line','data-owner':row.owner||data.person},check,
+    el('button',{class:'task-open',onClick:()=>details(row)},el('span',{class:'task-name'},shortTitle(row)),el('span',{class:'due-chip'+(overdue(row)?' overdue':'')},relativeDue(row))),
+    el('span',{class:'status-dot '+(row.status==='läuft'?'active':row.status==='in Prüfung'?'review':completed(row)?'done':''),role:'img','aria-label':row.status||'Status unbekannt',title:row.status||'Status unbekannt'}));
 }
-function groupCard() {
-  const group = data.group;
-  return card('Unser Gruppenstand',group ? el('div',{class:'card-body'},el('div',{class:'stats'},[['Arbeitspakete',group.total],['In Arbeit',group.active],['Erledigt',group.done],['Nicht zugeteilt',group.unassigned]].map(([label,value])=>el('div',{class:'stat'},el('strong',value===null?{class:'unknown-value'}:{},value??'Unbekannt'),el('span',{},label)))),el('p',{class:'quiet-note'},'Gemeinsame Planung. Keine Ergebnisse der Erhebung.'),el('p',{class:'unknown'},'Gesamtfortschritt unbekannt'+(group.unknownStatus?' · '+group.unknownStatus+' Statusangaben fehlen.':'.')),el('p',{class:'source'},'Laufende Phasen laut PSP: '+((data.phases||[]).filter(row=>row.status==='läuft').map(row=>row.title).join(', ')||'Unbekannt')),source()) : unknown());
+function taskList(rows,all=true){return rows===null?unknown():rows.length?el('ul',{class:'rows task-list'},sortRows(rows.filter(r=>all||!completed(r))).map(taskRow)):empty('Hier ist alles ruhig.','In diesem Bereich sind noch keine Aufgaben zugeteilt.');}
+function progress(done,total,label){return el('div',{class:'progress-block'},el('span',{},label||done+' von '+total+' erledigt'),el('progress',{max:Math.max(1,total||0),value:done||0,'aria-label':label||'Erledigte Aufgaben'}));}
+function areaRows(module){return allTasks().filter(r=>module.taskIds.includes(r.id));}
+function areaSummary(module){
+  if(module.state!=='ready')return 'Stand teilweise unbekannt';
+  const unit=module.id==='b'?'Kontakten':module.id==='c'?'Bewertungen':'Aufgaben';
+  return module.done+' von '+module.total+' '+unit+(module.id==='c'?' · Soll bis heute '+module.expected:'');
 }
-function piaCard() {return el('section',{class:'pia-card'},el('div',{},el('p',{class:'eyebrow'},'Deine Projektkollegin'),el('h2',{},'Ein klarer nächster Schritt.'),el('p',{},'Aufgaben, Fristen oder Regeln: Pia hilft dir, sie einzuordnen.'),button('Mit Pia klären →',()=>navigate('pia'),'text-button')),el('img',{src:'assets/pia.png',alt:'',width:128,height:128}));}
-function writingCard() {return card('Unser Schreibwerk',el('div',{class:'card-body'},el('p',{class:'quiet-note'},'PA6a · Kapitel 1 bis 7'),el('p',{class:'unknown'},'Kapitelstand unbekannt'),el('p',{class:'source'},'Es gibt noch keinen belegten Stand je Kapitel. Die PSP-Planung ist separat sichtbar.')),button('Ansehen →',()=>navigate('writing'),'text-button'));}
-function showToday() {
-  const tasks=ownTasks(), urgent=sortRows((tasks||[]).filter(row=>!completed(row)&&(overdue(row)||day(row.due)===today())));
-  const next=sortRows((data.meetings||[]).filter(row=>row.due&&day(row.due)>=today()))[0];
-  const focus=urgent[0]||next;
-  const hero=focus ? el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},urgent.length?'Dein nächster Schritt':'Als Nächstes · Gemeinsam'),el('h2',{},focus.title?.replace(/^\d{4}-\d{2}-\d{2} · /,'')||'Termin'),el('p',{},date(focus.due,true),' · ',urgent.length?'Deine Aufgabe':'Für die ganze Gruppe'),button(urgent.length?'Aufgabe ansehen →':'Termin ansehen →',()=>details(focus,urgent.length?'PSP':'Sitzungen')),piaLink(focus)),el('div',{class:'date-card','aria-hidden':'true'},el('span',{},new Intl.DateTimeFormat('de-CH',{month:'short',timeZone:'Europe/Zurich'}).format(new Date(focus.due))),el('strong',{},day(focus.due).slice(-2)),el('small',{},urgent.length?'Dein Fokus':'Nächster Termin'))) : el('section',{class:'hero'},el('div',{},el('p',{class:'eyebrow'},'Raum für den nächsten Schritt'),el('h2',{},data.meetings===null?'Nächster Termin unbekannt.':'Heute ist kein Termin hinterlegt.'),el('p',{},'Deine Aufgaben und die nächsten Fristen findest du hier.'),button('Fristen ansehen →',()=>navigate('deadlines'))));
-  return [heading('Hallo, '+names[data.person]+'.','Alles, was dich heute weiterbringt.'),hero,el('div',{class:'columns'},el('div',{class:'stack'},card('Deine nächsten Aufgaben',taskList(tasks===null?null:sortRows(tasks.filter(row=>!completed(row))).slice(0,3)),button('Alle ansehen →',()=>navigate('tasks'),'text-button')),writingCard()),el('div',{class:'stack'},groupCard(),piaCard())),el('div',{class:'capture-links','aria-label':'Erfassungsmasken'},el('a',{href:'b/'},'Servicebeobachtung →'),el('a',{href:'c/'},'Bewertungen codieren →'))];
+function openArea(id){area=id;navigate('tasks');}
+function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'B':module.id==='c'?'C':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},module.title),el('small',{},areaSummary(module))),el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
+function showToday(){
+  const open=sortRows(allTasks().filter(r=>!completed(r)&&r.status!=='in Prüfung'&&(r.owner===data.person||r.reader===data.person)));
+  const focus=open[0], count=(data.blockers||[]).filter(b=>b.owner===data.person).length;
+  const status=count?count+' '+(count===1?'Sache hängt.':'Dinge hängen.'):data.workspaceState==='ready'?'Du bist im Plan.':'Ein Teil deines Stands ist noch unbekannt.';
+  return [heading('Hallo, '+names[data.person]+'.',status),
+    el('section',{class:'focus-card'},el('p',{class:'eyebrow'},'Dein nächster Schritt'),el('h2',{},focus?shortTitle(focus):'Zeit für deinen Überblick'),el('p',{},focus?(cardText(focus,'Was')==='noch offen'?'Öffne die Aufgabe und kläre deinen nächsten Schritt.':focus.Was):'Öffne deine Arbeitsbereiche und sieh, wo du stehst.'),focus?el('span',{class:'focus-due'},relativeDue(focus)):null,button(focus?'Aufgabe ansehen':'Meine Arbeit öffnen',()=>focus?details(focus):navigate('tasks'))),
+    el('section',{class:'area-overview'},el('h2',{},'Deine Arbeitsbereiche'),(data.areas||[]).map(areaLine),!(data.areas||[]).length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null),
+    open.length>1?el('section',{class:'next-list'},el('h2',{},'Danach'),taskList(open.slice(1,4))):null,
+    el('p',{class:'group-line'},data.group?'Gemeinsam · '+(data.group.done??'Stand unbekannt')+' von '+data.group.total+' Arbeitspaketen erledigt':'Gruppenstand unbekannt')];
 }
-function showTasks() {
-  const tasks = data.role==='leitung'?data.tasks:ownTasks();
-  const rows = tasks===null ? null : [...tasks,...(data.assignments||[]),...(data.chapters||[])];
-  return [heading(data.role==='leitung'?'Aufgaben der Gruppe':'Meine Aufgaben',data.role==='leitung'?'Zuteilung und nächste Schritte im Blick.':'Dein Beitrag, übersichtlich an einem Ort.'),el('div',{class:'filters','aria-label':'Aufgabenfilter'},['open','all'].map(value=>el('button',{class:'filter','aria-pressed':filter===value,'data-filter':value,onClick:()=>{filter=value;render();document.querySelector('[data-filter='+value+']').focus();}},value==='open'?'Offen':'Alle'))),card(data.role==='leitung'?'Alle Arbeitspakete':'Für '+names[data.person],taskList(rows,filter==='all')),source(),data.group?.unassigned>0?el('p',{class:'unknown'},data.group.unassigned+' Arbeitspakete haben noch keine Zuständigkeit. Fehlende Zuordnung bedeutet nicht erledigt.'):null];
+function groupedTasks(rows){
+  const now=new Date(today()+'T12:00:00Z'),end=new Date(now);end.setUTCDate(end.getUTCDate()+(7-(now.getUTCDay()||7)));
+  const week=end.toISOString().slice(0,10),soon=new Date(end.getTime()+14*86400000).toISOString().slice(0,10);
+  const groups={'Diese Woche':[],Demnächst:[],Später:[],Erledigt:[]};
+  sortRows(rows).forEach(r=>groups[completed(r)?'Erledigt':r.due&&day(r.due)<=week?'Diese Woche':r.due&&day(r.due)<=soon?'Demnächst':'Später'].push(r));
+  return Object.entries(groups).filter(([,list])=>list.length).map(([label,list])=>label==='Erledigt'?el('details',{class:'done-list'},el('summary',{},'Erledigt · '+list.length),taskList(list)):el('section',{class:'task-group'},el('h3',{},label,el('span',{},list.length)),taskList(list)));
+}
+function blockerNote(blocker){return el('div',{class:'blocker-note'},el('div',{},el('strong',{},'Hier hängt es'),el('p',{},blocker.text)),piaLink({ctx:blocker.ctx,'Pia-Frage':blocker.question},'Pia hilft'));}
+function areaBlockers(id){
+  const blockers=(data.blockers||[]).filter(b=>b.area===id);
+  return blockers.length?[blockerNote(blockers[0]),blockers.length>1?el('details',{class:'extra-hints'},el('summary',{},'Weitere Hinweise · '+(blockers.length-1)),blockers.slice(1).map(blockerNote)):null]:[];
+}
+function showTasks(){
+  const modules=data.areas||[],selected=modules.find(m=>m.id===area);
+  const rows=selected?areaRows(selected):allTasks(), done=rows.filter(completed).length;
+  if(!selected)return [heading('Meine Arbeit','Deine Bereiche. Dein nächster Schritt.'),el('div',{class:'work-modules'},modules.map(module=>el('section',{class:'work-module'},areaLine(module),el('div',{class:'module-foot'},el('span',{},areaRows(module).filter(r=>!completed(r)).length+' offene Aufgaben'),button('Bereich öffnen',()=>openArea(module.id),'text-button'))))),!modules.length?unknown('Deine Arbeitsbereiche sind noch nicht zugeteilt oder nicht erreichbar.'):null];
+  const next=selected.next;
+  return [button('← Meine Arbeit',()=>{area='';navigate('tasks');},'text-button back-link'),heading(selected.title,''),
+    progress(selected.done,selected.total,areaSummary(selected)),
+    next?el('p',{class:'next-contact'},'Nächster '+date(next.date)+' · Block '+next.block+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Formular'}[next.channel]||next.channel)):null,
+    ...areaBlockers(area),
+    selected.tool?el('a',{class:'button area-tool',href:selected.tool},area==='b'?'Nächsten Kontakt erfassen':'Weiter codieren'):selected.id==='writing'?workLink(sortRows(rows).find(row=>!completed(row)&&/^https:\/\/docs.google.com\/document\//.test(row.Wo||''))||{}):null,
+    el('div',{class:'list-heading'},el('h2',{},'Meine Aufgaben'),el('small',{},done+' von '+rows.length+' erledigt')),
+    ...groupedTasks(rows),!rows.length?el('p',{class:'quiet-note'},'Deine Einsätze findest du direkt im Werkzeug.'):null];
+}
+function showProfile(){
+  const profile=data.profile||{},chapters=data.chapters||[],own=allTasks().filter(r=>r.owner===data.person||r.reader===data.person);
+  const section=(label,rows)=>el('section',{class:'profile-section'},el('h2',{},label),rows.length?taskList(rows):el('p',{class:'quiet-note'},'Noch keine Zuteilung hinterlegt.'));
+  return [heading('Dein Profil','Deine Rolle im gemeinsamen Projekt.'),el('section',{class:'profile-intro'},el('span',{class:'avatar-large'},names[data.person].slice(0,1)),el('div',{},el('h2',{},profile.role||'Rolle noch offen'),el('p',{},profile.text||'Dein Lead-Blatt ist noch nicht erreichbar.'),el('small',{class:'source'},profile.source||'Lead-Blatt'))),
+    piaLink({'Pia-Frage':'Erklär mir meine Rolle und meinen Lead-Bereich. Wofür bin ich verantwortlich?'},'Pia: Erklär mir meine Rolle'),
+    section('Kapitel als Pate',chapters.filter(r=>r.owner===data.person)),section('Kapitel als Zweitleser:in',chapters.filter(r=>r.reader===data.person)),
+    section('Deine Erhebungsaufträge',(data.assignments||[]).filter(r=>r.owner===data.person)),section('Deine nächsten drei Fristen',sortRows(own.filter(r=>!completed(r)&&r.due)).slice(0,3))];
 }
 const schoolDates = [
  {id:'school-a',ref:'Moodle-Kalender',title:'Abgabe PA6a','Pia-Frage':'Was gilt für die Abgabe PA6a und wo steht die Frist?',due:'2026-12-12T23:59:00+01:00'},
@@ -112,15 +160,11 @@ function timeline(rows, origin) {
   if (rows===null) return unknown();
   if (!rows.length) return empty('Keine Fristen hinterlegt.','Für diesen Bereich sind aktuell keine Termine eingetragen.');
   const groups=new Map(); sortRows(rows).forEach(row=>{const key=day(row.due)||'unbekannt'; if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);});
-  return el('div',{class:'timeline'},[...groups].map(([key,entries])=>el('section',{class:'timeline-group'},el('h3',{class:'timeline-label'},key==='unbekannt'?'Datum unbekannt':date(key)),entries.map(row=>el('div',{class:'card'},el('button',{class:'row',onClick:()=>details(row,row.source||origin)},el('span',{class:'row-copy'},el('span',{class:'row-title'},row.title||'Titel unbekannt'),el('span',{class:'row-sub'},date(row.due,true),' · ',row.source||origin,overdue(row)&&row.status?' · Überfällig':'')),el('span',{class:'row-arrow','aria-hidden':'true'},'›')),el('div',{class:'deadline-actions'},piaLink(row)))))));
+  return el('div',{class:'timeline'},[...groups].map(([key,entries])=>el('section',{class:'timeline-group'},el('h3',{class:'timeline-label'},key==='unbekannt'?'Datum unbekannt':date(key)),entries.map(row=>el('div',{class:'card'},el('button',{class:'row',onClick:()=>details(row,row.source||origin)},el('span',{class:'row-copy'},el('span',{class:'row-title'},shortTitle(row)),el('span',{class:'row-sub'},date(row.due,true),' · ',row.source||origin,overdue(row)&&row.status?' · Überfällig':'')),el('span',{class:'row-arrow','aria-hidden':'true'},'›')),el('div',{class:'deadline-actions'},piaLink(row)))))));
 }
 function showDeadlines() {
   const rows=[...(data.meetings||[]).map(row=>({...row,source:'Notion · Sitzungen'})),...(data.reserves||[]).map(row=>({...row,source:'Notion · PSP · Reserve'})),...(data.milestones||[]).map(row=>({...row,source:'Notion · PSP'})),...(data.tasks||[]).filter(row=>!completed(row)).map(row=>({...row,source:'Notion · PSP'})),...(data.assignments||[]).map(row=>({...row,source:'Notion · Erhebungsaufträge'})),...(data.chapters||[]).map(row=>({...row,source:'Notion · Kapitel'}))];
   return [heading('Die nächsten Fristen.','Von der nächsten Sitzung bis zur letzten Abgabe.'),el('h2',{class:'section-heading'},'Aus unserer Planung'),rows.length ? timeline(rows,'Notion') : (data.sources.psp.state==='unknown'||data.sources.meetings.state==='unknown') ? unknown() : timeline(rows,'Notion'),el('p',{class:'source'},'Plan-Enden aus dem PSP sind keine neu festgelegten Schultermine. Abweichungen mit den unten belegten Terminen abgleichen.'),el('h2',{class:'section-heading'},'Die Schultermine'),timeline(schoolDates,'Termine.md · Stand 28.10.2026'),el('p',{class:'source'},'Quelle: Termine.md, abgeglichen mit Moodle-Kalender und Stundenplan. Statischer Zusatz; der aktuelle Schulkalender wird hier nicht live gelesen.')];
-}
-const chapters = [['1','Ausgangslage und Problemstellung'],['2','Analyse der aktuellen Markt- und Geschäftssituation'],['2.4','Primäre Marktforschung'],['2.8','Auswertung'],['2.9','SWOT-Analyse'],['3','Strategische Überlegungen und mögliche Methoden das Ziel zu erreichen'],['4','Fazit'],['5','Reflexion Gruppenarbeit'],['6','Literaturverzeichnis'],['7','Eigenständigkeitserkärung']];
-function showWriting() {
-  return [heading('Unser Schreibwerk.','PA6a · Die vorgegebene Struktur bleibt unser roter Faden.'),el('p',{class:'notice'},'Für einzelne Kapitel ist noch kein Bearbeitungs- oder Prüfstand belegt. Die Planung unten ist keine Kapitelabnahme.'),card('Kapitelstand',chapters.map(([number,title])=>el('div',{class:'chapter-row'},el('span',{class:'chapter-num'},number),el('span',{class:'chapter-name'},title,number==='6'?el('span',{class:'row-sub'},'Abbildungsverzeichnis · Tabellenverzeichnis · Anhang'):null),el('small',{},'Stand unbekannt'),piaLink((data.chapters||[]).find(row=>row.ref==='6a-'+number)||{'Pia-Frage':'Erklär mir die Anforderungen an PA6a Kapitel '+number+' '+title+'.'})))),source('Merkmalblatt 6a · Wortlaut und Reihenfolge'),el('h2',{class:'section-heading'},'Deine Kapitelaufträge'),data.chapters==null?unknown('Kapitelaufträge sind noch offen.'):taskList(data.chapters,true),el('h2',{class:'section-heading'},'Zugehörige PSP-Planung'),data.writing===null?unknown():data.writing.length?card('Arbeitspakete',el('ul',{class:'rows task-grid'},data.writing.map(row=>taskRow(row)))):empty('Keine Schreibplanung hinterlegt.','Kapitelstände bleiben unbekannt.'),button('Zurück zu Heute',()=>navigate('today'),'button secondary')];
 }
 function showPia() {
   return [heading('Frag Pia.','Ein guter nächster Schritt beginnt mit einer Frage.'),el('section',{class:'pia-entry'},el('img',{src:'assets/pia.png',alt:'Pia, deine Projektkollegin',width:180,height:180}),el('p',{class:'eyebrow'},'Für unsere PA6'),el('h2',{},'Ich erkläre. Du entscheidest.'),el('p',{},'Deine Aufgaben, Fristen und Regeln. Zusammen bringen wir Ordnung rein.'),button(config.demo?'Pia-Einstieg ansehen →':'Pia öffnen →',openPia),el('p',{class:'privacy-copy'},'Keine Namen, Nummern oder Adressen eingeben. Vor einer Frage beachte den Verarbeitungshinweis auf der Pia-Seite. Ihr Verlauf bleibt in deinem Browser; die Nutzung ist freiwillig.'),config.demo?el('p',{class:'source'},'Lokaler Nachbau: Es wird keine Frage versendet.'):null)];
@@ -129,20 +173,58 @@ function openPia() {
   if (config.demo) return modal('Mit Pia klären',el('p',{},'Im Echtbetrieb öffnet dieser Einstieg deine bestehende Pia-Seite mit demselben persönlichen Zugang.'),el('p',{},'Beispiel für deinen Einstieg: «Was steht als Nächstes an?»'),el('p',{},'Dies ist die lokale Vorschau. Es wurde keine Verbindung aufgebaut.'),button('Zurück zu Heute',()=>{$('detail').close();navigate('today');}));
   rememberPiaRole(); location.assign(config.piaPath);
 }
-function modal(title,...content) {$('detail-body').replaceChildren(el('h2',{},title),...content); $('detail').showModal();}
-function details(row, origin='Notion · PSP') {
+function modal(title,...content) {$('detail-body').replaceChildren(el('h2',{id:'detail-title'},title),...content.flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false)); if(!$('detail').open)$('detail').showModal();}
+function details(row,origin='Projektplanung'){
   $('detail').dataset.owner=row.owner||data.person;
-  modal(cardText(row,'Was')==='noch offen'?(row.title||'Eintrag'):row.Was,el('div',{class:'task-detail'},el('p',{class:'task-due'+(row.due?'':' field-open')},el('span',{},'Frist'),date(row.due)),el('h3',{},'Warum'),el('p',{class:cardText(row,'Warum')==='noch offen'?'field-open':null},cardText(row,'Warum')),el('h3',{},'Fertig wenn'),el('p',{class:cardText(row,'Fertig wenn')==='noch offen'?'field-open':null},cardText(row,'Fertig wenn')),el('h3',{},"So geht’s"),steps(row),el('div',{class:'task-actions'},workLink(row),piaLink(row))),el('p',{class:'eyebrow'},row.ref||'Kennung unbekannt'),el('dl',{},el('dt',{},'Plan Start'),el('dd',{},date(row.start,true)),el('dt',{},'Termin'),el('dd',{},date(row.due,true)),el('dt',{},'Status'),el('dd',{},row.status||'Unbekannt'),el('dt',{},'Zuständig'),el('dd',{},names[row.owner]||'Unbekannt'),el('dt',{},'Quelle'),el('dd',{},origin)),el('p',{class:'source'},'Planungsstand. Änderungen und Zuteilungen werden weiterhin im Projekt gepflegt.'));
+  const notion=leadership&&/^[a-f0-9-]{32,36}$/i.test(row.id||'')?el('a',{class:'source notion-link',href:'https://www.notion.so/'+row.id.replace(/-/g,''),rel:'noopener noreferrer'},'In Notion öffnen'):null;
+  modal(shortTitle(row),el('p',{class:'detail-what'},cardText(row,'Was')==='noch offen'?shortTitle(row):row.Was),
+    el('p',{class:'detail-due'+(overdue(row)?' overdue':'')},relativeDue(row),' · ',row.status||'Status unbekannt'),
+    el('p',{class:'acceptance'},el('strong',{},'Fertig, wenn … '),cardText(row,'Fertig wenn')),
+    el('h3',{},'So geht’s'),steps(row),el('p',{class:'local-note'},'Deine Schritte bleiben auf diesem Gerät gespeichert.'),
+    el('div',{class:'task-actions'},workLink(row),piaLink(row)),
+    !workLink(row)?el('p',{class:'quiet-note'},'Das Werkzeug ist noch nicht verknüpft. Pia hilft dir beim Einstieg.'):null,
+    canReport(row)&&row.status==='offen'?button('Bearbeitung starten',()=>report(row,'läuft'),'text-button start-detail'):null,
+    canReport(row)?button('Als erledigt melden',()=>report(row),'text-button report-detail'):null,
+    leadership&&row.status==='in Prüfung'&&['psp','assignments'].includes(row.source)?button('Prüfung abschliessen',()=>report(row,'fertig'),'text-button'):null,
+    el('details',{class:'more'},el('summary',{},'Mehr'),el('h3',{},'Warum'),el('p',{},cardText(row,'Warum')),el('p',{class:'source'},cardText(row,'Auftragsquelle')),el('p',{class:'source'},cardText(row,'Herkunft')),el('p',{class:'source'},origin+' · '+(row.ref||'')),el('p',{class:'source'},'Start '+date(row.start,true)+' · Frist '+date(row.due,true)),notion));
+  $('detail-title').className='sr-only';
+}
+function toast(text,action){$('toast').replaceChildren(el('span',{},text),action||[]);$('toast').hidden=false;}
+async function postStatus(row,from,to,access,lead){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
+  try{
+    const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'status',k:access,leitung:lead,id:row.id,from,to}),signal:controller.signal,referrerPolicy:'no-referrer'});
+    const result=await response.json();if(!response.ok||!result.ok||result.id!==row.id||result.status!==to)throw Error(result.fehler||'Änderung nicht bestätigt.');
+    row.status=to;return result;
+  }finally{clearTimeout(timer);}
+}
+function report(row,target='in Prüfung'){
+  if(pending||state!=='ready'||(!canReport(row)&&!(leadership&&row.status==='in Prüfung'&&target==='fertig')))return;
+  if(config.demo){toast('In der Vorschau wird kein Status gespeichert.');return;}
+  const access=key,lead=leadership,identity=data.person;
+  pending={id:row.id,timer:null};
+  const undo=button('Rückgängig',()=>{clearTimeout(pending.timer);pending=null;toast('Meldung zurückgenommen.');render();},'toast-undo');
+  toast('Meldung wird in 5 Sekunden gesendet.',undo);$('detail').close();render();
+  pending.timer=setTimeout(async()=>{
+    if(key!==access||data?.person!==identity){pending=null;toast('Zugang geändert. Meldung zurückgenommen.');return;}
+    toast('Wird gespeichert …');
+    try{
+      if(row.status==='offen'&&target==='in Prüfung')await postStatus(row,'offen','läuft',access,lead);
+      await postStatus(row,row.status,target,access,lead);
+      toast(target==='fertig'?'✓ Prüfung abgeschlossen.':target==='läuft'?'✓ Bearbeitung gestartet.':'✓ Zur Prüfung gemeldet. Gut gemacht.');$('toast').classList.add('success');
+    }catch(error){toast((error.name==='AbortError'?'Verbindung unterbrochen. Bitte Stand prüfen.':error.message));}
+    finally{pending=null;await load();setTimeout(()=>$('toast').classList.remove('success'),700);}
+  },5000);
 }
 function privacy() {
-  modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Projektstände werden hier nur im Arbeitsspeicher gehalten. Der Server speichert Antworten höchstens 60 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
+  modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Projektstände werden hier nur im Arbeitsspeicher gehalten. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden an Notion gesendet und protokolliert. Der Server speichert Antworten höchstens 60 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
 }
 function logout() {try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
 function render() {
   $('breadcrumb').textContent=labels[view]; document.title=labels[view]+' · Unser Projekt';
-  $('nav').replaceChildren(...['today','tasks','deadlines','pia'].map(name=>el('a',{href:'?view='+name,class:'nav-link','aria-current':(view===name||view==='writing'&&name==='today')?'page':null,onClick:event=>{event.preventDefault();navigate(name);}},icon(name),el('span',{},labels[name]))));
+  $('nav').replaceChildren(...['today','tasks','deadlines','pia','profile'].map(name=>el('a',{href:'?view='+name,class:'nav-link','aria-current':(view===name)?'page':null,onClick:event=>{event.preventDefault();navigate(name);}},icon(name),el('span',{},labels[name]))));
   document.body.dataset.person=data?.person||'';
-  $('person').textContent=data?names[data.person]:config.demo?'Vorschau':'Dein Zugang';
+  $('person').textContent=data?names[data.person]:'Dein Zugang';$('person').setAttribute('aria-label','Profil öffnen');
   $('role').hidden=!(data?.person==='SA'); $('role').textContent=leadership?'Leitung an':'Leitung aus'; $('role').setAttribute('aria-pressed',String(leadership));
   $('refresh').disabled=state==='loading';
   $('source-note').textContent=config.demo?'Nachbau · Planungsstand 01.11.2026':data?'Zuletzt geladen '+date(data.fetchedAt,true)+(data.cached?' · Zwischenspeicher':''):'Planungsstand unbekannt';
@@ -154,8 +236,8 @@ function render() {
   const notices=[];
   if(state==='stale')notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Verbindung unterbrochen. Veralteter Stand vom '+date(data.fetchedAt,true)+'. Aktuelle Aufgaben sind unbekannt.'),button('Erneut laden',()=>load(),'text-button')));
   if(Object.values(data.sources).some(source=>source.state!=='ready'))notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Ein Teil des Projektstands ist unbekannt. Fehlende Quellen zählen nicht als leer.'),button('Erneut laden',()=>load(),'text-button')));
-  const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,writing:showWriting};
-  content.replaceChildren(...notices,...screens[view]()); announce(labels[view]+': '+(state==='stale'?'veralteter Stand.':'Projektstand angezeigt.'));
+  const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,profile:showProfile};
+  content.replaceChildren(...[...notices,...screens[view]()].flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false)); announce(labels[view]+': '+(state==='stale'?'veralteter Stand.':'Projektstand angezeigt.'));
 }
 function announce(text){$('announcement').textContent=text;}
 function readKey() {
@@ -181,6 +263,13 @@ function validResponse(result) {
     if(result[name]!==undefined && result[name]!==null && !Array.isArray(result[name]))return false;
     for(const row of result[name]||[])if(!row || typeof row.id!=='string' || ['Was','Warum','Fertig wenn',"So geht's",'Wo','Pia-Frage'].some(field=>row[field]!==undefined&&typeof row[field]!=='string'))return false;
   }
+  if(result.areas!==undefined){
+    if(!Array.isArray(result.areas)||result.areas.some(a=>!a||!['b','c','writing','tasks'].includes(a.id)||typeof a.title!=='string'||!['ready','unknown'].includes(a.state)||!Array.isArray(a.taskIds)||a.taskIds.some(id=>typeof id!=='string')||['done','total','expected'].some(k=>a[k]!==null&&(!Number.isInteger(a[k])||a[k]<0))))return false;
+  }
+  if(result.blockers!==undefined&&(!Array.isArray(result.blockers)||result.blockers.some(b=>!b||typeof b.text!=='string'||typeof b.question!=='string'||!/^hang:(overdue|dependency|backlog|contact|stop|consensus):([a-f0-9-]{32,36}|b|c|writing|tasks)$/.test(b.ctx)||result.role==='mitglied'&&b.owner!==result.person)))return false;
+  if(result.profile!==undefined&&(!result.profile||typeof result.profile.role!=='string'||typeof result.profile.text!=='string'))return false;
+  if(result.role==='mitglied'&&(result.assignments||[]).some(row=>row.owner!==result.person))return false;
+  if(result.role==='mitglied'&&(result.chapters||[]).some(row=>row.owner!==result.person&&row.reader!==result.person))return false;
   if(result.role==='mitglied'&&result.tasks?.some(row=>row.owner!==result.person))return false;
   if(result.group&&['total','active','done','unassigned','unknownStatus'].some(name=>!(result.group[name]===null&&['active','done'].includes(name))&&(!Number.isInteger(result.group[name])||result.group[name]<0)))return false;
   return true;
@@ -213,14 +302,19 @@ async function load(reset=false) {
   }catch(error){if(ticket!==generation)return;data=previous;state=previous?'stale':'error';errorMessage=error.name==='AbortError'?'Die Verbindung dauert zu lange. Bitte versuche es erneut.':error.message;}
   finally{clearTimeout(timeout);if(ticket===generation)render();}
 }
+$('person').addEventListener('click',()=>navigate('profile'));
 $('role').addEventListener('click',()=>{leadership=!leadership;data=null;load(true);});
 $('refresh').addEventListener('click',()=>load());
 $('demo-person').addEventListener('change',()=>{leadership=false;data=null;load(true);});
 $('demo-state').addEventListener('change',()=>{data=null;load(true);});
 $('privacy-button').addEventListener('click',privacy);$('privacy-footer').addEventListener('click',privacy);
-window.addEventListener('popstate',()=>navigate(new URLSearchParams(location.search).get('view'),false));
+window.addEventListener('popstate',()=>{area=new URLSearchParams(location.search).get('area')||'';navigate(new URLSearchParams(location.search).get('view'),false);});
 window.addEventListener('hashchange',()=>load(true));
 window.addEventListener('storage',event=>{if(event.key==='pa6k'){key='';data=null;leadership=false;load(true);}});
+document.addEventListener('click',event=>{
+  const link=event.target.closest('a[href]');
+  if(pending&&link&&new URL(link.href).pathname!==location.pathname){event.preventDefault();announce('Die Meldung wird noch gespeichert. Warte kurz oder wähle Rückgängig.');}
+},true);
 document.addEventListener('visibilitychange',()=>{if(!config.demo&&!document.hidden&&Date.now()-lastLoaded>60000)load();});
 $('preview').hidden=!config.demo;
 if(config.demo&&!window.TEAM_DEMO){

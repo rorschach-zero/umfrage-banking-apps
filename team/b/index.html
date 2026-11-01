@@ -3,10 +3,12 @@
 <title>Servicebeobachtung</title><link rel="stylesheet" href="../team.css"><link rel="stylesheet" href="../design.css">
 </head>
 <body>
-<header><div class="innen"><a class="project-return" href="../">← Unser Projekt</a><div class="titel"><small>Praxisarbeit HFW · Methode B</small>Servicebeobachtung</div><div id="wer" class="pille">…</div></div></header>
+<header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=b">← Meine Arbeit</a><div class="titel"><small>Praxisarbeit HFW · Methode B</small>Servicebeobachtung</div><div id="wer" class="pille">…</div></div></header>
+<section id="workspace-progress" class="workspace-progress" aria-live="polite"></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zwischen">Zwischenstand</button><button class="knopf" id="fertig">Abschliessen</button></div></div></div>
 <script src="../team.js"></script>
+<script src="../workspace.js"></script>
 <script>
 // Regeln aus 10_pa6a/beobachtung/Testprotokoll.md, Version 4. Die Maske schlaegt vor, die Person entscheidet.
 const SKRIPT = {
@@ -49,7 +51,7 @@ function liste() {
     m.append(el("h2", {}, { laufend: "Läuft, Antwort ausstehend", offen: "Als Nächstes", abgeschlossen: "Erledigt" }[gruppe]));
     g.forEach(r => m.append(el("div", { class: "karte klick", tabindex: "0", on: { click: () => oeffne(r), keydown: e => e.key === "Enter" && oeffne(r) } },
       el("div", { class: "zeile zw" }, el("b", {}, `${r.nr} · ${r.anbieter} · ${r.anliegen}`), el("span", { class: "pille " + (gruppe === "abgeschlossen" ? "gruen" : gruppe === "laufend" ? "orange" : "") }, r.kanal)),
-      el("div", { class: "leise" }, `${r.tag || "Tag offen"} · Block ${r.block} (${r.block === "A" ? "09 bis 12 Uhr" : "13 bis 17 Uhr"}) · Wiederholung ${r.wiederholung}`))));
+      el("div", { class: "leise" }, `${r.tag ? new Intl.DateTimeFormat("de-CH", {weekday:"short",day:"2-digit",month:"2-digit"}).format(new Date(r.tag+"T12:00:00")) : "Tag offen"} · Block ${r.block} (${r.block === "A" ? "09 bis 12 Uhr" : "13 bis 17 Uhr"}) · Wiederholung ${r.wiederholung}`))));
   }
   m.append(el("p", { class: "leise", style: "margin-top:28px" }, "Abend und Wochenende werden nicht beobachtet. Keine Kontodaten, keine Namen, keine Zitate eintragen."));
 }
@@ -201,6 +203,7 @@ async function speichern(stand) {
   msg.textContent = "Speichert …";
   try {
     await sende({ typ: "beobachtung", maske: "b3", zeile: zeile(stand) });
+    window.dispatchEvent(new Event("workspace-saved"));
     aktiv.erfasst = zeile(stand); try { localStorage.removeItem("b-" + aktiv.nr); } catch (e) {}
     try { const neu = await hole("plan"); daten = neu; belastung = neu.belastung || {}; } catch (e) {}
     msg.className = "meldung ok"; msg.textContent = stand === "abgeschlossen" ? "Abgeschlossen und gespeichert." : "Zwischenstand gespeichert. Komm zurück, wenn die Antwort da ist.";

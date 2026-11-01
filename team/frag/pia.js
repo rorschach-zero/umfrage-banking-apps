@@ -28,7 +28,7 @@ const thread = $('verlauf'), input = $('text'), sendButton = $('senden');
 const entryParams = new URLSearchParams(location.search);
 const entryQuestion = (entryParams.get('q') || '').trim();
 const entryHint = entryParams.get('ctx') || '';
-let taskContext = /^(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(entryHint) ? entryHint : '';
+let taskContext = /^(?:hang:(?:overdue|dependency|backlog|contact|stop|consensus):(?:[a-f0-9-]{32,36}|b|c|writing|tasks)|[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(entryHint) ? entryHint : '';
 const accessKey = schluessel();
 if (location.search) history.replaceState(null, '', location.pathname);
 let entryConsumed = false, entryRole = '';
