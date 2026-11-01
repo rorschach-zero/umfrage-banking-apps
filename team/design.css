@@ -1,0 +1,14 @@
+/* Shared project surfaces and keyboard navigation. */
+:root{--paper:#f8f8f5;--ink:#202923;--orange:#e65e38;--line:#e0e4dc;--lilac-faint:#f0ebf5;--surface:#f2f4ee;--green-dark:#27684e}
+html,body{background:var(--paper)}
+header{background:rgba(248,248,245,.96);border-bottom:1px solid var(--line)}
+.karte{border:1px solid var(--line);border-radius:20px;box-shadow:0 4px 16px #20292303}
+.knopf,.chip{min-height:44px}
+:focus-visible{outline:3px solid #736490;outline-offset:4px}
+.project-return{display:inline-flex;align-items:center;min-height:44px;font-size:13px;font-weight:750;color:var(--ink);text-decoration:none;white-space:nowrap}
+.project-return:hover{text-decoration:underline}
+.pia-page .page-header .innen{height:auto;min-height:88px;flex-wrap:wrap}
+.capture-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
+.capture-links a{display:inline-flex;align-items:center;min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:16px;color:var(--ink);background:white;text-decoration:none;font-weight:750}
+@media(max-width:600px){header .innen{flex-wrap:wrap;gap:8px}.project-return{order:3;flex-basis:100%}.pia-page .project-label{display:none}}
+.stat .unknown-value{font-size:16px;line-height:2}

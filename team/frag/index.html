@@ -1,68 +1,46 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
-<title>Pia · PA6</title><link rel="stylesheet" href="../team.css">
-<style>
-main{padding-bottom:150px}
-.verlauf{display:flex;flex-direction:column;gap:12px;margin:8px 0 18px}
-.bl{max-width:86%;padding:12px 16px;border-radius:18px;white-space:pre-line;line-height:1.5}
-.bl.du{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:6px}
-.bl.as{align-self:flex-start;background:var(--lilac-faint);border-bottom-left-radius:6px}
-.bl.as.fehler{background:#fdecea}
-.denkt{align-self:flex-start;color:var(--grey);font-size:14px;padding:4px 6px}
-.eingabe{display:flex;gap:10px;align-items:flex-end;width:100%}
-.eingabe textarea{flex:1;resize:none;min-height:48px;max-height:160px}
-.leer{border:1.5px dashed var(--line);border-radius:var(--card);padding:18px}
-</style></head>
-<body>
-<header><div class="innen"><div class="titel"><small>Praxisarbeit HFW · Gruppe 601</small>Pia</div><div class="zeile"><button id="leitung" class="pille" hidden type="button" aria-pressed="false">Leitung aus</button><span id="wer" class="pille">…</span></div></div></header>
-<main id="main">
-<div class="karte akzent"><div class="kicker">Pia</div><p style="margin:6px 0 0;font-size:17px">Frag mich zu deinen Aufgaben, Fristen und Regeln. Ich erkläre, du entscheidest.</p>
-<p class="leise" style="margin:8px 0 0">Keine Namen, Nummern oder Adressen eingeben. Deine Frage geht an Anthropic (USA), der Verlauf bleibt in deinem Browser.</p>
-<details style="margin-top:8px"><summary class="leise" style="cursor:pointer">Was ich weiss und was gilt</summary><p class="leise" style="margin:6px 0 0">Ich kenne die Unterlagen aus dem Unterricht, Lead-Blatt, Mappe, die 6b und deinen eigenen Stand. Einen Einzelfall der Erhebung entscheide ich nie. Bei Widerspruch gelten Auftrag und Merkmalblatt, dann Testprotokoll und Codebuch, dann Lead-Blatt und Briefing. Übernimmst du etwas in den Bericht, deklarierst du es als KI-Hilfe, zitierst es und legst den Verlauf in den Anhang («Verlauf als Datei»). Ist etwas unklar, frag Salah.</p></details></div>
-<div id="vorschlaege" class="chips" style="margin:14px 0"></div>
-<div id="verlauf" class="verlauf"></div>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f8f8f5">
+<title>Pia · Deine Projektkollegin</title>
+<link rel="stylesheet" href="../team.css">
+<link rel="stylesheet" href="pia.css">
+<script src="../team.js" defer></script>
+<script src="fennek.js" defer></script>
+<script src="pia.js" defer></script>
+<link rel="stylesheet" href="../design.css">
+</head>
+<body class="pia-page" data-state="waiting">
+<a class="skip-link" href="#text">Direkt zur Frage</a>
+<header class="page-header"><div class="innen"><a class="project-return" href="../">← Unser Projekt</a>
+  <a class="brand" href="./" aria-label="Pia, Startseite"><span class="fennek-avatar" aria-hidden="true"><img src="assets/c/avatar.png" alt="" width="160" height="160"></span><span>Pia<span class="brand-caption">Deine Projektkollegin</span></span></a>
+  <span class="project-label">Praxisarbeit HFW <span> / </span> Gruppe 601</span>
+  <div class="identity"><button id="leitung" class="role-toggle" hidden type="button" aria-pressed="false">Leitung aus</button><span id="wer" class="person">…</span></div>
+</div></header>
+<main id="main" class="workspace">
+  <aside class="companion" aria-label="Über Pia">
+    <div class="companion-intro">
+      <div class="portrait"><span class="portrait-orbit" aria-hidden="true"></span><span class="pia-figure" data-fennek="pose" data-pose="waiting" aria-hidden="true"><img src="assets/c/pose_wartet.png" alt="" width="512" height="512"></span><span class="figure-status" id="figure-status">Ein Schritt nach dem anderen.</span></div>
+      <div class="companion-copy"><p class="eyebrow">Für unsere PA6</p><h2>Ich erkläre.<br>Du entscheidest.</h2><p>Deine Aufgaben, Fristen und Regeln. Zusammen bringen wir Ordnung rein.</p></div>
+    </div>
+    <div class="privacy-block"><p id="privacy">Keine Namen, Nummern oder Adressen eingeben. Deine Frage geht an Anthropic (USA), der Verlauf bleibt in deinem Browser.</p>
+    <details class="knowledge"><summary>Was ich weiss und was gilt</summary><div class="knowledge-body"><p>Ich bin die KI-Assistentin unserer Gruppe. Verantwortlich ist Salah. Ich kenne die Unterlagen aus dem Unterricht, Lead-Blatt, Mappe, die 6b und deinen eigenen Stand. Einen Einzelfall der Erhebung entscheide ich nie.</p><p>Bei Widerspruch gilt diese Rangfolge:</p><ol><li>Auftrag und Merkmalblatt</li><li>Testprotokoll und Codebuch</li><li>Lead-Blatt und Briefing</li></ol><p>Übernimmst du etwas in den Bericht, deklarierst du es als KI-Hilfe, zitierst es und legst den Verlauf in den Anhang («Verlauf als Datei»).</p><p>Ist etwas unklar, frag Salah.</p></div></details></div>
+  </aside>
+  <section class="conversation" aria-label="Mit Pia sprechen">
+    <div class="welcome" id="welcome"><p class="eyebrow" id="greeting">Hallo.</p><h1>Was möchtest du klären?</h1><p class="welcome-subtitle">Ein guter nächster Schritt beginnt mit einer Frage.</p></div>
+    <details class="suggestions" id="suggestions" open><summary id="suggestion-heading">Ein Einstieg für dich</summary><div id="vorschlaege" class="prompt-grid"></div></details>
+    <div class="thread-header" id="thread-header" hidden><span>Unser Gespräch</span><span id="role-label">Deine Fragen</span></div>
+    <div id="verlauf" class="verlauf" role="log" aria-label="Gespräch mit Pia" aria-live="polite" aria-relevant="additions" tabindex="0"></div>
+    <p class="empty-note" id="empty-note">Oder frag einfach in deinen eigenen Worten.</p>
+    <div class="composer-dock">
+      <form id="question-form" class="composer"><label for="text" class="sr-only">Deine Frage an Pia</label><textarea id="text" rows="1" maxlength="1000" placeholder="Was beschäftigt dich?" aria-describedby="privacy input-hint" disabled></textarea><div class="composer-bottom"><span id="input-hint">Enter zum Senden <span>· ⇧ Enter für eine neue Zeile</span></span><button id="senden" type="submit" disabled>Fragen <span aria-hidden="true">↑</span></button></div></form>
+      <div class="conversation-tools"><span class="input-info" id="info" role="status"></span><div class="tool-buttons"><button id="datei" type="button">Verlauf als Datei</button><span aria-hidden="true">·</span><button id="neu" type="button">Neu beginnen</button></div></div>
+    </div>
+  </section>
 </main>
-<div class="fuss"><div class="innen" style="flex-direction:column;align-items:stretch;gap:8px">
-<div class="eingabe"><textarea id="text" class="t" rows="1" maxlength="1000" placeholder="Deine Frage …"></textarea><button class="knopf" id="senden">Fragen</button></div>
-<div class="zeile zw"><span class="leise" id="info"></span><span class="zeile"><button class="knopf hell" id="datei" style="padding:8px 14px;font-size:14px">Verlauf als Datei</button><button class="knopf hell" id="neu" style="padding:8px 14px;font-size:14px">Neu beginnen</button></span></div>
-</div></div>
-<script src="../team.js"></script>
-<script>
-const VORSCHLAEGE_LEITUNG = ["Wie ist die Lage heute?", "Welche Fristen werden in den nächsten 14 Tagen knapp?", "Wer braucht gerade Unterstützung?", "Was übersehe ich?"];
-const VORSCHLAEGE = ["Was steht für mich als Nächstes an?", "Was mache ich, wenn bei einer Bank niemand abnimmt?", "Wann ist meine Abgabe und wo steht das?", "Was mache ich bei einem Codierkonflikt?", "Was gilt bei der Stoppregel?"];
-let leitung = false;
-const speicher = () => "pa6frag_" + (schluessel() || "").slice(0, 8) + (leitung ? "_leitung" : "");   // je Schluessel und Rolle getrennt
-let verlauf = lokal(speicher()) || [];
-const V = document.getElementById("verlauf"), T = document.getElementById("text"), B = document.getElementById("senden");
-function zeigen(denkt) {
-  fuelle(V, verlauf.length ? verlauf.map(v => el("div", { class: "bl " + (v.rolle === "du" ? "du" : "as") + (v.fehler ? " fehler" : "") }, v.text)) : el("div", { class: "leer leise" }, "Noch keine Frage. Tipp auf einen Vorschlag oder schreib unten."),
-    denkt ? el("div", { class: "denkt" }, "Pia schaut nach …") : null);
-  scrollTo(0, document.body.scrollHeight);
-}
-async function fragen(text) {
-  text = (text || "").trim(); if (!text || B.disabled) return;
-  if (VERBOTEN.test(text)) { verlauf.push({ rolle: "assistent", text: "Bitte ohne Nummern, Mail- und Netzadressen fragen.", fehler: true }); zeigen(); return; }
-  verlauf.push({ rolle: "du", text }); T.value = ""; B.disabled = true; zeigen(true);
-  try {
-    const r = await sende({ typ: "frage", text, leitung, verlauf: verlauf.filter(v => !v.fehler).slice(-7, -1) });
-    verlauf.push({ rolle: "assistent", text: r.antwort });
-  } catch (e) { verlauf.push({ rolle: "assistent", text: String(e.message || e), fehler: true }); }
-  B.disabled = false; lokal(speicher(), verlauf.slice(-40)); zeigen(); T.focus();
-}
-fuelle(document.getElementById("vorschlaege"), VORSCHLAEGE.map(v => el("button", { type: "button", class: "chip", on: { click: () => fragen(v) } }, v)));
-B.addEventListener("click", () => fragen(T.value));
-T.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); fragen(T.value); } });
-T.addEventListener("input", () => { T.style.height = "auto"; T.style.height = Math.min(160, T.scrollHeight) + "px"; document.getElementById("info").textContent = T.value.length > 800 ? T.value.length + " von 1000 Zeichen" : ""; });
-document.getElementById("neu").addEventListener("click", () => { verlauf = []; lokal(speicher(), []); zeigen(); });
-document.getElementById("datei").addEventListener("click", () => {
-  const t = "Pia, Verlauf vom " + new Date().toLocaleString("de-CH") + "\n\n" + verlauf.map(v => (v.rolle === "du" ? "Frage: " : "Antwort: ") + v.text).join("\n\n");
-  const a = el("a", { href: URL.createObjectURL(new Blob([t], { type: "text/plain" })), download: "Pia_Verlauf.txt" }); document.body.append(a); a.click(); a.remove();
-});
-(async () => {
-  if (!schluessel()) { fuelle(document.getElementById("main"), el("div", { class: "karte" }, "Öffne Pia über deinen persönlichen Link.")); document.querySelector(".fuss").hidden = true; return; }
-  try { const r = await hole("info"); document.getElementById("wer").textContent = TEAM[r.person] || r.person;
-    if (r.person === "SA") { const L = document.getElementById("leitung"); L.hidden = false; L.addEventListener("click", () => { leitung = !leitung; L.setAttribute("aria-pressed", String(leitung)); L.textContent = leitung ? "Leitung an" : "Leitung aus"; verlauf = lokal(speicher()) || []; fuelle(document.getElementById("vorschlaege"), (leitung ? VORSCHLAEGE_LEITUNG : VORSCHLAEGE).map(v => el("button", { type: "button", class: "chip", on: { click: () => fragen(v) } }, v))); zeigen(); }); } } catch (e) { document.getElementById("wer").textContent = "kein Zugriff"; }
-  zeigen();
-})();
-</script>
-</body></html>
+<div id="notice" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

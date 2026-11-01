@@ -1,0 +1,1 @@
+window.TEAM_CONFIG = Object.freeze({"demo": false, "endpoint": "https://script.google.com/macros/s/AKfycbwKYjD-T2hJvIi84_RlplTnkqDE7ilWuDftVvfRa4ZR61V3s6S83lQ7IcTygDzJkHRI/exec", "piaPath": "/team/frag/"});

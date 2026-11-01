@@ -1,17 +1,30 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
-<title>Erhebung Team</title><link rel="stylesheet" href="team.css"></head>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#f8f8f5">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Unser Projekt · PA6</title><link rel="stylesheet" href="app.css">
+<script src="config.js" defer></script><script src="app.js" defer></script>
+<link rel="stylesheet" href="design.css">
+</head>
 <body>
-<header><div class="innen"><div class="titel"><small>Praxisarbeit HFW · Klasse 601/H25-B</small>Erhebung</div><div id="wer" class="pille">…</div></div></header>
-<main>
-<div class="kicker">Deine Arbeit in der Erhebung</div>
-<h1>Was willst du erfassen?</h1>
-<p class="leise">Beide Masken speichern direkt in die gemeinsame Tabelle. Kein Papier, kein Abtippen. Dein Link ist persönlich, bitte nicht weitergeben.</p>
-<a href="b/" style="text-decoration:none;color:inherit"><div class="karte klick"><div class="kicker">Methode B</div><h2 style="margin:4px 0">Servicebeobachtung</h2><p class="leise" style="margin:0">Deine geplanten Kontakte bei Yuh, Neon, Zak und Revolut. Frage stellen, Zeiten antippen, Antwort beurteilen.</p></div></a>
-<a href="c/" style="text-decoration:none;color:inherit"><div class="karte klick"><div class="kicker">Methode C</div><h2 style="margin:4px 0">Codierung der Bewertungen</h2><p class="leise" style="margin:0">Deine zugeteilten Bewertungen lesen und codieren, mit Tastatur in rund zwei Minuten je Bewertung.</p></div></a>
-<a href="frag/" style="text-decoration:none;color:inherit"><div class="karte klick akzent"><div class="kicker">Fragen</div><h2 style="margin:4px 0">Pia</h2><p class="leise" style="margin:0">Deine Assistentin für Aufgaben, Fristen, Notion, 6b und alle Unterlagen aus dem Unterricht.</p></div></a>
-<p class="leise" style="margin-top:24px">Fragen an Salah. Anleitung und Einsatzplan stehen in Notion unter PA6, Erhebung.</p>
-</main>
-<script src="team.js"></script>
-<script>const k = schluessel(); document.getElementById("wer").textContent = k ? "angemeldet" : "Link fehlt";</script>
+<a class="skip-link" href="#content">Direkt zum Inhalt</a>
+<div class="shell">
+<aside class="sidebar">
+<a class="brand" href="?view=today"><span class="brand-mark" aria-hidden="true">p<span>6</span></span><span>Unser Projekt<small>HFW · Gruppe 601</small></span></a>
+<div class="project-tag"><span class="tiny-dot"></span>Praxisarbeit 6a & 6b</div>
+<nav id="nav" aria-label="Hauptnavigation"></nav>
+<div class="sidebar-bottom"><div class="team-faces" aria-label="Salah, Ernes, Melisa, Arber und Leonie"><span>S</span><span>E</span><span>M</span><span>A</span><span>L</span></div><strong>Fünf Köpfe. Ein Projekt.</strong><p>Schritt für Schritt zur Abgabe.</p><button class="text-button" id="privacy-button">Datenschutz & Zugang</button></div>
+</aside>
+<div class="main-column">
+<header class="topbar"><span class="breadcrumb">Unser Projekt <span>/</span> <b id="breadcrumb">Heute</b></span><div class="identity"><button id="refresh" class="icon-button" aria-label="Stand aktualisieren" title="Stand aktualisieren">↻</button><button id="role" class="role-button" hidden aria-pressed="false">Leitung aus</button><span id="person" class="person">Dein Zugang</span></div></header>
+<main id="content" tabindex="-1"></main>
+<footer class="page-footer"><span id="source-note">Planung aus Notion</span><button class="text-button" id="privacy-footer">Datenschutz & Zugang</button></footer>
+<details class="preview" id="preview" hidden><summary>Nachbau · Stand 01.11.2026 · Vorschau einstellen</summary><div class="preview-controls"><label>Ansicht für <select id="demo-person"><option value="SA">Salah</option><option value="ES">Ernes</option><option value="MG">Melisa</option><option value="AM">Arber</option><option value="LB">Leonie</option></select></label><label>Zustand <select id="demo-state"><option value="ready">Snapshot</option><option value="empty">Leer</option><option value="loading">Laden</option><option value="error">Fehler</option><option value="partial">Teilweise unbekannt</option><option value="stale">Veralteter Stand</option><option value="unauthorized">Ohne Zugang</option></select></label><p>Lokale Planungsdaten. Keine Änderungen am Projekt.</p></div></details>
+</div></div>
+<div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+<dialog id="detail"><form method="dialog"><button class="icon-button close" aria-label="Schliessen">×</button></form><div id="detail-body"></div></dialog>
+<noscript><p>Bitte JavaScript aktivieren, um deine Aufgaben zu laden.</p></noscript>
 </body></html>
