@@ -29,6 +29,7 @@ function icon(name) {
 }
 function button(text, action, cls='button') {return el('button',{type:'button',class:cls,onClick:action},text);}
 function navigate(next, push=true) {
+  if(view!=='tasks'&&next==='tasks')workRole='mine';
   view = labels[next] ? next : 'today';
   if(!pending)$('toast').hidden=true;
   if (push) {const url=new URL(location.href); url.searchParams.set('view',view); if(view==='tasks'&&area)url.searchParams.set('area',area);else url.searchParams.delete('area'); url.hash=''; history.pushState({},'',url);}
@@ -153,7 +154,7 @@ function areaSummary(module){
   const unit=module.id==='b'?'Kontakten':module.id==='c'?'Bewertungen':'Aufgaben';
   return module.done+' von '+module.total+' '+unit+(module.id==='c'?' · Soll bis heute '+module.expected:'');
 }
-function openArea(id){area=id;navigate('tasks');}
+function openArea(id){area=id;workRole='mine';navigate('tasks');}
 function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'↗':module.id==='c'?'≡':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},areaTitle(module)),el('small',{},areaSummary(module))),el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
 function serviceCard(){
   const s=data.service;if(!s||s.error)return null;
@@ -336,9 +337,8 @@ function blockerList(blockers){
   return blockers.length?el('section',{class:'blocker-list','aria-label':'Hier hängt es'},el('ul',{},blockers.slice(0,3).map(blockerNote)),blockers.length>3?el('details',{class:'extra-hints'},el('summary',{},'Weitere anzeigen · '+(blockers.length-3)),el('ul',{},blockers.slice(3).map(blockerNote))):null):null;
 }
 function areaBlockers(id){return blockerList((data.blockers||[]).filter(b=>b.area===id));}
-// Meine Arbeit (Claudette 01.11.2026): eine Liste wie Linear «My Issues». Filter statt Bereichsseiten,
-// Zeitgruppen, Marken 6a/6b und Pate/Zweitleser, Werkzeug je Filter genau einmal.
-const workFilters=[['','Alle'],['a','A · Umfrage'],['b','B · Servicetest'],['c','C · Bewertungen'],['writing','Schreiben'],['tasks','Projekt']];
+// Filter work by area and responsibility, then group it by due date.
+const workFilters=[['','Alle'],['a','A · Umfrage'],['b','B · Servicetest'],['c','C · Bewertungen'],['writing','Schreibwerk'],['tasks','Projekt']];
 let workRole='mine';
 function workBucket(row){
   if(row.area==='b'||row.area==='c'||row.area==='writing')return row.area;
@@ -349,14 +349,14 @@ function workPart(row){
   if(row.part&&/6[ab]/i.test(row.part))return String(row.part).match(/6[ab]/i)[0].toLowerCase();
   const m=/^pa(6[ab])/i.exec(String(row.deliverable||''));return m?m[1].toLowerCase():null;
 }
-function workRoleOf(row){return row.owner===data.person?(row.source==='chapters'?'Pate':null):row.reader===data.person?'Zweitleser':null;}
+function workRoleOf(row){if(leadership)return row.source==='chapters'?'Pate':null;return row.owner===data.person?(row.source==='chapters'?'Pate':null):row.reader===data.person?'Zweitleser':null;}
 function workRows(){
-  const rows=leadership?allTasks():personalRows();
-  return rows.filter(r=>workRole==='read'?r.reader===data.person:leadership||r.owner===data.person);
+  if(leadership)return allTasks();
+  return personalRows().filter(r=>workRole==='read'?r.reader===data.person:r.owner===data.person);
 }
 function workGroups(rows){
   const sunday=sundayIso(),two=new Date(sunday+'T12:00:00Z');two.setUTCDate(two.getUTCDate()+14);const twoIso=two.toISOString().slice(0,10);
-  const g=[['Überfällig',[]],['Diese Woche',[]],['Nächste zwei Wochen',[]],['Bis Abgabe 6a · 12.12.',[]],['Bis Abgabe 6b · 27.02.',[]],['Ohne Frist',[]],['In Prüfung',[]],['Erledigt',[]]];
+  const g=[['Überfällig',[]],['Diese Woche',[]],['Nächste zwei Wochen',[]],['Bis Abgabe 6a · 12.12.',[]],['Bis Abgabe 6b · 27.02.',[]],['Ohne Frist',[]],['In Prüfung',[]],['Erledigt',[]],['Später',[]]];
   const put=(i,r)=>g[i][1].push(r);
   sortRows(rows).forEach(r=>{
     if(completed(r))return put(7,r);
@@ -364,55 +364,61 @@ function workGroups(rows){
     if(!r.due)return put(5,r);
     if(overdue(r))return put(0,r);
     const d=day(r.due);
-    if(d<=sunday)return put(1,r);if(d<=twoIso)return put(2,r);if(d<='2026-12-12')return put(3,r);return put(4,r);
+    if(d<=sunday)return put(1,r);if(d<=twoIso)return put(2,r);if(d<='2026-12-12')return put(3,r);if(d<='2027-02-27')return put(4,r);return put(8,r);
   });
-  return g.filter(([,list])=>list.length);
+  return [0,1,2,3,4,8,5,6,7].map(i=>g[i]).filter(([,list])=>list.length);
 }
 function workRow(row){
   const item=taskRow(row),name=item.querySelector('.task-name'),bucket=workBucket(row),part=workPart(row),role=workRoleOf(row);
   item.classList.add('work-row','area-'+(bucket==='tasks'?'p':bucket));
   const tags=el('span',{class:'work-tags'},
-    bucket!=='tasks'?el('span',{class:'work-tag area'},bucket==='writing'?'Schreiben':bucket.toUpperCase()):null,
+    bucket!=='tasks'?el('span',{class:'work-tag area'},bucket==='writing'?'Schreibwerk':bucket.toUpperCase()):null,
     part?el('span',{class:'work-tag'},part):null,
     role?el('span',{class:'work-tag role'},role):null,
-    leadership&&row.owner?el('span',{class:'work-tag who','data-owner':row.owner},names[row.owner]):null);
+    leadership&&row.owner?el('span',{class:'work-tag who','data-owner':row.owner},names[row.owner]):null,
+    leadership&&row.source==='chapters'&&row.reader?el('span',{class:'work-tag role'},'Zweitleser · '+names[row.reader]):null);
   if(tags.childNodes.length)name.append(tags);
   const due=item.querySelector('.due-chip');if(due&&row.due)due.textContent=overdue(row)?whenWord(row.due):date(row.due);
-  if(row.doc)item.insertBefore(el('a',{class:'work-doc',href:row.doc,target:'_blank',rel:'noopener','aria-label':'Doc öffnen: '+shortTitle(row),title:'Doc öffnen'},'Doc ↗'),item.querySelector('.status-dot'));
+  if(/^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+(?:\/edit)?$/.test(row.doc||''))item.insertBefore(el('a',{class:'work-doc',href:preview.active()?row.doc.replace(/(?:\/edit)?$/, '/preview'):row.doc,target:'_blank',rel:'noopener','aria-label':'Doc öffnen: '+shortTitle(row),title:'Doc öffnen'},'Doc ↗'),item.querySelector('.status-dot'));
   return item;
 }
 function workHeader(id){
-  if(id==='a'){const sh=data.sharing;return el('section',{class:'work-tool area-a'},el('div',{},el('strong',{},'A · Umfrage teilen'),el('span',{},Number.isFinite(sh?.done)?sh.done+' von 2 Kanälen geteilt':'Stand unbekannt')),button('Umfrage teilen',()=>navigate('sharing'),'button'));}
-  if(id==='b'){const sv=data.service&&!data.service.error?data.service:null;
+  if(id==='a'){const sh=data.sharing;return el('section',{class:'work-tool area-a'},el('div',{},el('strong',{},'A · Umfrage'),el('span',{},Number.isFinite(sh?.done)?sh.done+' von 2 Kanälen geteilt':'Stand unbekannt')),button('Umfrage teilen',()=>navigate('sharing'),'button'));}
+  if(id==='b'){const value=data.service;const sv=value&&!value.error&&Number.isFinite(value.done)&&Number.isFinite(value.config?.target)&&value.config.target>0&&value.config.official&&Array.isArray(value.selected)&&typeof value.probeDone==='boolean'?value:null;
     const line=!sv?'Stand unbekannt':sv.done+' von '+sv.config.target+' Kontakten · '+(!sv.probeDone?'Probe offen':(sv.selected?.length||0)<2?'Banken wählen':sv.next?'nächster '+date(sv.next.tag)+' · Block '+sv.next.block:'Feld ab '+date(sv.config.official));
     return el('section',{class:'work-tool area-b'},el('div',{},el('strong',{},'B · Servicetest'),el('span',{},line)),el('a',{class:'button',href:'/team/b/'},'Servicetest öffnen'));}
   if(id==='c'){const c=(data.areas||[]).find(m=>m.id==='c'),pr=data.practice;
-    const line=c&&c.state==='ready'&&c.total>0?c.done+' von '+c.total+' Bewertungen · Soll bis heute '+c.expected:Number.isFinite(pr?.done)&&pr?.total?pr.done+' von '+pr.total+' Übungen · eigene Fälle ab 03.11.':'Stand unbekannt';
+    const line=c&&c.state==='ready'&&Number.isFinite(c.done)&&c.total>0?c.done+' von '+c.total+' Bewertungen'+(Number.isFinite(c.expected)?' · Soll bis heute '+c.expected:' · Soll unbekannt'):Number.isFinite(pr?.done)&&pr?.total?pr.done+' von '+pr.total+' Übungen · eigene Fälle ab 03.11.':'Stand unbekannt';
     return el('section',{class:'work-tool area-c'},el('div',{},el('strong',{},'C · Bewertungen'),el('span',{},line)),el('a',{class:'button',href:'/team/c/'},'Bewertungen öffnen'));}
-  if(id==='writing')return el('section',{class:'work-tool area-writing'},el('div',{},el('strong',{},'Schreibwerk'),el('span',{},'Ein Google-Doc pro Kapitel · «Doc ↗» in der Zeile öffnet deins')),data.writingFolder?el('a',{class:'button secondary',href:data.writingFolder,target:'_blank',rel:'noopener'},'Ordner öffnen ↗'):null);
+  if(id==='writing')return el('section',{class:'work-tool area-writing'},el('div',{},el('strong',{},'Schreibwerk'),el('span',{},'Deine Kapitel und Gegenlesungen')),data.writingFolder?el('a',{class:'button secondary',href:data.writingFolder,target:'_blank',rel:'noopener'},'Schreibwerk öffnen ↗'):null);
   return null;
 }
 function showTasks(){
   const all=workRows(),filter=workFilters.some(([k])=>k===area)?area:'';
   const rows=filter?all.filter(r=>workBucket(r)===filter):all;
   const open=r=>!completed(r);
-  const tabs=el('div',{class:'work-tabs',role:'tablist','aria-label':'Bereich filtern'},workFilters.map(([k,label])=>{
-    const n=(k?all.filter(r=>workBucket(r)===k):all).filter(open).length;
-    return el('button',{type:'button',role:'tab','aria-selected':String(filter===k),class:'work-tab'+(filter===k?' is-on':''),onClick:()=>{area=k;navigate('tasks');}},label,el('span',{class:'work-count'},String(n)));
+  const known=['tasks','assignments','chapters'].every(key=>Array.isArray(data[key])&&data.sources?.[key==='tasks'?'psp':key]?.state==='ready');
+  const count=items=>known&&items.every(r=>typeof r.status==='string'&&r.status.trim()&&!/unbekannt/i.test(r.status))?String(items.filter(open).length):'–';
+  const selectTab=k=>{area=k;navigate('tasks');document.querySelector('.work-tab[aria-selected="true"]')?.focus({preventScroll:true});};
+  const tabs=el('div',{class:'work-tabs',role:'tablist','aria-label':'Bereich filtern'},workFilters.map(([k,label],index)=>{
+    const n=count(k?all.filter(r=>workBucket(r)===k):all);
+    return el('button',{type:'button',id:'work-tab-'+(k||'all'),role:'tab','aria-selected':String(filter===k),'aria-controls':'work-panel',tabindex:filter===k?0:-1,class:'work-tab'+(filter===k?' is-on':''),onClick:()=>selectTab(k),onKeydown:event=>{
+      const next=event.key==='ArrowRight'?(index+1)%workFilters.length:event.key==='ArrowLeft'?(index+workFilters.length-1)%workFilters.length:event.key==='Home'?0:event.key==='End'?workFilters.length-1:null;
+      if(next!==null){event.preventDefault();selectTab(workFilters[next][0]);}
+    }},label,el('span',{class:'work-count','aria-label':n==='–'?'Anzahl unbekannt':n+' offen'},n));
   }));
   const roleSwitch=leadership?null:el('div',{class:'work-role',role:'group','aria-label':'Rolle'},
-    button('Zuständig',()=>{workRole='mine';render();},'work-role-btn'+(workRole==='mine'?' is-on':'')),
-    button('Gegenlesen',()=>{workRole='read';render();},'work-role-btn'+(workRole==='read'?' is-on':'')));
+    ['mine','read'].map(role=>el('button',{type:'button','data-work-role':role,'aria-pressed':String(workRole===role),class:'work-role-btn'+(workRole===role?' is-on':''),onClick:()=>{workRole=role;render();document.querySelector('[data-work-role="'+role+'"]')?.focus();}},role==='mine'?'Zuständig':'Gegenlesen')));
   const groups=workGroups(rows);
   const list=rows.length?groups.map(([label,items])=>{
     const ul=el('ul',{class:'task-list work-list'},items.map(workRow));
     const head=el('span',{class:'work-group-head'},label,el('span',{class:'work-count'},String(items.length)));
-    return ['Erledigt','In Prüfung','Bis Abgabe 6b · 27.02.','Ohne Frist'].includes(label)
+    return ['Erledigt','In Prüfung','Bis Abgabe 6b · 27.02.','Später','Ohne Frist'].includes(label)
       ?el('details',{class:'work-group folded'},el('summary',{},head),ul)
       :el('section',{class:'work-group'},el('h2',{},head),ul);
-  }):el('p',{class:'quiet-note'},workRole==='read'?'Du liest hier gerade nichts gegen.':'In diesem Bereich ist nichts für dich offen.');
-  return [el('div',{class:'heading work-head'},el('div',{},el('h1',{},leadership?'Arbeit der Gruppe':'Meine Arbeit'),el('p',{class:'subtitle'},all.filter(open).length+' offen'+(leadership?' · alle fünf':''))),roleSwitch),
-    tabs,workHeader(filter),filter?areaBlockers(filter):null,filter&&filter!=='tasks'?window.createPurposeCard(filter,rememberPiaRole):null,...[list].flat()];
+  }):known?el('p',{class:'quiet-note'},workRole==='read'&&!leadership?'Keine Gegenlesungen in diesem Bereich.':leadership?'Keine Aufgaben in diesem Bereich.':'Keine Aufgaben für dich in diesem Bereich.'):null;
+  return [el('div',{class:'heading work-head'},el('div',{},el('h1',{},leadership?'Arbeit der Gruppe':'Meine Arbeit'),el('p',{class:'subtitle'},(count(all)==='–'?'Anzahl unbekannt':count(all)+' offen')+(leadership?' · alle fünf':''))),roleSwitch),
+    tabs,el('div',{id:'work-panel',role:'tabpanel','aria-labelledby':'work-tab-'+(filter||'all'),tabindex:0},workHeader(filter),!known?unknown('Aufgabenquellen fehlen. Angezeigt werden nur die verfügbaren Aufgaben.'):null,list,filter?areaBlockers(filter):null,filter&&filter!=='tasks'?window.createPurposeCard(filter,rememberPiaRole):null)];
 }
 function writingFolderLink(){
   return /^https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]+$/.test(data.writingFolder||'')
@@ -643,6 +649,8 @@ function render() {
   if(Object.values(data.sources).some(source=>source.state!=='ready'))notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Ein Teil des Projektstands ist unbekannt. Fehlende Quellen zählen nicht als leer.'),button('Erneut laden',()=>load(),'text-button')));
   const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,profile:showProfile,documents:showDocuments,sharing:showSharing};
   content.replaceChildren(...[...notices,...screens[view]()].flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false));
+  const tabs=content.querySelector('.work-tabs'),selected=tabs?.querySelector('[aria-selected="true"]');
+  if(selected)tabs.scrollLeft+=selected.getBoundingClientRect().left-tabs.getBoundingClientRect().left-3;
   content.querySelector('.heading > div')?.append(el('p',{class:'sync-status',role:'status'},$('source-note').textContent));
   announce(labels[view]+': '+(state==='stale'?'veralteter Stand.':'Projektstand angezeigt.'));
 }
