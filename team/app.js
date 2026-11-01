@@ -582,14 +582,14 @@ function report(row,target='in Prüfung'){
 }
 
 const shareChannels={w:'WhatsApp',i:'Instagram',f:'Facebook',l:'LinkedIn',r:'Reddit',g:'Arbeit / Geschäft',c:'Verein / Club',j:'Jodel und andere',k:'Klasse',s:'Schulhaus',a:'Anzeigen',d:'Dozierende und Sekretariat',h:'Andere Schulen',o:'Organisationen',t:'Test'};
-// Umfrage teilen (Claudette 01.11.2026): Kanal wählen, teilen, bestätigen. Speichern unverändert (typ share).
+// Choose a channel, share locally, then confirm with the existing payload.
 const shareGroups=[['Persönlich',['w','i','f','l','r','j']],['Im Umfeld',['g','c','k','s','d','a']],['Institutionen',['h','o']]];
 const shareCall='Wir sind Studierende der Klasse 601/H25-B an der KV Business School Zürich. Für unsere Praxisarbeit untersuchen wir Erfahrungen mit Banking-Apps. Mach bei unserer anonymen Umfrage mit und teile deine Sicht. Vielen Dank!';
 let shareSel='';
 function shareDone(channel){return (data.sharing?.rows||[]).filter(r=>r.kanal===channel);}
 function sharePanel(channel){
   const title=shareChannels[channel],institution=window.SHARING_INSTITUTIONS?.[channel];
-  const choices=institution?el('select',{class:'share-inst','aria-label':'Institution '+title},el('option',{value:''},'Institution wählen'),Object.entries(institution).map(([name,code])=>el('option',{value:code},name))):null;
+  const choices=institution?el('select',{id:'share-institution',class:'share-inst','aria-label':'Institution '+title},el('option',{value:''},'Institution wählen'),Object.entries(institution).map(([name,code])=>el('option',{value:code},name))):null;
   const url=()=>'https://umfrage.hydeout.ch/'+channel+(institution?'/?s='+encodeURIComponent(choices.value):'');
   const msg=el('div',{class:'share-msg'}),qr=el('img',{class:'share-qr',width:164,height:164,alt:'QR-Code für '+title}),feedback=el('p',{class:'share-feedback',role:'status','aria-live':'polite'});
   const copyAll=button('Text und Link kopieren',async()=>{try{await navigator.clipboard.writeText(shareCall+' '+url());feedback.textContent='Kopiert. Jetzt in '+title+' einfügen.';}catch{feedback.textContent='Kopieren nicht möglich. Markiere den Text oben.';}},'button');
@@ -607,14 +607,14 @@ function sharePanel(channel){
     save.disabled=true;
     try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);let result;
       try{const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'share',k:key,channel,day:dateInput.value,reach:reach.value}),signal:controller.signal});result=await response.json();if(!response.ok||!result.ok)throw Error(result.fehler||'Nicht gespeichert.');}finally{clearTimeout(timer);}
-      data.sharing=result.sharing;toast('✓ '+title+' gespeichert · '+result.sharing.done+' von 2 Kanälen');render();
+      data.sharing=result.sharing;toast('✓ '+title+' gespeichert · '+result.sharing.done+' von 2 Kanälen');shareSel='';render();document.getElementById('share-tile-'+channel)?.focus();
     }catch(error){feedback.textContent=error.message;save.disabled=false;}
   },'button');
   const sent=shareDone(channel);
-  return el('section',{class:'share-panel','data-channel':channel},
-    el('div',{class:'share-step'},el('span',{class:'share-num'},'2'),el('h2',{},'In '+title+' teilen')),
+  return el('section',{id:'share-panel',class:'share-panel','data-channel':channel,tabindex:-1,'aria-labelledby':'share-panel-title'},
+    el('div',{class:'share-step'},el('span',{class:'share-num'},'2'),el('h2',{id:'share-panel-title'},'In '+title+' teilen')),
     channel==='t'?el('p',{class:'quiet-note'},'Nur für technische Tests. Zählt nicht zum Ziel.'):null,
-    institution?el('div',{class:'share-inst-wrap'},el('label',{},'Welche Institution?'),choices,el('p',{class:'quiet-note'},'Die Kennung zeigt nur die Institution, nie eine Person.')):null,
+    institution?el('div',{class:'share-inst-wrap'},el('label',{for:'share-institution'},'Welche Institution?'),choices,el('p',{class:'quiet-note'},'Die Kennung zeigt nur die Institution, nie eine Person.')):null,
     msg,el('div',{class:'share-actions'},copyAll,native,copyLink),el('details',{class:'share-code'},el('summary',{},'QR-Code für Aushang oder Bildschirm'),qr),
     el('div',{class:'share-step'},el('span',{class:'share-num'},'3'),el('h2',{},'Bestätigen, wenn es draussen ist')),
     el('fieldset',{class:'share-confirm',disabled:preview.active()||state!=='ready'},el('label',{},'Wann',dateInput),el('label',{},'Wie viele erreicht das ungefähr? ',el('span',{class:'quiet-note'},'optional'),reach),save),
@@ -622,13 +622,15 @@ function sharePanel(channel){
 }
 function showSharing(){
   const done=data.sharing?.done;
+  const groups=shareGroups.concat(data.person==='SA'?[['Intern',['t']]]:[]);
+  if(!groups.some(([,channels])=>channels.includes(shareSel)))shareSel='';
   const tile=channel=>{const n=shareDone(channel).length,on=shareSel===channel;
-    return el('button',{type:'button',class:'share-tile'+(on?' is-on':'')+(n?' is-done':''),'aria-pressed':String(on),onClick:()=>{shareSel=on?'':channel;render();if(shareSel)setTimeout(()=>document.querySelector('.share-panel')?.scrollIntoView({behavior:'smooth',block:'start'}),30);}},
+    return el('button',{type:'button',id:'share-tile-'+channel,class:'share-tile'+(on?' is-on':'')+(n?' is-done':''),'aria-pressed':String(on),onClick:()=>{shareSel=on?'':channel;render();const target=shareSel?document.getElementById('share-panel'):document.getElementById('share-tile-'+channel);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:shareSel?'start':'nearest'});}},
       el('span',{class:'share-tile-name'},shareChannels[channel]),n?el('span',{class:'share-tile-done'},'✓ geteilt'):null);};
   const goal=el('div',{class:'share-goal'},[0,1].map(i=>el('span',{class:'share-dot'+(Number.isFinite(done)&&done>i?' is-on':'')})),el('b',{},Number.isFinite(done)?done+' von 2 Kanälen':'Stand unbekannt'),el('span',{class:'quiet-note'},Number.isFinite(done)&&done>=2?'Ziel erreicht. Jeder weitere Kanal hilft.':'Ziel sind zwei verschiedene Kanäle.'));
   return [heading('Umfrage teilen',''),goal,window.createPurposeCard('a',rememberPiaRole),
     el('div',{class:'share-step'},el('span',{class:'share-num'},'1'),el('h2',{},'Wo erreichst du Leute?')),
-    ...shareGroups.concat(leadership||data.person==='SA'?[['Intern',['t']]]:[]).map(([label,list])=>el('div',{class:'share-group'},el('h3',{},label),el('div',{class:'share-tiles'},list.map(tile)))),
+    ...groups.map(([label,list])=>el('div',{class:'share-group'},el('h3',{},label),el('div',{class:'share-tiles'},list.map(tile)))),
     shareSel?sharePanel(shareSel):el('p',{class:'quiet-note share-hint'},'Tippe auf einen Kanal. Dann bekommst du Text, Link und QR-Code.'),
     el('p',{class:'quiet-note share-privacy'},'Der Link enthält keinen Namen. Antworten werden nur je Kanal gezählt, nie einer Person. Gruppengrössen sind Schätzungen.')];
 }
