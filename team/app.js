@@ -582,39 +582,56 @@ function report(row,target='in Prüfung'){
 }
 
 const shareChannels={w:'WhatsApp',i:'Instagram',f:'Facebook',l:'LinkedIn',r:'Reddit',g:'Arbeit / Geschäft',c:'Verein / Club',j:'Jodel und andere',k:'Klasse',s:'Schulhaus',a:'Anzeigen',d:'Dozierende und Sekretariat',h:'Andere Schulen',o:'Organisationen',t:'Test'};
-function showSharing(){
-  const cards=Object.entries(shareChannels).map(([channel,title])=>{
-    const institution=window.SHARING_INSTITUTIONS?.[channel], choices=institution?el('select',{'aria-label':'Institution '+title},el('option',{value:''},'Vorhandene Institution wählen'),Object.entries(institution).map(([name,code])=>el('option',{value:code},name))):null;
-    const url=()=> 'https://umfrage.hydeout.ch/'+channel+(institution?'/?s='+encodeURIComponent(choices.value):'');
-    const call='Wir sind Studierende der Klasse 601/H25-B an der KV Business School Zürich. Für unsere Praxisarbeit untersuchen wir Erfahrungen mit Banking-Apps. Mach bei unserer anonymen Umfrage mit und teile deine Sicht. Vielen Dank!';
-    const link=el('p',{class:'share-url'}),qr=el('img',{class:'share-qr',width:164,height:164,alt:'QR-Code für '+title}),feedback=el('p',{role:'status','aria-live':'polite'});
-    const copy=button('Link kopieren',async()=>{try{await navigator.clipboard.writeText(url());feedback.textContent='Link kopiert.';}catch{feedback.textContent='Kopieren nicht möglich. Markiere den angezeigten Link.';}},'button secondary');
-    const share=button('Teilen',async()=>{if(preview.active())return;try{if(navigator.share){await navigator.share({title:'Umfrage zu Banking-Apps',text:call,url:url()});feedback.textContent='Teilen geöffnet. Bestätige den verwendeten Kanal unten selbst.';}else{await navigator.clipboard.writeText(call+' '+url());feedback.textContent='Aufruf und Link kopiert. Füge sie in deinem Kanal ein.';}}catch(error){feedback.textContent=error.name==='AbortError'?'Teilen abgebrochen.':'Teilen nicht verfügbar. Kopiere Aufruf und Link.';}},'button');
-    function update(){const valid=!institution||!!choices.value;copy.disabled=!valid;share.disabled=preview.active()||!valid;link.textContent=valid?url():'Wähle die vorhandene Institutionskennung.';qr.hidden=!valid;if(valid){const code=qrcode(0,'M');code.addData(url());code.make();qr.src=code.createDataURL(4,16);}}
-    if(choices)choices.addEventListener('change',update);update();
-    const dateInput=el('input',{type:'date',value:today(),min:'2026-10-29',max:today(),'aria-label':'Datum '+title}),reach=el('input',{type:'number',min:0,max:9999999,step:1,placeholder:'optional','aria-label':'Gruppengrösse '+title}),check=el('input',{type:'checkbox','aria-label':'Ich habe geteilt in '+title});
-    const save=button('Teilen bestätigen',async()=>{
-      if(preview.active()||state!=='ready')return;
-      if(!check.checked){feedback.textContent='Bestätige zuerst, dass du hier geteilt hast.';return;}
-      if(institution&&!choices.value){feedback.textContent='Wähle die verwendete Institution.';return;}
-      if(!dateInput.checkValidity()||!reach.checkValidity()){feedback.textContent='Prüfe Datum und geschätzte Gruppengrösse.';return;}
-      if(config.demo){feedback.textContent='Die Vorschau speichert keine Verteilung.';return;}
-      save.disabled=true;
-      try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);let result;
-        try{const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'share',k:key,channel,day:dateInput.value,reach:reach.value}),signal:controller.signal});result=await response.json();if(!response.ok||!result.ok)throw Error(result.fehler||'Nicht gespeichert.');}finally{clearTimeout(timer);}
-        data.sharing=result.sharing;document.getElementById('sharing-count').textContent=result.sharing.done+' von 2 Kanälen';feedback.textContent='Gespeichert. Die Reichweite ist eine Schätzung.';
-      }catch(error){feedback.textContent=error.message;}finally{save.disabled=false;}
-    },'button secondary');
-    const sent=(data.sharing?.rows||[]).filter(r=>r.kanal===channel);
-    return el('section',{class:'share-channel','data-channel':channel},el('h2',{},title),institution?el('p',{class:'quiet-note'},'Bestehenden Versandentscheid beachten. Die Institutionskennung ist keine Personenkennung.'):null,
-      channel==='t'?el('p',{class:'quiet-note'},'Nur für technische Tests. Zählt nicht zum Ziel von zwei Kanälen.'):null,
-      choices,el('p',{class:'share-call'},call),link,el('div',{class:'share-actions'},copy,share),el('details',{class:'share-code'},el('summary',{},'QR-Code anzeigen'),qr),
-      el('fieldset',{disabled:preview.active()||state!=='ready'},el('legend',{},'Deine Verteilung festhalten'),el('label',{class:'share-check'},check,'Ich habe geteilt in '+title),el('label',{},'Datum',dateInput),el('label',{},'Geschätzte Gruppengrösse',reach),save),
-      sent.length?el('small',{},'Bereits erfasst am '+sent.map(r=>r.datum).join(', ')):null,feedback);
-  });
-  return [heading('Umfrage teilen','Teile in mindestens zwei passenden Kanälen. Der Link enthält keinen Namen.'),window.createPurposeCard('a',rememberPiaRole),el('p',{id:'sharing-count',class:'sharing-count'},(data.sharing?.done??'–')+' von 2 Kanälen'),el('p',{class:'quiet-note'},'Gruppengrössen sind freiwillige Schätzungen. Überschneidungen sind möglich. Antworten werden nur je Kanal gezählt und keiner verteilenden Person zugeordnet.'),el('div',{class:'share-grid'},cards)];
+// Umfrage teilen (Claudette 01.11.2026): Kanal wählen, teilen, bestätigen. Speichern unverändert (typ share).
+const shareGroups=[['Persönlich',['w','i','f','l','r','j']],['Im Umfeld',['g','c','k','s','d','a']],['Institutionen',['h','o']]];
+const shareCall='Wir sind Studierende der Klasse 601/H25-B an der KV Business School Zürich. Für unsere Praxisarbeit untersuchen wir Erfahrungen mit Banking-Apps. Mach bei unserer anonymen Umfrage mit und teile deine Sicht. Vielen Dank!';
+let shareSel='';
+function shareDone(channel){return (data.sharing?.rows||[]).filter(r=>r.kanal===channel);}
+function sharePanel(channel){
+  const title=shareChannels[channel],institution=window.SHARING_INSTITUTIONS?.[channel];
+  const choices=institution?el('select',{class:'share-inst','aria-label':'Institution '+title},el('option',{value:''},'Institution wählen'),Object.entries(institution).map(([name,code])=>el('option',{value:code},name))):null;
+  const url=()=>'https://umfrage.hydeout.ch/'+channel+(institution?'/?s='+encodeURIComponent(choices.value):'');
+  const msg=el('div',{class:'share-msg'}),qr=el('img',{class:'share-qr',width:164,height:164,alt:'QR-Code für '+title}),feedback=el('p',{class:'share-feedback',role:'status','aria-live':'polite'});
+  const copyAll=button('Text und Link kopieren',async()=>{try{await navigator.clipboard.writeText(shareCall+' '+url());feedback.textContent='Kopiert. Jetzt in '+title+' einfügen.';}catch{feedback.textContent='Kopieren nicht möglich. Markiere den Text oben.';}},'button');
+  const copyLink=button('Nur Link',async()=>{try{await navigator.clipboard.writeText(url());feedback.textContent='Link kopiert.';}catch{feedback.textContent='Kopieren nicht möglich.';}},'button secondary');
+  const native=navigator.share?button('Teilen …',async()=>{if(preview.active())return;try{await navigator.share({title:'Umfrage zu Banking-Apps',text:shareCall,url:url()});feedback.textContent='Geteilt? Dann unten bestätigen.';}catch(error){feedback.textContent=error.name==='AbortError'?'Abgebrochen.':'Teilen nicht verfügbar.';}},'button secondary'):null;
+  function update(){const ok=!institution||!!choices.value;[copyAll,copyLink,native].forEach(b=>{if(b)b.disabled=!ok||(preview.active()&&b===native);});
+    msg.replaceChildren(el('p',{},shareCall),el('p',{class:'share-url'},ok?url():'Zuerst die Institution wählen.'));qr.hidden=!ok;if(ok){const code=qrcode(0,'M');code.addData(url());code.make();qr.src=code.createDataURL(4,16);}}
+  if(choices)choices.addEventListener('change',update);update();
+  const dateInput=el('input',{type:'date',value:today(),min:'2026-10-29',max:today(),'aria-label':'Datum'}),reach=el('input',{type:'number',min:0,max:9999999,step:1,placeholder:'z. B. 40','aria-label':'Geschätzte Gruppengrösse'});
+  const save=button('Ja, ich habe in '+title+' geteilt',async()=>{
+    if(preview.active()||state!=='ready')return;
+    if(institution&&!choices.value){feedback.textContent='Wähle die verwendete Institution.';return;}
+    if(!dateInput.checkValidity()||!reach.checkValidity()){feedback.textContent='Prüfe Datum und Gruppengrösse.';return;}
+    if(config.demo){feedback.textContent='Die Vorschau speichert keine Verteilung.';return;}
+    save.disabled=true;
+    try{const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);let result;
+      try{const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'share',k:key,channel,day:dateInput.value,reach:reach.value}),signal:controller.signal});result=await response.json();if(!response.ok||!result.ok)throw Error(result.fehler||'Nicht gespeichert.');}finally{clearTimeout(timer);}
+      data.sharing=result.sharing;toast('✓ '+title+' gespeichert · '+result.sharing.done+' von 2 Kanälen');render();
+    }catch(error){feedback.textContent=error.message;save.disabled=false;}
+  },'button');
+  const sent=shareDone(channel);
+  return el('section',{class:'share-panel','data-channel':channel},
+    el('div',{class:'share-step'},el('span',{class:'share-num'},'2'),el('h2',{},'In '+title+' teilen')),
+    channel==='t'?el('p',{class:'quiet-note'},'Nur für technische Tests. Zählt nicht zum Ziel.'):null,
+    institution?el('div',{class:'share-inst-wrap'},el('label',{},'Welche Institution?'),choices,el('p',{class:'quiet-note'},'Die Kennung zeigt nur die Institution, nie eine Person.')):null,
+    msg,el('div',{class:'share-actions'},copyAll,native,copyLink),el('details',{class:'share-code'},el('summary',{},'QR-Code für Aushang oder Bildschirm'),qr),
+    el('div',{class:'share-step'},el('span',{class:'share-num'},'3'),el('h2',{},'Bestätigen, wenn es draussen ist')),
+    el('fieldset',{class:'share-confirm',disabled:preview.active()||state!=='ready'},el('label',{},'Wann',dateInput),el('label',{},'Wie viele erreicht das ungefähr? ',el('span',{class:'quiet-note'},'optional'),reach),save),
+    sent.length?el('p',{class:'quiet-note'},'Schon erfasst am '+sent.map(r=>r.datum).join(', ')+'. Du kannst es erneut teilen.'):null,feedback);
 }
-
+function showSharing(){
+  const done=data.sharing?.done;
+  const tile=channel=>{const n=shareDone(channel).length,on=shareSel===channel;
+    return el('button',{type:'button',class:'share-tile'+(on?' is-on':'')+(n?' is-done':''),'aria-pressed':String(on),onClick:()=>{shareSel=on?'':channel;render();if(shareSel)setTimeout(()=>document.querySelector('.share-panel')?.scrollIntoView({behavior:'smooth',block:'start'}),30);}},
+      el('span',{class:'share-tile-name'},shareChannels[channel]),n?el('span',{class:'share-tile-done'},'✓ geteilt'):null);};
+  const goal=el('div',{class:'share-goal'},[0,1].map(i=>el('span',{class:'share-dot'+(Number.isFinite(done)&&done>i?' is-on':'')})),el('b',{},Number.isFinite(done)?done+' von 2 Kanälen':'Stand unbekannt'),el('span',{class:'quiet-note'},Number.isFinite(done)&&done>=2?'Ziel erreicht. Jeder weitere Kanal hilft.':'Ziel sind zwei verschiedene Kanäle.'));
+  return [heading('Umfrage teilen',''),goal,window.createPurposeCard('a',rememberPiaRole),
+    el('div',{class:'share-step'},el('span',{class:'share-num'},'1'),el('h2',{},'Wo erreichst du Leute?')),
+    ...shareGroups.concat(leadership||data.person==='SA'?[['Intern',['t']]]:[]).map(([label,list])=>el('div',{class:'share-group'},el('h3',{},label),el('div',{class:'share-tiles'},list.map(tile)))),
+    shareSel?sharePanel(shareSel):el('p',{class:'quiet-note share-hint'},'Tippe auf einen Kanal. Dann bekommst du Text, Link und QR-Code.'),
+    el('p',{class:'quiet-note share-privacy'},'Der Link enthält keinen Namen. Antworten werden nur je Kanal gezählt, nie einer Person. Gruppengrössen sind Schätzungen.')];
+}
 function privacy() {
   modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Der letzte Projektstand bleibt für deine Person und Ansicht auf diesem Gerät gespeichert, damit er beim Wiederöffnen sofort erscheint. Beim Abmelden werden diese gespeicherten Projektstände gelöscht. Nutze dafür ein persönliches Gerät. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden an Notion gesendet und protokolliert. Der Server speichert Antworten höchstens 600 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Beim Teilen speichert das Verteilungsprotokoll deine Person, den Kanal, das Datum und eine freiwillige Reichweitenschätzung. Es verknüpft keine Umfrageantwort mit dir. QR-Codes werden auf deinem Gerät erzeugt.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
 }
@@ -633,6 +650,7 @@ function renderViewSelector() {
 function render() {
   $('breadcrumb').textContent=labels[view]; document.title=labels[view]+' · Unser Projekt';
   $('nav').replaceChildren(...['today','tasks','deadlines','documents','pia','profile'].map(name=>el('a',{href:'?view='+name,class:'nav-link','aria-current':(view===name)?'page':null,onClick:event=>{event.preventDefault();navigate(name);}},icon(name),el('span',{},labels[name]))));
+  const toolShare=document.getElementById('tool-sharing');if(toolShare){if(view==='sharing')toolShare.setAttribute('aria-current','page');else toolShare.removeAttribute('aria-current');}
   document.body.dataset.person=data?.person||'';
   $('person').textContent=data?names[data.person]:'Dein Zugang';$('person').setAttribute('aria-label','Profilmenü öffnen');$('person').setAttribute('aria-expanded',String(!$('profile-menu')?.hidden&&!!$('profile-menu')));$('person').disabled=!!pending||noteSaving;
   renderViewSelector();
