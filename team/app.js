@@ -477,9 +477,55 @@ function timeline(rows, origin) {
   const groups=new Map(); sortRows(rows).forEach(row=>{const key=day(row.due)||'unbekannt'; if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);});
   return el('div',{class:'timeline'},[...groups].map(([key,entries])=>el('section',{class:'timeline-group'},el('h3',{class:'timeline-label'},key==='unbekannt'?'Datum unbekannt':date(key)),entries.map(row=>el('div',{class:'card'},el('button',{class:'row',onClick:()=>details(row,row.source||origin)},el('span',{class:'row-copy'},el('span',{class:'row-title'},shortTitle(row)),el('span',{class:'row-sub'},date(row.due,true),' · ',row.source||origin,overdue(row)&&row.status?' · Überfällig':'')),el('span',{class:'row-arrow','aria-hidden':'true'},'›')),el('div',{class:'deadline-actions'},piaLink(row)))))));
 }
-function showDeadlines() {
-  const rows=[...(data.meetings||[]).map(row=>({...row,source:'Notion · Sitzungen'})),...(data.reserves||[]).map(row=>({...row,source:'Notion · PSP · Reserve'})),...(data.milestones||[]).map(row=>({...row,source:'Notion · PSP'})),...(data.tasks||[]).filter(row=>!completed(row)).map(row=>({...row,source:'Notion · PSP'})),...(data.assignments||[]).map(row=>({...row,source:'Notion · Erhebungsaufträge'})),...(data.chapters||[]).map(row=>({...row,source:'Notion · Kapitel'}))];
-  return [heading('Die nächsten Fristen.','Von der nächsten Sitzung bis zur letzten Abgabe.'),el('h2',{class:'section-heading'},'Aus unserer Planung'),rows.length ? timeline(rows,'Notion') : (data.sources.psp.state==='unknown'||data.sources.meetings.state==='unknown') ? unknown() : timeline(rows,'Notion'),el('p',{class:'source'},'Plan-Enden aus dem PSP sind keine neu festgelegten Schultermine. Abweichungen mit den unten belegten Terminen abgleichen.'),el('h2',{class:'section-heading'},'Die Schultermine'),timeline(schoolDates,'Termine.md · Stand 28.10.2026'),el('p',{class:'source'},'Quelle: Termine.md, abgeglichen mit Moodle-Kalender und Stundenplan. Statischer Zusatz; der aktuelle Schulkalender wird hier nicht live gelesen.')];
+// Fristen (Claudette 01.11.2026): als Nächstes mit Countdown, Wochen statt Endlosliste, Art als Marke, Vergangenes eingeklappt.
+let deadlineFilter='all';
+function dlLate(row){return overdue(row)&&row.status!=='in Prüfung';}
+function deadlineKind(row){return row.kind==='school'?['Schule','school']:row.src==='meetings'?['Treffen','meet']:row.src==='milestones'?['Meilenstein','mile']:row.src==='reserves'?['Reserve','res']:row.src==='chapters'?['Kapitel','task']:['Aufgabe','task'];}
+function deadlineTitle(row){return shortTitle(row).replace(/^\d{4}-\d{2}-\d{2}\s*[·\-–]\s*/,'').replace(/^[◆♦]\s*/,'');}
+function deadlineTime(row){return row.due&&row.due.includes('T')?new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',hour:'2-digit',minute:'2-digit'}).format(new Date(row.due)):'';}
+function deadlineRows(){
+  const tag=(list,src)=>(list||[]).map(r=>({...r,src}));
+  const rows=[...tag(data.meetings,'meetings'),...tag(data.milestones,'milestones'),...tag(data.reserves,'reserves'),...tag((data.tasks||[]).filter(r=>!completed(r)),'tasks'),...tag(data.assignments,'assignments'),...tag(data.chapters,'chapters'),...schoolDates.map(r=>({...r,kind:'school',src:'school'}))];
+  return rows.filter(r=>r.due).filter(r=>deadlineFilter==='all'?true:deadlineFilter==='mine'?(r.owner===data.person||r.reader===data.person||r.src==='meetings'||r.src==='school'):r.src==='school'||r.src==='milestones');
+}
+function deadlineRow(row){
+  const [kind,cls]=deadlineKind(row),d=new Date(day(row.due)+'T12:00:00Z'),time=deadlineTime(row),mine=row.reader===data.person&&row.owner!==data.person?'Gegenlesen':row.owner&&row.owner!==data.person?names[row.owner]:null;
+  return el('li',{},el('button',{type:'button',class:'dl-row'+(dlLate(row)?' is-late':''),onClick:()=>details(row,kind==='Schule'?'Schultermin':'Projektplanung')},
+    el('span',{class:'dl-date'},el('b',{},new Intl.DateTimeFormat('de-CH',{day:'2-digit'}).format(d)),el('small',{},new Intl.DateTimeFormat('de-CH',{weekday:'short'}).format(d))),
+    el('span',{class:'dl-main'},el('span',{class:'dl-title'},deadlineTitle(row)),el('span',{class:'dl-meta'},el('span',{class:'dl-kind '+cls},kind),time?el('span',{},time+' Uhr'):null,mine?el('span',{},mine):null,dlLate(row)?el('span',{class:'dl-late'},whenWord(row.due)):row.status==='in Prüfung'?el('span',{},'in Prüfung'):null)),
+    el('span',{class:'dl-chev','aria-hidden':'true'},'›')));
+}
+function dlItems(list){
+  const out=[],byDay=new Map();
+  list.forEach(r=>{if(r.src==='chapters'){const d=day(r.due);if(!byDay.has(d))byDay.set(d,[]);byDay.get(d).push(r);}});
+  const done=new Set();
+  list.forEach(r=>{
+    if(r.src==='chapters'&&byDay.get(day(r.due)).length>3){const d=day(r.due);if(done.has(d))return;done.add(d);const ch=byDay.get(d),dt=new Date(d+'T12:00:00Z');
+      out.push(el('li',{},el('details',{class:'dl-bundle'},el('summary',{class:'dl-row'},
+        el('span',{class:'dl-date'},el('b',{},new Intl.DateTimeFormat('de-CH',{day:'2-digit'}).format(dt)),el('small',{},new Intl.DateTimeFormat('de-CH',{weekday:'short'}).format(dt))),
+        el('span',{class:'dl-main'},el('span',{class:'dl-title'},ch.length+' Kapitel fällig'),el('span',{class:'dl-meta'},el('span',{class:'dl-kind task'},'Kapitel'),el('span',{},'aufklappen'))),el('span',{class:'dl-chev','aria-hidden':'true'},'›')),
+        el('ul',{class:'dl-sub'},ch.map(deadlineRow)))));return;}
+    out.push(deadlineRow(r));
+  });
+  return out;
+}
+function showDeadlines(){
+  const now=nowMs(),rows=sortRows(deadlineRows()),sunday=sundayIso();
+  const next=rows.find(r=>Date.parse(r.due.includes('T')?r.due:r.due+'T23:59:00+01:00')>=now&&!completed(r));
+  const past=rows.filter(r=>day(r.due)<today()&&!dlLate(r)),late=rows.filter(dlLate),future=rows.filter(r=>day(r.due)>=today());
+  const nextSun=new Date(sunday+'T12:00:00Z');nextSun.setUTCDate(nextSun.getUTCDate()+7);const ns=nextSun.toISOString().slice(0,10);
+  const groups=new Map();
+  future.forEach(r=>{const d=day(r.due);const label=d<=sunday?'Diese Woche':d<=ns?'Nächste Woche':new Intl.DateTimeFormat('de-CH',{month:'long',year:'numeric'}).format(new Date(d+'T12:00:00Z'));if(!groups.has(label))groups.set(label,[]);groups.get(label).push(r);});
+  const hero=next?(()=>{const [kind,cls]=deadlineKind(next),d=daysUntil(next.due),time=deadlineTime(next);
+    return el('section',{class:'dl-hero'},el('div',{class:'dl-hero-when'},el('b',{},d===0?'Heute':d===1?'Morgen':'In '+d+' Tagen'),el('span',{},date(next.due)+(time?' · '+time+' Uhr':''))),
+      el('div',{class:'dl-hero-what'},el('span',{class:'dl-kind '+cls},kind),el('h2',{},deadlineTitle(next))),button('Details',()=>details(next,kind==='Schule'?'Schultermin':'Projektplanung'),'button secondary'));})():null;
+  const filters=el('div',{class:'work-tabs dl-filters',role:'group','aria-label':'Fristen filtern'},[['all','Alle'],['mine','Für mich'],['big','Nur Abgaben und Meilensteine']].map(([k,l])=>el('button',{type:'button','aria-pressed':String(deadlineFilter===k),class:'work-tab'+(deadlineFilter===k?' is-on':''),onClick:()=>{deadlineFilter=k;render();}},l)));
+  const sources=data.sources?.psp?.state==='unknown'||data.sources?.meetings?.state==='unknown';
+  return [heading('Fristen',''),hero,filters,sources?unknown():null,
+    late.length?el('section',{class:'dl-group'},el('h2',{class:'dl-late-head'},'Überfällig',el('span',{class:'work-count'},String(late.length))),el('ul',{class:'dl-list'},late.map(deadlineRow))):null,
+    ...[...groups].map(([label,list])=>el('section',{class:'dl-group'},el('h2',{},label,el('span',{class:'work-count'},String(list.length))),el('ul',{class:'dl-list'},dlItems(list)))),
+    past.length?el('details',{class:'dl-group dl-past'},el('summary',{},'Vergangen',el('span',{class:'work-count'},String(past.length))),el('ul',{class:'dl-list'},past.reverse().map(deadlineRow))):null,
+    el('p',{class:'quiet-note dl-source'},'Planung aus Notion. Schultermine laut Termine.md, abgeglichen mit Moodle. Bei Abweichung gilt der Schultermin.')];
 }
 function showPia() {
   return [heading('Frag Pia.','Ein guter nächster Schritt beginnt mit einer Frage.'),el('section',{class:'pia-entry'},el('img',{src:'assets/pia.png',alt:'Pia, deine Projektkollegin',width:180,height:180}),el('p',{class:'eyebrow'},'Für unsere PA6'),el('h2',{},'Ich erkläre. Du entscheidest.'),el('p',{},'Deine Aufgaben, Fristen und Regeln. Zusammen bringen wir Ordnung rein.'),button(config.demo?'Pia-Einstieg ansehen →':'Pia öffnen →',openPia),el('p',{class:'privacy-copy'},'Keine Namen, Nummern oder Adressen eingeben. Vor einer Frage beachte den Verarbeitungshinweis auf der Pia-Seite. Ihr Verlauf bleibt in deinem Browser; die Nutzung ist freiwillig.'),config.demo?el('p',{class:'source'},'Lokaler Nachbau: Es wird keine Frage versendet.'):null)];
