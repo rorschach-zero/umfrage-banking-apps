@@ -240,8 +240,7 @@ function nowItem(rows){
   const steps=fixedSteps.filter(stepOpen);
   const open=sortRows(rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'));
   const upcoming=[...steps.filter(s=>s.when).map(s=>({due:s.when,focus:()=>stepFocus(s)})),
-    ...open.filter(r=>r.due).map(r=>({due:r.due,focus:()=>taskFocus(r)})),
-    ...(data.meetings||[]).filter(m=>m.due).map(m=>({due:m.due,focus:()=>({area:null,chips:['Termin',date(m.due,true)],title:shortTitle(m),why:'Bereite dich auf diesen Termin vor.',meta:'',cta:'Termin ansehen',act:()=>navigate('deadlines')})}))]
+    ...open.filter(r=>r.due).map(r=>({due:r.due,focus:()=>taskFocus(r)}))]
     .filter(item=>dueMs(item.due)>=nowMs()&&dueMs(item.due)-nowMs()<=48*3600000).sort((a,b)=>dueMs(a.due)-dueMs(b.due));
   if(upcoming.length)return upcoming[0].focus();
   const late=[...open.filter(overdue).map(r=>({due:r.due,focus:()=>taskFocus(r)})),...steps.filter(s=>s.when&&daysUntil(s.when)<0).map(s=>({due:s.when,focus:()=>stepFocus(s)}))].sort((a,b)=>dueMs(a.due)-dueMs(b.due));
