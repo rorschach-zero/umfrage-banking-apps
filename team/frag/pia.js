@@ -24,7 +24,15 @@ const ICONS = {
 };
 const $ = id => document.getElementById(id);
 const thread = $('verlauf'), input = $('text'), sendButton = $('senden');
+// Decode once before reading the access fragment, then remove all query text from history.
+const entryParams = new URLSearchParams(location.search);
+const entryQuestion = (entryParams.get('q') || '').trim();
+const entryHint = entryParams.get('ctx') || '';
+let taskContext = /^(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(entryHint) ? entryHint : '';
 const accessKey = schluessel();
+if (location.search) history.replaceState(null, '', location.pathname);
+let entryConsumed = false, entryRole = '';
+try {entryRole = sessionStorage.getItem('pa6_pia_role') || ''; sessionStorage.removeItem('pa6_pia_role');} catch {}
 let isLead = false, isBusy = false, isReady = false, person = '', messages = [], storageAvailable = true;
 let figureTimers = [];
 const FIGURE_LABELS = {waiting:'Ein Schritt nach dem anderen.', thinking:'Ich denke kurz nach.', writing:'Ich schaue in die Unterlagen.', happy:'Ein Stück weiter.', answering:'Hier ist dein nächster Schritt.', error:'Versuchen wir es nochmals.'};
@@ -49,7 +57,7 @@ function messageAvatar() {
     el('img', {src:'assets/c/avatar.png', alt:'', width:'160', height:'160'}));
 }
 // Keep the full key and an explicit role boundary: equal prefixes must never share a history.
-const historyKey = () => 'pa6frag_v2_' + encodeURIComponent(accessKey) + (isLead ? '_lead' : '_member');
+const historyKey = () => 'pa6frag_v2_' + encodeURIComponent(accessKey) + (isLead ? '_lead' : '_member') + (taskContext ? '_ctx_' + taskContext : '');
 function readHistory() {
   try {
     const saved = JSON.parse(localStorage.getItem(historyKey()) || '[]');
@@ -112,6 +120,7 @@ function updateLayout() {
   $('thread-header').hidden = !hasMessages;
   $('role-label').textContent = isLead ? 'Leitungsansicht' : 'Deine Fragen';
   $('suggestion-heading').textContent = hasMessages ? 'Eine andere Frage stellen' : (isLead ? 'Dein Überblick als Leitung' : 'Ein Einstieg für dich');
+  document.querySelector('.welcome h1').textContent = taskContext ? 'Dein Auftrag, Schritt für Schritt.' : 'Was möchtest du klären?';
   $('greeting').textContent = person ? (isLead ? 'Hallo, Salah · Leitungsansicht' : 'Hallo, ' + (TEAM[person] || person) + '.') : 'Hallo.';
   $('datei').disabled = !hasMessages || isBusy;
   $('neu').disabled = !hasMessages || isBusy;
@@ -162,7 +171,7 @@ async function ask(rawText) {
   thread.append(thinking); $('notice').textContent = 'Pia schaut in den Unterlagen nach.'; scrollToLatest();
   try {
     // Pin the key and role to this request, including when browser storage is unavailable.
-    const reply = await sende({k:accessKey, typ:'frage', text, leitung:isLead, verlauf:requestHistory});
+    const reply = await sende({k:accessKey, typ:'frage', text, leitung:isLead, ctx:taskContext, verlauf:requestHistory});
     if (typeof reply.antwort !== 'string' || !reply.antwort.trim()) throw new Error('Es kam keine Antwort an. Versuch es bitte nochmals.');
     thinking.remove(); addMessage({rolle:'assistent', text:reply.antwort});
     setFigureState('answering');
@@ -191,7 +200,7 @@ $('leitung').addEventListener('click', () => {
 });
 $('neu').addEventListener('click', () => {
   if (isBusy) return;
-  messages = []; input.value = ''; saveHistory(); renderHistory();
+  taskContext = ''; messages = []; input.value = ''; saveHistory(); renderHistory();
   setFigureState('waiting'); $('notice').textContent = 'Neues Gespräch begonnen.';
   input.focus({preventScroll:true});
 });
@@ -209,9 +218,13 @@ async function initialize() {
     const reply = await sende({k:accessKey, typ:'lesen', a:'info'});
     if (!TEAM[reply.person]) throw new Error('Kein Zugriff. Öffne Pia über deinen persönlichen Link.');
     person = reply.person; isReady = true;
+    isLead = person === 'SA' && entryRole === 'leitung';
+    $('leitung').setAttribute('aria-pressed',String(isLead));
+    $('leitung').textContent = isLead ? 'Leitung an' : 'Leitung aus';
     $('wer').textContent = TEAM[person]; $('leitung').hidden = person !== 'SA';
     messages = readHistory(); input.disabled = false;
     renderPrompts(); renderHistory(); updateInput();
+    if (entryQuestion && !entryConsumed) {entryConsumed = true; messages = []; renderHistory(); await ask(entryQuestion);}
   } catch (error) { showAccessError(String(error.message || error)); }
 }
 function showAccessError(text) {

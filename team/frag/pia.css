@@ -138,3 +138,6 @@
   .pia-page .role-toggle{padding:7px 10px;min-height:40px;white-space:nowrap}
   .pia-page .portrait-orbit{top:3px}
 }
+
+/* Keep the full answer readable above the follow-up field on phones. */
+@media(max-width:600px){.pia-page .composer-dock{position:static}}
