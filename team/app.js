@@ -33,7 +33,7 @@ function day(value) {if (!value) return null; return value.includes('T') ? new I
 function date(value, time=false) {
   if (!value) return 'Termin unbekannt';
   const text = new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',day:'2-digit',month:'2-digit',year:'numeric',...(time&&value.includes('T')?{hour:'2-digit',minute:'2-digit'}:{})}).format(new Date(value.includes('T')?value:value+'T12:00:00+01:00'));
-  return text + (time && !value.includes('T') ? ' · Uhrzeit unbekannt' : '');
+  return text;
 }
 function completed(row) {return ['fertig','erledigt'].includes(row.status);}
 function overdue(row) {return !completed(row) && row.due && (row.due.includes('T') ? Date.parse(row.due)<Date.parse(config.demo ? '2026-11-01T10:00:00+01:00' : new Date().toISOString()) : row.due<today());}
@@ -64,6 +64,7 @@ function workLink(row) {
   return safe && !url.username && !url.password ? el('a',{class:'button work-link',href:url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},'Arbeitsort öffnen ↗') : el('span',{class:'field-open'},'Wo · noch offen');
 }
 function steps(row) {
+  if (cardText(row,"So geht's")==="noch offen") return el('p',{class:'field-open'},'noch offen');
   const values=cardText(row,"So geht's").split(/\n+|\s+(?=\d+[.)]\s)/).map(value=>value.replace(/^\s*(?:\d+[.)]|[-•])\s*/, '').trim()).filter(Boolean);
   return el('ol',{class:'task-steps'},values.map(value=>el('li',{},value)));
 }
@@ -71,10 +72,10 @@ function taskRow(row) {
   const status=overdue(row)?'Überfällig':row.status||'Status unbekannt';
   return el('li',{class:'task-card','data-owner':row.owner||data.person},
     el('div',{class:'task-card-top'},el('span',{class:'eyebrow'},row.ref||'Kennung noch offen'),el('span',{class:'badge '+(overdue(row)?'warning':'')},status)),
-    el('p',{class:'task-due'},el('span',{},'Frist'),date(row.due)),
-    el('button',{type:'button',class:'row task-title',onClick:()=>details(row)},el('h3',{},cardText(row,'Was')),el('span',{'aria-hidden':'true'},'↗')),
+    el('p',{class:'task-due'+(row.due?'':' field-open')},el('span',{},'Frist'),date(row.due)),
+    el('button',{type:'button',class:'row task-title',onClick:()=>details(row)},el('h3',{class:cardText(row,'Was')==='noch offen'?'field-open':null},cardText(row,'Was')),el('span',{'aria-hidden':'true'},'↗')),
     el('p',{class:'task-label'},row.title||'Auftrag noch offen'),
-    el('div',{class:'task-field'},el('h4',{},'Fertig wenn'),el('p',{},cardText(row,'Fertig wenn'))),
+    el('div',{class:'task-field'},el('h4',{},'Fertig wenn'),el('p',{class:cardText(row,'Fertig wenn')==='noch offen'?'field-open':null},cardText(row,'Fertig wenn'))),
     el('div',{class:'task-field'},el('h4',{},"So geht’s"),steps(row)),
     el('div',{class:'task-actions'},workLink(row),piaLink(row)),
     el('p',{class:'task-owner'},names[row.owner]||'Zuteilung noch offen'));
@@ -131,7 +132,7 @@ function openPia() {
 function modal(title,...content) {$('detail-body').replaceChildren(el('h2',{},title),...content); $('detail').showModal();}
 function details(row, origin='Notion · PSP') {
   $('detail').dataset.owner=row.owner||data.person;
-  modal(cardText(row,'Was')==='noch offen'?(row.title||'Eintrag'):row.Was,el('div',{class:'task-detail'},el('p',{class:'task-due'},el('span',{},'Frist'),date(row.due)),el('h3',{},'Warum'),el('p',{},cardText(row,'Warum')),el('h3',{},'Fertig wenn'),el('p',{},cardText(row,'Fertig wenn')),el('h3',{},"So geht’s"),steps(row),el('div',{class:'task-actions'},workLink(row),piaLink(row))),el('p',{class:'eyebrow'},row.ref||'Kennung unbekannt'),el('dl',{},el('dt',{},'Plan Start'),el('dd',{},date(row.start,true)),el('dt',{},'Termin'),el('dd',{},date(row.due,true)),el('dt',{},'Status'),el('dd',{},row.status||'Unbekannt'),el('dt',{},'Zuständig'),el('dd',{},names[row.owner]||'Unbekannt'),el('dt',{},'Quelle'),el('dd',{},origin)),el('p',{class:'source'},'Planungsstand. Änderungen und Zuteilungen werden weiterhin im Projekt gepflegt.'));
+  modal(cardText(row,'Was')==='noch offen'?(row.title||'Eintrag'):row.Was,el('div',{class:'task-detail'},el('p',{class:'task-due'+(row.due?'':' field-open')},el('span',{},'Frist'),date(row.due)),el('h3',{},'Warum'),el('p',{class:cardText(row,'Warum')==='noch offen'?'field-open':null},cardText(row,'Warum')),el('h3',{},'Fertig wenn'),el('p',{class:cardText(row,'Fertig wenn')==='noch offen'?'field-open':null},cardText(row,'Fertig wenn')),el('h3',{},"So geht’s"),steps(row),el('div',{class:'task-actions'},workLink(row),piaLink(row))),el('p',{class:'eyebrow'},row.ref||'Kennung unbekannt'),el('dl',{},el('dt',{},'Plan Start'),el('dd',{},date(row.start,true)),el('dt',{},'Termin'),el('dd',{},date(row.due,true)),el('dt',{},'Status'),el('dd',{},row.status||'Unbekannt'),el('dt',{},'Zuständig'),el('dd',{},names[row.owner]||'Unbekannt'),el('dt',{},'Quelle'),el('dd',{},origin)),el('p',{class:'source'},'Planungsstand. Änderungen und Zuteilungen werden weiterhin im Projekt gepflegt.'));
 }
 function privacy() {
   modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Projektstände werden hier nur im Arbeitsspeicher gehalten. Der Server speichert Antworten höchstens 60 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
