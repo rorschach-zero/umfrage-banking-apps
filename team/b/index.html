@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
 <title>Servicebeobachtung</title><link rel="stylesheet" href="../team.css"><link rel="stylesheet" href="../design.css">
+<link rel="stylesheet" href="../view-as.css">
 </head>
 <body>
 <header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=b">← Meine Arbeit</a><div class="titel"><small>Praxisarbeit HFW · Methode B</small>Servicebeobachtung</div><div id="wer" class="pille">…</div></div></header>
@@ -8,6 +9,7 @@
 <section id="workspace-progress" class="workspace-progress" aria-live="polite"></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zwischen">Zwischenstand</button><button class="knopf" id="fertig">Abschliessen</button></div></div></div>
+<script src="../view-as.js"></script>
 <script src="../team.js"></script>
 <script src="../purpose.js"></script>
 <script src="../workspace.js"></script>
@@ -69,7 +71,7 @@ function openForm(r) {
   if (!Array.isArray(z.elemente)) z.elemente = z.elemente ? String(z.elemente).split("|") : [];
   ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].forEach(k => { if (z[k]) z[k] = String(z[k]).replace(" ", "T").slice(0, 16); });
   formular(); document.getElementById("fuss").hidden = false; scrollTo(0, 0);
-  ["zwischen", "fertig"].forEach(id => document.getElementById(id).disabled = gesperrt());
+  ["zwischen", "fertig"].forEach(id => document.getElementById(id).disabled = window.PA6View.active() || gesperrt());
 }
 function setze(k, v) { z[k] = v; lokal("b-" + aktiv.nr, z); formular(); }
 function vorschlaege() {
@@ -112,7 +114,7 @@ function formular() {
   const r = aktiv, s = SKRIPT[r.anliegen] || { frage: "", elemente: [] }, f = FRIST[r.kanal] || FRIST.chat, v = vorschlaege(), m = document.getElementById("main");
   const lauf = minuten(z.t_start, jetztLokal()), last = belastung[r.anbieter] || { nachrichten: 0, minuten: 0 };
   fuelle(m, 
-    el("button", { type: "button", class: "knopf hell", on: { click: liste } }, "‹ Einsatzplan"),
+    el("button", { type: "button", class: "knopf hell", "data-read-navigation": true, on: { click: liste } }, "‹ Einsatzplan"),
     el("div", { class: "kicker", style: "margin-top:16px" }, `Kontakt ${r.nr} · Wiederholung ${r.wiederholung}`),
     el("h1", {}, `${r.anbieter} · ${r.anliegen} · ${r.kanal}`),
     el("div", { class: "chips" }, el("span", { class: "pille" }, `Block ${r.block}`), el("span", { class: "pille" }, f.text), lauf !== null && !z.t_ende ? el("span", { class: "pille orange" }, `läuft seit ${lauf} min`) : null),
@@ -205,6 +207,7 @@ function fehlt() {
   return f;
 }
 async function speichern(stand) {
+  if(window.PA6View.active())return;
   const msg = document.getElementById("meldung"); msg.className = "meldung";
   if (stand === "abgeschlossen") { const f = fehlt(); if (f.length) { msg.className = "meldung fehler"; msg.textContent = "Fehlt noch: " + f.join(", "); return; } }
   if (stand === "laufend" && VERBOTEN.test([z.verlauf, z.bemerkung].join(" "))) { msg.className = "meldung fehler"; msg.textContent = "Notizen ohne Nummern, Mail- und Netzadressen"; return; }

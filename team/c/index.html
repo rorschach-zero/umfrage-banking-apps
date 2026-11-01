@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
 <title>Codierung Bewertungen</title><link rel="stylesheet" href="../team.css"><link rel="stylesheet" href="../design.css">
+<link rel="stylesheet" href="../view-as.css">
 </head>
 <body>
 <header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=c">← Meine Arbeit</a><div class="titel"><small>Praxisarbeit HFW · Methode C</small>Codierung öffentlicher Bewertungen</div><div class="zeile"><span id="fort" class="pille">…</span><span id="wer" class="pille">…</span></div></div></header>
@@ -8,6 +9,7 @@
 <section id="workspace-progress" class="workspace-progress" aria-live="polite"></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zurueck" title="Pfeil links">‹</button><button class="knopf" id="speichern" title="Enter">Speichern und weiter</button></div></div></div>
+<script src="../view-as.js"></script>
 <script src="../team.js"></script>
 <script src="../purpose.js"></script>
 <script src="../workspace.js"></script>
@@ -123,6 +125,7 @@ function pruefe() {
   return "";
 }
 async function speichern() {
+  if(window.PA6View.active())return;
   const msg = document.getElementById("meldung"), f = pruefe();
   if (f) { msg.className = "meldung fehler"; msg.textContent = f; return; }
   const x = q[i], z = { nr: x.nr, ausschluss: c.ausschluss, kundendienst_kontakt: c.ausschluss ? "" : c.kundendienst_kontakt, anker: c.anker.trim(), bemerkung: c.bemerkung.trim(), zak_bezug: c.zak_bezug, sprache: c.sprache };
@@ -141,6 +144,12 @@ async function speichern() {
 document.getElementById("speichern").addEventListener("click", speichern);
 document.getElementById("zurueck").addEventListener("click", () => { if (i > 0) { i--; zeige(); } });
 document.addEventListener("keydown", e => {
+  if(window.PA6View.active()) {
+    if(e.target.closest('input,textarea,select,button,summary,a'))return;
+    if(e.key==='ArrowLeft'&&i>0){i--;zeige();}
+    if(e.key==='ArrowRight'&&i<q.length-1){i++;zeige();}
+    return;
+  }
   if (!c || ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) { if (e.key === "Enter" && document.activeElement.tagName === "INPUT") speichern(); return; }
   if (/^[0-9]$/.test(e.key)) { kat(e.key === "0" ? 10 : Number(e.key)); e.preventDefault(); }
   else if (e.key === "j" || e.key === "J") { c.kundendienst_kontakt = "ja"; merke(); }
@@ -149,6 +158,10 @@ document.addEventListener("keydown", e => {
   else if (e.key === "Enter") { speichern(); e.preventDefault(); }
   else if (e.key === "ArrowLeft" && i > 0) { i--; zeige(); }
 });
+if(window.PA6View.active()) {
+  document.getElementById('speichern').disabled=true;
+  document.getElementById('speichern').after(el('button',{class:'knopf hell','data-read-navigation':true,on:{click:()=>{if(i<q.length-1){i++;zeige();}}}},'Nächste Bewertung'));
+}
 start();
 </script>
 </body></html>

@@ -1,6 +1,7 @@
 'use strict';
 (() => {
 const config = window.TEAM_CONFIG;
+const preview = window.PA6View;
 const names = {SA:'Salah',ES:'Ernes',MG:'Melisa',AM:'Arber',LB:'Leonie'};
 const labels = {sharing:'Umfrage teilen',today:'Heute',tasks:'Meine Arbeit',deadlines:'Fristen',pia:'Pia',documents:'Unterlagen',profile:'Profil'};
 const paths = {documents:'M4 3h11l5 5v13H4zM14 3v6h6M8 13h8M8 17h6',profile:'M20 21v-2a7 7 0 0 0-14 0v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',today:'M3 10 12 3l9 7M5 9v12h5v-7h4v7h5V9',tasks:'M9 6h12M9 12h12M9 18h12M3 6l1 1 2-3M3 12l1 1 2-3M3 18l1 1 2-3',deadlines:'M4 5h16v16H4zM4 10h16M8 3v4M16 3v4',pia:'M21 11a8 8 0 0 1-8 8H8l-5 3 1-6a8 8 0 1 1 17-5Z'};
@@ -53,7 +54,7 @@ function safeQuestion(value) {
   const privateText=/[\w.+-]+@[\w-]+\.[\w.-]+|https?:\/\/|www\.|(?:\+|00)?\d[\d\s/.-]{6,}\d|\b(?:Salah|Aouaj|Ernes|Softic|Melisa|Gjini|Arber|Maliqi|Leonie|Bytyqi)\b/i;
   return text && text!=='noch offen' && !privateText.test(text) ? text : 'Erklär mir Schritt für Schritt diesen Auftrag. Was ist zu tun und wann ist er fertig?';
 }
-function rememberPiaRole() {try {sessionStorage.setItem('pa6_pia_role',leadership?'leitung':'mitglied');} catch {}}
+function rememberPiaRole() {try {sessionStorage.setItem('pa6_pia_role',leadership||preview.active()?'leitung':'mitglied');} catch {}}
 function piaLink(row, label='Pia fragen') {
   const url=new URL(config.piaPath,location.origin);
   url.searchParams.set('q',safeQuestion(cardText(row,'Pia-Frage')));
@@ -112,14 +113,14 @@ function workLink(row) {
   const drive=url.protocol==='https:' && url.hostname==='drive.google.com';
   if(!internal&&!doc&&!drive)return null;
   const label=doc?'Kapitel-Doc öffnen':internal?(url.pathname.includes('/b')?'Maske B öffnen':'Maske C öffnen'):'Unterlagen öffnen';
-  return el('a',{class:'button work-link',href:internal?url.pathname:url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
+  return el('a',{class:'button work-link',href:internal?url.pathname:preview.active()&&doc?url.origin+url.pathname.replace(/(?:\/edit)?\/?$/, '/preview'):url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
 }
 function steps(row) {
   if(cardText(row,"So geht's")==='noch offen')return el('p',{class:'field-open'},'Die Schritte sind noch nicht hinterlegt. Pia hilft dir weiter.');
   const values=stepValues(row);
   return el('ul',{class:'step-list'},values.map(value=>{
     const storageKey=stepKey(row,value), checked=stepDone(row,value);
-    const input=el('input',{type:'checkbox','aria-label':value,onChange:()=>{try{localStorage.setItem(storageKey,input.checked?'1':'0');render();}catch{announce('Der Schritt kann in diesem Browser nicht gespeichert werden.');}}});input.checked=checked;
+    const input=el('input',{type:'checkbox','aria-label':value,disabled:preview.active(),onChange:()=>{if(preview.active())return;try{localStorage.setItem(storageKey,input.checked?'1':'0');render();}catch{announce('Der Schritt kann in diesem Browser nicht gespeichert werden.');}}});input.checked=checked;
     return el('li',{},el('label',{},input,el('span',{},value)));
   }));
 }
@@ -129,7 +130,7 @@ function relativeDue(row){
   const diff=Math.round((Date.parse(day(row.due)+'T12:00:00Z')-Date.parse(today()+'T12:00:00Z'))/86400000);
   return (diff<0?'Überfällig':diff===0?'Heute':diff===1?'Morgen':'in '+diff+' Tagen')+' · '+date(row.due);
 }
-function canReport(row){return state==='ready' && ['psp','assignments'].includes(row.source) && ['offen','läuft'].includes(row.status) && (row.owner===data.person||leadership);}
+function canReport(row){return !preview.active() && state==='ready' && ['psp','assignments'].includes(row.source) && ['offen','läuft'].includes(row.status) && (row.owner===data.person||leadership);}
 function taskRow(row){
   const waiting=pending?.id===row.id;
   const check=button(completed(row)?'✓':row.status==='in Prüfung'?'·':'',()=>report(row),'task-check'+(waiting?' is-pending':'')+(completed(row)?' is-done':''));
@@ -235,7 +236,7 @@ function documentRow(row,chapter=false){
   const url=chapter?row.doc:row.url;
   const valid=chapter?/^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+(?:\/edit)?$/.test(url||''):/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view$/.test(url||'');
   return el('li',{class:'document-row'},el('div',{class:'document-copy'},el('h3',{},row.title),el('p',{},chapter?((row.owner===data.person?'Als Pate':row.reader===data.person?'Als Zweitleser:in':'Leitungsübersicht')+' · '+(row.ref||'')):'Wozu: '+row.purpose)),
-    el('div',{class:'document-actions'},valid?el('a',{class:'button secondary document-open',href:url,target:'_blank',rel:'noopener noreferrer'},'Öffnen'):el('button',{class:'button secondary',disabled:true,title:'Datei oder Leselink noch nicht verfügbar'},'Öffnen'),piaLink({...row,'Pia-Frage':'Erklär mir das Wichtigste aus '+row.title+'.'})),
+    el('div',{class:'document-actions'},valid?el('a',{class:'button secondary document-open',href:preview.active()&&chapter?url.replace(/(?:\/edit)?$/, '/preview'):url,target:'_blank',rel:'noopener noreferrer'},'Öffnen'):el('button',{class:'button secondary',disabled:true,title:'Datei oder Leselink noch nicht verfügbar'},'Öffnen'),piaLink({...row,'Pia-Frage':'Erklär mir das Wichtigste aus '+row.title+'.'})),
     valid?null:el('p',{class:'quiet-note'},'Datei oder Leselink noch nicht verfügbar.'));
 }
 function showDocuments(){
@@ -282,11 +283,11 @@ function modal(title,...content) {$('detail-body').replaceChildren(el('h2',{id:'
 function details(row,origin='Projektplanung',takeover=false){
   $('detail').dataset.owner=row.owner||data.person;
   const notion=leadership&&/^[a-f0-9-]{32,36}$/i.test(row.id||'')?el('a',{class:'source notion-link',href:'https://www.notion.so/'+row.id.replace(/-/g,''),rel:'noopener noreferrer'},'In Notion öffnen'):null;
-  modal(shortTitle(row),el('p',{class:'detail-what'},cardText(row,'Was')==='noch offen'?shortTitle(row):row.Was),
+  modal(shortTitle(row),preview.active()?el('p',{class:'read-only-note'},'Ansicht von '+names[data.person]+' · nur lesen'):null,el('p',{class:'detail-what'},cardText(row,'Was')==='noch offen'?shortTitle(row):row.Was),
     el('p',{class:'detail-due'+(overdue(row)?' overdue':'')},relativeDue(row),' · ',row.status||'Status unbekannt'),
     row.waitingOn?el('p',{class:'quiet-note dependency-wait'},'Startet nach: '+row.waitingOn):null,
     el('p',{class:'acceptance'},el('strong',{},'Fertig, wenn … '),cardText(row,'Fertig wenn')),
-    el('h3',{},'So geht’s'),steps(row),el('p',{class:'local-note'},'Deine Schritte bleiben auf diesem Gerät gespeichert.'),
+    el('h3',{},'So geht’s'),steps(row),el('p',{class:'local-note'},preview.active()?'Lokale Schritte der Person werden in dieser Ansicht nicht verändert.':'Deine Schritte bleiben auf diesem Gerät gespeichert.'),
     el('div',{class:'task-actions'},workLink(row),piaLink(row)),
     !workLink(row)?el('p',{class:'quiet-note'},'Das Werkzeug ist noch nicht verknüpft. Pia hilft dir beim Einstieg.'):null,
     !takeover&&canReport(row)&&row.status==='offen'?button('Bearbeitung starten',()=>report(row,'läuft'),'text-button start-detail'):null,
@@ -297,6 +298,7 @@ function details(row,origin='Projektplanung',takeover=false){
 }
 function toast(text,action){$('toast').replaceChildren(el('span',{},text),action||[]);$('toast').hidden=false;}
 async function postStatus(row,from,to,access,lead){
+  if(preview.active())throw Error('Diese Personenansicht ist nur zum Lesen.');
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),20000);
   try{
     const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'status',k:access,leitung:lead,id:row.id,from,to}),signal:controller.signal,referrerPolicy:'no-referrer'});
@@ -305,7 +307,7 @@ async function postStatus(row,from,to,access,lead){
   }finally{clearTimeout(timer);}
 }
 function report(row,target='in Prüfung'){
-  if(pending||state!=='ready'||(!canReport(row)&&!(leadership&&row.status==='in Prüfung'&&target==='fertig')))return;
+  if(preview.active()||pending||state!=='ready'||(!canReport(row)&&!(leadership&&row.status==='in Prüfung'&&target==='fertig')))return;
   if(config.demo){toast('In der Vorschau wird kein Status gespeichert.');return;}
   const access=key,lead=leadership,identity=data.person;
   pending={id:row.id,timer:null};
@@ -331,11 +333,12 @@ function showSharing(){
     const call='Wir sind Studierende der Klasse 601/H25-B an der KV Business School Zürich. Für unsere Praxisarbeit untersuchen wir Erfahrungen mit Banking-Apps. Mach bei unserer anonymen Umfrage mit und teile deine Sicht. Vielen Dank!';
     const link=el('p',{class:'share-url'}),qr=el('img',{class:'share-qr',width:164,height:164,alt:'QR-Code für '+title}),feedback=el('p',{role:'status','aria-live':'polite'});
     const copy=button('Link kopieren',async()=>{try{await navigator.clipboard.writeText(url());feedback.textContent='Link kopiert.';}catch{feedback.textContent='Kopieren nicht möglich. Markiere den angezeigten Link.';}},'button secondary');
-    const share=button('Teilen',async()=>{try{if(navigator.share){await navigator.share({title:'Umfrage zu Banking-Apps',text:call,url:url()});feedback.textContent='Teilen geöffnet. Bestätige den verwendeten Kanal unten selbst.';}else{await navigator.clipboard.writeText(call+' '+url());feedback.textContent='Aufruf und Link kopiert. Füge sie in deinem Kanal ein.';}}catch(error){feedback.textContent=error.name==='AbortError'?'Teilen abgebrochen.':'Teilen nicht verfügbar. Kopiere Aufruf und Link.';}},'button');
-    function update(){const valid=!institution||!!choices.value;copy.disabled=!valid;share.disabled=!valid;link.textContent=valid?url():'Wähle die vorhandene Institutionskennung.';qr.hidden=!valid;if(valid){const code=qrcode(0,'M');code.addData(url());code.make();qr.src=code.createDataURL(4,16);}}
+    const share=button('Teilen',async()=>{if(preview.active())return;try{if(navigator.share){await navigator.share({title:'Umfrage zu Banking-Apps',text:call,url:url()});feedback.textContent='Teilen geöffnet. Bestätige den verwendeten Kanal unten selbst.';}else{await navigator.clipboard.writeText(call+' '+url());feedback.textContent='Aufruf und Link kopiert. Füge sie in deinem Kanal ein.';}}catch(error){feedback.textContent=error.name==='AbortError'?'Teilen abgebrochen.':'Teilen nicht verfügbar. Kopiere Aufruf und Link.';}},'button');
+    function update(){const valid=!institution||!!choices.value;copy.disabled=!valid;share.disabled=preview.active()||!valid;link.textContent=valid?url():'Wähle die vorhandene Institutionskennung.';qr.hidden=!valid;if(valid){const code=qrcode(0,'M');code.addData(url());code.make();qr.src=code.createDataURL(4,16);}}
     if(choices)choices.addEventListener('change',update);update();
     const dateInput=el('input',{type:'date',value:today(),min:'2026-10-29',max:today(),'aria-label':'Datum '+title}),reach=el('input',{type:'number',min:0,max:9999999,step:1,placeholder:'optional','aria-label':'Gruppengrösse '+title}),check=el('input',{type:'checkbox','aria-label':'Ich habe geteilt in '+title});
     const save=button('Teilen bestätigen',async()=>{
+      if(preview.active())return;
       if(!check.checked){feedback.textContent='Bestätige zuerst, dass du hier geteilt hast.';return;}
       if(institution&&!choices.value){feedback.textContent='Wähle die verwendete Institution.';return;}
       if(!dateInput.checkValidity()||!reach.checkValidity()){feedback.textContent='Prüfe Datum und geschätzte Gruppengrösse.';return;}
@@ -350,7 +353,7 @@ function showSharing(){
     return el('section',{class:'share-channel','data-channel':channel},el('h2',{},title),institution?el('p',{class:'quiet-note'},'Bestehenden Versandentscheid beachten. Die Institutionskennung ist keine Personenkennung.'):null,
       channel==='t'?el('p',{class:'quiet-note'},'Nur für technische Tests. Zählt nicht zum Ziel von zwei Kanälen.'):null,
       choices,el('p',{class:'share-call'},call),link,el('div',{class:'share-actions'},copy,share),el('details',{class:'share-code'},el('summary',{},'QR-Code anzeigen'),qr),
-      el('fieldset',{},el('legend',{},'Deine Verteilung festhalten'),el('label',{class:'share-check'},check,'Ich habe geteilt in '+title),el('label',{},'Datum',dateInput),el('label',{},'Geschätzte Gruppengrösse',reach),save),
+      el('fieldset',{disabled:preview.active()},el('legend',{},'Deine Verteilung festhalten'),el('label',{class:'share-check'},check,'Ich habe geteilt in '+title),el('label',{},'Datum',dateInput),el('label',{},'Geschätzte Gruppengrösse',reach),save),
       sent.length?el('small',{},'Bereits erfasst am '+sent.map(r=>r.datum).join(', ')):null,feedback);
   });
   return [heading('Umfrage teilen','Teile in mindestens zwei passenden Kanälen. Der Link enthält keinen Namen.'),window.createPurposeCard('a',rememberPiaRole),el('p',{id:'sharing-count',class:'sharing-count'},(data.sharing?.done??'–')+' von 2 Kanälen'),el('p',{class:'quiet-note'},'Gruppengrössen sind freiwillige Schätzungen. Überschneidungen sind möglich. Antworten werden nur je Kanal gezählt und keiner verteilenden Person zugeordnet.'),el('div',{class:'share-grid'},cards)];
@@ -359,13 +362,25 @@ function showSharing(){
 function privacy() {
   modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Projektstände werden hier nur im Arbeitsspeicher gehalten. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden an Notion gesendet und protokolliert. Der Server speichert Antworten höchstens 60 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Beim Teilen speichert das Verteilungsprotokoll deine Person, den Kanal, das Datum und eine freiwillige Reichweitenschätzung. Es verknüpft keine Umfrageantwort mit dir. QR-Codes werden auf deinem Gerät erzeugt.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
 }
-function logout() {try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
+function logout() {preview.clear();try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
+function renderViewSelector() {
+  let slot = $('view-as-selector');
+  if (!slot) { slot = el('div',{id:'view-as-selector',class:'view-as-selector'});document.querySelector('.topbar').after(slot); }
+  const allowed = data && (data.person==='SA' && leadership || data.viewer==='SA' && data.readOnly===true);
+  slot.hidden = !allowed;
+  if (!allowed) return;
+  const select=el('select',{id:'view-as-person','aria-label':'Ansicht von',disabled:!!pending,onChange:event=>preview.select(event.target.value)},
+    el('option',{value:'',disabled:true},'Person wählen'),Object.entries(names).map(([id,name])=>el('option',{value:id},name)));
+  select.value=preview.target();
+  slot.replaceChildren(el('label',{for:'view-as-person'},'Ansicht von:'),select);
+}
 function render() {
   $('breadcrumb').textContent=labels[view]; document.title=labels[view]+' · Unser Projekt';
   $('nav').replaceChildren(...['today','tasks','documents','deadlines','pia','profile'].map(name=>el('a',{href:'?view='+name,class:'nav-link','aria-current':(view===name)?'page':null,onClick:event=>{event.preventDefault();navigate(name);}},icon(name),el('span',{},labels[name]))));
   document.body.dataset.person=data?.person||'';
   $('person').textContent=data?names[data.person]:'Dein Zugang';$('person').setAttribute('aria-label','Profil öffnen');
-  $('role').hidden=!(data?.person==='SA'); $('role').textContent=leadership?'Leitung an':'Leitung aus'; $('role').setAttribute('aria-pressed',String(leadership));
+  renderViewSelector();
+  $('role').hidden=preview.active()||!(data?.person==='SA'); $('role').textContent=leadership?'Leitung an':'Leitung aus'; $('role').setAttribute('aria-pressed',String(leadership));
   $('refresh').disabled=state==='loading';
   $('source-note').textContent=config.demo?'Nachbau · Planungsstand 01.11.2026':data?'Zuletzt geladen '+date(data.fetchedAt,true)+(data.cached?' · Zwischenspeicher':''):'Planungsstand unbekannt';
   const content=$('content'); content.setAttribute('aria-busy',String(state==='loading'));
@@ -384,7 +399,7 @@ function readKey() {
   const fragment=new URLSearchParams(location.hash.slice(1)), incoming=fragment.get('k');
   if(location.hash){const url=new URL(location.href);url.hash='';history.replaceState({},'',url);}
   if(config.demo)return '';
-  if(incoming){try{localStorage.setItem('pa6k',incoming);}catch{}return incoming;}
+  if(incoming){preview.clear();try{localStorage.setItem('pa6k',incoming);}catch{}return incoming;}
   try{return localStorage.getItem('pa6k')||key||'';}catch{return key||'';}
 }
 function validResponse(result) {
@@ -424,6 +439,7 @@ function validResponse(result) {
 async function load(reset=false) {
   const ticket=++generation, nextKey=readKey();
   if(reset||nextKey!==key){data=null;leadership=reset?leadership:false;} key=nextKey;
+  if(preview.returning() && !preview.active() && !data)leadership=true;
   const previous=data;
   state='loading';render();
   if(config.demo){
@@ -440,10 +456,11 @@ async function load(reset=false) {
   const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),20000);
   try{
     if(!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(config.endpoint))throw Error('Der Projektzugang ist noch nicht verbunden.');
-    const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'team',k:key,leitung:leadership}),signal:controller.signal,referrerPolicy:'no-referrer',cache:'no-store'});
+    const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(preview.request({typ:'team',k:key,leitung:leadership})),signal:controller.signal,referrerPolicy:'no-referrer',cache:'no-store'});
     if(!response.ok)throw Error('Der Projektstand ist vorübergehend nicht erreichbar.');
     const result=await response.json(); if(ticket!==generation)return;
     if(result?.code==='unauthorized'){data=null;state='unauthorized';leadership=false;render();return;}
+    if(preview.active() && (result.readOnly!==true || result.viewer!=='SA' || result.person!==preview.target() || result.role!=='mitglied'))throw Error(result.fehler||'Personenansicht nicht freigegeben.');
     if(!validResponse(result))throw Error('Die Antwort ist unvollständig. Der aktuelle Stand bleibt unbekannt.');
     data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();
   }catch(error){if(ticket!==generation)return;data=previous;state=previous?'stale':'error';errorMessage=error.name==='AbortError'?'Die Verbindung dauert zu lange. Bitte versuche es erneut.':error.message;}

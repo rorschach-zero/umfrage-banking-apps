@@ -190,7 +190,7 @@ input.addEventListener('keydown', event => {
 });
 input.addEventListener('input', updateInput);
 $('leitung').addEventListener('click', () => {
-  if (person !== 'SA' || isBusy) return;
+  if (person !== 'SA' || isBusy || window.PA6View.active()) return;
   isLead = !isLead;
   $('leitung').setAttribute('aria-pressed', String(isLead));
   $('leitung').textContent = isLead ? 'Leitung an' : 'Leitung aus';
@@ -218,10 +218,10 @@ async function initialize() {
     const reply = await sende({k:accessKey, typ:'lesen', a:'info'});
     if (!TEAM[reply.person]) throw new Error('Kein Zugriff. Öffne Pia über deinen persönlichen Link.');
     person = reply.person; isReady = true;
-    isLead = person === 'SA' && entryRole === 'leitung';
+    isLead = person === 'SA' && (entryRole === 'leitung' || window.PA6View.active());
     $('leitung').setAttribute('aria-pressed',String(isLead));
     $('leitung').textContent = isLead ? 'Leitung an' : 'Leitung aus';
-    $('wer').textContent = TEAM[person]; $('leitung').hidden = person !== 'SA';
+    $('wer').textContent = TEAM[person]; $('leitung').hidden = person !== 'SA'; $('leitung').disabled = window.PA6View.active();
     messages = readHistory(); input.disabled = false;
     renderPrompts(); renderHistory(); updateInput();
     if (entryQuestion && !entryConsumed) {entryConsumed = true; messages = []; renderHistory(); await ask(entryQuestion);}

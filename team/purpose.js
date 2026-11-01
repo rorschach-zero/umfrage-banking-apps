@@ -39,7 +39,7 @@
     try {
       const storageKey = 'pa6-purpose-seen:' + area;
       card.open = localStorage.getItem(storageKey) !== '1';
-      localStorage.setItem(storageKey, '1');
+      if (!window.PA6View?.active()) localStorage.setItem(storageKey, '1');
     } catch {}
     const summary = document.createElement('summary');
     summary.textContent = 'Warum wir das machen';
@@ -64,7 +64,7 @@
     link.referrerPolicy = 'no-referrer';
     link.textContent = 'Mehr bei Pia';
     link.addEventListener('click', onPia || (() => {
-      try { sessionStorage.setItem('pa6_pia_role', 'mitglied'); } catch {}
+      try { sessionStorage.setItem('pa6_pia_role', window.PA6View?.active() ? 'leitung' : 'mitglied'); } catch {}
     }));
     body.append(connection, link);
     card.append(summary, body);

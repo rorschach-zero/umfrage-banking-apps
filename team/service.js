@@ -15,7 +15,7 @@ function renderBSetup(main) {
   fuelle(section,el('h2',{},'Dein Start in die Servicebeobachtung'),el('p',{class:'service-status'},(state.probeDone?'Probe erledigt':'Probe noch offen')+' · '+state.done+' von '+config.target+' Kontakten erledigt · '+state.assigned+' zugeteilt'),
     el('p',{},heute()<config.start?'Probe jetzt möglich, echte Kontakte ab '+formatServiceDate(config.start):'Probe jetzt möglich. Echte Kontakte nach deiner Probe an Werktagen in Block A/B.'),
     el('p',{class:'leise'},'Offizieller Feldbeginn '+formatServiceDate(config.official)+'. Frühere Kontakte werden als vorgezogen markiert und zählen normal.'),
-    el('button',{class:'knopf',type:'button',on:{click:()=>oeffne(state.probe)}},state.probeDone?'Probe ansehen':'Probe starten'),
+    el('button',{class:'knopf',type:'button','data-read-navigation':true,on:{click:()=>oeffne(state.probe)}},state.probeDone?'Probe ansehen':'Probe starten'),
     choices,el('p',{class:'leise'},'Wähle mindestens zwei verschiedene Banken. Nur Banken, bei denen du ein aktives Konto hast. Alle vier stehen zur Auswahl.'),
     el('label',{for:'service-day'},'Einsätze frühestens ab'),date,el('p',{class:'leise'},'Wiederholung 1 in Block A von 09–12 Uhr, Wiederholung 2 an einem anderen Tag in Block B von 13–17 Uhr. Höchstens zwei Kontakte je Block.'),
     el('button',{class:'knopf',type:'button',on:{click:()=>serviceAction({typ:'b_assign',providers:[...selected],day:date.value})}},state.assigned?'Auswahl speichern und freie Zellen ergänzen':'Kontakte zuteilen'),
