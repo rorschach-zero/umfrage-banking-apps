@@ -6,6 +6,7 @@ header { position:sticky; top:0; z-index:5; background:rgba(255,255,255,.94); ba
 header .innen { max-width:880px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:12px; justify-content:space-between; }
 header .titel { font-weight:800; letter-spacing:-.01em; }
 header .titel small { display:block; font-weight:600; color:var(--grey); font-size:12px; letter-spacing:.1em; text-transform:uppercase; }
+[hidden] { display:none !important; }   /* hidden gilt auch fuer Elemente mit eigener display-Regel (z. B. .pille) */
 .pille { display:inline-flex; align-items:center; gap:6px; border:1.5px solid var(--line); border-radius:var(--pill); padding:4px 12px; font-size:13px; font-weight:700; color:var(--ink); background:var(--white); }
 .pille.gruen { border-color:var(--green); color:var(--green-dark); } .pille.rot { border-color:var(--red); color:var(--red); } .pille.orange { border-color:var(--orange); color:var(--orange); }
 main { max-width:880px; margin:0 auto; padding:20px 20px 120px; }
