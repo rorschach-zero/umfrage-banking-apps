@@ -21,7 +21,7 @@
 .b-step-body .bank-options legend{font-weight:800;margin-bottom:8px;padding:0}
 .b-step-body .bank-options label{display:flex;align-items:center;gap:10px;border:1.5px solid var(--soft);border-radius:12px;padding:11px 12px;font-weight:700;cursor:pointer}
 .b-step-body .bank-options label:has(input:checked){border-color:var(--area-b);background:var(--area-b-wash)}
-.b-step-body input[type=date],.b-step-body select,.b-step-body input[type=url]{font:inherit;padding:10px 12px;border:1.5px solid var(--soft);border-radius:10px;background:#fff;max-width:320px}
+.b-step-body input[type=date],.b-step-body select,.b-step-body input[type=url]{font:inherit;padding:10px 12px;border:1.5px solid var(--soft);border-radius:10px;background:#fff;max-width:min(100%,320px);min-width:0;box-sizing:border-box}
 .b-step-body .channel-setup{display:grid;gap:8px}
 .b-missing{font-weight:800;color:var(--late)}
 .b-next{font-size:19px;font-weight:850;margin:4px 0 2px!important}
@@ -79,3 +79,6 @@
 .c-ready{margin:14px 0 4px;font-weight:800;color:var(--late)}.c-ready.ok{color:var(--area-b)}
 .c-rules{margin-bottom:110px}
 @media(max-width:620px){.c-q-body{padding-left:0}.c-themes{grid-template-columns:1fr 1fr}}
+
+.b-stepper-item:focus-visible,.c-theme:focus-visible{outline:3px solid #8a63b5;outline-offset:2px}
+.b-step-title,.b-step-body,.c-q-body{min-width:0;overflow-wrap:anywhere}

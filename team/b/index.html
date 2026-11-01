@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<title>Servicebeobachtung</title><link rel="stylesheet" href="../team.css"><link rel="stylesheet" href="../design.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-yNU/CDIZM2vr8waa6DJoE20qhgHRKUQvKLQdmRCfC4k='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>B Servicetest</title><link rel="stylesheet" href="../team.css"><link rel="stylesheet" href="../design.css">
 <link rel="stylesheet" href="../view-as.css"><link rel="stylesheet" href="../flow.css">
 </head>
 <body>
@@ -43,6 +44,7 @@ async function start() {
 }
 function statusVon(r) { const e = r.erfasst; return !e ? "offen" : e.stand === "abgeschlossen" ? "abgeschlossen" : "laufend"; }
 function liste() {
+  if (aktiv?.erfasst?.stand === "abgeschlossen") bOffen = null;
   aktiv = null; document.getElementById("fuss").hidden = true;
   const m = document.getElementById("main"); fuelle(m, );
   const p = (daten.plan || []).slice().sort((a, b) => (a.tag + a.block).localeCompare(b.tag + b.block));
@@ -70,7 +72,8 @@ function openForm(r) {
   if (!Array.isArray(z.elemente)) z.elemente = z.elemente ? String(z.elemente).split("|") : [];
   ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].forEach(k => { if (z[k]) z[k] = String(z[k]).replace(" ", "T").slice(0, 16); });
   bBesucht = new Set(); bStep = 0; for (let i = 0; i < B_SCHRITTE.length; i++) { if (bFehltIn(i).length) { bStep = i; break; } }
-  formular(); document.getElementById("fuss").hidden = false; scrollTo(0, 0);
+  if (!z.t_start && r.status !== "nicht angeboten") bStep = 0;
+  formular(); document.getElementById("fuss").hidden = false; document.getElementById("meldung").textContent = ""; focusStep();
   ["zwischen", "fertig"].forEach(id => document.getElementById(id).disabled = window.PA6View.active() || gesperrt());
 }
 function setze(k, v) { z[k] = v; lokal("b-" + aktiv.nr, z); formular(); }
@@ -110,17 +113,23 @@ function text(k, titel, hilfe, mehr) {
   const a = { class: "t", value: z[k] || "", on: { input: e => { z[k] = e.target.value; lokal("b-" + aktiv.nr, z); } } };
   return el("div", {}, el("label", { class: "f" }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")), mehr ? el("textarea", a, z[k] || "") : el("input", a));
 }
-// Geführter Ablauf (Claudette 01.11.2026): dieselben Felder und Regeln, nur in fünf Schritten statt einer langen Seite.
+// Keep the existing fields and validation in five presentation steps.
 const B_SCHRITTE = ["Frage stellen", "Zeitstempel", "Mensch oder Automat", "Antwort beurteilen", "Ergebnis"];
 const B_FELDER = [["Bestätigung der internen Simulation", "Kanal erreichbar"], ["Start", "Ende", "Ende liegt vor dem Start", "Zeitfolge", "Mindestantwort vor der ersten menschlichen Antwort"], ["Mensch oder Automat"],
   ["Vollständigkeit", "erster Kontakt", "Richtigkeit", "wie geht es weiter", "Höflichkeit", "Rückfragen", "Deutsch beibehalten", "Standort", "Quelle (https) und Abrufdatum zur Richtigkeit"],
   ["Code", "Grund", "Gesprächsminuten", "Nachrichten des Anbieters", "Belastung als ganze Zahl von 0 bis 500", "Notizen ohne Nummern, Mail- und Netzadressen"]];
 let bStep = 0, bBesucht = new Set();
 function bFehltIn(i) { return fehlt().filter(x => B_FELDER[i].some(k => x === k || x.startsWith(k + " "))); }
+function focusStep() {
+  document.querySelector(".b-form-title").focus({preventScroll:true});
+  const top = document.querySelector(".b-stepper").getBoundingClientRect().top + scrollY;
+  scrollTo(0, Math.max(0, top - document.querySelector("header").getBoundingClientRect().bottom - 12));
+}
+function showStep(index) { bStep = index; formular(); focusStep(); }
 function bStepper() {
   return el("nav", { class: "b-stepper", "aria-label": "Schritte" }, B_SCHRITTE.map((name, i) => {
     const ok = !bFehltIn(i).length && (i < bStep || bBesucht.has(i));
-    return el("button", { type: "button", class: "b-stepper-item" + (i === bStep ? " is-now" : "") + (ok ? " is-ok" : ""), "aria-current": i === bStep ? "step" : null, "data-read-navigation": true, on: { click: () => { bStep = i; formular(); scrollTo(0, 0); } } },
+    return el("button", { type: "button", class: "b-stepper-item" + (i === bStep ? " is-now" : "") + (ok ? " is-ok" : ""), "aria-label": (i + 1) + " · " + name, "aria-current": i === bStep ? "step" : null, "data-read-navigation": true, on: { click: () => { showStep(i); } } },
       el("span", { class: "b-stepper-num" }, ok && i !== bStep ? "✓" : String(i + 1)), el("span", { class: "b-stepper-name" }, name));
   }));
 }
@@ -129,8 +138,8 @@ function bStepNav() {
   return el("div", { class: "b-stepnav" },
     offen.length ? el("p", { class: "b-stepnav-missing" }, "In diesem Schritt fehlt noch: " + offen.join(", ")) : el("p", { class: "b-stepnav-ok" }, letzter ? (alle.length ? "Fehlt noch in anderen Schritten: " + alle.join(", ") : "Alles ausgefüllt. Unten auf «Abschliessen» tippen.") : "Dieser Schritt ist vollständig."),
     el("div", { class: "zeile" },
-      bStep > 0 ? el("button", { type: "button", class: "knopf hell", "data-read-navigation": true, on: { click: () => { bStep--; formular(); scrollTo(0, 0); } } }, "‹ Zurück") : null,
-      !letzter ? el("button", { type: "button", class: "knopf", "data-read-navigation": true, on: { click: () => { bStep++; formular(); scrollTo(0, 0); } } }, "Weiter ›") : null));
+      bStep > 0 ? el("button", { type: "button", class: "knopf hell", "data-read-navigation": true, on: { click: () => { showStep(bStep - 1); } } }, "‹ Zurück") : null,
+      !letzter ? el("button", { type: "button", class: "knopf", "data-read-navigation": true, on: { click: () => { showStep(bStep + 1); } } }, "Weiter ›") : null));
 }
 function formular() {
   const r = aktiv, s = SKRIPT[r.anliegen] || { frage: "", elemente: [] }, f = FRIST[r.kanal] || FRIST.chat, v = vorschlaege(), m = document.getElementById("main");
@@ -193,7 +202,7 @@ function formular() {
     text("bemerkung", "Bemerkung", "ein Satz")
   ]];
   bBesucht.add(bStep);
-  fuelle(m, kopf, bStepper(), el("h2", { class: "b-form-title" }, (bStep + 1) + " · " + B_SCHRITTE[bStep]), teile[bStep], bStepNav());
+  fuelle(m, kopf, bStepper(), el("h2", { class: "b-form-title", tabindex: "-1" }, (bStep + 1) + " · " + B_SCHRITTE[bStep]), teile[bStep], bStepNav());
 }
 function zeile(stand) {
   const o = Object.assign({}, z, { stand });
@@ -247,7 +256,11 @@ async function speichern(stand) {
   } catch (e) { msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
 }
 document.getElementById("zwischen").addEventListener("click", () => speichern("laufend"));
-document.getElementById("fertig").addEventListener("click", () => speichern("abgeschlossen"));
+document.getElementById("fertig").addEventListener("click", () => {
+  const first = B_SCHRITTE.findIndex((_, index) => bFehltIn(index).length);
+  if (first >= 0) showStep(first);
+  speichern("abgeschlossen");
+});
 start();
 </script>
 </body></html>
