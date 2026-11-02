@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-yNU/CDIZM2vr8waa6DJoE20qhgHRKUQvKLQdmRCfC4k='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-I49K52uOxuFEPEIlug19hJgkGwtydgfyau4IOqD6Vxw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css"><link rel="stylesheet" href="../design.css">
 <link rel="stylesheet" href="../view-as.css"><link rel="stylesheet" href="../flow.css">
 </head>
@@ -154,6 +154,7 @@ function formular() {
 ];
   const teile = [[
     r.nr.startsWith('PROBE-B-') ? simulationNotice() : !r.erfasst?.t_start && r.status!=='nicht angeboten' ? startNotice(r) : null,
+    !r.nr.startsWith('PROBE-B-') && kanalInfo(r.anbieter, r.kanal) ? el("div", { class: "kanal-hinweis" }, el("b", {}, "So erreichst du " + r.anbieter + ": "), kanalInfo(r.anbieter, r.kanal).text, " ", el("a", { href: kanalInfo(r.anbieter, r.kanal).quelle, target: "_blank", rel: "noopener", "data-read-navigation": true }, "Quelle ↗")) : null,
     el("div", { class: "karte akzent" }, el("div", { class: "kicker" }, "Fragekern, so wörtlich wie möglich"), el("p", { style: "font-size:19px;font-weight:700;margin:6px 0 10px" }, "«" + s.frage + "»"),
       el("button", { type: "button", class: "chip", on: { click: async e => { try { await navigator.clipboard.writeText(s.frage); e.target.textContent = "Kopiert"; } catch (x) {} } } }, "Frage kopieren")),
     el("p", { class: "leise" }, "Nur diese Frage. Auf Rückfragen wahrheitsgemäss antworten, bedanken, beenden, sobald die Mindestantwort da ist. Auf «Ist das ein Test?» ehrlich antworten. Nie sperren, nachforschen oder etwas ändern lassen."),

@@ -56,14 +56,36 @@ function renderBSetup(main) {
 }
 function formatServiceDate(day){return day.split('-').reverse().join('.');}
 function nextServiceDay(start){let day=[start,heute()].sort().pop();while([0,6].includes(new Date(day+'T12:00:00').getDay())){const d=new Date(day+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+1);day=d.toISOString().slice(0,10);}return day;}
+// Belegte Kanäle (Recherche 01.11.2026, jede Angabe auf der Anbieterseite geprüft; 10_pa6a/beobachtung/Kanaele_belegt.md).
+// Nur Vorschläge: die Person öffnet die Quelle, prüft selbst und speichert. Offene Zuordnungen zeigen beide Möglichkeiten.
+const KANAELE_BELEGT={
+  Yuh:{schriftlich:[{kanal:'chat',text:'Chat in der App («Support via Chat», kostenlos)',quelle:'https://www.yuh.com/de/pricing/'}],
+       telefon:[{kanal:'telefon',text:'+41 44 825 87 89 · Mo–Fr 08–19 Uhr',quelle:'https://www.yuh.com/de/contact/'}]},
+  Neon:{schriftlich:[{kanal:'chat',text:'In-App-Hilfe, laut Neon KI-gestützt',quelle:'https://www.neon-free.ch/blog/der-neon-kundenservice-ganz-ohne-filiale'},{kanal:'mail',text:'service@neon-free.ch · Antwort innert zwei Arbeitstagen',quelle:'https://www.neon-free.ch/kontakt'}],
+        telefon:[{kanal:'telefon',text:'+41 43 508 03 19 · Mo–Fr 08–17 Uhr · nur Plan plus, global oder metal',quelle:'https://www.neon-free.ch/faq/wie-erreiche-ich-euch-am-besten'},{kanal:'keiner',text:'Gratis-Plan: kein Telefonservice laut Neon',quelle:'https://www.neon-free.ch/faq/wie-erreiche-ich-euch-am-besten'}]},
+  Zak:{schriftlich:[{kanal:'chat',text:'Nachricht in der App («Nachricht im DigitalBanking»)',quelle:'https://www.cler.ch/de/services/hilfe-und-kontakt/hilfethemen/zak'},{kanal:'formular',text:'Zak-Kontaktformular · nur Domizil Schweiz',quelle:'https://www.cler.ch/de/services/kontakt/kontaktformular-zak'}],
+       telefon:[{kanal:'telefon',text:'0848 845 245 · Mo–Fr 8–18 Uhr',quelle:'https://www.cler.ch/de/services/hilfe-und-kontakt/hilfethemen/zak'}]},
+  Revolut:{schriftlich:[{kanal:'chat',text:'Chat in der App · Profil > Chats > Support · rund um die Uhr',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'}],
+           telefon:[{kanal:'keiner',text:'Keine Nummer · Anruf nur mit Ultra-Abo und nur Englisch',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'},{kanal:'telefon',text:'Anruf in der App mit Ultra-Abo, nur Englisch',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'}]}
+};
+function kanalInfo(anbieter,kanal){const art=kanal==='telefon'?'telefon':'schriftlich';return ((KANAELE_BELEGT[anbieter]||{})[art]||[]).find(v=>v.kanal===kanal)||null;}
 function channelSetup(state){
   const provider=el('select',{id:'channel-provider'},state.selected.map(a=>el('option',{value:a},a))),kind=el('select',{id:'channel-kind'},el('option',{value:'schriftlich'},'Schriftlich'),el('option',{value:'telefon'},'Telefon')),
     channel=el('select',{id:'channel-value'},['chat','mail','formular','telefon','keiner'].map(a=>el('option',{value:a},a==='keiner'?'Nicht angeboten':a))),source=el('input',{id:'channel-source',type:'url',placeholder:'https://…'}),date=el('input',{id:'channel-date',type:'date',max:heute(),value:heute()}),checked=el('input',{type:'checkbox',id:'channel-checked'});
-  return el('div',{class:'channel-setup'},el('p',{class:'leise'},'Schriftlich heisst Chat in der App, falls angeboten, sonst Formular oder E-Mail.'),
-    el('ul',{},state.channels.map(r=>el('li',{},r.anbieter+' · '+r.art+' · '+r.kanal+' · '+r.abruf))),
+  const belegt=new Set((state.channels||[]).map(r=>r.anbieter+'|'+r.art));
+  const vorschlaege=state.selected.flatMap(a=>['schriftlich','telefon'].filter(art=>!belegt.has(a+'|'+art)).map(art=>({a,art,optionen:(KANAELE_BELEGT[a]||{})[art]||[]}))).filter(v=>v.optionen.length);
+  const uebernehmen=(a,art,o)=>{provider.value=a;kind.value=art;channel.value=o.kanal;source.value=o.quelle;date.value=heute();checked.checked=false;serviceMessage('Übernommen. Öffne die Quelle, prüfe sie und setze dann das Häkchen.');provider.scrollIntoView({behavior:'smooth',block:'center'});};
+  return el('div',{class:'channel-setup'},
+    vorschlaege.length?el('div',{class:'kanal-vorschlaege'},el('p',{class:'kanal-titel'},'Schon recherchiert, du musst nur noch prüfen'),
+      vorschlaege.map(v=>el('div',{class:'kanal-karte'},el('b',{},v.a+' · '+(v.art==='telefon'?'Telefon':'schriftlich')),
+        v.optionen.length>1?el('p',{class:'leise'},'Zwei Möglichkeiten. Was für dein Konto gilt, entscheidest du mit Ernes.'):null,
+        v.optionen.map(o=>el('div',{class:'kanal-option'},el('span',{},o.text),el('a',{href:o.quelle,target:'_blank',rel:'noopener','data-read-navigation':true},'Quelle ↗'),
+          el('button',{type:'button',class:'chip',on:{click:()=>uebernehmen(v.a,v.art,o)}},'Übernehmen')))))):null,
+    el('p',{class:'leise'},'Schriftlich heisst Chat in der App, falls angeboten, sonst Formular oder E-Mail.'),
+    state.channels.length?el('ul',{},state.channels.map(r=>el('li',{},'✓ '+r.anbieter+' · '+r.art+' · '+r.kanal+' · geprüft '+r.abruf))):null,
     el('label',{for:'channel-provider'},'Anbieter'),provider,el('label',{for:'channel-kind'},'Kanalart'),kind,el('label',{for:'channel-value'},'Belegter Kanal'),channel,
-    el('label',{for:'channel-source'},'Quelle des Anbieters'),source,el('label',{for:'channel-date'},'Abrufdatum'),date,
-    el('label',{class:'checkline'},checked,'Ich habe Kanalregel und Bedingungen geprüft. Dieser Kontakt ist nach der Prüfung möglich.'),
+    el('label',{for:'channel-source'},'Quelle des Anbieters'),source,el('label',{for:'channel-date'},'Geprüft am'),date,
+    el('label',{class:'checkline'},checked,'Ich habe die Quelle geöffnet und Kanalregel und Bedingungen geprüft.'),
     el('button',{class:'knopf hell',type:'button',on:{click:()=>serviceAction({typ:'b_channel',provider:provider.value,kind:kind.value,channel:channel.value,source:source.value,date:date.value,checked:checked.checked})}},'Kanal speichern'));
 }
 async function oeffne(row){
