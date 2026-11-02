@@ -479,7 +479,7 @@ function timeline(rows, origin) {
 }
 // Deadline overview with calendar groups and read-only planning details.
 let deadlineFilter='all';
-function dlLate(row){return overdue(row)&&row.status!=='in Prüfung';}
+function dlLate(row){return ['tasks','assignments','chapters'].includes(row.src)&&overdue(row)&&row.status!=='in Prüfung';}
 function deadlineKind(row){return row.kind==='school'?['Schule','school']:row.src==='meetings'?['Treffen','meet']:row.src==='milestones'?['Meilenstein','mile']:row.src==='reserves'?['Reserve','res']:row.src==='chapters'?['Kapitel','task']:['Aufgabe','task'];}
 function deadlineTitle(row){return shortTitle(row).replace(/^\d{4}-\d{2}-\d{2}\s*[·\-–]\s*/,'').replace(/^[◆♦]\s*/,'');}
 function deadlineTime(row){return row.due&&row.due.includes('T')?new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',hour:'2-digit',minute:'2-digit'}).format(new Date(row.due)):'';}
