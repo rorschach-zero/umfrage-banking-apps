@@ -61,7 +61,7 @@ function nextServiceDay(start){let day=[start,heute()].sort().pop();while([0,6].
 const KANAELE_BELEGT={
   Yuh:{schriftlich:[{kanal:'chat',text:'Chat in der App («Support via Chat», kostenlos)',quelle:'https://www.yuh.com/de/pricing/'}],
        telefon:[{kanal:'telefon',text:'+41 44 825 87 89 · Mo–Fr 08–19 Uhr',quelle:'https://www.yuh.com/de/contact/'}]},
-  Neon:{schriftlich:[{kanal:'chat',text:'In-App-Hilfe, laut Neon KI-gestützt',quelle:'https://www.neon-free.ch/blog/der-neon-kundenservice-ganz-ohne-filiale'},{kanal:'mail',text:'service@neon-free.ch · Antwort innert zwei Arbeitstagen',quelle:'https://www.neon-free.ch/kontakt'}],
+  Neon:{schriftlich:[{kanal:'chat',text:'In-App-Hilfe, laut Neon KI-gestützt',quelle:'https://www.neon-free.ch/blog/der-neon-kundenservice-ganz-ohne-filiale'},{kanal:'mail',text:'service@neon-free.ch · von der hinterlegten Adresse schreiben · Antwort innert zwei Arbeitstagen',quelle:'https://www.neon-free.ch/kontakt'}],
         telefon:[{kanal:'telefon',text:'+41 43 508 03 19 · Mo–Fr 08–17 Uhr · nur Plan plus, global oder metal',quelle:'https://www.neon-free.ch/faq/wie-erreiche-ich-euch-am-besten'},{kanal:'keiner',text:'Gratis-Plan: kein Telefonservice laut Neon',quelle:'https://www.neon-free.ch/faq/wie-erreiche-ich-euch-am-besten'}]},
   Zak:{schriftlich:[{kanal:'chat',text:'Nachricht in der App («Nachricht im DigitalBanking»)',quelle:'https://www.cler.ch/de/services/hilfe-und-kontakt/hilfethemen/zak'},{kanal:'formular',text:'Zak-Kontaktformular · nur Domizil Schweiz',quelle:'https://www.cler.ch/de/services/kontakt/kontaktformular-zak'}],
        telefon:[{kanal:'telefon',text:'0848 845 245 · Mo–Fr 8–18 Uhr',quelle:'https://www.cler.ch/de/services/hilfe-und-kontakt/hilfethemen/zak'}]},
