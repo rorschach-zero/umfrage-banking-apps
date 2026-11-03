@@ -8,3 +8,4 @@
 .pa-einwand{display:grid;gap:8px;margin:8px 0 16px;max-width:560px}
 .pa-einwand textarea{font:inherit;padding:10px 12px;border:1px solid #c9d1cb;border-radius:10px;min-height:96px}
 main{max-width:720px}
+.skip-link{position:absolute;left:-9999px}.skip-link:focus{left:16px;top:12px;z-index:10;background:#fff;padding:8px 12px;border-radius:8px}
