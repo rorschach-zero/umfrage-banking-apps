@@ -204,6 +204,26 @@ details summary::before { border-color: #5d636b; }
 .schirm.start > .start-unten { order:10; margin-top: 24px; max-width: 460px; }
 .schirm.start .start-unten .hinweis { font-size: 13px; }
 @media (max-width: 520px) { .schirm.start { min-height: 0; } .schirm.start .nav .knopf { width: 100%; } .schirm.start > .sprachen { margin-bottom: 20px; } }
+
+/* Grosse Bildschirme: alles wächst mit, statt als schmale 720-px-Spalte zu verloren zu wirken */
+:root { --z: 1; }
+@media (min-width: 1280px) and (min-height: 760px) { :root { --z: 1.12; } }
+@media (min-width: 1600px) and (min-height: 860px) { :root { --z: 1.25; } }
+@media (min-width: 1900px) and (min-height: 1000px) { :root { --z: 1.4; } }
+@media (min-width: 2400px) and (min-height: 1300px) { :root { --z: 1.75; } }
+header, main, footer { zoom: var(--z); }
+.schirm.start { min-height: calc((100dvh - 210px * var(--z)) / var(--z)); }
+
+/* Ab Laptopbreite: Willkommensbildschirm mittig wie bei Typeform */
+@media (min-width: 900px) {
+  .schirm.start { margin: 0 auto; align-items: center; text-align: center; }
+  .schirm.start > .sprachen, .schirm.start .nav { justify-content: center; }
+  .schirm.start > p:not(.kurz) { margin-left: auto; margin-right: auto; }
+  .schirm.start > .gewinn { text-align: left; width: 100%; }
+  .schirm.start > .start-unten { width: 100%; }
+  .schirm.start .start-unten .hinweis { text-align: center; }
+  .schirm.start details { text-align: left; }
+}
 </style>
 </head>
 <body>
