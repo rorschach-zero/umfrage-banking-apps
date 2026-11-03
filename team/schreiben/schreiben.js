@@ -150,14 +150,9 @@ function renderAll() {
   fill($('meta'),
     el('span', {class:'chip role'}, roleOf(c)),
     c.due ? el('span', {class:'chip'}, 'Frist ' + day(c.due)) : null,
-    el('span', {id:'schreib-zeit', class:'chip'}),
     g.seiten ? el('span', {class:'chip'}, 'rund ' + String(g.seiten).replace('.', ',') + (g.seiten === 1 ? ' Seite' : ' Seiten')) : null,
     c.reader && c.owner === state.person ? el('span', {class:'chip soft'}, 'Gegenlesen: ' + (NAMES[c.reader] || c.reader)) : null);
-  const zeit = schreibZeitKontext(c);
-  queueMicrotask(() => {
-    if (!window.PA6Zeit || DEMO) return;
-    PA6Zeit.mount($('schreib-zeit'), Object.assign({person: state.person, compact: true, label: 'Zeit erfassen', pakete: (state.tasks || []).filter(t => t.owner === state.person && /^AP-\d{3}$/.test(t.ref || '')).map(t => ({ref: t.ref, title: t.title})), save: body => post(Object.assign({k: state.key}, body))}, zeit));
-  });
+  // Zeitleiste entfernt (Salah 03.11.): Zeit wird mit dem Auftrag erfasst, nicht separat im Schreibplatz.
   const picker = $('picker');
   picker.replaceChildren(...state.chapters.filter(x => state.lead || state.person === 'SA' || x.owner === state.person || x.reader === state.person)
     .map(x => el('option', {value:x.ref, selected:x.ref === c.ref}, x.ref + ' · ' + x.title)));
