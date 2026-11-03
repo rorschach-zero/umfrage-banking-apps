@@ -156,6 +156,10 @@ p.hinweis { font-size: 16px; max-width: 62ch; }
 .botschaft { border-radius: 16px; }
 .gewinn { border-radius: 12px; }
 @media (prefers-reduced-motion: reduce) { .schirm { animation: none; } .optionen .opt { transition: none; } }
+@media (max-width: 520px) { h2 { font-size: clamp(21px, 5.6vw, 26px); } h1 { font-size: clamp(28px, 8vw, 36px); } main { padding-top: 24px; } }
+.skala.worte .opt { font-weight: 500; }
+main a, footer a { color: var(--ink); text-decoration-color: var(--orange); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+main a:hover { text-decoration-thickness: 2.5px; }
 </style>
 </head>
 <body>
