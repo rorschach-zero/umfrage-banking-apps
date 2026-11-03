@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-I49K52uOxuFEPEIlug19hJgkGwtydgfyau4IOqD6Vxw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>B Servicetest</title><link rel="stylesheet" href="../team.css"><link rel="stylesheet" href="../design.css">
-<link rel="stylesheet" href="../view-as.css"><link rel="stylesheet" href="../flow.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-TdDPHEJUGThzRL9z9q7qkNsiyW8uoFTAls3g1/ZSPUo='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
+<link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=84d3596daea8">
 </head>
 <body>
 <header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=b">← Meine Arbeit</a><div class="titel"><small>B · Servicetest</small>Servicetest</div><div id="wer" class="pille">…</div></div></header>
@@ -10,11 +10,10 @@
 <section id="workspace-progress" class="workspace-progress" aria-live="polite" hidden></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zwischen">Zwischenstand</button><button class="knopf" id="fertig">Abschliessen</button></div></div></div>
-<script src="../view-as.js"></script>
-<script src="../team.js"></script>
-<script src="../purpose.js"></script>
-<script src="../workspace.js"></script>
-<script src="../service.js"></script>
+<script src="../view-as.js?v=41cc5d81f7cc"></script>
+<script src="../team.js?v=91ca8ca4ac11"></script>
+<script src="../purpose.js?v=5ec0008c81c2"></script>
+<script src="../service.js?v=ee046eda636c"></script>
 <script>
 // Regeln aus 10_pa6a/beobachtung/Testprotokoll.md, Version 4. Die Maske schlaegt vor, die Person entscheidet.
 const SKRIPT = {
@@ -32,15 +31,18 @@ const FRIST = { // Minuten bis Mensch, danach bis Mindestantwort; Beobachtung ge
 const HINWEISE = ["Name oder Kürzel", "Bezug auf ein Detail der Frage", "Sichtbare Tippzeit oder Schreibanzeige", "Freitext ohne Bausteincharakter"];
 const HOEFLICH = [[1, "abweisend oder herablassend"], [2, "einsilbig, geht nicht auf Dank oder Rückfrage ein"], [3, "korrekt und sachlich"], [4, "freundlich, nimmt Bezug auf die Person"], [5, "freundlich und vorausschauend, bietet ungefragt Hilfe an"]];
 const STOPP = { nachrichten: 42, minuten: 140 };
-let daten = null, aktiv = null, z = {}, belastung = {};
+let daten = null, aktiv = null, z = {}, belastung = {}, savePending = false;
 
 function frei(s) { return (s || "").replace(/\s+/g, " ").trim(); }
 async function start() {
   if (!schluessel()) { document.getElementById("main").replaceChildren(el("h1", {}, "Persönlicher Link fehlt"), el("p", {}, "Öffne die Maske über den Link, den du von Salah bekommen hast. Er enthält deinen Schlüssel.")); return; }
-  try { daten = await hole("plan"); } catch (e) { document.getElementById("main").replaceChildren(el("h1", {}, "Keine Verbindung"), el("p", { class: "leise" }, e.message)); return; }
-  belastung = daten.belastung || {};
-  document.getElementById("wer").textContent = TEAM[daten.person] || daten.person;
-  liste();
+  const selectedStep = bOffen;
+  return fieldStart("plan", (value, cached) => {
+    daten = value; belastung = daten.belastung || {};
+    document.getElementById("wer").textContent = TEAM[daten.person] || daten.person;
+    if (!cached) bOffen = selectedStep;
+    liste();
+  });
 }
 function statusVon(r) { const e = r.erfasst; return !e ? "offen" : e.stand === "abgeschlossen" ? "abgeschlossen" : "laufend"; }
 function liste() {
@@ -242,19 +244,23 @@ function fehlt() {
   return f;
 }
 async function speichern(stand) {
-  if(window.PA6View.active())return;
+  if(window.PA6View.active() || fieldPending || savePending)return;
   const msg = document.getElementById("meldung"); msg.className = "meldung";
   if (stand === "abgeschlossen") { const f = fehlt(); if (f.length) { msg.className = "meldung fehler"; msg.textContent = "Fehlt noch: " + f.join(", "); return; } }
   if (stand === "laufend" && VERBOTEN.test([z.verlauf, z.bemerkung].join(" "))) { msg.className = "meldung fehler"; msg.textContent = "Notizen ohne Nummern, Mail- und Netzadressen"; return; }
+  const row = aktiv, previous = row.erfasst, payload = zeile(stand);
+  savePending = true; row.erfasst = payload;
   msg.textContent = "Speichert …";
   try {
-    await sende({ typ: "beobachtung", maske: "b4", simulation:aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: zeile(stand) });
+    await sende({ typ: "beobachtung", maske: "b4", simulation:aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: payload });
     window.dispatchEvent(new Event("workspace-saved"));
-    aktiv.erfasst = zeile(stand); try { localStorage.removeItem("b-" + aktiv.nr); } catch (e) {}
-    try { const neu = await hole("plan"); daten = neu; belastung = neu.belastung || {}; } catch (e) {}
+    row.erfasst = payload; try { localStorage.removeItem("b-" + row.nr); } catch (e) {}
+    fieldValue = daten; fieldPersist();
+    hole("plan").then(neu => { if (neu.person !== daten.person) return; neu.fetchedAt ||= new Date().toISOString(); daten = neu; belastung = neu.belastung || {}; fieldValue = neu; fieldPersist(); }).catch(() => fieldNotice('Gespeichert · Abgleich ausstehend'));
     msg.className = "meldung ok"; msg.textContent = stand === "abgeschlossen" ? "Abgeschlossen und gespeichert." : "Zwischenstand gespeichert. Komm zurück, wenn die Antwort da ist.";
     if (stand === "abgeschlossen") setTimeout(liste, 900);
-  } catch (e) { msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
+  } catch (e) { row.erfasst = previous; msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
+  finally { savePending = false; }
 }
 document.getElementById("zwischen").addEventListener("click", () => speichern("laufend"));
 document.getElementById("fertig").addEventListener("click", () => {

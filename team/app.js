@@ -691,7 +691,7 @@ function showSharing(){
 function privacy() {
   modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Der letzte Projektstand bleibt für deine Person und Ansicht auf diesem Gerät gespeichert, damit er beim Wiederöffnen sofort erscheint. Beim Abmelden werden diese gespeicherten Projektstände gelöscht. Nutze dafür ein persönliches Gerät. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden an Notion gesendet und protokolliert. Der Server speichert Antworten höchstens 600 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Beim Teilen speichert das Verteilungsprotokoll deine Person, den Kanal, das Datum und eine freiwillige Reichweitenschätzung. Es verknüpft keine Umfrageantwort mit dir. QR-Codes werden auf deinem Gerät erzeugt.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
 }
-function logout() {if(pending){clearTimeout(pending.timer);pending=null;}$('toast').hidden=true;clearResponses();cacheNamespace='';refreshing=false;if(activeRequest)activeRequest.abort();preview.clear();try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
+function logout() {try{for(const name of Object.keys(localStorage))if(name.startsWith('pa6-field-v1:'))localStorage.removeItem(name);}catch{}if(pending){clearTimeout(pending.timer);pending=null;}$('toast').hidden=true;clearResponses();cacheNamespace='';refreshing=false;if(activeRequest)activeRequest.abort();preview.clear();try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
 function renderViewSelector() {
   let slot = $('view-as-selector');
   if (!slot) { slot = el('div',{id:'view-as-selector',class:'view-as-selector'});document.querySelector('.topbar').after(slot); }
@@ -837,8 +837,25 @@ async function load(reset=false) {
     if(preview.active() && (result.readOnly!==true || result.viewer!=='SA' || result.person!==preview.target() || result.role!=='mitglied'))throw Error(result.fehler||'Personenansicht nicht freigegeben.');
     if(!validResponse(result))throw Error('Die Antwort ist unvollständig. Der aktuelle Stand bleibt unbekannt.');
     data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();saveResponse(result);
+    if (result.role === 'leitung' && result.person === 'SA' && !preview.active()) void prefetchPeople(key, cacheNamespace);
   }catch(error){if(ticket!==generation)return;data=previous;state=previous?'stale':'error';errorMessage=error.name==='AbortError'?'Die Verbindung dauert zu lange. Bitte versuche es erneut.':error.message;}
   finally{clearTimeout(timeout);if(ticket===generation){refreshing=false;activeRequest=null;render();}}
+}
+const personPrefetches = new Map();
+async function prefetchPeople(access, namespace) {
+  const last = personPrefetches.get(namespace) || 0;
+  if (Date.now() - last < 300000) return;
+  personPrefetches.set(namespace, Date.now());
+  await Promise.all(Object.keys(names).map(async target => {
+    const controller = new AbortController(), timeout = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(config.endpoint, {method:'POST', headers:{'Content-Type':'text/plain'},
+        body:JSON.stringify({typ:'team',k:access,leitung:true,als:target}), signal:controller.signal, referrerPolicy:'no-referrer', cache:'no-store'});
+      const value = await response.json();
+      if (key !== access || cacheNamespace !== namespace || readKey() !== access) return;
+      if (response.ok && validResponse(value) && value.person === target && value.role === 'mitglied' && value.viewer === 'SA' && value.readOnly === true) saveResponse(value);
+    } catch {} finally { clearTimeout(timeout); }
+  }));
 }
 function openPerson(id) {if(pending||noteSaving)return;preview.select(id);}
 function switchView() {
@@ -868,7 +885,7 @@ document.addEventListener('click',event=>{
 document.addEventListener('visibilitychange',()=>{if(!config.demo&&!document.hidden&&Date.now()-lastLoaded>60000)load();});
 $('preview').hidden=!config.demo;
 if(config.demo&&!window.TEAM_DEMO){
-  const script=document.createElement('script');script.src='demo-data.js';script.onload=()=>load();
+  const script=document.createElement('script');script.src='demo-data.js?v=30';script.onload=()=>load();
   script.onerror=()=>{state='error';errorMessage='Die lokalen Vorschau-Daten fehlen.';render();};document.head.append(script);
 }else load();
 })();

@@ -1,6 +1,7 @@
 'use strict';
 (() => {
   const area=location.pathname.includes('/team/b')?'b':'c',container=document.getElementById('workspace-progress');
+  if (!container || container.hidden) return;
   async function refresh(){
     if(!schluessel())return;
     try{

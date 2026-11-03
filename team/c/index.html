@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Swe53yqn2OaPV5rOaZxupekXZdi30Rg+LvEdjjETOMw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>C Bewertungen</title><link rel="stylesheet" href="../team.css"><link rel="stylesheet" href="../design.css">
-<link rel="stylesheet" href="../view-as.css"><link rel="stylesheet" href="../flow.css">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-41oOsaK8Dr9MM49Kv/tDCCe+7AN3d1+IV5N3RqtPVFc='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>C Bewertungen</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
+<link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=84d3596daea8">
 </head>
 <body>
 <header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=c">← Meine Arbeit</a><div class="titel"><small>C · Bewertungen</small>Bewertungen codieren</div><div class="zeile"><span id="fort" class="pille">…</span><span id="wer" class="pille">…</span></div></div></header>
@@ -10,10 +10,9 @@
 <section id="workspace-progress" class="workspace-progress" aria-live="polite" hidden></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zurueck" title="Pfeil links">‹</button><button class="knopf" id="speichern" title="Enter">Speichern und weiter</button></div></div></div>
-<script src="../view-as.js"></script>
-<script src="../team.js"></script>
-<script src="../purpose.js"></script>
-<script src="../workspace.js"></script>
+<script src="../view-as.js?v=41cc5d81f7cc"></script>
+<script src="../team.js?v=91ca8ca4ac11"></script>
+<script src="../purpose.js?v=5ec0008c81c2"></script>
 <script>
 // Regeln aus 10_pa6a/bewertungen/Codebuch.md, Version 10. Die zweite Person (Rolle B) sieht nie die Codes der ersten.
 const KAT = [
@@ -37,16 +36,19 @@ const GRENZE = {
   "8-9": "8 gegen 9: technischer Fehler ist 8, auch beim Handel; fehlende Anlagefunktion ist 9."
 };
 const AUSSCHLUSS = ["Sprache", "kein Text", "nicht Zak", "Duplikat", "nicht im Zeitraum"];
-let q = [], i = 0, wer = "", c = null;
+let q = [], i = 0, wer = "", c = null, savePending = false;
 
 async function start() {
   if (!schluessel()) { document.getElementById("main").replaceChildren(el("h1", {}, "Persönlicher Link fehlt"), el("p", {}, "Öffne die Maske über den Link, den du von Salah bekommen hast.")); return; }
-  try { const j = await hole("queue"); q = j.queue || []; wer = j.person; } catch (e) { document.getElementById("main").replaceChildren(el("h1", {}, "Keine Verbindung"), el("p", { class: "leise" }, e.message)); return; }
+  return fieldStart("queue", value => {
+  q = value.queue; wer = value.person;
   document.getElementById("wer").textContent = TEAM[wer] || wer;
   q.sort((a, b) => (a.rolle + a.anbieter + a.quelle + a.schicht + String(a.position).padStart(4, "0")).localeCompare(b.rolle + b.anbieter + b.quelle + b.schicht + String(b.position).padStart(4, "0")));
   const offen = q.findIndex(x => !x.eigen); i = offen >= 0 ? offen : 0;
-  if (!q.length) { document.getElementById("main").replaceChildren(el("h1", {}, "Noch nichts zugeteilt"), el("p", { class: "leise" }, "Die Ziehung ist am Stichtag 03.11. Danach erscheinen deine Bewertungen hier.")); return; }
+  document.getElementById("fuss").hidden = !q.length;
+  if (!q.length) { c = null; document.getElementById("main").replaceChildren(el("h1", {}, "Noch nichts zugeteilt"), el("p", { class: "leise" }, "Die Ziehung ist am Stichtag 03.11. Danach erscheinen deine Bewertungen hier.")); return; }
   document.getElementById("fuss").hidden = false; zeige();
+  });
 }
 function leer(x) { return { nr: x.nr, ausschluss: "", kundendienst_kontakt: "", kats: [], vals: {}, anker: "", bemerkung: "", zak_bezug: x.anbieter === "Zak" && x.quelle === "Trustpilot" ? "" : "nicht anwendbar", sprache: x.sprache || "" }; }
 function aus(e) { const k = []; const v = {}; [1, 2, 3].forEach(n => { if (e["kat_" + n]) { k.push(Number(e["kat_" + n])); v[e["kat_" + n]] = e["val_" + n]; } }); return Object.assign(leer(q[i]), { ausschluss: e.ausschluss || "", kundendienst_kontakt: e.kundendienst_kontakt || "", kats: k, vals: v, anker: e.anker || "", bemerkung: e.bemerkung || "", zak_bezug: e.zak_bezug || "nicht anwendbar" }); }
@@ -145,26 +147,33 @@ function pruefe() {
   return "";
 }
 async function speichern() {
-  if(window.PA6View.active())return;
+  if(window.PA6View.active() || fieldPending || savePending)return;
   const msg = document.getElementById("meldung"), f = pruefe();
   if (f) { msg.className = "meldung fehler"; msg.textContent = f; return; }
   const x = q[i], z = { nr: x.nr, ausschluss: c.ausschluss, kundendienst_kontakt: c.ausschluss ? "" : c.kundendienst_kontakt, anker: c.anker.trim(), bemerkung: c.bemerkung.trim(), zak_bezug: c.zak_bezug, sprache: c.sprache };
   c.kats.forEach((n, r) => { z["kat_" + (r + 1)] = String(n); z["val_" + (r + 1)] = c.vals[n]; });
+  const previous = x.eigen, previousIndex = i;
+  savePending = true;
+  x.eigen = Object.assign({codiert_von:wer}, z);
+  const next = q.findIndex((row, index) => index > i && !row.eigen);
+  i = next >= 0 ? next : Math.min(i + 1, q.length - 1); zeige();
   msg.className = "meldung"; msg.textContent = "Speichert …";
   try {
     await sende({ typ: "codierung", rolle: x.rolle, maske: "c2", zeile: z });
     window.dispatchEvent(new Event("workspace-saved"));
     x.eigen = Object.assign({ codiert_von: wer }, z); try { localStorage.removeItem(draftKey(x)); } catch (e) {}
+    fieldValue.queue = q; fieldPersist();
     msg.className = "meldung ok"; msg.textContent = "Gespeichert.";
-    const n = q.findIndex((y, k) => k > i && !y.eigen); i = n >= 0 ? n : Math.min(i + 1, q.length - 1); zeige();
+    fortschritt();
     renderExtraCases();
     if (q.every(y => y.eigen)) { msg.textContent = "Alles codiert. Danke."; }
-  } catch (e) { msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
+  } catch (e) { x.eigen = previous; i = previousIndex; zeige(); msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
+  finally { savePending = false; }
 }
 document.getElementById("speichern").addEventListener("click", speichern);
 document.getElementById("zurueck").addEventListener("click", () => { if (i > 0) { i--; zeige(); } });
 document.addEventListener("keydown", e => {
-  if(window.PA6View.active()) {
+  if(window.PA6View.active() || fieldPending) {
     if(e.target.closest('input,textarea,select,button,summary,a'))return;
     if(e.key==='ArrowLeft'&&i>0){i--;zeige();}
     if(e.key==='ArrowRight'&&i<q.length-1){i++;zeige();}
