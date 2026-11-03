@@ -3,6 +3,8 @@
 // Uebersetzung aus der Gruppe mit zweiter Lesung und stichprobenweiser Rueckuebersetzung (30.10.2026); der deutsche Text ist massgeblich.
 const SPRACHEN = {
 fr: {
+  "Kennst du jemanden, für den die Umfrage passt?": "Tu connais quelqu'un à qui ce sondage correspond ?",
+  "Was gespeichert wird": "Ce qui est enregistré",
   "Wie erlebst du den Kundendienst deiner Banking-App? Studierende der KV Business School Zürich wollen es wissen.": "Comment trouves-tu le service clientèle de ton application bancaire ? Des étudiant·e·s de la KV Business School Zürich aimeraient le savoir.",
   "Galaxus-Gutschein zu gewinnen": "Bon d'achat Galaxus à gagner",
   "Umfrage starten": "Commencer le sondage",
@@ -220,6 +222,8 @@ fr: {
   "Sprache": "Langue"
 },
 it: {
+  "Kennst du jemanden, für den die Umfrage passt?": "Conosci qualcuno a cui si addice questo sondaggio?",
+  "Was gespeichert wird": "Cosa viene salvato",
   "Wie erlebst du den Kundendienst deiner Banking-App? Studierende der KV Business School Zürich wollen es wissen.": "Come ti trovi con il servizio clienti della tua app bancaria? Studenti della KV Business School Zürich vogliono saperlo.",
   "Galaxus-Gutschein zu gewinnen": "Buono Galaxus da vincere",
   "Umfrage starten": "Inizia il sondaggio",
@@ -437,6 +441,8 @@ it: {
   "Sprache": "Lingua"
 },
 en: {
+  "Kennst du jemanden, für den die Umfrage passt?": "Know someone this survey is for?",
+  "Was gespeichert wird": "What is stored",
   "Wie erlebst du den Kundendienst deiner Banking-App? Studierende der KV Business School Zürich wollen es wissen.": "How do you find the customer service of your banking app? Students at KV Business School Zürich want to know.",
   "Galaxus-Gutschein zu gewinnen": "Galaxus voucher to win",
   "Umfrage starten": "Start the survey",
