@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-41oOsaK8Dr9MM49Kv/tDCCe+7AN3d1+IV5N3RqtPVFc='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WjI7KMMOVyS2AnOTJKyXav421V5JPSK1rAb0aJWWUjM='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>C Bewertungen</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
-<link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=84d3596daea8">
+<link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 </head>
 <body>
 <header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=c">← Meine Arbeit</a><div class="titel"><small>C · Bewertungen</small>Bewertungen codieren</div><div class="zeile"><span id="fort" class="pille">…</span><span id="wer" class="pille">…</span></div></div></header>
@@ -88,7 +88,8 @@ function frage(nr, titel, hilfe, fertig, ...inhalt) {
 function updateReadiness() {
   const node = document.querySelector(".c-ready"); if (!node) return;
   const missing = pruefe(); node.className = "c-ready" + (missing ? "" : " ok");
-  node.textContent = missing ? "Noch offen: " + missing : "Bereit. Enter oder «Speichern und weiter».";
+  node.textContent = missing ? "Noch offen · " + missing : "Bereit. Enter oder «Speichern und weiter».";
+  document.getElementById("speichern").disabled=window.PA6View.active()||fieldPending||savePending||!!missing;
 }
 function bild() {
   const focused = document.activeElement;
@@ -126,11 +127,12 @@ function bild() {
       el("div", { class: "gitter" },
         el("div", {}, el("label", { class: "f" }, "Anker"), el("input", { class: "t", value: c.anker, maxlength: "60", placeholder: "z. B. Antwort kam nach drei Tagen", on: { input: e => { c.anker = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })),
         el("div", {}, el("label", { class: "f" }, "Bemerkung"), el("input", { class: "t", value: c.bemerkung, placeholder: "Zweifel oder Grenzregel", on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })))),
-    el("p", { class: "c-ready" + (offen ? "" : " ok") }, offen ? "Noch offen: " + offen : "Bereit. Enter oder «Speichern und weiter»."),
+    el("p", { class: "c-ready" + (offen ? "" : " ok") }, offen ? "Noch offen · " + offen : "Bereit. Enter oder «Speichern und weiter»."),
     el("p", { class: "leise c-rules" }, "Keine Namen, Beträge oder Orte. Die Sterne werden nicht gedeutet.")
   );
   if (focusKey) [...m.querySelectorAll("[data-focus]")].find(node => node.getAttribute("data-focus") === focusKey)?.focus({preventScroll:true});
   else if (focusQuestion && focusText) [...m.querySelectorAll(".c-q")].find(node => node.querySelector("h2")?.textContent === focusQuestion)?.querySelectorAll("button").forEach(node => { if (node.textContent === focusText) node.focus({preventScroll:true}); });
+  updateReadiness();
 }
 function pruefe() {
   const x = q[i];
@@ -168,7 +170,7 @@ async function speichern() {
     renderExtraCases();
     if (q.every(y => y.eigen)) { msg.textContent = "Alles codiert. Danke."; }
   } catch (e) { x.eigen = previous; i = previousIndex; zeige(); msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
-  finally { savePending = false; }
+  finally { savePending = false; updateReadiness(); }
 }
 document.getElementById("speichern").addEventListener("click", speichern);
 document.getElementById("zurueck").addEventListener("click", () => { if (i > 0) { i--; zeige(); } });
