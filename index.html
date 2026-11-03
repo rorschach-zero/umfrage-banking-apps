@@ -78,7 +78,7 @@ label.feld { display:block; font-weight: 600; margin-top: 8px; }
 .gewinn b { display:block; font-size: 17px; line-height: 1.3; }
 .gewinn .sub { margin: 2px 0 0; font-size: 14px; color: var(--grey); }
 .schirm.start .nav { justify-content:flex-start; margin-top: 10px; }
-.schirm.start .nav > span { display:none; }
+.schirm.start .nav > span:not(.weiter-gruppe) { display:none; }
 .schirm.start .nav .knopf { min-width: 240px; }
 .schirm.start { display:flex; flex-direction:column; }
 .schirm.start .start-unten { order: 10; margin-top: 12px; }
@@ -117,6 +117,45 @@ details p { margin: 10px 0 0; color: var(--grey); font-size: 15px; }
 footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 24px 28px; }
 .sr { position:absolute; left:-9999px; }
 @media (max-width: 520px) { header .marke span { display:none; } .skala .opt { padding: 12px 2px; font-size: 14px; } .skala.worte { grid-template-columns: 1fr; } .skala.worte .opt { justify-content:flex-start; text-align:left; padding: 12px 16px; font-size: 16px; } .nav { flex-direction: column-reverse; align-items: stretch; } .knopf { width:100%; } }
+
+/* Typeform-Gefühl, neutral (Claudette 03.11.2026, Impeccable): nur Gestaltung, Instrument unverändert. */
+:root { --akzent-text:#d4431f; }
+::selection { background: #ffd9cf; color: var(--ink); }
+html { caret-color: var(--orange); scrollbar-color: #c9cbcf transparent; }
+header { padding: 18px 24px 14px; }
+header #zaehler { font-size: 14px; color: var(--grey); font-variant-numeric: tabular-nums; }
+.fortschritt { height: 3px; background: #efeff1; }
+main { padding: clamp(28px, 7vh, 72px) 24px 56px; max-width: 720px; }
+.schirm { animation: rein 420ms cubic-bezier(.16,1,.3,1); }
+@keyframes rein { from { opacity:0; transform: translateY(12px); filter: blur(2px); } to { opacity:1; transform:none; filter:none; } }
+h1::after { display:none; }
+h1 { font-size: clamp(30px, 6vw, 44px); line-height: 1.08; letter-spacing: -0.025em; margin-bottom: 14px; text-wrap: balance; }
+h2 { font-size: clamp(24px, 4.6vw, 32px); line-height: 1.18; letter-spacing: -0.02em; font-weight: 750; margin: 0 0 10px; text-wrap: balance; }
+p.hinweis { font-size: 16px; max-width: 62ch; }
+.optionen { gap: 8px; margin: 26px 0 8px; counter-reset: wahl; max-width: 560px; }
+.optionen .opt { border-radius: 10px; padding: 12px 16px 12px 12px; border-width: 1.5px; background: #fff; transition: border-color 160ms ease, background-color 160ms ease, transform 120ms ease; }
+.optionen .opt:active { transform: scale(.995); }
+.optionen .opt .punkt { display:none; }
+.optionen .opt::before { counter-increment: wahl; content: counter(wahl, upper-alpha); flex: none; width: 26px; height: 26px; border-radius: 6px; border: 1.5px solid var(--line); display:grid; place-items:center; font-size: 13px; font-weight: 800; color: var(--grey); background:#fff; transition: inherit; }
+.optionen .opt[aria-checked="true"] { border-color: var(--orange); background: #fff4f0; }
+.optionen .opt[aria-checked="true"]::before { background: var(--orange); border-color: var(--orange); color: #fff; }
+.optionen .opt.multi[aria-checked="true"]::after { content:""; margin-left:auto; width: 10px; height: 16px; border: solid var(--akzent-text); border-width: 0 2.5px 2.5px 0; transform: rotate(45deg) translate(-2px,-2px); }
+.skala { gap: 6px; max-width: 560px; }
+.skala .opt { border-radius: 10px; }
+.skala .opt[aria-checked="true"] { background: var(--orange); border-color: var(--orange); color:#fff; }
+.matrix .zeile { background: #f7f7f8; border-radius: 12px; }
+.matrix .skala .opt[aria-checked="true"] { color:#fff; }
+.knopf { background: var(--akzent-text); border-radius: 10px; font-size: 18px; padding: 13px 26px; box-shadow: 0 1px 2px rgba(21,26,33,.12); }
+.knopf.leise { box-shadow:none; }
+.knopf:focus-visible, .opt:focus-visible, .sprache:focus-visible { outline: 3px solid #f4a28c; outline-offset: 2px; }
+.weiter-gruppe { display:inline-flex; align-items:center; gap: 12px; }
+.taste { font-size: 13px; color: var(--grey); white-space: nowrap; }
+@media (hover: none), (max-width: 520px) { .taste { display:none; } .optionen .opt::before { display:none; } .optionen .opt { padding-left: 16px; } .optionen .opt .punkt { display:block; } }
+.text { border-radius: 10px; }
+.text:focus { outline: 3px solid #f4a28c; outline-offset: 1px; border-color: var(--ink); }
+.botschaft { border-radius: 16px; }
+.gewinn { border-radius: 12px; }
+@media (prefers-reduced-motion: reduce) { .schirm { animation: none; } .optionen .opt { transition: none; } }
 </style>
 </head>
 <body>
@@ -260,10 +299,10 @@ function render() {
   const fragen = L.filter(x => x.art !== "info" && x.art !== "ende").length;
   const pos = L.slice(0, i).filter(x => x.art !== "info" && x.art !== "ende").length;
   document.getElementById("balken").style.width = (pos / fragen * 100) + "%";
-  document.getElementById("zaehler").textContent = (s.art==="info"||s.art==="ende") ? "" : `${t("Frage")} ${pos+1}`;
+  document.getElementById("zaehler").textContent = (s.art==="info"||s.art==="ende") ? "" : `${t("Frage")} ${pos+1}` + (s.kicker ? ` · ${t(s.kicker)}` : "");
   const titel = typeof s.titel === "function" ? s.titel() : t(s.titel);
   let h = `<section class="schirm${s.id==="start" ? " start" : ""}">`;
-  if (s.kicker) h += `<div class="kicker">${t(s.kicker)}</div>`;
+  if (s.kicker && s.art==="ende") h += `<div class="kicker">${t(s.kicker)}</div>`;
   if (s.art === "ende") { h += endeHtml(); main.innerHTML = h + "</section>"; senden(); return; }
   h += s.art==="info" ? `<h1>${titel}</h1><p>${t(s.text)||""}</p>${typeof s.html==="function" ? s.html() : (s.html||"")}` : `<h2 id="frage-titel">${titel}${s.pflicht ? `&nbsp;<span class="stern" aria-hidden="true">*</span><span class="sr">(${t("Pflichtfrage")})</span>` : ""}</h2>`;
   if (s.hinweis) h += `<p class="hinweis">${t(s.hinweis)}</p>`;
@@ -297,7 +336,7 @@ function render() {
   if (s.art==="auswahl") {
     h += `<select class="text" id="auswahl" aria-labelledby="frage-titel"><option value="">${t("Bitte wählen")}</option>` + s.optionen.map(o => `<option value="${esc(o)}" ${A[s.id]===o?'selected':''}>${esc(t(o))}</option>`).join("") + `</select>`;
   }
-  h += `<div class="fehler" id="fehler" role="alert" tabindex="-1"></div><div class="nav">` + (i>0 && s.art!=="info" ? `<button type="button" class="knopf leise" id="zurueck">${t("Zurück")}</button>` : `<span></span>`) + `<button type="button" class="knopf" id="weiter">${t(s.knopf || "Weiter")}</button></div></section>`;
+  h += `<div class="fehler" id="fehler" role="alert" tabindex="-1"></div><div class="nav">` + (i>0 && s.art!=="info" ? `<button type="button" class="knopf leise" id="zurueck">${t("Zurück")}</button>` : `<span></span>`) + `<span class="weiter-gruppe"><button type="button" class="knopf" id="weiter">${t(s.knopf || "Weiter")}</button><span class="taste" aria-hidden="true">Enter ↵</span></span></div></section>`;
   main.innerHTML = h; verdrahten(s); window.scrollTo({top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
   if (fokus) { const f = main.querySelector(`.opt[data-wert="${CSS.escape(fokus)}"]`); if (f) f.focus(); fokus = null; }
 }
@@ -419,6 +458,22 @@ const _render = render; render = function(){ const L = liste(); if (L[i] && L[i]
 // Nach einem Ausschluss im Screening bleibt es beim Ausschluss, auch nach Neuladen (der Empfaenger verwirft die doppelte Kennung).
 spracheAnwenden();
 if (!beendet()) setInterval(() => { if (beendet()) location.reload(); }, 60000);
+// Tastatur wie Typeform (Claudette 03.11.2026): nur Bedienung, löst dieselben Klicks aus, Daten unverändert.
+document.addEventListener("keydown", e => {
+  if (e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return;
+  const ziel = e.target, tag = ziel && ziel.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (ziel && ziel.isContentEditable)) return;
+  if (main.querySelector(".matrix")) { if (e.key === "Enter" && tag !== "BUTTON") { const w = document.getElementById("weiter"); if (w) { e.preventDefault(); w.click(); } } return; }
+  if (/^[a-z]$/i.test(e.key)) {
+    const opts = [...main.querySelectorAll(".optionen .opt")]; const n = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (opts[n]) { e.preventDefault(); opts[n].click(); opts[n].focus({preventScroll:true}); }
+  } else if (/^[1-9]$/.test(e.key)) {
+    const st = [...main.querySelectorAll(".skala .opt")]; const n = Number(e.key) - 1;
+    if (st[n]) { e.preventDefault(); st[n].click(); st[n].focus({preventScroll:true}); }
+  } else if (e.key === "Enter" && tag !== "BUTTON" && tag !== "A") {
+    const w = document.getElementById("weiter"); if (w && !w.disabled) { e.preventDefault(); w.click(); }
+  }
+});
 if (beendet()) { main.innerHTML = `<section class="schirm"><div class="ende"><div class="gross">${t("Danke")}</div><p style="margin-top:16px">${t("Die Umfrage ist seit dem 1. Dezember 2026 beendet. Danke für dein Interesse.")}</p></div></section>`; }
 else if (A.abbruch) { i = S.length - 1; renderEnde(true); } else if (A._gesendet) { i = liste().length - 1; renderEnde(false); zeigeGesendet(); } else render();
 </script>
