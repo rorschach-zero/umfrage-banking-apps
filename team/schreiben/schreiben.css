@@ -453,3 +453,9 @@ body.choosing .empty .btn:hover{background:var(--c-acc-h)}
 .panel .sub-block+.sub-block{margin-top:16px;padding-top:0;border-top:0}
 .info h3,.lnk b{font-weight:600}
 .panel .achten{border-top:0}
+.src-wrap{display:block;margin-top:2px}
+.src-btn{appearance:none;border:0;background:none;padding:0;min-height:24px;font:inherit;font-size:12px;font-weight:500;color:var(--c-sub);text-decoration:underline;text-decoration-color:#C9D2CD;text-underline-offset:3px;cursor:pointer;transition:color .14s}
+.src-btn:hover{color:var(--c-acc-h);text-decoration-color:currentColor}
+.src-btn[aria-expanded=true]{color:var(--c-text)}
+.src-wrap .src{display:block;margin-top:0}
+.src-wrap .src[hidden]{display:none}

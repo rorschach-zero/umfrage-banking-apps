@@ -359,7 +359,13 @@ function renderAll() {
 }
 function block(title, ...kids) { return card(title, '', ...kids); }
 function card(title, cls, ...kids) { const body = kids.flat().filter(Boolean); return body.length ? el('section', {class:'card' + (cls ? ' ' + cls : '')}, title ? el('h2', {class:'card-h'}, title) : null, body) : null; }
-function sourceTag(t) { return t ? el('span', {class:'src'}, t) : null; }
+// Quellen einheitlich als kleiner Link «Quelle», der die Fundstelle aufklappt (Salah 03.11.2026).
+function sourceTag(t) {
+  if (!t) return null;
+  const s = el('span', {class:'src', hidden:true}, t);
+  const b = el('button', {type:'button', class:'src-btn', 'aria-expanded':'false', onclick:e => { e.preventDefault(); e.stopPropagation(); const zu = s.hidden; s.hidden = !zu; b.setAttribute('aria-expanded', String(zu)); }}, 'Quelle');
+  return el('span', {class:'src-wrap'}, b, s);
+}
 
 function renderAuftrag(c, g) {
   const checksKey = 'pa6-sp-muss:' + c.ref, done = store.get(checksKey, {});
@@ -406,7 +412,7 @@ function rule(r, key) {
     el('div', {}, r.regel ? el('p', {}, r.regel) : null,
       r.beispiel ? el('div', {class:'ex'}, el('code', {}, r.beispiel), copyBtn(r.beispiel)) : null,
       r.pruefen ? el('p', {class:'check'}, 'Prüffrage: ' + r.pruefen) : null,
-      r.seite || r.quelle ? el('p', {class:'src-line'}, (state[key] && state[key].quelle ? state[key].quelle + ', ' : '') + (r.seite ? 'S. ' + r.seite : r.quelle)) : null));
+      r.seite || r.quelle ? el('p', {class:'src-line'}, sourceTag((state[key] && state[key].quelle ? state[key].quelle + ', ' : '') + (r.seite ? 'S. ' + r.seite : r.quelle))) : null));
 }
 function kiBlock(ki) {
   const f = ki.format || {}, list = a => Array.isArray(a) ? a : (a ? [{punkt:String(a)}] : []);
@@ -418,7 +424,7 @@ function kiBlock(ki) {
         el('tbody', {}, (f.beispiel_aus_vorlage || []).slice(0, 6).map(r => el('tr', {}, r.map(c => el('td', {}, c))))))),
       el('div', {class:'ex'}, el('code', {}, 'Schreibhilfe Schreibplatz (Claude, Anthropic) | Gliederung und Hinweise zu Kapitel … | Kapitel …'), copyBtn('Schreibhilfe Schreibplatz (Claude, Anthropic)\tGliederung und Hinweise zu Kapitel …\tKapitel …')))) : null,
     f.kurzbeleg_im_text ? el('details', {class:'rule'}, el('summary', {}, 'Beleg im Text und Anhang'), el('div', {}, el('p', {}, f.kurzbeleg_im_text), f.anhang ? el('p', {}, f.anhang) : null)) : null,
-    f.erklaerung_wortlaut ? el('details', {class:'rule'}, el('summary', {}, 'Ehrenwörtliche Erklärung (Wortlaut)'), el('div', {}, el('p', {class:'pre'}, f.erklaerung_wortlaut), el('p', {class:'src-line'}, f.quelle || ''))) : null,
+    f.erklaerung_wortlaut ? el('details', {class:'rule'}, el('summary', {}, 'Ehrenwörtliche Erklärung (Wortlaut)'), el('div', {}, el('p', {class:'pre'}, f.erklaerung_wortlaut), f.quelle ? el('p', {class:'src-line'}, sourceTag(f.quelle)) : null)) : null,
     list(ki.verboten).length ? el('div', {class:'nogo'}, el('p', {class:'k'}, 'Nicht erlaubt'), el('ul', {class:'plain warn'}, list(ki.verboten).map(x => el('li', {}, x.punkt, sourceTag(x.quelle))))) : null];
 }
 function renderRegeln(g) {
