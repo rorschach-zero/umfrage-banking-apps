@@ -5,7 +5,7 @@ const DOK = 'projektauftrag';
 const PUNKTE = [
   ['Was wir liefern', 'Die PA6a mit Forschung und Analyse in sieben Kapiteln, Abgabe 12.12.2026. Die PA6b mit einer ausgearbeiteten Massnahme für Yuh, Abgabe 27.02.2027. Die Präsentation mit Fachgespräch am 22.03.2027.'],
   ['Was nicht dazugehört', 'Wir setzen die Massnahme nicht selbst bei Yuh um, versprechen keine Umsatzwirkung und rechnen unsere Umfrage nicht auf die ganze Schweiz hoch.'],
-  ['Wer wofür zuständig ist', 'Salah leitet das Projekt, hält den Kontakt zu Yuh und zur Schule und gibt am Schluss ab. Ernes führt den Servicetest, Melisa die Bewertungen und die SWOT, Arber die Umfrage, Leonie das Schreibwerk mit Terminen und Formalem. Die Lead-Person ist verantwortlich, mitarbeiten dürfen alle.'],
+  ['Wer wofür zuständig ist', 'Salah leitet das Projekt, hält den Kontakt zur Schule und gibt am Schluss ab. Den Kontakt zu Yuh halten wir alle. Ernes führt den Servicetest, Melisa die Bewertungen und die SWOT, Arber die Umfrage, Leonie das Schreibwerk mit Terminen und Formalem. Die Lead-Person ist verantwortlich, mitarbeiten dürfen alle.'],
   ['Wie viel Aufwand', 'Das Konzept der Schule rechnet mit rund 37 Stunden pro Person, 25 für die 6b und 12 für die 6a. Unser Plan liegt höher, weil die drei Erhebungen und die Präsentation dazukommen. Alle erfassen ihre Stunden selbst in der Team-App.'],
   ['Was Vorrang hat', 'Die Termine der Schule stehen fest. Danach kommt die Qualität. Über Stunden und Verteilung reden wir, wenn es eng wird, und verteilen bei Bedarf am Sonntag um.'],
   ['Unsere Termine', 'Arbeitsplan final am 18.11.2026. Auftrag für die PA6b am 16.11.2026. Abgaben am 12.12.2026 und 27.02.2027, Präsentation am 22.03.2027.'],
