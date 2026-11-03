@@ -175,8 +175,8 @@ html { caret-color: #001B35; }
 .stern { color: #8a93a0; }
 .knopf { background:#001B35; box-shadow: 0 1px 2px rgba(0,27,53,.18), 0 6px 16px -8px rgba(0,27,53,.35); }
 .knopf:hover { background:#0a2a4d; }
-.knopf:focus-visible, .opt:focus-visible, .sprache:focus-visible, main a:focus-visible { outline: 3px solid #9fb4d6; outline-offset: 2px; }
-.text:focus { outline: 3px solid #9fb4d6; }
+.knopf:focus-visible, .opt:focus-visible, .sprache:focus-visible, main a:focus-visible { outline: 3px solid #3d5f94; outline-offset: 2px; }
+.text:focus { outline: 3px solid #3d5f94; }
 main a, footer a { text-decoration-color: #9aa6b8; }
 .botschaft { background: var(--tint); }
 .ende .gross { color:#001B35; }
@@ -355,7 +355,7 @@ const kenntYuh = () => nutztYuh() || A.t13a === "ja" || A.t6 === "Yuh" || A.t3c_
 
 /* ---------- Bildschirme ---------- */
 const S = [
- {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Umfrage zu Banking-Apps", text:`Wie erlebst du den Kundendienst deiner Banking-App? Studierende der KV Business School Zürich wollen es wissen.`, html: () => `<div class="sprachen" role="group" aria-label="${t("Sprache")}">${Object.keys(SPRACHEN_LISTE).map(k => `<button type="button" class="sprache" data-lang="${k}" aria-pressed="${SPRACHE===k}" lang="${k}"><span class="flagge">${FLAGGEN[k]}</span><span class="lname">${SPRACHEN_LISTE[k]}</span><span class="lcode" aria-hidden="true">${k.toUpperCase()}</span></button>`).join("")}</div><div class="gewinn"><div class="ikon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div class="betrag">CHF 100.–</div><b>${t("Galaxus-Gutschein zu gewinnen")}</b><p class="sub">${t("Unter allen, die bis zum Schluss ausfüllen und eine Mailadresse hinterlassen.")}</p></div><p class="kurz"><b>${t(DAUER_TEXT)}</b> · ${t("ohne Namen und Kontodaten")}</p><div class="start-unten"><p class="hinweis">${t("Mit «Umfrage starten» stimmst du der Teilnahme zu.")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a> · <a href="${tbLink()}" target="_blank" rel="noopener">${t("Teilnahmebedingungen")}</a></p><details><summary>${t("Details zur Teilnahme")}</summary><p>${t("Unter allen vollständigen Antworten mit Mailadresse verlosen wir einen Galaxus-Gutschein im Wert von 100 Franken (16 bis 65 Jahre, Wohnsitz Schweiz).")}</p><p>${t("Gehörst du nicht zur Zielgruppe (Schweiz, 16 bis 65, Banking-App), endet die Umfrage nach bis zu drei Fragen; gespeichert werden dann nur diese Antworten.")} ${t("Hörst du vorher auf, merken wir uns nur die Stelle, keine Antworten.")} ${t("Die Rohdaten bleiben bei der Studierendengruppe, der Praxispartner wird am Ende genannt.")} ${t("Fragen mit Stern sind Pflicht.")}</p></details></div>`, knopf:"Umfrage starten"},
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Umfrage zu Banking-Apps", text:`Wie erlebst du den Kundendienst deiner Banking-App? Studierende der KV Business School Zürich wollen es wissen.`, html: () => `<div class="sprachen" role="group" aria-label="${t("Sprache")}">${Object.keys(SPRACHEN_LISTE).map(k => `<button type="button" class="sprache" data-lang="${k}" aria-pressed="${SPRACHE===k}" lang="${k}" aria-label="${SPRACHEN_LISTE[k]}"><span class="flagge">${FLAGGEN[k]}</span><span class="lname" aria-hidden="true">${SPRACHEN_LISTE[k]}</span><span class="lcode" aria-hidden="true">${k.toUpperCase()}</span></button>`).join("")}</div><div class="gewinn"><div class="ikon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div class="betrag">CHF 100.–</div><b>${t("Galaxus-Gutschein zu gewinnen")}</b><p class="sub">${t("Unter allen, die bis zum Schluss ausfüllen und eine Mailadresse hinterlassen.")}</p></div><p class="kurz"><b>${t(DAUER_TEXT)}</b> · ${t("ohne Namen und Kontodaten")}</p><div class="start-unten"><p class="hinweis">${t("Mit «Umfrage starten» stimmst du der Teilnahme zu.")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a> · <a href="${tbLink()}" target="_blank" rel="noopener">${t("Teilnahmebedingungen")}</a></p><details><summary>${t("Details zur Teilnahme")}</summary><p>${t("Unter allen vollständigen Antworten mit Mailadresse verlosen wir einen Galaxus-Gutschein im Wert von 100 Franken (16 bis 65 Jahre, Wohnsitz Schweiz).")}</p><p>${t("Gehörst du nicht zur Zielgruppe (Schweiz, 16 bis 65, Banking-App), endet die Umfrage nach bis zu drei Fragen; gespeichert werden dann nur diese Antworten.")} ${t("Hörst du vorher auf, merken wir uns nur die Stelle, keine Antworten.")} ${t("Die Rohdaten bleiben bei der Studierendengruppe, der Praxispartner wird am Ende genannt.")} ${t("Fragen mit Stern sind Pflicht.")}</p></details></div>`, knopf:"Umfrage starten"},
  {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
@@ -573,13 +573,14 @@ document.addEventListener("keydown", e => {
   const ziel = e.target, tag = ziel && ziel.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (ziel && ziel.isContentEditable)) return;
   if (main.querySelector(".matrix")) { if (e.key === "Enter" && tag !== "BUTTON") { const w = document.getElementById("weiter"); if (w) { e.preventDefault(); w.click(); } } return; }
-  if (/^[a-z]$/i.test(e.key)) {
+  const inOptionen = ziel && ziel.closest && ziel.closest(".optionen"), inSkala = ziel && ziel.closest && ziel.closest(".skala");
+  if (/^[a-z]$/i.test(e.key) && inOptionen) {
     const opts = [...main.querySelectorAll(".optionen .opt")]; const n = e.key.toUpperCase().charCodeAt(0) - 65;
     if (opts[n]) { e.preventDefault(); opts[n].click(); opts[n].focus({preventScroll:true}); }
-  } else if (/^[1-9]$/.test(e.key)) {
+  } else if (/^[1-9]$/.test(e.key) && inSkala) {
     const st = [...main.querySelectorAll(".skala .opt")]; const n = Number(e.key) - 1;
     if (st[n]) { e.preventDefault(); st[n].click(); st[n].focus({preventScroll:true}); }
-  } else if (e.key === "Enter" && tag !== "BUTTON" && tag !== "A") {
+  } else if (e.key === "Enter" && !(ziel && ziel.closest && ziel.closest("button, a, summary, details, [role=button]"))) {
     const w = document.getElementById("weiter"); if (w && !w.disabled) { e.preventDefault(); w.click(); }
   }
 });
