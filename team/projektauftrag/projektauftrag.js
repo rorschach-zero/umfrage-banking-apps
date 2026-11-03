@@ -9,7 +9,7 @@ const PUNKTE = [
   ['Wie viel Aufwand', 'Das Konzept der Schule rechnet mit rund 37 Stunden pro Person, 25 für die 6b und 12 für die 6a. Unser Plan liegt höher, weil die drei Erhebungen und die Präsentation dazukommen. Alle erfassen ihre Stunden selbst in der Team-App.'],
   ['Was Vorrang hat', 'Die Termine der Schule stehen fest. Danach kommt die Qualität. Über Stunden und Verteilung reden wir, wenn es eng wird, und verteilen bei Bedarf am Sonntag um.'],
   ['Unsere Termine', 'Arbeitsplan final am 18.11.2026. Auftrag für die PA6b am 16.11.2026. Abgaben am 12.12.2026 und 27.02.2027, Präsentation am 22.03.2027.'],
-  ['Wie wir uns abstimmen', 'Ab dem 16.11. gibt es jede Woche einen kurzen Statusbericht. Wir entscheiden nach der Nein-Regel, wer bis zur Frist nicht widerspricht, stimmt zu.']
+  ['Wie wir uns abstimmen', 'Ab dem 16.11. gibt es jede Woche einen kurzen Statusbericht und ein Meeting von 30 Minuten auf Teams, in dem wir uns absprechen. Wir entscheiden nach der Nein-Regel, wer bis zur Frist nicht widerspricht, stimmt zu.']
 ];
 const $ = id => document.getElementById(id);
 let stand = null, busy = false, einwandOffen = false, nachricht = {text: '', art: ''};
