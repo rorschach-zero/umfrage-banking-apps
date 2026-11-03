@@ -7,6 +7,17 @@ const forms={
  arbeitszeit:{title:'Arbeitszeit',intro:'Erfasse deine geleistete Zeit in Stunden. Eine halbe Stunde ist 0,5 Stunden.',fields:[['datum','Datum','date'],['person','Person','self'],['stunden','Stunden','number'],['aufgabe','Aufgabe','textarea']]},
  beitrag:{title:'6b-Beiträge',intro:'Ordne deinen Beitrag einem Abschnitt der vorgegebenen Gliederung zu. Ein Beitrag ersetzt keine Prüfung oder Abgabe.',fields:[['abschnitt','Abschnitt',Array.from({length:14},(_,i)=>String(i+1))],['beitrag','Beitrag','textarea'],['stand','Stand',['Entwurf','in Bearbeitung','zur Prüfung']]]}
 };
+const servicePlan=[
+ ['MG','2026-11-09','A','Yuh','chat',['Karte','Anmeldung']],['MG','2026-11-10','B','Revolut','chat',['Karte','Anmeldung']],['MG','2026-11-11','A','Yuh','chat',['Zahlung']],['MG','2026-11-12','B','Revolut','chat',['Zahlung']],['MG','2026-11-12','B','Yuh','telefon',['Zahlung']],['MG','2026-11-16','B','Revolut','telefon',['Karte','Anmeldung']],['MG','2026-11-17','B','Revolut','telefon',['Zahlung']],
+ ['LB','2026-11-09','A','Revolut','chat',['Karte','Anmeldung']],['LB','2026-11-10','B','Yuh','chat',['Karte','Anmeldung']],['LB','2026-11-11','A','Revolut','chat',['Zahlung']],['LB','2026-11-12','B','Yuh','chat',['Zahlung']],['LB','2026-11-12','B','Yuh','telefon',['Karte']],['LB','2026-11-16','B','Yuh','telefon',['Anmeldung']],
+ ['AM','2026-11-09','A','Yuh','telefon',['Karte','Anmeldung']],['AM','2026-11-10','A','Yuh','telefon',['Zahlung']],['AM','2026-11-10','A','Zak','chat',['Karte']],['AM','2026-11-11','A','Zak','chat',['Anmeldung','Zahlung']],['AM','2026-11-12','A','Zak','telefon',['Karte','Anmeldung']],['AM','2026-11-13','A','Zak','telefon',['Zahlung']],
+ ['ES','2026-11-09','A','Neon','chat',['Karte','Anmeldung']],['ES','2026-11-10','A','Neon','chat',['Zahlung']],['ES','2026-11-10','A','Neon','telefon',['Karte']],['ES','2026-11-11','A','Neon','telefon',['Anmeldung','Zahlung']],['ES','2026-11-12','A','Revolut','telefon',['Karte','Anmeldung']],['ES','2026-11-13','A','Revolut','telefon',['Zahlung']],
+ ['SA','2026-11-11','B','Neon','chat',['Karte','Anmeldung']],['SA','2026-11-12','B','Neon','chat',['Zahlung']],['SA','2026-11-12','B','Neon','telefon',['Karte']],['SA','2026-11-13','B','Neon','telefon',['Anmeldung','Zahlung']],['SA','2026-11-16','B','Zak','chat',['Karte','Anmeldung']],['SA','2026-11-17','B','Zak','chat',['Zahlung']],['SA','2026-11-17','B','Zak','telefon',['Karte']],['SA','2026-11-18','B','Zak','telefon',['Anmeldung','Zahlung']]
+];
+const phoneSources={
+ Neon:'https://www.neon-free.ch/faq/wie-erreiche-ich-euch-am-besten',
+ Revolut:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'
+};
 let active='stakeholder',who='',saving=false,draft=null,receipts=[],loaded=false;
 const $=id=>document.getElementById(id),drafts=new Map();
 function newDraft(){return {id:crypto.randomUUID(),values:{},tasks:[],none:false,uncertain:false};}
@@ -63,6 +74,26 @@ function showSync(sync){
   })
  );
 }
+function showPlan(){
+ const contacts=servicePlan.flatMap(([person,day,block,provider,channel,topics])=>topics.map(topic=>({person,day,block,provider,channel,topic,unavailable:channel==='telefon'&&Object.hasOwn(phoneSources,provider)})));
+ if(contacts.length!==48)throw Error('Der bestätigte Einsatzplan ist unvollständig');
+ const date=value=>new Intl.DateTimeFormat('de-CH',{weekday:'short',day:'2-digit',month:'2-digit'}).format(new Date(value+'T12:00:00'));
+ $('project-plan').replaceChildren(
+  el('h2',{id:'project-plan-title'},'Bestätigter Einsatzplan'),
+  el('p',{},'Bestätigt am 03.11.2026. Alle Konten laufen in der Gratisversion. Bei Neon und Revolut startest du keinen Telefonkontakt. Diese Zellen erfasst du als «nicht angeboten» mit der Anbieterquelle.'),
+  el('div',{class:'project-plan-sources'},
+   el('a',{href:phoneSources.Neon,target:'_blank',rel:'noopener'},'Quelle Neon ↗'),
+   el('a',{href:phoneSources.Revolut,target:'_blank',rel:'noopener'},'Quelle Revolut ↗')),
+  el('div',{class:'project-plan-people'},Object.entries(TEAM).map(([person,name])=>{
+   const rows=contacts.filter(row=>row.person===person);
+   return el('section',{class:'project-person'},el('h3',{},name+' · '+rows.length+' Zellen'),el('ol',{},rows.map(row=>
+    el('li',{'data-contact':'',class:row.unavailable?'unavailable':''},
+     el('span',{},date(row.day)+' · Block '+row.block+' · '+row.provider+' · '+(row.channel==='telefon'?'Telefon':'Chat')+' · '+row.topic),
+     row.unavailable?el('span',{class:'project-not-offered'},'nicht angeboten · Gratisversion'):null,
+     row.unavailable?el('a',{href:phoneSources[row.provider],target:'_blank',rel:'noopener','aria-label':'Quelle für '+row.provider+' Telefon'},'Quelle ↗'):null))));})),
+  el('p',{class:'leise'},'Reserve 19.–20.11. · Nachlauf schriftlicher Kontakte bis 72 Stunden · Schluss 23.11.')
+ );
+}
 async function save(retry=false){
  if(saving||!loaded||window.PA6View.active()||(!retry&&(draft.uncertain||missing().length)))return;
  const current=draft,type=active,payload={...current.values};if(type==='coaching')payload.folgeaufgaben=JSON.stringify(current.none?[]:current.tasks);
@@ -81,7 +112,7 @@ async function start(){
   const receiptOk=row=>row&&forms[row.formular]&&typeof row.id==='string'&&Number.isInteger(row.zeile)&&row.zeile>=2&&Number.isFinite(Date.parse(row.zeitstempel))&&typeof row.blatt==='string'&&/^[a-f0-9]{64}$/.test(row.pruefsumme);
   const syncOk=data.sync&&typeof data.sync.enabled==='boolean'&&Array.isArray(data.sync.forms)&&data.sync.forms.length===keys.length&&data.sync.forms.every(row=>row&&forms[row.formular]&&typeof row.status==='string');
   if(!TEAM[data.person]||JSON.stringify(data.forms)!==JSON.stringify(keys)||!Array.isArray(data.receipts)||!data.receipts.every(receiptOk)||!syncOk)throw Error('Der Projektbereich ist noch nicht bereitgestellt');
-  who=data.person;receipts=data.receipts;loaded=true;draft=newDraft();drafts.set(active,draft);$('wer').textContent=TEAM[who];$('project-loading').hidden=true;$('project-content').hidden=false;renderForm();showReceipts();showSync(data.sync);
+  who=data.person;receipts=data.receipts;loaded=true;draft=newDraft();drafts.set(active,draft);$('wer').textContent=TEAM[who];$('project-loading').hidden=true;$('project-content').hidden=false;renderForm();showPlan();showReceipts();showSync(data.sync);
  }
  catch(error){$('project-loading').replaceChildren(el('span',{},error.message+' '),el('button',{type:'button',class:'chip',on:{click:start}},'Erneut laden'));}
 }
