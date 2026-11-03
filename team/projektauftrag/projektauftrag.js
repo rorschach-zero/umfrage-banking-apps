@@ -44,7 +44,12 @@ async function speichern(antwort) {
     einwandOffen = false;
     await laden(true);
     meldung(antwort === 'ja' ? 'Gespeichert. Danke für deine Bestätigung!' : 'Gespeichert. Salah meldet sich bei dir.', 'ok');
-  } catch (e) { meldung('Nicht gespeichert. ' + e.message, 'fehler'); }
+  } catch (e) {
+    const vorher = stand && stand.eigene ? stand.eigene.zeit : '';
+    await laden(true);
+    if (stand && stand.eigene && stand.eigene.zeit !== vorher && stand.eigene.antwort === antwort) { einwandOffen = false; meldung(antwort === 'ja' ? 'Gespeichert. Danke für deine Bestätigung!' : 'Gespeichert. Salah meldet sich bei dir.', 'ok'); }
+    else meldung('Nicht gespeichert. ' + e.message, 'fehler');
+  }
   finally { busy = false; render(); }
 }
 function knoepfe() {
