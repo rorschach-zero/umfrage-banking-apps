@@ -367,6 +367,11 @@ function sourceTag(t) {
   return el('span', {class:'src-wrap'}, b, s);
 }
 
+// Messung (03.11.2026): jede Aktion im Schreibweg geht als Ereignis ins Blatt «Schreibweg». Nie blockierend, nie im Demo.
+function track(aktion, schritt, wert) {
+  if (DEMO || !state.key || !state.chapter || (window.PA6View && PA6View.active && PA6View.active())) return;
+  post({typ:'schreibweg', k:state.key, kapitel:state.chapter.ref, schritt, aktion, wert}, 15000).catch(() => {});
+}
 // Schreibweg (Salah 03.11.2026): kein Informationsschwall, sondern ein geführter Weg zu vollen Punkten.
 // Immer ein Schritt offen, jeder ein- und ausklappbar, «Weiter» schliesst ab und öffnet den nächsten. Stand je Kapitel im Browser.
 function renderAuftrag(c, g) {
@@ -382,7 +387,7 @@ function renderAuftrag(c, g) {
   const check = (store_, key, i, text, quelle, onchange) => {
     const id = key + i, input = el('input', {type:'checkbox', id});
     input.checked = !!store_[i];
-    input.addEventListener('change', () => { store_[i] = input.checked; onchange(); });
+    input.addEventListener('change', () => { store_[i] = input.checked; onchange(); track(input.checked ? 'haken' : 'haken_weg', key === 'teil' ? 'schreiben' : 'pruefen', key + i); });
     return el('li', {}, input, el('label', {for:id}, el('span', {class:'lt'}, text, sourceTag(quelle))));
   };
   const rasterBlock = () => raster.length ? el('details', {class:'rule achten w-raster'}, el('summary', {}, maxPunkte ? 'So gibt es die vollen ' + maxPunkte + ' Punkte' : 'So gibt es volle Punkte'), el('div', {}, raster.map(r => el('div', {class:'pts'}, el('span', {class:'pn'}, r.punkte + ' P.'), el('p', {}, r.volle_punkte_wenn))))) : null;
@@ -411,7 +416,7 @@ function renderAuftrag(c, g) {
     steps.push({id:'schreiben', t:'Abschnitt für Abschnitt schreiben', s:'Hak jeden Abschnitt ab, sobald er steht', progress:() => glied.length ? [glied.filter((_, i) => teile[i]).length, glied.length] : null, body:() => [
       el('p', {}, 'Ein Abschnitt nach dem anderen, in ganzen Sätzen. Jede fremde Aussage bekommt gleich ihren Beleg (Autor, Jahr).'),
       glied.length ? el('div', {class:'w-sub'}, el('div', {class:'row'}, el('h3', {}, 'Geschrieben'), teilZahl), teilListe) : null,
-      el('button', {type:'button', class:'btn secondary', onclick:() => { setTab('hilfe'); state.askHilfe && state.askHilfe('Schlag mir eine Gliederung in Stichworten vor.'); }}, 'Stichworte von der Schreibhilfe')], after:teilStand});
+      el('button', {type:'button', class:'btn secondary', onclick:() => { track('hilfe', 'schreiben'); setTab('hilfe'); state.askHilfe && state.askHilfe('Schlag mir eine Gliederung in Stichworten vor.'); }}, 'Stichworte von der Schreibhilfe')], after:teilStand});
   }
   const mussListe = el('ul', {class:'checks'}), mussZahl = el('span', {class:'w-count'});
   const mussStand = () => { const n = muss.filter((_, i) => done[i]).length; mussZahl.textContent = n + ' von ' + muss.length; store.set(checksKey, done); kopf(); };
@@ -423,7 +428,7 @@ function renderAuftrag(c, g) {
     (g.nicht || []).length || (g.fallen || []).length ? el('details', {class:'rule achten'}, el('summary', {}, 'Typische Fehler und was nicht hierhin gehört'), el('div', {},
       (g.fallen || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Typische Fehler'), muster(g.fallen)) : null,
       (g.nicht || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Gehört nicht hierhin'), muster(g.nicht)) : null)) : null,
-    reading ? null : el('button', {type:'button', class:'btn secondary', onclick:() => { setTab('hilfe'); state.askHilfe && state.askHilfe('Was fehlt mir noch für volle Punkte?'); }}, 'Schreibhilfe fragen, was noch fehlt')], after:mussStand});
+    reading ? null : el('button', {type:'button', class:'btn secondary', onclick:() => { track('hilfe', 'pruefen'); setTab('hilfe'); state.askHilfe && state.askHilfe('Was fehlt mir noch für volle Punkte?'); }}, 'Schreibhilfe fragen, was noch fehlt')], after:mussStand});
   steps.push({id:'abgeben', t:reading ? 'Rückmeldung geben' : 'Übergeben', s:reading ? 'Kommentare im Doc, dann Bescheid geben' : gegen ? gegen + ' liest gegen' : 'Zum Gegenlesen weitergeben', body:() => [
     el('p', {}, reading ? 'Wenn deine Kommentare im Doc stehen, sag ' + (autor || 'der Person') + ' Bescheid. Sie arbeitet sie ein.' : 'Wenn alle Pflichtpunkte drin sind, melde das Kapitel in der Team-App als erledigt. ' + (gegen ? gegen + ' bekommt es dann zum Gegenlesen.' : 'Dann geht es ans Gegenlesen.')),
     el('a', {class:'btn secondary', href:'/team/'}, 'Zur Team-App')]});
@@ -448,12 +453,12 @@ function renderAuftrag(c, g) {
   steps.forEach((s, i) => {
     const next = steps[i + 1];
     s.countEl = el('span', {class:'w-prog'});
-    s.head = el('button', {type:'button', class:'w-head', 'aria-expanded':'false', 'aria-controls':'w-' + s.id, onclick:() => open(s.id, false, true)},
+    s.head = el('button', {type:'button', class:'w-head', 'aria-expanded':'false', 'aria-controls':'w-' + s.id, onclick:() => { const auf = weg.open !== s.id; open(s.id, false, true); if (auf) track('geoeffnet', s.id); }},
       el('span', {class:'w-num', 'aria-hidden':'true'}, String(i + 1)),
       el('span', {class:'w-tt'}, el('span', {class:'w-t'}, s.t), el('span', {class:'w-s'}, s.s)),
       s.countEl, el('span', {class:'chev', 'aria-hidden':'true'}));
-    const weiter = el('button', {type:'button', class:'btn', onclick:() => { weg.done[s.id] = true; save(); s.node.classList.add('done'); announce(s.t + ' erledigt'); if (next) open(next.id, true); else { weg.open = null; save(); apply(); } }}, next ? 'Weiter: ' + next.t : 'Fertig');
-    const zurueck = weg.done[s.id] ? el('button', {type:'button', class:'btn ghost', onclick:() => { delete weg.done[s.id]; save(); s.node.classList.remove('done'); kopf(); }}, 'Wieder öffnen') : null;
+    const weiter = el('button', {type:'button', class:'btn', onclick:() => { weg.done[s.id] = true; save(); track('erledigt', s.id); s.node.classList.add('done'); announce(s.t + ' erledigt'); if (next) open(next.id, true); else { weg.open = null; save(); apply(); } }}, next ? 'Weiter: ' + next.t : 'Fertig');
+    const zurueck = weg.done[s.id] ? el('button', {type:'button', class:'btn ghost', onclick:() => { delete weg.done[s.id]; save(); track('wieder_offen', s.id); s.node.classList.remove('done'); kopf(); }}, 'Wieder öffnen') : null;
     s.panel = el('div', {class:'w-body', id:'w-' + s.id, hidden:true}, s.body(), el('div', {class:'w-act'}, weiter, zurueck));
     s.node = el('section', {class:'w-step' + (weg.done[s.id] ? ' done' : '')}, s.head, s.panel);
     if (s.after) s.after();
@@ -465,7 +470,7 @@ function renderAuftrag(c, g) {
   apply();
 }
 function copyBtnWide(text, label) {
-  return el('button', {class:'btn secondary', type:'button', onclick:async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(text); b.textContent = 'Kopiert, jetzt im Doc einfügen'; announce('Gliederung kopiert'); setTimeout(() => { b.textContent = label; }, 2400); } catch { announce('Kopieren nicht möglich'); } }}, label);
+  return el('button', {class:'btn secondary', type:'button', onclick:async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(text); b.textContent = 'Kopiert, jetzt im Doc einfügen'; announce('Gliederung kopiert'); track('kopiert', 'geruest'); setTimeout(() => { b.textContent = label; }, 2400); } catch { announce('Kopieren nicht möglich'); } }}, label);
 }
 function renderInfos(g) {
   const inApp = [
