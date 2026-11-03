@@ -212,8 +212,8 @@ header:has(+ * .schirm.start), body:has(.schirm.start) header { max-width: 1180p
 .schirm.start details p { font-size: 0.8125rem; }
 /* Gewinn als Bildflaeche rechts */
 .schirm.start > .gewinn { grid-area: bild; align-self: center; position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end; gap: 6px; aspect-ratio: 1 / 1; padding: clamp(24px, 3vw, 40px); margin: 0; border-radius: 28px; overflow:hidden; color:#fff; background: radial-gradient(120% 90% at 85% 0%, #2c4a72 0%, transparent 60%), linear-gradient(160deg, #0b2a4a 0%, #001B35 70%); box-shadow: 0 30px 60px -30px rgba(0,27,53,.55); }
-.schirm.start > .gewinn::before { content:""; position:absolute; inset: 9% -16% auto auto; width: 56%; aspect-ratio: 1.6; border-radius: 20px; background: linear-gradient(135deg, #f8d26a, #e8a92e); transform: rotate(-9deg); box-shadow: 0 24px 40px -18px rgba(0,0,0,.5); }
-.schirm.start > .gewinn::after { content:""; position:absolute; inset: 9% -16% auto auto; width: 56%; aspect-ratio: 1.6; border-radius: 20px; background: repeating-linear-gradient(90deg, transparent 0 22px, rgba(255,255,255,.18) 22px 24px); transform: rotate(-9deg); mix-blend-mode: soft-light; }
+.schirm.start > .gewinn::before { content:""; position:absolute; inset: 8% -14% auto auto; height: 30%; width: auto; aspect-ratio: 1.6; border-radius: 20px; background: linear-gradient(135deg, #f8d26a, #e8a92e); transform: rotate(-9deg); box-shadow: 0 24px 40px -18px rgba(0,0,0,.5); }
+.schirm.start > .gewinn::after { content:""; position:absolute; inset: 8% -14% auto auto; height: 30%; width: auto; aspect-ratio: 1.6; border-radius: 20px; background: repeating-linear-gradient(90deg, transparent 0 22px, rgba(255,255,255,.18) 22px 24px); transform: rotate(-9deg); mix-blend-mode: soft-light; }
 .schirm.start .gewinn .ikon { position:absolute; top: clamp(24px, 3vw, 40px); left: clamp(24px, 3vw, 40px); width: 56px; height: 56px; border-radius: 16px; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,.1); color: #f8d26a; }
 .schirm.start .gewinn .betrag { position:relative; font-size: clamp(3rem, 1.6rem + 4vw, 5.25rem); font-weight: 800; line-height: .95; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
 .schirm.start .gewinn b { position:relative; display:block; font-size: clamp(1.125rem, 1rem + .4vw, 1.375rem); line-height: 1.25; font-weight: 700; }
@@ -252,6 +252,13 @@ header:has(+ * .schirm.start), body:has(.schirm.start) header { max-width: 1180p
   .schirm.start .nav .knopf { padding: 16px 24px; font-size: 1.125rem; }
   main:has(.schirm.start) { padding-top: 16px; }
 }
+
+/* Betrag und Text liegen immer über der Karte und haben eigene Fläche */
+.schirm.start .gewinn .betrag, .schirm.start .gewinn b, .schirm.start .gewinn .sub { z-index: 1; }
+
+/* Betrag skaliert mit der Karte, nicht mit dem Fenster (Container-Query), immer einzeilig */
+.schirm.start > .gewinn { container-type: inline-size; }
+.schirm.start .gewinn .betrag { white-space: nowrap; font-size: clamp(2.125rem, 19cqi, 5.5rem); }
 </style>
 </head>
 <body>
