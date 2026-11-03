@@ -5,7 +5,7 @@ const $ = id => document.getElementById(id);
 const ENDPOINT = (window.TEAM_CONFIG || {}).endpoint || '';
 const DEMO = location.hostname === '127.0.0.1' && new URLSearchParams(location.search).has('demo');
 const NAMES = {SA:'Salah', ES:'Ernes', MG:'Melisa', AM:'Arber', LB:'Leonie'};
-const state = {key:'', person:'', chapters:[], chapter:null, guide:{}, apa:null, wiar:null, tab:'auftrag', chat:[], busy:false};
+const state = {key:'', person:'', chapters:[], chapter:null, guide:{}, apa:null, wiar:null, tab:'auftrag', chat:[], busy:false, tasks:[]};
 
 function el(tag, attrs, ...kids) {
   const e = document.createElement(tag);
@@ -64,7 +64,7 @@ async function load() {
     let r = await post({typ:'team', k:state.key, leitung:false});
     if (!r || r.ok === false) throw Object.assign(Error(r && r.fehler || 'Kein Zugriff.'), {key:true});
     if (r.person === 'SA') { const lead = await post({typ:'team', k:state.key, leitung:true}).catch(() => null); if (lead && lead.ok !== false && Array.isArray(lead.chapters)) r = lead; }
-    return {person:r.person, chapters:r.chapters || [], chapterOverview:r.chapterOverview || null};
+    return {person:r.person, chapters:r.chapters || [], chapterOverview:r.chapterOverview || null, tasks:r.tasks || []};
   })();
   const [guide, apa, wiar] = await assets; state.guide = guide || {}; state.apa = apa; state.wiar = wiar;
   if (cached && cached.person) { apply(cached); route(); }
@@ -76,6 +76,7 @@ async function load() {
 }
 function apply(r) {
   state.person = r.person;
+  state.tasks = r.tasks || [];
   const own = r.chapters || [], byRef = new Map(own.map(c => [c.ref, c]));
   // Schreibwerk-Leitung: Gesamtsicht aller Kapitel (eigene Zeilen behalten ihre volle Form).
   (r.chapterOverview || []).forEach(c => { if (!byRef.has(c.ref)) byRef.set(c.ref, Object.assign({overview:true}, c)); });
@@ -129,16 +130,34 @@ function overviewBlock() {
     el('h2', {}, 'PA6a'), table(part('6a')), el('h2', {}, 'PA6b'), table(part('6b')));
 }
 // ---------- Darstellung ----------
+function schreibZeitKontext(c) {
+  let aufgabe = 'Kapitel ' + c.ref;
+  if (c.owner === state.person) aufgabe = 'Kapitel ' + c.ref + ' schreiben';
+  else if (c.reader === state.person) aufgabe = 'Kapitel ' + c.ref + ' gegenlesen';
+  let paket = '';
+  if (String(c.ref || '').startsWith('6a')) paket = 'AP-006';
+  else if (String(c.ref || '').startsWith('6b')) {
+    const row = (state.tasks || []).find(item => item.deliverable === 'pa6b_bericht' && item.owner === state.person);
+    paket = row?.ref || '';
+  }
+  return {aufgabe, paket};
+}
 function renderAll() {
   const c = state.chapter, g = state.guide[c.ref] || {};
   document.title = c.ref + ' · Schreibplatz';
   $('part').textContent = (c.ref.startsWith('6b') ? 'PA6b' : 'PA6a') + ' · Kapitel ' + c.ref.replace(/^6[ab]-/, '');
   $('title').textContent = g.titel || c.title;
-  fill($('meta'), 
+  fill($('meta'),
     el('span', {class:'chip role'}, roleOf(c)),
     c.due ? el('span', {class:'chip'}, 'Frist ' + day(c.due)) : null,
+    el('span', {id:'schreib-zeit', class:'chip'}),
     g.seiten ? el('span', {class:'chip'}, 'rund ' + String(g.seiten).replace('.', ',') + (g.seiten === 1 ? ' Seite' : ' Seiten')) : null,
     c.reader && c.owner === state.person ? el('span', {class:'chip soft'}, 'Gegenlesen: ' + (NAMES[c.reader] || c.reader)) : null);
+  const zeit = schreibZeitKontext(c);
+  queueMicrotask(() => {
+    if (!window.PA6Zeit || DEMO) return;
+    PA6Zeit.mount($('schreib-zeit'), Object.assign({person: state.person, compact: true, label: 'Zeit erfassen', save: body => post(Object.assign({k: state.key}, body))}, zeit));
+  });
   const picker = $('picker');
   picker.replaceChildren(...state.chapters.filter(x => state.lead || state.person === 'SA' || x.owner === state.person || x.reader === state.person)
     .map(x => el('option', {value:x.ref, selected:x.ref === c.ref}, x.ref + ' · ' + x.title)));

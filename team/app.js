@@ -308,6 +308,23 @@ function nextMeeting(){
   return (daysUntil(soon.due)===0?'heute ':'morgen ')+time+shortTitle(soon).replace(/^\d{4}-\d{2}-\d{2}\s*[·\-–]\s*/,'');
 }
 function greeting(){const h=Number(new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',hour:'2-digit',hour12:false}).formatToParts(new Date(nowMs())).find(part=>part.type==='hour').value);return h<11?'Guten Morgen':h<17?'Hallo':'Guten Abend';}
+async function projektSaveRequest(body){
+  const access=readKey();if(!access)throw Error('Öffne deinen persönlichen Team-Link.');
+  const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(Object.assign({k:access},body)),referrerPolicy:'no-referrer',cache:'no-store'});
+  const result=await response.json();if(!response.ok||!result.ok)throw Error(result.fehler||'Nicht gespeichert');return result;
+}
+function personPakete(tasks,person){
+  const open=status=>['offen','läuft','fällig','in Prüfung'].includes(status);
+  return (tasks||[]).filter(row=>row.type==='Arbeitspaket'&&row.owner===person&&/^AP-\d{3}$/.test(row.ref||''))
+    .sort((a,b)=>(open(a.status)?0:1)-(open(b.status)?0:1)||String(a.ref).localeCompare(b.ref))
+    .map(row=>({ref:row.ref,title:row.title,status:row.status||''}));
+}
+function zeitBar(){
+  if(!data?.person||leadership||preview.active()||!window.PA6Zeit)return null;
+  const host=el('div',{id:'zeit-heute'});
+  queueMicrotask(()=>PA6Zeit.mount(host,{person:data.person,pakete:personPakete(allTasks(),data.person),label:'Zeit erfassen',compact:true,save:projektSaveRequest}));
+  return host;
+}
 function showToday(){
   if(leadership && data.person==='SA')return showLeadership();
   const rows=personalRows(),sunday=sundayIso(),open=rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'),late=open.filter(overdue).length+fixedSteps.filter(s=>stepOpen(s)&&s.when&&daysUntil(s.when)<0).length;
@@ -318,8 +335,8 @@ function showToday(){
     nextMeeting()?el('span',{},nextMeeting()):null,!known&&due?el('span',{},'Stand teilweise unbekannt'):null].filter(Boolean);
   const summary=el('p',{class:'today-summary'});parts.forEach((p,i)=>{if(i)summary.append(el('span',{class:'sep','aria-hidden':'true'},' · '));summary.append(p);});
   const head=el('div',{class:'heading today-head'},el('div',{},el('h1',{},greeting()+', '+names[data.person]),summary),el('span',{class:'date-label'},date(today())));
-  return [head,focusSection(nowItem(rows)),threadsSection(),weekSection(rows),
-    el('p',{class:'group-line'},data.group&&data.group.done!==null?'Gemeinsam · '+data.group.done+' von '+data.group.total+' Aufgaben erledigt':'Gruppenstand unbekannt')];
+  return [head,zeitBar(),focusSection(nowItem(rows)),threadsSection(),weekSection(rows),
+    el('p',{class:'group-line'},data.group&&data.group.done!==null?'Gemeinsam · '+data.group.done+' von '+data.group.total+' Aufgaben erledigt':'Gruppenstand unbekannt')].filter(Boolean);
 }
 function groupedTasks(rows,compact=false){
   const now=new Date(today()+'T12:00:00Z'),end=new Date(now);end.setUTCDate(end.getUTCDate()+(7-(now.getUTCDay()||7)));

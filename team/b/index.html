@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JmC+wQKx16ZejWHvncoSm3vUeBURoVzCsW+ONqCmwbU='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-g7ncytrzLab7eKyUNPqVm8Jad3Z8wTm5u8kQfz0EE9U='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
+<link rel="stylesheet" href="../zeit.css?v=943ac658adf1">
 </head>
 <body>
 <header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=b">← Meine Arbeit</a><div class="titel">Servicetest</div><div id="wer" class="pille">…</div></div></header>
@@ -14,6 +15,7 @@
 <script src="../team.js?v=91ca8ca4ac11"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
 <script src="../service.js?v=c08e4cdbb6a6"></script>
+<script src="../zeit.js?v=74423848b5a6"></script>
 <script>
 // Regeln aus 10_pa6a/beobachtung/Testprotokoll.md, Version 4. Die Maske schlaegt vor, die Person entscheidet.
 const SKRIPT = {
@@ -337,7 +339,19 @@ async function speichern(stand) {
     fieldValue = daten; fieldPersist();
     hole("plan").then(neu => { if (nummer !== bSpeicherNr || neu.person !== daten.person) return; neu.fetchedAt ||= new Date().toISOString(); daten = neu; belastung = neu.belastung || {}; fieldValue = neu; fieldPersist(); }).catch(() => { if (nummer === bSpeicherNr) fieldNotice('Gespeichert · Abgleich ausstehend'); });
     msg.className = "meldung ok"; msg.textContent = stand === "abgeschlossen" ? "Abgeschlossen und gespeichert." : "Zwischenstand gespeichert. Komm zurück, wenn die Antwort da ist.";
-    if (stand === "abgeschlossen") setTimeout(liste, 900);
+    if (stand === "abgeschlossen") {
+      const start = payload.t_start ? String(payload.t_start).replace(" ", "T") : "";
+      const end = payload.t_ende ? String(payload.t_ende).replace(" ", "T") : "";
+      const mins = minuten(start, end);
+      if (mins > 0 && window.PA6Zeit && daten.person) {
+        const hours = PA6Zeit.roundQuarterMinutes(mins);
+        const datum = (payload.datum || start.slice(0, 10) || heute());
+        const host = document.getElementById("zeit-vorschlag") || (() => { const node = el("div", { id: "zeit-vorschlag" }); document.getElementById("main").prepend(node); return node; })();
+        host.replaceChildren();
+        PA6Zeit.offer(host, {person: daten.person, stunden: hours, minuten: mins, datum, paket: PA6Zeit.servicePaket(datum), aufgabe: "Servicetest " + row.nr});
+      }
+      setTimeout(liste, 900);
+    }
   } catch (e) { row.erfasst = planRow.erfasst = previous; msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
   finally { savePending = false; }
 }
