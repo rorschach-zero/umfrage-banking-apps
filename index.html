@@ -169,13 +169,29 @@ const S5 = (a,b)=>({stufen:5, links:a, rechts:b});
 
 /* ---------- Antworten ---------- */
 function merk(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
-let idAusAdresse = (new URLSearchParams(location.search).get("id")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,16);
-// Ein Kanal-Praefix wie «AD-» gilt fuer viele Personen: dann bekommt jede Teilnahme eine eigene Kennung dahinter.
-if (idAusAdresse.endsWith("-")) {
-  let fruehere = null; try { const g = JSON.parse(merk("stand") || "null"); if (g && g.A && typeof g.A.id === "string" && g.A.id.startsWith(idAusAdresse)) fruehere = g.A.id; } catch (e) {}
-  idAusAdresse = fruehere || (idAusAdresse + Math.random().toString(36).slice(2,8));
+function validSurveyId(value) {
+  if(typeof value!=="string"||!/^[A-Za-z0-9_-]{1,24}$/.test(value)||value.endsWith("-"))return false;
+  return !/^(HS|OR)-/i.test(value)||/^(HS|OR)-[A-Za-z0-9_]{1,12}-[A-Za-z0-9_]{1,8}$/.test(value);
 }
-const A = { id: idAusAdresse || merk("id") || Math.random().toString(36).slice(2,10), variante: merk("variante") || ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop", herkunft: (() => { try { const von = new URLSearchParams(location.search).get("von") || ""; if (/^[a-z0-9.-]{1,80}$/i.test(von)) return von.toLowerCase(); const h = document.referrer ? new URL(document.referrer).hostname.slice(0, 80) : ""; return h === location.hostname ? "" : h; } catch (e) { return ""; } })() };
+function rejectSurveyLink() {
+  const text={de:"Dieser Umfragelink ist ungültig. Bitte melde den Link an umfrage@hydeout.ch.",fr:"Ce lien est invalide. Merci de le signaler à umfrage@hydeout.ch.",it:"Questo link non è valido. Segnalalo a umfrage@hydeout.ch.",en:"This survey link is invalid. Please report it to umfrage@hydeout.ch."};
+  document.body.innerHTML='<main><h1>'+text[SPRACHE||"de"]+'</h1></main>';
+  throw Error("Ungültige Kennung; keine Teilnahme gestartet.");
+}
+const linkParams=new URLSearchParams(location.search);
+let idAusAdresse=linkParams.get("id")||"";
+if(linkParams.has("id")) {
+  const prefix=/^(?:[A-Z]{2,5}-|(?:HS|OR)-[A-Za-z0-9_]{1,12}-)$/.test(idAusAdresse)&&idAusAdresse!=="HS-"&&idAusAdresse!=="OR-";
+  if(!(prefix&&idAusAdresse.length<=16)&&!validSurveyId(idAusAdresse))rejectSurveyLink();
+}
+// Channel prefixes retain their full code and get a separate random suffix per session.
+if (idAusAdresse.endsWith("-")) {
+  let fruehere=null;try {const g=JSON.parse(merk("stand")||"null");if(g&&g.A&&validSurveyId(g.A.id)&&g.A.id.startsWith(idAusAdresse))fruehere=g.A.id;}catch(e){}
+  idAusAdresse=fruehere||(idAusAdresse+Math.random().toString(36).slice(2,8));
+}
+const storedId=idAusAdresse||merk("id");
+if(storedId&&!validSurveyId(storedId))rejectSurveyLink();
+const A = { id: storedId || Math.random().toString(36).slice(2,10), variante: merk("variante") || ["A","B","C"][Math.floor(Math.random()*3)], geraet: /Mobi/.test(navigator.userAgent) ? "mobil" : "desktop", herkunft: (() => { try { const von = new URLSearchParams(location.search).get("von") || ""; if (/^[a-z0-9.-]{1,80}$/i.test(von)) return von.toLowerCase(); const h = document.referrer ? new URL(document.referrer).hostname.slice(0, 80) : ""; return h === location.hostname ? "" : h; } catch (e) { return ""; } })() };
 merk("id", A.id); merk("variante", A.variante); A.reihenfolge = APPS.slice(1, 5).join("|"); A.merkmale_reihenfolge = MERK_ORDER.map(i => i + 1).join("|");
 let start = Date.now();
 // Neuladen mitten in der Umfrage (am Handy reicht ein Wischen nach unten) darf die Antworten nicht loeschen.
