@@ -9,13 +9,13 @@ const ABSCHNITTE_6B=[
  {id:'12',title:'Reflexion'},{id:'13',title:'Alle nötigen Verzeichnisse'},{id:'14',title:'Eigenständigkeitserklärung'}
 ];
 const forms={
- stakeholder:{title:'Stakeholder',intro:'Erfasse eine Rolle und deinen Umgang mit ihr. Trenne das Gruppenprojekt von einer Marketingmassnahme.',fields:[['bereich','Bereich',['Gruppenprojekt','Massnahme']],['rolle','Rolle'],['einfluss','Einfluss',['tief','mittel','hoch']],['haltung','Haltung',['unterstützend','neutral','kritisch','unbekannt']],['massnahme','Massnahme','textarea'],['kontaktweg','Kontaktweg'],['zustaendig','Zuständig','person'],['aenderungsdatum','Änderungsdatum','date']]},
- coaching:{title:'Coaching-Protokoll',intro:'Halte Fragen, Antworten und nächste Aufgaben fest. Nenne bei jeder Folgeaufgabe die Person und die Frist.',fields:[['termin','Termin','datetime-local'],['anwesenheit','Anwesenheit'],['fragen','Fragen','textarea'],['antworten','Antworten','textarea']]},
- risiko:{title:'Risiken',intro:'Beschreibe das Risiko, seine Folgen und was du dagegen unternimmst.',fields:[['risiko','Risiko','textarea'],['wahrscheinlichkeit','Wahrscheinlichkeit',['tief','mittel','hoch']],['auswirkung','Auswirkung',['tief','mittel','hoch']],['massnahme','Massnahme','textarea'],['verantwortung','Verantwortung','person'],['status','Status',['offen','in Bearbeitung','geschlossen']]]},
- arbeitszeit:{title:'Arbeitszeit',intro:'Erfasse deine geleistete Zeit in Stunden. Eine halbe Stunde ist 0,5 Stunden.',fields:[['datum','Datum','date'],['person','Person','self'],['stunden','Stunden','hours'],['aufgabe','Aufgabe','textarea']]},
- beitrag:{title:'6b-Beiträge',intro:'Ordne deinen Beitrag einem Abschnitt der vorgegebenen Gliederung zu. Ein Beitrag ersetzt keine Prüfung oder Abgabe.',fields:[['abschnitt','Abschnitt',ABSCHNITTE_6B.map(row=>row.id)],['beitrag','Beitrag','textarea'],['stand','Stand',['Entwurf','in Bearbeitung','zur Prüfung']]]}
+ stakeholder:{title:'Stakeholder',intro:'Eine Zeile pro Person oder Gruppe, die von der Massnahme für Yuh betroffen ist oder sie beeinflusst (Stakeholder-Map, C7).',fields:[['bereich','Bereich',['Massnahme']],['rolle','Rolle'],['einfluss','Einfluss',['tief','mittel','hoch']],['haltung','Haltung',['unterstützend','neutral','kritisch','unbekannt']],['massnahme','Massnahme','textarea'],['kontaktweg','Kontaktweg'],['zustaendig','Zuständig','person'],['aenderungsdatum','Änderungsdatum','date']]},
+ coaching:{title:'Coaching-Protokoll',intro:'Dokumentiert ein Coaching mit Fragen, Antworten und Folgeaufgaben (Protokolle der Coachings, C6).',fields:[['termin','Termin','datetime-local'],['anwesenheit','Anwesenheit'],['fragen','Fragen','textarea'],['antworten','Antworten','textarea']]},
+ risiko:{title:'Risiken',intro:'Was bei der Massnahme für Yuh oder bei unserer Gruppenarbeit schiefgehen kann und was ihr dagegen tut (Risiko-Map C8, Projektrisiken C4).',fields:[['bereich','Bereich',['Massnahme','Gruppenprojekt']],['risiko','Risiko','textarea'],['wahrscheinlichkeit','Wahrscheinlichkeit',['tief','mittel','hoch']],['auswirkung','Auswirkung',['tief','mittel','hoch']],['massnahme','Massnahme','textarea'],['verantwortung','Verantwortung','person'],['status','Status',['offen','in Bearbeitung','geschlossen']]]},
+ arbeitszeit:{title:'Arbeitszeit',intro:'Erfasst geleistete Stunden für den Abgleich Plan und Ist (Aufwand Plan gegen Ist, C5).',fields:[['datum','Datum','date'],['person','Person','self'],['stunden','Stunden','hours'],['paket','Arbeitspaket','paket'],['aufgabe','Aufgabe','textarea']]},
+ beitrag:{title:'6b-Beiträge',intro:'Ordnet deinen Textbeitrag einem Abschnitt der vorgegebenen 6b-Gliederung zu (eigener Beitrag zu einem 6b-Abschnitt).',fields:[['abschnitt','Abschnitt',ABSCHNITTE_6B.map(row=>row.id)],['beitrag','Beitrag','textarea'],['stand','Stand',['Entwurf','in Bearbeitung','zur Prüfung']]]}
 };
-let active=FORM_ORDER[0],who='',saving=false,draft=null,receipts=[],loaded=false;
+let active=FORM_ORDER[0],who='',saving=false,draft=null,receipts=[],loaded=false,pakete=[];
 const $=id=>document.getElementById(id),drafts=new Map();
 function abschnittLabel(id){return ABSCHNITTE_6B.find(row=>row.id===String(id))?.title||('Abschnitt '+id);}
 function newDraft(){return {id:crypto.randomUUID(),values:{},tasks:[],none:false,uncertain:false};}
@@ -30,18 +30,24 @@ function fieldInvalid(key,label,type){
  if(!input)return false;
  const value=String(draft.values[key]||'').trim();
  if(type==='hours')return !normalizeHours(value);
+ if(type==='paket')return false;
  if(!value||!input.checkValidity()||/^=/.test(value))return true;
  return false;
 }
 function field(key,label,type,value,onInput){
  const id='project-'+key,invalid=fieldInvalid(key,label,type);
  const mark=e=>{(draft.touched||(draft.touched=new Set())).add(key);onInput&&onInput(e);};
- const attrs={id,name:key,required:true,'aria-describedby':id+'-error',on:{input:mark,change:mark},...(invalid?{'aria-invalid':'true'}:{})};
+ const attrs={id,name:key,required:type!=='paket','aria-describedby':id+'-error',on:{input:mark,change:mark},...(invalid?{'aria-invalid':'true'}:{})};
  let input;
- if(Array.isArray(type)||type==='person'||type==='self'){
+ if(Array.isArray(type)||type==='person'||type==='self'||type==='paket'){
+  if(type==='paket'){
+   input=el('select',attrs,el('option',{value:''},'Paket optional'),...pakete.map(row=>el('option',{value:row.ref},row.ref+' · '+row.title)),el('option',{value:'anderes'},'anderes'));
+   input.value=value||'';
+  }else{
   const options=Array.isArray(type)?type:(type==='self'?[who]:Object.keys(TEAM));
   input=el('select',attrs,el('option',{value:''},'Bitte wählen'),options.map(v=>el('option',{value:v},key==='abschnitt'?v+' · '+abschnittLabel(v):(TEAM[v]||v))));input.value=value||'';
   if(type==='self'){input.value=who;input.disabled=true;draft.values[key]=who;}
+  }
  }else if(type==='textarea')input=el('textarea',{...attrs,maxlength:6000,rows:4},value||'');
  else if(type==='hours')input=el('input',{...attrs,type:'text',inputMode:'decimal',value:value||'',maxlength:8,placeholder:'0.5 mit Punkt oder Komma'});
  else input=el('input',{...attrs,type:type||'text',value:value||'',maxlength:6000});
@@ -84,7 +90,7 @@ function renderForm(){
   return el('button',{type:'button',class:'chip','aria-pressed':String(key===active),disabled:saving||!unlocked,on:{click:()=>{active=key;draft=drafts.get(key)||newDraft();drafts.set(key,draft);renderForm();showNext();}}},String(index+1)+'. '+forms[key].title);
  }));
  const fields=el('div',{class:'project-fields'},spec.fields.map(([key,label,type])=>field(key,label,type,draft.values[key],e=>{draft.values[key]=e.target.value;update();})),active==='coaching'?taskFields():null);
- const form=el('form',{novalidate:true,on:{submit:e=>{e.preventDefault();save();}}},el('h2',{},spec.title),el('p',{},spec.intro),el('p',{class:'leise'},'Alle Felder sind Pflichtfelder. Deine Eingaben bleiben bis zum Speichern nur in diesem geöffneten Fenster.'),fields,el('p',{id:'project-ready',role:'status','aria-live':'polite'}),el('div',{class:'project-actions'},el('button',{id:'project-save',class:'knopf',type:'submit',disabled:true},draft.id&&receipts.some(r=>r.id===draft.id)?'Änderung speichern':'Speichern'),draft.uncertain?el('button',{type:'button',class:'knopf hell',on:{click:()=>save(true)}},'Speicherauftrag wiederholen'):null),el('p',{id:'project-message',class:'project-message',role:'status'}));
+ const form=el('form',{novalidate:true,on:{submit:e=>{e.preventDefault();save();}}},el('h2',{},spec.title),el('p',{},spec.intro),el('p',{class:'leise'},(active==='arbeitszeit'?'Alle Felder ausser dem Arbeitspaket sind Pflichtfelder.':'Alle Felder sind Pflichtfelder.')+' Deine Eingaben bleiben bis zum Speichern nur in diesem geöffneten Fenster.'),fields,el('p',{id:'project-ready',role:'status','aria-live':'polite'}),el('div',{class:'project-actions'},el('button',{id:'project-save',class:'knopf',type:'submit',disabled:true},draft.id&&receipts.some(r=>r.id===draft.id)?'Änderung speichern':'Speichern'),draft.uncertain?el('button',{type:'button',class:'knopf hell',on:{click:()=>save(true)}},'Speicherauftrag wiederholen'):null),el('p',{id:'project-message',class:'project-message',role:'status'}));
  $('project-form').replaceChildren(form);
  if(draft.uncertain)fields.querySelectorAll('input,textarea,select,button').forEach(n=>n.disabled=true);
  update();
@@ -95,7 +101,7 @@ function entrySummary(row){
  if(row.formular==='stakeholder')return f.rolle+' · '+f.bereich;
  if(row.formular==='coaching')return f.termin+' · '+String(f.fragen||'').slice(0,80);
  if(row.formular==='risiko')return String(f.risiko||'').slice(0,80);
- if(row.formular==='arbeitszeit')return f.datum+' · '+f.stunden+' h · '+String(f.aufgabe||'').slice(0,60);
+ if(row.formular==='arbeitszeit')return f.datum+' · '+f.stunden+' h'+(f.paket?' · '+f.paket:'')+' · '+String(f.aufgabe||'').slice(0,60);
  if(row.formular==='beitrag')return abschnittLabel(f.abschnitt)+' · '+String(f.beitrag||'').slice(0,80);
  return '';
 }
@@ -157,7 +163,7 @@ async function save(retry=false){
  if(saving||!loaded||window.PA6View.active()||(!retry&&(draft.uncertain||missing().length)))return;
  const current=draft,type=active,payload={...current.values};
  if(type==='coaching')payload.folgeaufgaben=JSON.stringify(current.none?[]:current.tasks);
- if(type==='arbeitszeit'){const hours=normalizeHours(payload.stunden);if(!hours)return;payload.stunden=hours;}
+ if(type==='arbeitszeit'){const hours=normalizeHours(payload.stunden);if(!hours)return;payload.stunden=hours;if(payload.paket==='anderes')payload.paket='';}
  saving=true;renderForm();$('project-form').querySelectorAll('input,textarea,select,button').forEach(n=>n.disabled=true);$('project-message').textContent='Dein Eintrag wird gespeichert …';
  try{
   const r=await sende({typ:'projekt_save',formular:type,id:current.id,felder:payload});
@@ -173,8 +179,9 @@ async function start(){
   const data=await hole('projekt'),keys=FORM_ORDER;
   const receiptOk=row=>row&&forms[row.formular]&&typeof row.id==='string'&&Number.isInteger(row.zeile)&&row.zeile>=2&&Number.isFinite(Date.parse(row.zeitstempel))&&typeof row.blatt==='string'&&/^[a-f0-9]{64}$/.test(row.pruefsumme);
   const syncOk=data.sync&&typeof data.sync.enabled==='boolean'&&Array.isArray(data.sync.forms)&&data.sync.forms.length===keys.length&&data.sync.forms.every(row=>row&&forms[row.formular]&&typeof row.status==='string');
-  if(!TEAM[data.person]||JSON.stringify(data.forms)!==JSON.stringify(keys)||!Array.isArray(data.receipts)||!data.receipts.every(receiptOk)||!syncOk)throw Error('Der Projektbereich ist noch nicht bereitgestellt');
-  who=data.person;receipts=data.receipts;loaded=true;draft=newDraft();drafts.set(active,draft);$('wer').textContent=TEAM[who];$('project-loading').hidden=true;$('project-content').hidden=false;showNext();showServiceLink();renderForm();showReceipts();showSync(data.sync);
+  const paketeOk=Array.isArray(data.pakete)&&data.pakete.every(row=>row&&/^AP-\d{3}$/.test(row.ref)&&typeof row.title==='string');
+  if(!TEAM[data.person]||JSON.stringify(data.forms)!==JSON.stringify(keys)||!Array.isArray(data.receipts)||!data.receipts.every(receiptOk)||!syncOk||!paketeOk)throw Error('Der Projektbereich ist noch nicht bereitgestellt');
+  who=data.person;pakete=data.pakete;receipts=data.receipts;loaded=true;draft=newDraft();drafts.set(active,draft);$('wer').textContent=TEAM[who];$('project-loading').hidden=true;$('project-content').hidden=false;showNext();showServiceLink();renderForm();showReceipts();showSync(data.sync);
  }
  catch(error){$('project-loading').replaceChildren(el('span',{},error.message+' '),el('button',{type:'button',class:'chip',on:{click:start}},'Erneut laden'));}
 }
