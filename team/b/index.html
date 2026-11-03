@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-f3ldnEvFWrn8hxZlwm8lWzwMET57e9i+05b6FwKYDOE='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-gIDMPsXAR3JmQ6EFxa9bvhcEY2TUr8ZNDr91GNNN0Mc='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 </head>
 <body>
-<header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=b">← Meine Arbeit</a><div class="titel"><small>B · Servicetest</small>Servicetest</div><div id="wer" class="pille">…</div></div></header>
+<header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=b">← Meine Arbeit</a><div class="titel">Servicetest</div><div id="wer" class="pille">…</div></div></header>
 <div class="purpose-slot" data-purpose-area="b"></div>
 <section id="workspace-progress" class="workspace-progress" aria-live="polite" hidden></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
@@ -31,7 +31,7 @@ const FRIST = { // Minuten bis Mensch, danach bis Mindestantwort; Beobachtung ge
 const HINWEISE = ["Name oder Kürzel", "Bezug auf ein Detail der Frage", "Sichtbare Tippzeit oder Schreibanzeige", "Freitext ohne Bausteincharakter"];
 const HOEFLICH = [[1, "abweisend oder herablassend"], [2, "einsilbig, geht nicht auf Dank oder Rückfrage ein"], [3, "korrekt und sachlich"], [4, "freundlich, nimmt Bezug auf die Person"], [5, "freundlich und vorausschauend, bietet ungefragt Hilfe an"]];
 const STOPP = { nachrichten: 42, minuten: 140 };
-let daten = null, aktiv = null, z = {}, belastung = {}, savePending = false;
+let daten = null, aktiv = null, z = {}, belastung = {}, savePending = false, startCorrection = false;
 
 function frei(s) { return (s || "").replace(/\s+/g, " ").trim(); }
 async function start() {
@@ -52,7 +52,7 @@ function liste() {
   const p = (daten.plan || []).slice().sort((a, b) => (a.tag + a.block).localeCompare(b.tag + b.block));
   const fertig = p.filter(r => statusVon(r) === "abgeschlossen").length;
   const ziel = daten.service && daten.service.config ? daten.service.config.target : p.length;
-  m.append(el("div", { class: "kicker" }, "B · Servicetest"), el("h1", {}, "Servicetest"),
+  m.append(el("h1", {}, "Servicetest"),
     el("p", { class: "b-sub" }, p.length ? `${fertig} von ${p.length} Kontakten erledigt` : `Ziel ${ziel} Kontakte · so startest du`));
   renderBSetup(m);
   for (const gruppe of ["laufend", "offen", "abgeschlossen"]) {
@@ -67,6 +67,7 @@ function liste() {
 function gesperrt() { const l = belastung[aktiv.anbieter] || { nachrichten: 0, minuten: 0 }; return !aktiv.erfasst && (l.nachrichten >= STOPP.nachrichten || l.minuten >= STOPP.minuten); }
 function openForm(r) {
   aktiv = r;
+  startCorrection = false;
   z = Object.assign({ nr: r.nr, code: "durchgefuehrt", kanal_angeboten: "ja", sprache_antwort: "Deutsch", stand: "laufend", hinweise: [], elemente: [] }, lokal("b-" + r.nr) || {}, r.erfasst || {});
   if (r.nr.startsWith('PROBE-B-')) { z.nachrichten_anbieter='0';z.minuten_anbieter='0'; }
   if (r.status==='nicht angeboten'&&!r.erfasst) {z.code='nicht angeboten';z.kanal_angeboten='nein';}
@@ -100,10 +101,63 @@ function vorschlaege() {
   v.inFrist = inFrist;
   return v;
 }
-function zeitfeld(k, titel, hilfe) {
-  const inp = el("input", { class: "t", type: "datetime-local", value: z[k] || "", on: { change: e => setze(k, e.target.value) } });
+function zeitfeld(k, titel, hilfe, jetzt = true) {
+  const inp = el("input", { class: "t", type: "datetime-local", value: z[k] || "", on: { change: e => { z[k] = e.target.value; lokal("b-" + aktiv.nr, z); bUpdateReadiness(); } } });
   return el("div", {}, el("label", { class: "f" }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")),
-    el("div", { class: "zeit" }, inp, el("button", { type: "button", class: "knopf zwei", on: { click: () => setze(k, jetztLokal()) } }, "Jetzt")));
+    el("div", { class: "zeit" }, inp, jetzt ? el("button", { type: "button", class: "knopf zwei", on: { click: () => setze(k, jetztLokal()) } }, "Jetzt") : null));
+}
+function startHilfe(kanal) {
+  return kanal === "telefon" ? "Halte den Moment fest, in dem du wählst."
+    : kanal === "chat" ? "Halte den Moment fest, in dem deine Nachricht rausgeht."
+    : "Trage den Absendezeitpunkt aus dem Mailverlauf ein.";
+}
+async function markStarted() {
+  if (window.PA6View.active() || fieldPending || savePending || !aktiv) return;
+  const msg = document.getElementById("meldung");
+  try {
+    if (!aktiv.nr.startsWith("PROBE-B-") && !aktiv.erfasst?.t_start) {
+      await sende({ typ: "b_begin", nr: aktiv.nr });
+      daten = await hole("plan");
+      const row = daten.plan.find(item => item.nr === aktiv.nr) || aktiv;
+      aktiv = row;
+      const server = row.erfasst?.t_start ? String(row.erfasst.t_start).replace(" ", "T").slice(0, 16) : jetztLokal();
+      z.t_start = server;
+      lokal("b-" + aktiv.nr, z);
+      window.dispatchEvent(new Event("workspace-saved"));
+    } else if (!z.t_start) {
+      z.t_start = jetztLokal();
+      lokal("b-" + aktiv.nr, z);
+    }
+    startCorrection = false;
+    formular();
+    bUpdateReadiness();
+  } catch (error) {
+    msg.className = "meldung fehler";
+    msg.textContent = error.message;
+  }
+}
+function startBlock(r) {
+  const help = startHilfe(r.kanal);
+  const rows = [el("p", { class: "leise" }, help)];
+  if (r.kanal === "mail" || r.kanal === "formular") {
+    rows.push(zeitfeld("t_start", "Start", help));
+    return rows;
+  }
+  if (!z.t_start) {
+    rows.push(el("button", { type: "button", class: "b-event knopf", on: { click: markStarted } }, "gestartet"));
+    return rows;
+  }
+  if (startCorrection) {
+    rows.push(zeitfeld("t_start", "Start korrigieren", help, false),
+      el("div", { class: "zeile" },
+        el("button", { type: "button", class: "chip", on: { click: () => { startCorrection = false; formular(); } } }, "Abbrechen"),
+        el("button", { type: "button", class: "knopf", on: { click: () => { z.start_korrektur = true; startCorrection = false; formular(); } } }, "Übernehmen")));
+    return rows;
+  }
+  rows.push(
+    el("p", {}, new Intl.DateTimeFormat("de-CH", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Zurich" }).format(new Date(String(z.t_start).replace(" ", "T")))),
+    el("button", { type: "button", class: "chip", on: { click: () => { startCorrection = true; formular(); } } }, "Korrigieren"));
+  return rows;
 }
 const ANZEIGE = { durchgefuehrt: "durchgeführt", "nicht zugaenglich": "nicht zugänglich", "nicht pruefbar": "nicht prüfbar", "Schritt erklaert": "Schritt erklärt" };
 function wahl(k, titel, werte, hilfe, vorschlag) {
@@ -132,7 +186,7 @@ function showStep(index) { bStep = index; formular(); focusStep(); }
 function bStepper() {
   return el("nav", { class: "b-stepper", "aria-label": "Schritte" }, B_SCHRITTE.map((name, i) => {
     const ok = !bFehltIn(i).length && (i < bStep || bBesucht.has(i));
-    return el("button", { type: "button", class: "b-stepper-item" + (i === bStep ? " is-now" : "") + (ok ? " is-ok" : ""), "aria-label": (i + 1) + " · " + name, "aria-current": i === bStep ? "step" : null, "data-read-navigation": true, on: { click: () => { showStep(i); } } },
+    return el("button", { type: "button", class: "b-stepper-item" + (i === bStep ? " is-now" : "") + (ok ? " is-ok" : ""), "aria-label": (i + 1) + " · " + name, "aria-current": i === bStep ? "step" : null, "data-read-navigation": true, on: { click: () => { for (let j = 0; j < i; j++) if (bFehltIn(j).length) return; showStep(i); } } },
       el("span", { class: "b-stepper-num" }, ok && i !== bStep ? "✓" : String(i + 1)), el("span", { class: "b-stepper-name" }, name));
   }));
 }
@@ -164,14 +218,14 @@ function formular() {
   const lauf = minuten(z.t_start, jetztLokal()), last = belastung[r.anbieter] || { nachrichten: 0, minuten: 0 };
   const kopf = [
     el("button", { type: "button", class: "knopf hell", "data-read-navigation": true, on: { click: liste } }, "‹ Einsatzplan"),
-    el("div", { class: "kicker", style: "margin-top:16px" }, `Kontakt ${r.nr} · Wiederholung ${r.wiederholung}`),
     el("h1", {}, `${r.anbieter} · ${r.anliegen} · ${r.kanal}`),
+    el("p", { class: "leise" }, `Kontakt ${r.nr} · Wiederholung ${r.wiederholung}`),
     el("div", { class: "chips" }, el("span", { class: "pille" }, `Block ${r.block}`), el("span", { class: "pille" }, f.text), lauf !== null && !z.t_ende ? el("span", { class: "pille orange" }, `läuft seit ${lauf} min`) : null),
     gesperrt() ? el("div", { class: "hinweisbox" }, `Stoppregel erreicht bei ${r.anbieter}: dieser Kontakt wird nicht mehr gestartet. Bitte Salah melden.`) : null,
     v.inFrist === false && z.t_antwort ? el("div", { class: "hinweisbox" }, "Die Mindestantwort kam ausserhalb der Frist. Sie zählt als «nicht in der Frist», nicht im Median.") : null,
 ];
   const teile = [[
-    r.nr.startsWith('PROBE-B-') ? simulationNotice() : !r.erfasst?.t_start && r.status!=='nicht angeboten' ? startNotice(r) : null,
+    r.nr.startsWith('PROBE-B-') ? simulationNotice() : null,
     !r.nr.startsWith('PROBE-B-') && kanalInfo(r.anbieter, r.kanal) ? el("div", { class: "kanal-hinweis" }, el("b", {}, "So erreichst du " + r.anbieter + ": "), kanalInfo(r.anbieter, r.kanal).text, " ", el("a", { href: kanalInfo(r.anbieter, r.kanal).quelle, target: "_blank", rel: "noopener", "data-read-navigation": true }, "Quelle ↗")) : null,
     el("div", { class: "karte akzent" }, el("div", { class: "kicker" }, "Fragekern, so wörtlich wie möglich"), el("p", { style: "font-size:19px;font-weight:700;margin:6px 0 10px" }, "«" + s.frage + "»"),
       el("button", { type: "button", class: "chip", on: { click: async e => { try { await navigator.clipboard.writeText(s.frage); e.target.textContent = "Kopiert"; } catch (x) {} } } }, "Frage kopieren")),
@@ -180,11 +234,7 @@ function formular() {
     el("div", {}, el("label", { class: "f" }, "Kanal vorhanden und erreichbar? ", el("span", { class: "hilfe" }, "«nicht angeboten» laut Anbieter (Quelle angeben), «nicht erreichbar» wenn er existiert, aber nicht funktioniert")),
       chips([["ja", "ja"], ["nein", "nicht angeboten"], ["nicht erreichbar", "nicht erreichbar"]], z.kanal_angeboten || "", w => setze("kanal_angeboten", w)))
   ],
-  [
-    el("p", { class: "leise" }, r.kanal==="telefon"?"Wähle zuerst die Nummer. Halte den Start fest, sobald der Anruf rausgeht.":r.kanal==="chat"?"Öffne den belegten Chat. Halte den Start fest, sobald deine Nachricht gesendet ist.":"Trage den Start aus dem Verlauf ein."),
-    ["telefon","chat"].includes(r.kanal)?bEventButton("t_start","gestartet"):null,
-    zeitfeld("t_start", "Start", "Anruf gewählt, Nachricht gesendet, Mail abgeschickt")
-  ],
+  startBlock(r),
   [
     el("p", { class: "leise" }, r.kanal==="telefon"?"Halte den Moment fest, in dem eine Person spricht. Ansage und Menü zählen nicht.":"Halte die erste Antwort mit Hinweisen auf eine Person fest."),
     ["telefon","chat"].includes(r.kanal)?bEventButton("t_mensch",r.kanal==="telefon"?"Mensch erreicht":"erste Antwort"):null,
@@ -239,6 +289,7 @@ function zeile(stand) {
   o.datum = (o.t_start || "").slice(0, 10);
   o.verlauf = frei(o.verlauf); o.bemerkung = frei(o.bemerkung);
   delete o.hinweise; delete o.auto_selbst; delete o.anderer_kanal; delete o.erfasst;
+  if (z.start_korrektur) o.start_korrektur = true;
   return o;
 }
 function echt(t) { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(t || "")); if (!m) return false; const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])); return d.getUTCDate() === +m[3] && d.getUTCMonth() === +m[2] - 1; }
@@ -279,7 +330,8 @@ async function speichern(stand) {
   savePending = true; row.erfasst = planRow.erfasst = payload;
   msg.textContent = "Speichert …";
   try {
-    await sende({ typ: "beobachtung", maske: "b4", simulation:aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: payload });
+    await sende({ typ: "beobachtung", maske: "b4", simulation: aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: payload, start_korrektur: payload.start_korrektur === true });
+    delete z.start_korrektur;
     window.dispatchEvent(new Event("workspace-saved"));
     row.erfasst = planRow.erfasst = payload; try { localStorage.removeItem("b-" + row.nr); } catch (e) {}
     fieldValue = daten; fieldPersist();
