@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-4k5i0f7VCHtAA+Qwaa26abRSPO5c2A2sUD4qEbsCRZ4='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-OzaQ2kwkUm3RXg3TMPLTcmeslRas55E0O1WwoqdQFUw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=84d3596daea8">
 </head>
@@ -243,26 +243,26 @@ function fehlt() {
   if (VERBOTEN.test([o.verlauf, o.bemerkung, o.ausfall_grund, o.abbruch_grund].join(" "))) f.push("Notizen ohne Nummern, Mail- und Netzadressen");
   return f;
 }
-// Nur die Antwort auf die neueste Speicherung gilt; ältere Antworten überschreiben nie einen neueren Stand (t25).
+// Invalidate earlier refreshes as soon as a new write begins.
 let bSpeicherNr = 0;
 async function speichern(stand) {
   if(window.PA6View.active() || fieldPending || savePending)return;
   const msg = document.getElementById("meldung"); msg.className = "meldung";
   if (stand === "abgeschlossen") { const f = fehlt(); if (f.length) { msg.className = "meldung fehler"; msg.textContent = "Fehlt noch: " + f.join(", "); return; } }
   if (stand === "laufend" && VERBOTEN.test([z.verlauf, z.bemerkung].join(" "))) { msg.className = "meldung fehler"; msg.textContent = "Notizen ohne Nummern, Mail- und Netzadressen"; return; }
-  const row = aktiv, previous = row.erfasst, payload = zeile(stand);
-  savePending = true; row.erfasst = payload;
+  const row = aktiv, planRow = daten.plan.find(item => item.nr === row.nr) || row;
+  const previous = planRow.erfasst, payload = zeile(stand), nummer = ++bSpeicherNr;
+  savePending = true; row.erfasst = planRow.erfasst = payload;
   msg.textContent = "Speichert …";
   try {
     await sende({ typ: "beobachtung", maske: "b4", simulation:aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: payload });
     window.dispatchEvent(new Event("workspace-saved"));
-    row.erfasst = payload; try { localStorage.removeItem("b-" + row.nr); } catch (e) {}
+    row.erfasst = planRow.erfasst = payload; try { localStorage.removeItem("b-" + row.nr); } catch (e) {}
     fieldValue = daten; fieldPersist();
-    const nummer = ++bSpeicherNr;
-    hole("plan").then(neu => { if (nummer !== bSpeicherNr || neu.person !== daten.person) return; neu.fetchedAt ||= new Date().toISOString(); daten = neu; belastung = neu.belastung || {}; fieldValue = neu; fieldPersist(); }).catch(() => fieldNotice('Gespeichert · Abgleich ausstehend'));
+    hole("plan").then(neu => { if (nummer !== bSpeicherNr || neu.person !== daten.person) return; neu.fetchedAt ||= new Date().toISOString(); daten = neu; belastung = neu.belastung || {}; fieldValue = neu; fieldPersist(); }).catch(() => { if (nummer === bSpeicherNr) fieldNotice('Gespeichert · Abgleich ausstehend'); });
     msg.className = "meldung ok"; msg.textContent = stand === "abgeschlossen" ? "Abgeschlossen und gespeichert." : "Zwischenstand gespeichert. Komm zurück, wenn die Antwort da ist.";
     if (stand === "abgeschlossen") setTimeout(liste, 900);
-  } catch (e) { row.erfasst = previous; msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
+  } catch (e) { row.erfasst = planRow.erfasst = previous; msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
   finally { savePending = false; }
 }
 document.getElementById("zwischen").addEventListener("click", () => speichern("laufend"));
