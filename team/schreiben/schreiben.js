@@ -81,7 +81,7 @@ function chooser(mine) {
   $('part').textContent = 'Schreibplatz';
   const list = (rows, label) => rows.length ? el('section', {class:'block'}, el('h2', {}, label), el('ul', {class:'choose'}, rows.map(c =>
     el('li', {}, el('a', {href:'?k=' + encodeURIComponent(c.ref) + (DEMO ? '&demo' : '')}, el('span', {class:'ref'}, c.ref), el('span', {class:'ct'}, c.title),
-      el('span', {class:'cm'}, [c.due ? 'Frist ' + day(c.due) : null, state.guide[c.ref] && state.guide[c.ref].seiten ? 'rund ' + state.guide[c.ref].seiten + ' S.' : null].filter(Boolean).join(' · '))))))) : null;
+      el('span', {class:'cm'}, [c.due ? 'Frist ' + day(c.due) : null, state.guide[c.ref] && state.guide[c.ref].seiten ? 'rund ' + String(state.guide[c.ref].seiten).replace('.', ',') + ' S.' : null].filter(Boolean).join(' · '))))))) : null;
   const reading = state.chapters.filter(c => c.reader === state.person);
   const others = state.person === 'SA' ? state.chapters.filter(c => c.owner !== 'SA' && c.reader !== 'SA') : [];
   fill($('tab-auftrag'), 
@@ -101,7 +101,7 @@ function renderAll() {
   fill($('meta'), 
     el('span', {class:'chip role'}, roleOf(c)),
     c.due ? el('span', {class:'chip'}, 'Frist ' + day(c.due)) : null,
-    g.seiten ? el('span', {class:'chip'}, 'rund ' + g.seiten + (g.seiten === 1 ? ' Seite' : ' Seiten')) : null,
+    g.seiten ? el('span', {class:'chip'}, 'rund ' + String(g.seiten).replace('.', ',') + (g.seiten === 1 ? ' Seite' : ' Seiten')) : null,
     c.reader && c.owner === state.person ? el('span', {class:'chip soft'}, 'Gegenlesen: ' + (NAMES[c.reader] || c.reader)) : null);
   const picker = $('picker');
   picker.replaceChildren(...state.chapters.filter(x => state.person === 'SA' || x.owner === state.person || x.reader === state.person)
@@ -181,6 +181,18 @@ function renderRegeln(g) {
     block('Wissenschaftlich schreiben (Unterricht)', state.wiar && state.wiar.regeln ? state.wiar.regeln.map(r => rule(r, 'wiar')) : el('p', {class:'quiet'}, 'Die Regeln aus dem Unterricht werden gerade ergänzt.')));
 }
 
+// Kleine Markdown-Darstellung fuer Antworten: Fett, Aufzaehlungen, Absaetze. Kein HTML aus der Antwort.
+function inline(t) { const out = []; String(t).split(/(\*\*[^*]+\*\*)/).forEach(p => { if (/^\*\*[^*]+\*\*$/.test(p)) out.push(el('strong', {}, p.slice(2, -2))); else if (p) out.push(p); }); return out; }
+function rich(t) {
+  const nodes = []; let list = null;
+  for (const line of String(t).split('\n')) {
+    const m = /^\s*(?:[-*•]|\d+\.)\s+(.*)$/.exec(line);
+    if (m) { if (!list) { list = el('ul', {class:'md'}); nodes.push(list); } list.append(el('li', {}, inline(m[1]))); continue; }
+    list = null;
+    if (line.trim()) nodes.push(el('p', {class:'md'}, inline(line.replace(/^#+\s*/, ''))));
+  }
+  return nodes;
+}
 // ---------- Hilfe (Gliederung, keine Absätze) ----------
 const PROMPTS = ['Schlag mir eine Gliederung in Stichworten vor.', 'Was fehlt mir noch für volle Punkte?', 'Wo finde ich die Daten und Quellen dafür?', 'Worauf muss ich bei APA hier achten?'];
 function renderHilfe(c, g) {
@@ -189,7 +201,7 @@ function renderHilfe(c, g) {
   const thread = el('div', {class:'thread', 'aria-live':'polite'});
   const input = el('textarea', {rows:'3', maxlength:'900', placeholder:'Frag nach Gliederung, Leitfragen, Quellen oder APA …', 'aria-label':'Frage an die Schreibhilfe'});
   const send = el('button', {class:'btn', type:'submit'}, 'Fragen');
-  const draw = () => { thread.replaceChildren(...(state.chat.length ? state.chat.map(m => el('div', {class:'msg ' + m.r + (m.err ? ' err' : '')}, el('p', {class:'who'}, m.r === 'du' ? 'Du' : 'Schreibhilfe'), el('div', {class:'txt'}, m.t))) :
+  const draw = () => { thread.replaceChildren(...(state.chat.length ? state.chat.map(m => el('div', {class:'msg ' + m.r + (m.err ? ' err' : '')}, el('p', {class:'who'}, m.r === 'du' ? 'Du' : 'Schreibhilfe'), el('div', {class:'txt'}, m.r === 'du' ? m.t : rich(m.t)))) :
     [el('p', {class:'quiet'}, 'Die Hilfe kennt den Auftrag dieses Kapitels. Sie gibt Stichworte und Hinweise, schreibt aber keine Absätze für dich.')])); thread.scrollTop = thread.scrollHeight; };
   async function ask(text) {
     text = String(text || '').trim(); if (!text || state.busy) return;

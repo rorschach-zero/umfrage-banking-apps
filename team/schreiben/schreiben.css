@@ -82,7 +82,8 @@ h1{margin:0;font-size:17px;line-height:1.25;font-weight:850;white-space:nowrap;o
 .msg.err{border-color:#e9c5b8;background:#fff6f2}
 .msg.wait .txt{color:var(--muted)}
 .who{margin:0 0 2px;font-size:11px;font-weight:850;color:var(--muted)}
-.txt{white-space:pre-wrap}
+.txt{white-space:normal}.txt p.md{margin:0 0 8px}.txt ul.md{margin:0 0 8px;padding-left:18px}.txt ul.md li{margin:0 0 3px}.msg.du .txt{white-space:pre-wrap}
+[hidden]{display:none!important}
 .ask textarea{width:100%;border:1px solid #c9cfc6;border-radius:12px;padding:10px 12px;font:inherit;resize:vertical;min-height:72px;background:#fff}
 .ask .row{margin-top:8px}
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 18px;border:0;border-radius:10px;background:var(--ink);color:#fff;font:inherit;font-weight:850;text-decoration:none;cursor:pointer}
