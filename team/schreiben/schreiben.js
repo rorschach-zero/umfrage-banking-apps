@@ -179,9 +179,9 @@ function chooser() {
   const segBtn = (value, label) => el('button', {type:'button', 'data-mode':value, 'aria-pressed':String(mode === value), onclick:() => setMode(value)}, label);
   seg.append(segBtn('meine', 'Meine'), segBtn('alle', 'Alle'));
   const progressBase = complete ? all : known.filter(mineOf);
-  const n = progressBase.length, d = drafted(progressBase);
+  const n = progressBase.length, d = progressBase.filter(c => STAND[c.status] === 'done').length;
   const bar = el('div', {class:'prog', 'aria-hidden':'true'});
-  ['done', 'review', 'draft'].forEach(k => { const part = progressBase.filter(c => STAND[c.status] === k).length; if (part) { const s = el('span', {class:k}); s.style.width = (part / Math.max(n, 1) * 100) + '%'; bar.append(s); } });
+  ['done', 'review'].forEach(k => { const part = progressBase.filter(c => STAND[c.status] === k).length; if (part) { const s = el('span', {class:k}); s.style.width = (part / Math.max(n, 1) * 100) + '%'; bar.append(s); } });
   const count = (code, role) => all.filter(c => c[role] === code).length;
   const hero = el('header', {class:'ov-hero'},
     el('p', {class:'ov-eyebrow'}, 'PA6 · Praxisauftrag Yuh'),
@@ -189,7 +189,7 @@ function chooser() {
     el('p', {class:'ov-lede'}, 'Yuh fragt, wie bekannt sein Schweizer Kundendienst ist und wie er wirkt. In der PA6a untersuchen wir das mit Umfrage, Servicetest und Bewertungen, in der PA6b machen wir daraus ein Marketingkonzept mit einer ausgearbeiteten Massnahme.'),
     el('div', {class:'ov-facts'},
       el('div', {class:'fact wide'}, el('p', {class:'fk'}, complete ? 'Fortschritt' : 'Deine Kapitel'),
-        el('p', {class:'fv'}, n ? d + ' von ' + n + (complete ? ' Kapiteln im Entwurf oder weiter' : ' im Entwurf oder weiter') : 'Noch kein Kapitel zugeteilt'), bar,
+        el('p', {class:'fv'}, n ? d + ' von ' + n + (complete ? ' Kapiteln fertig' : ' fertig') : 'Noch kein Kapitel zugeteilt'), bar,
         n ? el('p', {class:'prog-key'}, [['done', 'Fertig'], ['review', 'In Prüfung'], ['draft', 'Entwurf']].map(([k, label]) => el('span', {class:'pk ' + k}, label + ' ' + progressBase.filter(c => STAND[c.status] === k).length))) : null),
       PARTS.map(p => el('div', {class:'fact'}, el('p', {class:'fk'}, 'Abgabe ' + p.name), el('p', {class:'fv'}, day(p.due))))),
     el('ul', {class:'team', 'aria-label':'Team'}, PEOPLE.map(code => el('li', {class:code === me ? 'me' : null},
