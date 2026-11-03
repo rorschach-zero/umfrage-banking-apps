@@ -516,6 +516,8 @@ function renderDoc(c) {
         open('secondary wide', 'Im eigenen Fenster öffnen'), open('primary narrow', 'Doc öffnen')),
       frame),
     el('p', {class:'doc-hint'}, 'Leer oder Anmeldung verlangt? Einmal «Im eigenen Fenster öffnen», bei Google anmelden, dann hier neu laden.'));
+  // 03.11.2026 Salah: Doc soll die Höhe ausnutzen. Am Desktop sitzen Öffnen-Knopf und Hinweis in der Kopfzeile statt über und unter dem Doc.
+  if ($('bar-doc')) fill($('bar-doc'), open('secondary', 'Im eigenen Fenster öffnen'), el('span', {class:'bar-hint', title:'Leer oder Anmeldung verlangt? Einmal «Im eigenen Fenster öffnen», bei Google anmelden, dann hier neu laden.'}, 'Doc leer? Einmal im eigenen Fenster öffnen, dann neu laden.'));
 }
 
 // ---------- Tabs ----------
