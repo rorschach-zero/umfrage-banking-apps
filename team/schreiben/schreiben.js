@@ -120,6 +120,8 @@ const PLAN = [
   ['6b-6','AM','LB','Zielgruppenanalyse'], ['6b-7','SA','ES','Strategische Ansätze und Begründungen'], ['6b-8','ES','MG','Marketing-Mix'],
   ['6b-9','MG','AM','Nachhaltigkeitserläuterungen'], ['6b-10','ES','SA','Budget- und Kostenplanung'], ['6b-11','LB','SA','Fazit'],
   ['6b-12','LB','SA','Reflexion'], ['6b-13','LB','SA','Alle nötigen Verzeichnisse'], ['6b-14','LB','SA','Eigenständigkeitserklärung']];
+// Schreibfristen nach Abhängigkeiten (Salah 03.11.2026), gleich wie Notion «Kapitel», Feld Frist. Bei Änderung in Notion hier nachführen.
+const PLAN_FRIST = {"6a-2-ziel": "2026-11-13", "6a-2.4-design": "2026-11-13", "6a-1": "2026-11-15", "6a-2.4": "2026-11-15", "6a-7": "2026-11-15", "6a-2-partner": "2026-11-17", "6a-2.4-instrumente": "2026-11-18", "6a-2-sicherheit": "2026-11-20", "6a-2-konkurrenz": "2026-11-22", "6a-reserve-markt": "2026-11-27", "6a-reserve-unternehmen": "2026-11-27", "6a-2.8-f3": "2026-11-28", "6a-2.8-f4": "2026-11-28", "6a-2": "2026-11-29", "6a-2.4-stichprobe": "2026-12-03", "6a-2.8-f12": "2026-12-04", "6a-2.8": "2026-12-05", "6a-2.9": "2026-12-06", "6a-5": "2026-12-08", "6a-3": "2026-12-09", "6a-4": "2026-12-09", "6a-6-anhang": "2026-12-09", "6a-6": "2026-12-10", "6a-6-abbildungen": "2026-12-10", "6a-6-tabellen": "2026-12-10", "6b-1": "2026-12-18", "6b-2": "2026-12-18", "6b-5": "2026-12-18", "6b-3": "2027-01-08", "6b-6": "2027-01-08", "6b-7": "2027-01-15", "6b-8": "2027-02-01", "6b-4": "2027-02-05", "6b-9": "2027-02-08", "6b-10": "2027-02-10", "6b-11": "2027-02-13", "6b-12": "2027-02-13", "6b-13": "2027-02-15", "6b-14": "2027-02-15"};
 const PARTS = [
   {key:'6a', name:'PA6a', title:'Analyse und Marktforschung', due:'2026-12-12'},
   {key:'6b', name:'PA6b', title:'Marketingkonzept', due:'2027-02-27'}];
@@ -128,7 +130,7 @@ const STAND = {'Entwurf':'draft', 'In Prüfung':'review', 'fertig':'done'};
 function planMerge() {
   // Kapitel, die der Empfänger nicht liefert, aus dem Kapitelplan ergänzen (nur lesen, ohne Stand und Doc).
   const have = new Set(state.chapters.map(c => c.ref));
-  PLAN.forEach(([ref, owner, reader, title], i) => { if (!have.has(ref)) state.chapters.push({ref, owner, reader, title, plan:true, overview:true, due:PARTS[ref.startsWith('6b') ? 1 : 0].due}); });
+  PLAN.forEach(([ref, owner, reader, title], i) => { if (!have.has(ref)) state.chapters.push({ref, owner, reader, title, plan:true, overview:true, due:PLAN_FRIST[ref] || PARTS[ref.startsWith('6b') ? 1 : 0].due}); });
   const order = new Map(PLAN.map((p, i) => [p[0], i]));
   state.chapters.sort((a, b) => (order.has(a.ref) ? order.get(a.ref) : 999) - (order.has(b.ref) ? order.get(b.ref) : 999) || (a.ref || '').localeCompare(b.ref || '', 'de', {numeric:true}));
 }
