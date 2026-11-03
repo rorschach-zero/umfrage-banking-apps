@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="de-CH"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>PA6 · Treffen 03.11.</title>
+<style>
+@font-face{font-family:"Nunito";src:url(../assets/Nunito.ttf) format("truetype");font-weight:200 1000;font-display:swap}
+:root{--canvas:#F8F9F6;--surface:#fff;--stone:#F1F3F0;--ink:#22282B;--slate:#5d676b;--line:#E3E8E4;--teal:#237E79;--teal-d:#17645F;--mint:#E6F3F0;--lav:#BEB8EA;--coral:#EFA79D;--sage:#A7CEAE;--butter:#F0CE82}
+*{box-sizing:border-box}html,body{margin:0;background:var(--canvas);color:var(--ink);font-family:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+main{height:100vh;overflow-y:auto;scroll-snap-type:y mandatory}
+section{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;padding:6vh 7vw;max-width:1280px;margin:0 auto}
+.kicker{font-size:15px;font-weight:800;letter-spacing:.02em;color:var(--teal);margin:0 0 14px}
+h1{font-size:clamp(34px,5.4vw,64px);line-height:1.05;margin:0 0 20px;font-weight:900;letter-spacing:-.01em}
+h2{font-size:clamp(28px,3.6vw,44px);line-height:1.12;margin:0 0 28px;font-weight:900}
+p.lead{font-size:clamp(18px,1.8vw,24px);line-height:1.5;color:var(--slate);max-width:900px;margin:0}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 22px 20px}
+.card h3{font-size:19px;margin:0 0 8px;font-weight:800}.card p{margin:0;line-height:1.5;font-size:16.5px;color:#3a4246}
+.tag{display:inline-block;font-size:13px;font-weight:800;border-radius:999px;padding:4px 11px;margin-bottom:12px;background:var(--mint);color:var(--teal-d)}
+.tag.coral{background:#fbe3df;color:#8a3a2e}.tag.lav{background:#ecebfa;color:#4b4396}.tag.butter{background:#fbf0d6;color:#7a5a10}
+ol.steps{list-style:none;counter-reset:s;padding:0;margin:0;display:grid;gap:14px;max-width:980px}
+ol.steps li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 22px 18px 74px;position:relative;font-size:19px;line-height:1.45}
+ol.steps li::before{content:counter(s);position:absolute;left:22px;top:16px;width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;font-weight:900;display:grid;place-items:center}
+ol.steps li b{display:block;font-size:20px;margin-bottom:2px}
+ol.steps li small{display:block;color:var(--slate);font-size:15.5px;margin-top:4px}
+table{border-collapse:collapse;width:100%;max-width:1060px;font-size:17px;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.4}th{background:var(--stone);font-size:14px;letter-spacing:.02em}
+tr:last-child td{border-bottom:0}td.d{white-space:nowrap;font-weight:800;color:var(--teal-d)}
+.big{font-size:clamp(22px,2.4vw,30px);line-height:1.4;font-weight:800;max-width:1000px}
+.who{display:flex;gap:14px;align-items:center;margin-bottom:18px}.dot{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-weight:900;font-size:20px}
+.alert{background:#fff6f4;border:1.5px solid var(--coral);border-radius:16px;padding:16px 20px;font-size:18px;line-height:1.45;max-width:980px;margin-bottom:18px}
+a{color:var(--teal-d);font-weight:800}
+.foot{position:fixed;right:18px;bottom:14px;font-size:13px;color:var(--slate);background:rgba(248,249,246,.9);padding:4px 10px;border-radius:999px}
+@media(max-width:640px){section{padding:40px 18px}ol.steps li{padding-left:64px;font-size:17px}table{font-size:15px}th,td{padding:10px}}
+@media print{main{height:auto;overflow:visible}section{page-break-after:always;min-height:auto}.foot{display:none}}
+</style></head>
+<body><main id="deck">
+
+<section><p class="kicker">PA6 · Gruppe 601 · Treffen Di 03.11., 18:30, Teams</p>
+<h1>Gut starten.<br>Was die Arbeit ist und was jetzt ansteht.</h1>
+<p class="lead">Für Arber und Leonie, und für alle als Überblick. Nach dem Treffen weisst du, worum es geht, wo du arbeitest und was deine nächsten Schritte sind.</p></section>
+
+<section><p class="kicker">1 · Worum es geht</p><h2>Yuh will, dass sein Kundendienst als Stärke wahrgenommen wird.</h2>
+<div class="grid">
+<div class="card"><span class="tag">Ausgangslage</span><h3>Guter Service, schlechter Ruf</h3><p>Yuh hat viele Leute im Kundendienst in der Schweiz. Kundinnen und Kunden sehen das aber nicht als Vorteil, Themen sind Wartezeit, Erreichbarkeit und Tempo.</p></div>
+<div class="card"><span class="tag">Leitfrage</span><h3>Wie positionieren?</h3><p>Wie kann Yuh seinen Kundendienst so zeigen und vermarkten, dass er als echter Vorteil gegenüber anderen digitalen Banken gilt?</p></div>
+<div class="card"><span class="tag">Ergebnis</span><h3>Ein Marketingkonzept</h3><p>Praxisnah, kundenzentriert, umsetzbar und gut begründet. Unkonventionelle Ideen sind ausdrücklich erwünscht.</p></div>
+</div></section>
+
+<section><p class="kicker">2 · So ist die Arbeit aufgebaut</p><h2>Zwei Teile, ein Ziel.</h2>
+<table><tr><th>Teil</th><th>Was wir tun</th><th>Abgabe</th></tr>
+<tr><td><b>PA6a</b><br>Forschung</td><td>Wir messen selbst, wie gut der Kundendienst von Banking-Apps ist, mit drei Methoden. Daraus entstehen Befunde, eine SWOT und erste Ideen.</td><td class="d">Sa 12.12.</td></tr>
+<tr><td><b>PA6b</b><br>Massnahme</td><td>Wir arbeiten eine Massnahme für Yuh aus, mit Zielen, Marketing-Mix, Budget und Erfolgskontrolle, dazu das Projektmanagement.</td><td class="d">Sa 27.02.</td></tr>
+<tr><td><b>Präsentation</b></td><td>10 bis 15 Minuten mit Flipchart, danach Fachgespräch, Yuh ist dabei.</td><td class="d">Mo 22.03.</td></tr></table></section>
+
+<section><p class="kicker">3 · Die drei Methoden der PA6a</p><h2>Jede Person macht bei allen drei mit.</h2>
+<div class="grid">
+<div class="card"><span class="tag">A · Umfrage</span><h3>Was erwarten die Leute?</h3><p>Online-Umfrage bis 01.12. Ziel 100 Antworten, davon 30 von Yuh-Nutzenden. Jede Person teilt ihren eigenen Link. <b>Lead Arber.</b></p></div>
+<div class="card"><span class="tag coral">B · Servicetest</span><h3>Wie gut antworten Banken?</h3><p>Wir stellen echte Fragen an den Kundendienst und messen Zeit und Qualität. Probe am 06.11., Kontakte 09.–20.11. <b>Lead Ernes.</b></p></div>
+<div class="card"><span class="tag lav">C · Bewertungen</span><h3>Was schreiben Kunden?</h3><p>Wir ordnen öffentliche App-Bewertungen nach festen Regeln ein, am besten jeden Tag ein Block bis 21.11. <b>Lead Melisa.</b></p></div>
+</div></section>
+
+<section><p class="kicker">4 · Wo du arbeitest</p><h2>Alles läuft über deinen persönlichen Link.</h2>
+<div class="grid">
+<div class="card"><span class="tag">Team-App</span><h3>Dein Startpunkt</h3><p>«Heute» zeigt, was ansteht. Dort sind Servicetest, Bewertungen, Aufgaben und der Knopf «Zeit erfassen». Den Link hast du heute nochmals per Mail bekommen.</p></div>
+<div class="card"><span class="tag lav">Schreibplatz</span><h3>Für die Kapitel</h3><p>Links das Kapitel, rechts Auftrag, Regeln, APA und eine Schreibhilfe. Die KI gibt Tipps und Gliederung, schreibt aber keine Absätze für dich.</p></div>
+<div class="card"><span class="tag butter">Pia</span><h3>Wenn du nicht weiter weisst</h3><p>Pia in der Team-App kennt alle Aufträge, Termine und Regeln. Frag sie zuerst, dann Salah.</p></div>
+<div class="card"><span class="tag coral">Drive › Schreibwerk</span><h3>Gemeinsame Ablage</h3><p>Kapitel-Docs, Vorlagen und am Schluss das Berichtsdokument.</p></div>
+</div></section>
+
+<section><p class="kicker">5 · Was alle tun</p><h2>Für alle fünf, ab heute.</h2>
+<table><tr><th>Wann</th><th>Was</th><th>Wo</th></tr>
+<tr><td class="d">bis Fr 06.11.</td><td>Projektauftrag lesen und bestätigen, oder Einwand schreiben</td><td>Mail von heute, Knopf</td></tr>
+<tr><td class="d">Fr 06.11.</td><td>Ein Probekontakt im Servicetest</td><td>Team-App › Servicetest</td></tr>
+<tr><td class="d">bis 21.11.</td><td>Bewertungen einordnen, jeden Tag ein Block</td><td>Team-App › Bewertungen</td></tr>
+<tr><td class="d">09.–20.11.</td><td>Deine Testkontakte nach Plan, am Vorabend kommt eine Mail</td><td>Team-App › Servicetest</td></tr>
+<tr><td class="d">bis 01.12.</td><td>Umfrage mit deinem Link teilen, Ziel je 20 Antworten</td><td>Team-App › Umfrage teilen</td></tr>
+<tr><td class="d">ab 16.11.</td><td>Jede Arbeitszeit erfassen, ein Tipp genügt</td><td>Team-App › Zeit erfassen</td></tr>
+<tr><td class="d">ab 16.11.</td><td>Jede Woche Statusbericht und 30 Minuten Teams</td><td>Teams</td></tr></table></section>
+
+<section><div class="who"><div class="dot" style="background:var(--sage)">AM</div><div><p class="kicker" style="margin:0">6 · Arber</p><h2 style="margin:0">Lead Umfrage und Reichweite</h2></div></div>
+<p class="big" style="margin-bottom:22px">Du sorgst dafür, dass bis am 1. Dezember 100 gute Antworten da sind, aus der ganzen Schweiz und aus allen Altersgruppen.</p>
+<table><tr><th>Zwischenziel</th><th>Antworten</th><th>Wenn verpasst</th></tr>
+<tr><td class="d">So 08.11.</td><td>30</td><td rowspan="4">Salah informieren und zwei neue Verteilorte mit zuständiger Person vorschlagen. Fehlen Yuh-Nutzende, gezielt sie fragen. Fehlen Ältere oder Jüngere, im Umfeld fragen, z. B. Eltern oder Lernende.</td></tr>
+<tr><td class="d">So 15.11.</td><td>60</td></tr><tr><td class="d">So 22.11.</td><td>85</td></tr><tr><td class="d">Di 01.12., 23:59</td><td>100, davon 30 Yuh</td></tr></table></section>
+
+<section><p class="kicker">6 · Arber · deine Schritte</p><h2>So gehst du vor.</h2>
+<ol class="steps">
+<li><b>Jeden Sonntag den Kanalbericht lesen</b>Er kommt automatisch per Mail und zeigt, welcher Link wie viele Antworten bringt.<small>Stand jederzeit live in Team-App › Dashboard.</small></li>
+<li><b>Bringt ein Kanal 7 Tage nichts, nachhaken</b>Mit der Person einen neuen Ort suchen. Romandie und Tessin gezielt anfragen, die Sprache wählt man oben auf der Umfrage.</li>
+<li><b>Bis 18.11. und 01.12. Salah melden</b>Wo verteilt wurde, wie viele Antworten, wie weit vom Ziel, was als Nächstes kommt.<small>Aufträge AP-001 und AP-034.</small></li>
+<li><b>Ab 02.12. Kapitel 2.8 Auswertung</b>Du führst die freigegebenen Ergebnisse der drei Methoden zusammen. Pate für 2.4, 2.8 F1 und F2, Zweitleser für Melisas Kapitel.<small>Auftrag AP-004, im Schreibplatz.</small></li>
+</ol></section>
+
+<section><div class="who"><div class="dot" style="background:var(--lav)">LB</div><div><p class="kicker" style="margin:0">7 · Leonie</p><h2 style="margin:0">Lead Qualität und Formales</h2></div></div>
+<p class="big" style="margin-bottom:22px">Du sorgst dafür, dass nichts Formales Punkte kostet. Jedes Kapitel ist zweimal gelesen, jede Quelle stimmt, die Abgabe ist vollständig.</p>
+<div class="grid">
+<div class="card"><span class="tag coral">1 · jetzt</span><h3>Coaching-Protokoll</h3><p>Das Coaching vom 02.11. festhalten, Fragen, Antworten, wer da war, Folgeaufgaben. Ist überfällig.</p></div>
+<div class="card"><span class="tag">2 · laufend</span><h3>Lesungsliste</h3><p>Wer hat welches Kapitel gelesen, mit Datum. 5 Minuten pro Woche.</p></div>
+<div class="card"><span class="tag lav">3 · bis 06.12.</span><h3>Reflexion sammeln</h3><p>Von allen fünf Sätze einholen, daraus wird Kapitel 5.</p></div>
+<div class="card"><span class="tag butter">4 · Fr 11.12.</span><h3>Schlusscheck</h3><p>Die fertige 6a gegen fünf Punkte prüfen, bevor Salah abgibt.</p></div>
+</div></section>
+
+<section><p class="kicker">7 · Leonie · Schritt 1, heute</p><h2>Das Coaching-Protokoll vom 02.11.</h2>
+<ol class="steps">
+<li><b>Team-App › Projekt › Coaching-Protokoll öffnen</b><a href="https://umfrage.hydeout.ch/team/projekt/">umfrage.hydeout.ch/team/projekt</a></li>
+<li><b>Termin, Anwesende, Fragen und Antworten eintragen</b>Was wir gefragt haben und was die Coachin oder der Coach geantwortet hat. Stichworte genügen.</li>
+<li><b>Folgeaufgaben mit Person und Frist</b>Was sich daraus für uns ändert, wer es macht und bis wann, mit Nummer des Arbeitspakets, wenn es eins gibt.</li>
+<li><b>Speichern, fertig</b>Danach bei jedem Coaching gleich, immer innert 24 Stunden. Nächste Coachings 14.12. und 01.02.<small>Aufträge AP-012, AP-039, AP-030.</small></li>
+</ol></section>
+
+<section><p class="kicker">8 · Leonie · Schritt 2 bis 4</p><h2>Lesungsliste, Reflexion, Schlusscheck.</h2>
+<div class="grid">
+<div class="card"><span class="tag">Lesungsliste</span><h3>Im Schreibplatz, nicht in Notion</h3><p>Im Schreibplatz siehst du unter «Gesamtwerk» alle Kapitel mit Pate und Zweitleser. Du achtest darauf, dass bis 10.12. jedes Kapitel gelesen ist. Fehlt etwas am 06.12., den Paten anschreiben, Salah in Kopie.</p></div>
+<div class="card"><span class="tag lav">Reflexion</span><h3>Vorlage zum Kopieren</h3><p>«Hoi [Name], für Kapitel 5 brauche ich bis 06.12. von dir fünf Sätze. Was lief gut? Was war schwierig? Was hast du gelernt? Was machst du in der 6b anders?»</p></div>
+<div class="card"><span class="tag butter">Schlusscheck 11.12.</span><h3>Fünf Prüfpunkte</h3><p>1 Gliederung 1–7 stimmt. 2 Jede Zahl hat eine Quelle oder heisst «eigene Erhebung». 3 Jede Quelle steht nach APA im Verzeichnis. 4 Abbildungen haben Nummer, Titel, Quelle. 5 Hilfsmittelverzeichnis und Erklärung sind drin.</p></div>
+</div>
+<p class="lead" style="margin-top:20px">Dazu bist du Pate für Kapitel 4 bis 7 der 6a und schreibst ab 30.11. Kapitel 5. Fehlt eine Quelle, nichts erfinden, den Satz markieren und an den Paten zurückgeben.</p></section>
+
+<section><p class="kicker">9 · Die nächsten zwei Wochen</p><h2>Termine auf einen Blick.</h2>
+<table><tr><th>Datum</th><th>Was</th><th>Wer</th></tr>
+<tr><td class="d">Heute</td><td>Coaching-Protokoll 02.11. nachtragen</td><td>Leonie</td></tr>
+<tr><td class="d">Fr 06.11.</td><td>Projektauftrag bestätigt · Probekontakt Servicetest</td><td>alle</td></tr>
+<tr><td class="d">So 08.11.</td><td>30 Antworten, erster Kanalbericht</td><td>Arber</td></tr>
+<tr><td class="d">09.–20.11.</td><td>Testkontakte Servicetest nach Plan</td><td>alle</td></tr>
+<tr><td class="d">So 15.11.</td><td>60 Antworten</td><td>Arber</td></tr>
+<tr><td class="d">Mo 16.11.</td><td>Auftragserteilung PA6b mit Yuh, ganzer Tag · ab jetzt Zeit erfassen</td><td>alle</td></tr>
+<tr><td class="d">Mi 18.11.</td><td>Arbeitsplan final · erster Statusbericht</td><td>Salah</td></tr>
+<tr><td class="d">Sa 21.11.</td><td>Bewertungen fertig eingeordnet</td><td>alle</td></tr></table></section>
+
+<section><p class="kicker">10 · Zum Schluss</p><h2>Drei Dinge, bevor wir auflegen.</h2>
+<ol class="steps">
+<li><b>Hast du deinen Link als Lesezeichen?</b>Er steht in der Mail von heute unter «Meine Team-App öffnen».</li>
+<li><b>Ist etwas unklar?</b>Jetzt fragen. Später zuerst Pia, dann Salah. Nicht raten.</li>
+<li><b>Wer macht was bis Freitag?</b>Kurz reihum sagen. Leonie das Protokoll, Arber die Verteilung, alle den Projektauftrag.</li>
+</ol></section>
+
+</main><div class="foot">↑ ↓ blättern · Stand 03.11.2026</div>
+<script>
+const d=document.getElementById('deck'),s=[...d.querySelectorAll('section')];
+function go(n){const i=Math.max(0,Math.min(s.length-1,n));s[i].scrollIntoView({behavior:'smooth'});}
+function cur(){let b=0,m=1e9;s.forEach((x,i)=>{const t=Math.abs(x.getBoundingClientRect().top);if(t<m){m=t;b=i;}});return b;}
+addEventListener('keydown',e=>{if(['ArrowDown','PageDown',' ','ArrowRight'].includes(e.key)){e.preventDefault();go(cur()+1);}if(['ArrowUp','PageUp','ArrowLeft'].includes(e.key)){e.preventDefault();go(cur()-1);}});
+</script>
+</body></html>
