@@ -42,6 +42,10 @@ p.hinweis, .klein { color: var(--grey); font-size: 15px; }
 .opt .punkt { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
 .opt[aria-checked="true"] .punkt { border-color: var(--orange); background: var(--orange); box-shadow: inset 0 0 0 4px #fff; }
 .opt.multi .punkt { border-radius: 6px; }
+.mehrfach-hinweis { display:inline-flex; align-items:center; gap:10px; margin:6px 0 14px; padding:8px 14px; border-radius:10px; background:#FFF4D6; border:1.5px solid #E9B949; color:#001B35; font-weight:700; font-size:15px; }
+.mehrfach-hinweis .mf-icon { width:16px; height:16px; border:2px solid #001B35; border-radius:4px; position:relative; flex:none; }
+.mehrfach-hinweis .mf-icon::after { content:""; position:absolute; left:4px; top:0; width:4px; height:8px; border:solid #001B35; border-width:0 2px 2px 0; transform:rotate(45deg); }
+.mehrfach-zaehler { min-height:22px; margin:10px 0 0; font-size:15px; font-weight:700; color:#001B35; }
 .text { width:100%; font: inherit; padding: 14px 18px; border: 1.5px solid var(--line); border-radius: var(--card); margin-top: 8px; }
 .text:focus { outline: 3px solid var(--lavender); border-color: var(--ink); }
 textarea.text { min-height: 110px; resize: vertical; }
@@ -317,13 +321,13 @@ header:has(+ * .schirm.start), body:has(.schirm.start) header { max-width: 1180p
 <div class="fortschritt" aria-hidden="true"><div id="balken"></div></div>
 <main id="main" aria-live="polite"></main>
 <footer>Praxisarbeit HFW von Studierenden der KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit</footer>
-<script src="sprachen.js?v=c32fec28"></script>
+<script src="sprachen.js?v=cc27fcec"></script>
 <script>
 /* ---------- Konfiguration ---------- */
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "6 bis 8 Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.31";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.32";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "umfrage@hydeout.ch";    // Kontakt der Studierendengruppe fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
@@ -478,7 +482,7 @@ function render() {
   if (s.kicker && s.art==="ende") h += `<div class="kicker">${t(s.kicker)}</div>`;
   if (s.art === "ende") { h += endeHtml(); main.innerHTML = h + "</section>"; senden(); return; }
   h += s.art==="info" ? `<h1>${titel}</h1><p>${t(s.text)||""}</p>${typeof s.html==="function" ? s.html() : (s.html||"")}` : `<h2 id="frage-titel">${titel}${s.pflicht ? `&nbsp;<span class="stern" aria-hidden="true">*</span><span class="sr">(${t("Pflichtfrage")})</span>` : ""}</h2>`;
-  if (s.hinweis) h += `<p class="hinweis">${t(s.hinweis)}</p>`;
+  if (s.hinweis) h += s.art==="mehrfach" ? `<p class="mehrfach-hinweis"><span class="mf-icon" aria-hidden="true"></span>${t(s.hinweis)}</p>` : `<p class="hinweis">${t(s.hinweis)}</p>`;
   if (s.botschaft) h += `<div class="botschaft">${BOTSCHAFTEN[A.variante]}</div>`;
   if (s.frage) h += `<p><strong>${t(s.frage)}</strong></p>`;
   if (s.art==="einfach" || s.art==="mehrfach") {
@@ -490,6 +494,7 @@ function render() {
       let x = `<button type="button" class="opt ${multi?'multi':''}" role="${multi?'checkbox':'radio'}" aria-checked="${an}" data-wert="${esc(o)}" aria-label="${lab}"><span class="punkt"></span><span>${lab}</span></button>`;
       if (s.texte && s.texte[o] && an) x += `<input class="text extra" data-key="${s.texte[o].key}" maxlength="80" placeholder="${esc(t(s.texte[o].label))}" value="${esc(A[s.texte[o].key]||"")}" aria-label="${esc(t(s.texte[o].label))}">`;
       return x; }).join("") + `</div>`;
+    if (multi) { const n = (A[s.id]||[]).length; h += `<p class="mehrfach-zaehler" aria-live="polite">${n ? t("{n} ausgewählt, du kannst weitere wählen.").replace("{n}", n) : ""}</p>`; }
   }
   if (s.art==="skala") {
     const st = s.stufen || [1,2,3,4,5];

@@ -1,10 +1,12 @@
 @font-face{font-family:Nunito;src:url(../assets/Nunito.ttf) format("truetype");font-weight:200 1000;font-display:swap}
+@font-face{font-family:"Plus Jakarta Sans";src:url(../assets/PlusJakartaSans.woff2) format("woff2");font-weight:200 800;font-display:swap}
+@font-face{font-family:Inter;src:url(../assets/Inter.woff2) format("woff2");font-weight:100 900;font-display:swap}
 /* Tokens nach Bricks-Briefing (03.11.2026). Alte Namen zeigen auf dieselben Werte, damit nichts doppelt gepflegt wird. */
 :root{--c-canvas:#F8F9F6;--c-surface:#fff;--c-surface2:#F1F3F0;--c-text:#22282B;--c-sub:#687276;--c-line:#E3E8E4;--c-acc:#237E79;--c-acc-h:#17645F;--c-tint:#E6F3F0;--c-warn:#A3361B;
   --shadow:0 4px 18px rgba(25,36,38,.045);--shadow-pop:0 16px 48px rgba(25,36,38,.14),0 2px 6px rgba(25,36,38,.06);--ease:cubic-bezier(.2,.7,.2,1);
   --paper:var(--c-canvas);--ink:var(--c-text);--muted:var(--c-sub);--line:var(--c-line);--soft:var(--c-surface2);--lilac:var(--c-acc-h);--lilac-faint:var(--c-tint);--green:var(--c-acc);--warn:var(--c-warn);--card:var(--c-surface);--bar:56px}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--c-canvas);color:var(--c-text);font:15px/1.55 Nunito,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+html,body{margin:0;background:var(--c-canvas);color:var(--c-text);font:15px/1.55 Inter,Nunito,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
 a{color:var(--c-acc-h)}
 :focus-visible{outline:3px solid var(--c-acc);outline-offset:2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -38,7 +40,14 @@ h1{margin:0;font-size:17px;line-height:1.25;font-weight:850;white-space:nowrap;o
   body.kapitel .panel{flex:1;min-height:0;overflow:auto;max-width:none;margin:0;padding:4px 24px 32px;scrollbar-gutter:stable}
   body.kapitel .doc{display:flex;flex-direction:column;min-height:0;padding:16px 24px 16px 8px}
   body.kapitel .doc-card{flex:1;min-height:0}
+  /* 03.11.2026: Doc nutzt die volle Höhe, Kopf und Hinweis wandern in die Kopfzeile */
+  body.kapitel .doc{padding:0 16px 12px 0}
+  body.kapitel .doc-bar,body.kapitel .doc-hint{display:none}
+  body.kapitel header.bar{grid-template-columns:minmax(0,1fr) auto auto;padding:12px 24px 10px}
+  .bar-doc:not(:empty){display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+  .bar-hint{font-size:11px;color:var(--c-sub);white-space:nowrap}
 }
+.bar-doc{display:none}
 body.kapitel .bar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:16px;padding:16px 24px;background:var(--c-canvas)}
 body.kapitel .back{display:none}
 body.kapitel .eyebrow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:13px;font-weight:650;letter-spacing:0;color:var(--c-sub);margin:0 0 2px}
@@ -207,7 +216,7 @@ body.kapitel h1{font-size:22px;line-height:1.3;font-weight:800;letter-spacing:-.
 .dots i{width:6px;height:6px;border-radius:50%;background:var(--c-acc);opacity:.25;animation:dot 1.2s ease-in-out infinite}
 .dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
 @keyframes dot{0%,80%,100%{opacity:.25;transform:none}40%{opacity:1;transform:translateY(-2px)}}
-.composer{position:sticky;bottom:0;margin-top:auto;padding:16px 0 4px;background:linear-gradient(to bottom,rgba(248,249,246,0),var(--c-canvas) 16px)}
+.composer{position:sticky;bottom:0;box-shadow:0 40px 0 var(--c-canvas);margin-top:auto;padding:16px 0 4px;background:linear-gradient(to bottom,rgba(248,249,246,0),var(--c-canvas) 16px)}
 .help-intro+.suggest.list{margin-top:0}
 .suggest.list{background:var(--c-surface);border:1px solid var(--c-line);border-radius:16px;margin:0 0 12px;overflow:hidden;box-shadow:var(--shadow)}
 .sg-h{margin:0;padding:12px 16px 4px;font-size:12px;font-weight:750;color:var(--c-sub);letter-spacing:.02em}
@@ -411,3 +420,101 @@ body.choosing .empty .btn:hover{background:var(--c-acc-h)}
 .pk.done::before{background:var(--c-acc)}.pk.review::before{background:#5FA9A3}.pk.draft::before{background:#B5DCD6}
 .due small{display:block;font-size:11px;line-height:1.2}
 @media (max-width:899px){.stand.none{display:none}.due small{display:inline;margin-left:6px}}
+
+/* ---------- Ruhige Seitenleiste (03.11.2026, impeccable quieter, Bricks-Werte) ----------
+   Keine Kartenstapel: Abschnitte trennen sich durch Raum und eine Haarlinie. Eine Betonung pro Abschnitt. */
+.tabs{background:none;border:0;border-bottom:1px solid var(--c-line);border-radius:0;padding:0;gap:24px;margin:4px 24px 4px}
+.tabs button{flex:none;padding:10px 0;min-height:44px;border-radius:0;font-weight:600;color:var(--c-sub)}
+.tabs button[aria-selected=true]{background:none;color:var(--c-text);box-shadow:inset 0 -2px 0 var(--c-acc)}
+.panel .card{background:none;border:0;border-top:1px solid var(--c-line);border-radius:0;box-shadow:none;padding:24px 0;margin:0}
+.panel [role=tabpanel]>.card:first-child,.panel .card.lead{border-top:0}
+.panel .card.lead{padding:20px 0 24px}
+.lead .big{font-size:17px;line-height:1.55;font-weight:600;letter-spacing:-.005em}
+.card-h{font-size:14px;font-weight:600;margin:0 0 12px;color:var(--c-text)}
+.panel .soft-card{background:var(--c-tint);border:0;border-radius:12px;padding:14px 16px;margin:0 0 8px}
+.panel .soft-card .card-h{margin:0 0 4px}
+.qs li{padding-left:26px;margin-bottom:10px}
+.qs li::before{content:counter(q) ".";width:auto;height:auto;background:none;border-radius:0;display:block;font-size:15px;font-weight:500;color:var(--c-sub);font-variant-numeric:tabular-nums}
+.steps{border-left:1px solid var(--c-line);margin-left:2px}
+.steps li{padding:0 0 8px 16px;font-size:15px}
+.steps li::before,.steps li:not(:last-child)::after{content:none}
+.checks li{border-top:0;padding:8px 0}
+.checks li:first-child{padding-top:0}
+.checks label{font-size:15px}
+.checks input:checked+label{text-decoration:none;color:var(--c-sub)}
+.meter i{display:none}
+.meter b{font-weight:500}
+.meter.full b{color:var(--c-acc-h);font-weight:600}
+.pts{grid-template-columns:44px minmax(0,1fr);border-top:0;padding:6px 0}
+.pn{background:none;padding:0;text-align:left;font-size:13px;font-weight:600;color:var(--c-sub);font-variant-numeric:tabular-nums;line-height:1.6}
+.pts p{font-size:15px}
+.plain li::marker,.warn li::marker{color:#A9B3AE}
+.achten summary{padding:0;min-height:32px;font-size:14px;font-weight:600}
+.achten[open] summary{margin-bottom:12px}
+.sub-h{margin:0 0 6px;font-size:13px;font-weight:600;color:var(--c-sub)}
+.panel .sub-block+.sub-block{margin-top:16px;padding-top:0;border-top:0}
+.info h3,.lnk b{font-weight:600}
+.panel .achten{border-top:0}
+.src-wrap{display:block;margin-top:2px}
+.src-btn{appearance:none;border:0;background:none;padding:0;min-height:24px;font:inherit;font-size:12px;font-weight:500;color:var(--c-sub);text-decoration:underline;text-decoration-color:#C9D2CD;text-underline-offset:3px;cursor:pointer;transition:color .14s}
+.src-btn:hover{color:var(--c-acc-h);text-decoration-color:currentColor}
+.src-btn[aria-expanded=true]{color:var(--c-text)}
+.src-wrap .src{display:block;margin-top:0}
+.src-wrap .src[hidden]{display:none}
+
+/* ---------- Schreibweg im Bricks-Stil (03.11.2026) ----------
+   Typeform-Gefühl: ein Schritt offen, ein klarer nächster Knopf. Linear/Ramp-Ruhe: Fläche, Haarlinie, eine Betonung.
+   Bricks: Plus Jakarta Sans für Titel, Inter für Text, Karten 16, Knöpfe 12, Schatten 0 4px 18px, Bewegung 140–240 ms,
+   Charakterfarbe Lavendel nur für den aktiven Schritt. */
+h1,.card-h,.w-t,.w-lead,.w-num,.big-note,.hi-t{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif}
+.w-top{display:flex;align-items:center;gap:12px;margin:16px 0 12px}
+.w-stand{margin:0;flex:none;font-size:13px;font-weight:500;color:var(--c-sub);font-variant-numeric:tabular-nums}
+.w-bar{flex:1;display:flex;gap:4px}
+.w-bar i{flex:1;height:4px;border-radius:4px;background:var(--c-line);transition:background-color .2s var(--ease)}
+.w-bar i.on{background:var(--c-acc)}
+.w-bar i.now{background:#BEB8EA}
+.weg{display:flex;flex-direction:column;gap:8px;padding-bottom:24px}
+.w-step{background:var(--c-surface);border:1px solid var(--c-line);border-radius:16px;transition:box-shadow .2s var(--ease),border-color .2s var(--ease)}
+.w-step.open{box-shadow:var(--shadow);border-color:#D6DED9}
+.w-head{appearance:none;display:grid;grid-template-columns:28px minmax(0,1fr) auto 12px;align-items:center;gap:14px;width:100%;min-height:60px;padding:14px 16px;border:0;background:none;border-radius:16px;font:inherit;color:var(--c-text);text-align:left;cursor:pointer;transition:background-color .16s}
+.w-head:hover{background:#FBFCFA}
+.w-step.open .w-head:hover{background:none}
+.w-num{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--c-surface2);color:var(--c-sub);font-size:13px;font-weight:700;transition:background-color .2s var(--ease),color .2s var(--ease)}
+.w-step.open .w-num{background:#BEB8EA;color:#2B2550}
+.w-step.done .w-num{background:var(--c-acc);color:transparent;position:relative}
+.w-step.done .w-num::after{content:"";position:absolute;width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.w-tt{display:flex;flex-direction:column;min-width:0}
+.w-t{font-size:15px;font-weight:650;line-height:1.35;letter-spacing:-.005em}
+.w-step.done:not(.open) .w-t{color:var(--c-sub)}
+.w-s{font-size:13px;color:var(--c-sub);line-height:1.4;margin-top:1px}
+.w-step.open .w-s{display:none}
+.w-prog{font-size:12px;font-weight:600;color:var(--c-sub);font-variant-numeric:tabular-nums}
+.w-step.open .w-prog{display:none}
+.w-head .chev{justify-self:end}
+.w-step.open .w-head .chev{transform:translateY(2px) rotate(-135deg)}
+.w-body{padding:0 20px 20px 58px;font-size:15px;line-height:1.6;animation:wegIn .22s var(--ease)}
+.w-body>p{margin:0 0 12px}
+.w-lead{margin:0 0 4px;font-size:17px;font-weight:600;line-height:1.5;letter-spacing:-.01em}
+.w-sub{margin:20px 0 0}
+.w-sub h3{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--c-sub)}
+.w-sub .row h3{margin:0}
+.w-sub .row{margin:0 0 10px}
+.w-count{font-size:12px;font-weight:600;color:var(--c-sub);font-variant-numeric:tabular-nums}
+.w-infos{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:2px}
+.w-infos li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--c-line);font-size:14px}
+.w-infos li:first-child{border-top:0;padding-top:0}
+.w-infos span{color:var(--c-sub);font-size:12px;white-space:nowrap}
+.w-body .steps{margin:4px 0 14px}
+.w-body .btn.secondary{min-height:40px;padding:8px 14px;font-size:14px;border-radius:12px}
+.w-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--c-line)}
+.w-act .btn{min-height:44px;border-radius:12px;padding:10px 18px;font-size:15px}
+.btn.ghost{background:none;border-color:transparent;color:var(--c-sub);font-weight:600}
+.btn.ghost:hover{color:var(--c-text)}
+.w-body .achten{margin-top:16px}
+.w-body .pts{grid-template-columns:40px minmax(0,1fr)}
+@keyframes wegIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.w-body{animation:none}.w-step,.w-num,.w-bar i{transition:none}}
+@media (max-width:1099px){.w-body{padding:0 16px 18px 16px}.w-top{margin:12px 0 10px}}
+#tab-auftrag{padding-top:0}
+.w-sub+.btn,.w-sub+details+.btn,.achten+.btn{margin-top:16px}
+.w-raster{margin-top:16px}
