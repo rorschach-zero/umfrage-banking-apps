@@ -114,13 +114,16 @@ function nextActions(rows) {
 function workLink(row) {
   const raw=cardText(row,'Wo');let url;
   try {url=new URL(raw,location.origin);}catch{}
-  if (!url || url.username || url.password || /notion\.(so|site)|app\.notion/.test(url.hostname)) return null;
-  const internal=(url.origin===location.origin || url.hostname==='umfrage.hydeout.ch') && /^\/team\/(?:b|c)(?:\/|$)/.test(url.pathname);
+  if (!url || url.username || url.password) return null;
+  // Notion nur fuer Salah (einziges Mitglied im Workspace); die anderen bekommen dort keinen toten Link.
+  const notionLink=url.protocol==='https:' && /(^|\.)notion\.(so|site)$|^app\.notion\.com$|^www\.notion\.so$/.test(url.hostname);
+  if (notionLink && data?.person!=='SA') return null;
+  const internal=(url.origin===location.origin || url.hostname==='umfrage.hydeout.ch') && /^\/team\/(?:b|c|schreiben|projekt|dashboard|frag)(?:\/|$)/.test(url.pathname);
   const doc=url.protocol==='https:' && url.hostname==='docs.google.com' && /^\/document\//.test(url.pathname);
   const drive=url.protocol==='https:' && url.hostname==='drive.google.com';
-  if(!internal&&!doc&&!drive)return null;
-  const label=doc?'Kapitel-Doc öffnen':internal?(url.pathname.includes('/b')?'Kontaktmaske öffnen':'Bewertungsmaske öffnen'):'Unterlagen öffnen';
-  return el('a',{class:'button secondary work-link',href:internal?url.pathname:preview.active()&&doc?url.origin+url.pathname.replace(/(?:\/edit)?\/?$/, '/preview'):url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
+  if(!internal&&!doc&&!drive&&!notionLink)return null;
+  const p=url.pathname,label=doc?'Kapitel-Doc öffnen':notionLink?'In Notion öffnen':internal?(/^\/team\/b/.test(p)?'Kontaktmaske öffnen':/^\/team\/c/.test(p)?'Bewertungsmaske öffnen':/^\/team\/schreiben/.test(p)?'Schreibplatz öffnen':/^\/team\/projekt/.test(p)?'Projekt öffnen':/^\/team\/dashboard/.test(p)?'Dashboard öffnen':'Pia fragen'):'Unterlagen öffnen';
+  return el('a',{class:'button secondary work-link',...(notionLink?{target:'_blank'}:{}),href:internal?url.pathname+url.search:preview.active()&&doc?url.origin+url.pathname.replace(/(?:\/edit)?\/?$/, '/preview'):url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
 }
 function steps(row,readOnly=false) {
   if(cardText(row,"So geht's")==='noch offen')return el('p',{class:'field-open'},'Die Schritte sind noch nicht hinterlegt. Pia hilft dir weiter.');
