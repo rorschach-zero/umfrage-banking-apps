@@ -2652,6 +2652,252 @@
    "Interne Yuh-Unterlagen nach dem Muster Organisation. (Jahr, Tag. Monat). Titel des Dokuments [Format]."
   ]
  },
+ "6a-6-abbildungen": {
+  "titel": "Abbildungsverzeichnis",
+  "teil": "6a",
+  "kurz": "Erstelle das Abbildungsverzeichnis mit Nummer, Titel und Seite jeder Abbildung.",
+  "seiten": null,
+  "fragen": [
+   "Ist jede Abbildung im Bericht im Verzeichnis erfasst?",
+   "Stimmen Nummer, Titel und Seitenzahl mit dem exportierten PDF überein?",
+   "Hat jede Abbildung im Text eine Beschriftung und eine Quelle unter der Abbildung?"
+  ],
+  "muss": [
+   {
+    "punkt": "Abbildungsverzeichnis als Teil von Kapitel 6 der 6a.",
+    "quelle": "Merkmalblatt 6a, Punkt 6"
+   },
+   {
+    "punkt": "Aufbau je Zeile: Nr. der Abbildung, Titel der Abbildung, Seite in der Arbeit.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.2.1, S. 19"
+   },
+   {
+    "punkt": "Im Verzeichnis werden keine Quellen genannt, es dient nur der Übersicht.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.2, S. 18"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R8",
+    "punkte": 10,
+    "volle_punkte_wenn": "Schriftbild nach Vorgaben und sehr ansprechend, Grafiken und Abbildungen in sehr guter Qualität, nötige Quellen angegeben, Inhaltsverzeichnis und Layout einwandfrei."
+   }
+  ],
+  "gliederung": [
+   "Abbildungsverzeichnis (Nr., Titel, Seite)"
+  ],
+  "infos": [
+   {
+    "titel": "Abbildungsverzeichnis",
+    "wo": "Notion › PA6 › Kapitel › Abbildungsverzeichnis",
+    "inhalt": "Kapitelkarte mit Startbedingung und Abgleich mit dem exportierten PDF."
+   },
+   {
+    "titel": "Arbeitspaket Layout und Verzeichnisse",
+    "wo": "Notion › PA6 › Projektmanagement › PSP › Layout, Verzeichnisse und Lektorat 6a (R8, R9)",
+    "inhalt": "Formale Schlussprüfung mit Abnahmekriterien."
+   }
+  ],
+  "nicht": [
+   "Quellenangaben im Verzeichnis",
+   "Abbildungen, die im Bericht nicht vorkommen"
+  ],
+  "daten_ab": "Endstand erst nach Textschluss aller Kapitel",
+  "fallen": [
+   "Seitenzahlen vor dem letzten PDF-Export übernommen",
+   "Position offen: Merkmalblatt unter 6, Formale Vorschriften direkt nach dem Inhaltsverzeichnis; Entscheid abwarten"
+  ],
+  "apa": [
+   "Die Quelle steht unter der Abbildung im Text, nicht im Verzeichnis.",
+   "Wird eine Abbildung übernommen, steht die Quelle zusätzlich im Literaturverzeichnis."
+  ]
+ },
+ "6a-6-tabellen": {
+  "titel": "Tabellenverzeichnis",
+  "teil": "6a",
+  "kurz": "Erstelle das Tabellenverzeichnis mit Nummer, Titel und Seite jeder Tabelle.",
+  "seiten": null,
+  "fragen": [
+   "Ist jede Tabelle im Bericht im Verzeichnis erfasst?",
+   "Stimmen Nummer, Titel und Seitenzahl mit dem exportierten PDF überein?",
+   "Hat jede Tabelle im Text eine Beschriftung und eine Quelle?"
+  ],
+  "muss": [
+   {
+    "punkt": "Tabellenverzeichnis als Teil von Kapitel 6 der 6a.",
+    "quelle": "Merkmalblatt 6a, Punkt 6"
+   },
+   {
+    "punkt": "Aufbau je Zeile: Nr. der Tabelle, Titel der Tabelle, Seite in der Arbeit.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.2.2, S. 19"
+   },
+   {
+    "punkt": "Im Verzeichnis werden keine Quellen genannt, es dient nur der Übersicht.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.2, S. 18"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R8",
+    "punkte": 10,
+    "volle_punkte_wenn": "Schriftbild nach Vorgaben und sehr ansprechend, Grafiken und Abbildungen in sehr guter Qualität, nötige Quellen angegeben, Inhaltsverzeichnis und Layout einwandfrei."
+   }
+  ],
+  "gliederung": [
+   "Tabellenverzeichnis (Nr., Titel, Seite)"
+  ],
+  "infos": [
+   {
+    "titel": "Tabellenverzeichnis",
+    "wo": "Notion › PA6 › Kapitel › Tabellenverzeichnis",
+    "inhalt": "Kapitelkarte mit Startbedingung und Abgleich mit dem exportierten PDF."
+   },
+   {
+    "titel": "Arbeitspaket Layout und Verzeichnisse",
+    "wo": "Notion › PA6 › Projektmanagement › PSP › Layout, Verzeichnisse und Lektorat 6a (R8, R9)",
+    "inhalt": "Formale Schlussprüfung mit Abnahmekriterien."
+   }
+  ],
+  "nicht": [
+   "Quellenangaben im Verzeichnis",
+   "Tabellen, die im Bericht nicht vorkommen"
+  ],
+  "daten_ab": "Endstand erst nach Textschluss aller Kapitel",
+  "fallen": [
+   "Seitenzahlen vor dem letzten PDF-Export übernommen",
+   "Position offen: Merkmalblatt unter 6, Formale Vorschriften direkt nach dem Inhaltsverzeichnis; Entscheid abwarten"
+  ],
+  "apa": [
+   "Die Quelle steht bei der Tabelle im Text, nicht im Verzeichnis."
+  ]
+ },
+ "6a-6-anhang": {
+  "titel": "Anhang",
+  "teil": "6a",
+  "kurz": "Ordne die Anhänge nummeriert und verweise im Text auf jeden Anhang.",
+  "seiten": null,
+  "fragen": [
+   "Ist jeder Anhang nummeriert und beginnt auf einer neuen Seite?",
+   "Wird auf jeden Anhang im Text mindestens einmal verwiesen?",
+   "Sind Fragebogen und alle Antworten der Umfrage enthalten?",
+   "Enthält der Anhang keine Personendaten?"
+  ],
+  "muss": [
+   {
+    "punkt": "Anhang als Teil von Kapitel 6 der 6a.",
+    "quelle": "Merkmalblatt 6a, Punkt 6"
+   },
+   {
+    "punkt": "Anhang nummeriert, jeder Anhang auf neuer Seite, jeder im Text mindestens einmal verwiesen.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.5, S. 20"
+   },
+   {
+    "punkt": "Inhalt: umfangreiche Forschungs- und Umfrageergebnisse, weiterführende Informationen zu Umfragen, Dokumentation von Chatverläufen mit KI-Hilfsmitteln.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.5, S. 20"
+   },
+   {
+    "punkt": "Der Fragebogen ist online oder in der Arbeit verfügbar; alle Antworten der Umfrage stehen im Anhang.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 4; Berichtsgrundlage 6a, WIAR (Block 3, Folie 8)"
+   },
+   {
+    "punkt": "Mit einem KI-Werkzeug erstellte Inhalte, die zitiert werden, mit vollständigem Chat im Anhang.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 3.10, S. 11"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R8",
+    "punkte": 10,
+    "volle_punkte_wenn": "Schriftbild nach Vorgaben und sehr ansprechend, Grafiken und Abbildungen in sehr guter Qualität, nötige Quellen angegeben, Inhaltsverzeichnis und Layout einwandfrei."
+   }
+  ],
+  "gliederung": [
+   "Anhang 1 bis n, je auf neuer Seite"
+  ],
+  "infos": [
+   {
+    "titel": "Anhang",
+    "wo": "Notion › PA6 › Kapitel › Anhang",
+    "inhalt": "Kapitelkarte mit Startbedingung und Liste der referenzierten Nachweise."
+   },
+   {
+    "titel": "Arbeitspaket Layout und Verzeichnisse",
+    "wo": "Notion › PA6 › Projektmanagement › PSP › Layout, Verzeichnisse und Lektorat 6a (R8, R9)",
+    "inhalt": "Formale Schlussprüfung mit Abnahmekriterien."
+   }
+  ],
+  "nicht": [
+   "Rohdaten mit Personendaten im Anhang",
+   "Anhänge ohne Verweis im Text",
+   "Mailadressen aus der Verlosung"
+  ],
+  "daten_ab": "Endstand erst nach Textschluss aller Kapitel",
+  "fallen": [
+   "Verweis im Text zeigt auf eine falsche Anhangnummer",
+   "Offen: ob Textentwürfe mit KI nur ins Hilfsmittelverzeichnis gehören oder mit Chat in den Anhang (Coaching-Frage 5)"
+  ],
+  "apa": [
+   "Im Text auf den Anhang verweisen, zum Beispiel (siehe Anhang 3)."
+  ]
+ },
+ "6a-7": {
+  "titel": "Eigenständigkeitserklärung",
+  "teil": "6a",
+  "kurz": "Füge die ehrenwörtliche Erklärung im vorgegebenen Wortlaut mit echten Angaben ein.",
+  "seiten": null,
+  "fragen": [
+   "Ist der Wortlaut unverändert aus den Formalen Vorschriften übernommen?",
+   "Haben alle fünf Gruppenmitglieder mit Ort, Datum, Name und Unterschrift bestätigt?",
+   "Stimmt die Erklärung mit dem Hilfsmittelverzeichnis überein?"
+  ],
+  "muss": [
+   {
+    "punkt": "Eigenständigkeitserklärung als Kapitel 7 mit dem Titel aus dem Merkmalblatt.",
+    "quelle": "Merkmalblatt 6a, Punkt 7"
+   },
+   {
+    "punkt": "Erklärung im vorgegebenen Wortlaut mit Ort, Datum, Name und Unterschrift.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 7, S. 21"
+   },
+   {
+    "punkt": "Die Erklärung versichert, dass alle KI-Werkzeuge mit Produktname und genutzten Funktionen als Hilfsmittel angegeben sind.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 7, S. 21; Kap. 6.1, S. 18"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R8",
+    "punkte": 10,
+    "volle_punkte_wenn": "Schriftbild nach Vorgaben und sehr ansprechend, Grafiken und Abbildungen in sehr guter Qualität, nötige Quellen angegeben, Inhaltsverzeichnis und Layout einwandfrei."
+   }
+  ],
+  "gliederung": [
+   "Eigenständigkeitserklärung (Kapitel 7)"
+  ],
+  "infos": [
+   {
+    "titel": "Eigenständigkeitserklärung",
+    "wo": "Notion › PA6 › Kapitel › Eigenständigkeitserklärung",
+    "inhalt": "Kapitelkarte mit Startbedingung; Unterschriften erst nach der Schlussprüfung."
+   },
+   {
+    "titel": "Hilfsmittelverzeichnis",
+    "wo": "Notion › PA6 › Kapitel › Literaturverzeichnis",
+    "inhalt": "Das Hilfsmittelverzeichnis gehört zu Kapitel 6 und muss zur Erklärung passen."
+   }
+  ],
+  "nicht": [
+   "Erfundene Unterschriften oder Daten",
+   "Eigene Umformulierung des Wortlauts"
+  ],
+  "daten_ab": "Unterschriften erst nach der Schlussprüfung",
+  "fallen": [
+   "Wortlaut verändert oder auf «wir» umgeschrieben, ohne dass der Entscheid zur Gruppenfassung vorliegt",
+   "Titelschreibweise offen: Merkmalblatt «Eigenständigkeitserklärung», Berichtsgrundlage will «Eigenständigkeitserklärung» (Coaching-Frage 4)",
+   "Der Wortlaut spricht von «ich» und «Diplomarbeit»; ob er für eine Gruppenarbeit angepasst werden darf, sagen die Unterlagen nicht"
+  ],
+  "apa": []
+ },
  "6b-13": {
   "titel": "Alle nötigen Verzeichnisse · Eigenständigkeitserklärung",
   "teil": "6b",
@@ -2737,5 +2983,62 @@
    "Dokumente aus dem Studium nach dem Muster Nachname, Initiale. (Jahr, Tag. Monat). Titel kursiv [Format]. Plattform. URL.",
    "Mehrere Werke desselben Autors im selben Jahr mit Kleinbuchstaben unterscheiden (2023 a, 2023 b)."
   ]
+ },
+ "6b-14": {
+  "titel": "Eigenständigkeitserklärung",
+  "teil": "6b",
+  "kurz": "Füge die ehrenwörtliche Erklärung der 6b im vorgegebenen Wortlaut mit echten Angaben ein.",
+  "seiten": null,
+  "fragen": [
+   "Ist der Wortlaut unverändert aus den Formalen Vorschriften übernommen?",
+   "Haben alle fünf Gruppenmitglieder mit Ort, Datum, Name und Unterschrift bestätigt?",
+   "Stimmt die Erklärung mit dem Hilfsmittelverzeichnis der 6b überein?"
+  ],
+  "muss": [
+   {
+    "punkt": "Eigenständigkeitserklärung als Punkt 14 der 6b.",
+    "quelle": "Merkmalblatt 6b, Punkt 14"
+   },
+   {
+    "punkt": "Erklärung im vorgegebenen Wortlaut mit Ort, Datum, Name und Unterschrift.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 7, S. 21"
+   },
+   {
+    "punkt": "Die Erklärung versichert, dass alle KI-Werkzeuge mit Produktname und genutzten Funktionen als Hilfsmittel angegeben sind.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 7, S. 21; Kap. 6.1, S. 18"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B14",
+    "punkte": 5,
+    "volle_punkte_wenn": "Schriftbild nach Vorgaben und sehr ansprechend, Grafiken und Abbildungen in sehr guter Qualität."
+   }
+  ],
+  "gliederung": [
+   "Eigenständigkeitserklärung (Punkt 14)"
+  ],
+  "infos": [
+   {
+    "titel": "Eigenständigkeitserklärung",
+    "wo": "Notion › PA6 › Kapitel › Eigenständigkeitserklärung",
+    "inhalt": "Kapitelkarte der 6b mit Startbedingung; Unterschriften erst nach der Schlussprüfung."
+   },
+   {
+    "titel": "Alle nötigen Verzeichnisse",
+    "wo": "Notion › PA6 › Kapitel › Alle nötigen Verzeichnisse",
+    "inhalt": "Das Hilfsmittelverzeichnis der 6b muss zur Erklärung passen."
+   }
+  ],
+  "nicht": [
+   "Erfundene Unterschriften oder Daten",
+   "Eigene Umformulierung des Wortlauts"
+  ],
+  "daten_ab": "Unterschriften erst nach der Schlussprüfung",
+  "fallen": [
+   "Wortlaut der Erklärung verändert",
+   "Der Wortlaut spricht von «ich» und «Diplomarbeit»; ob er für eine Gruppenarbeit angepasst werden darf, sagen die Unterlagen nicht"
+  ],
+  "apa": []
  }
 }
