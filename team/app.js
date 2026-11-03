@@ -118,11 +118,11 @@ function workLink(row) {
   // Notion nur fuer Salah (einziges Mitglied im Workspace); die anderen bekommen dort keinen toten Link.
   const notionLink=url.protocol==='https:' && /(^|\.)notion\.(so|site)$|^app\.notion\.com$|^www\.notion\.so$/.test(url.hostname);
   if (notionLink && data?.person!=='SA') return null;
-  const internal=(url.origin===location.origin || url.hostname==='umfrage.hydeout.ch') && /^\/team\/(?:b|c|schreiben|projekt|dashboard|frag)(?:\/|$)/.test(url.pathname);
+  const internal=(url.origin===location.origin || url.hostname==='umfrage.hydeout.ch') && (/^\/team\/(?:b|c|schreiben|projekt|dashboard|frag)(?:\/|$)/.test(url.pathname)||(url.pathname==='/team/'&&/^\?view=(?:sharing|today|tasks)$/.test(url.search)));
   const doc=url.protocol==='https:' && url.hostname==='docs.google.com' && /^\/document\//.test(url.pathname);
   const drive=url.protocol==='https:' && url.hostname==='drive.google.com';
   if(!internal&&!doc&&!drive&&!notionLink)return null;
-  const p=url.pathname,label=doc?'Kapitel-Doc öffnen':notionLink?'In Notion öffnen':internal?(/^\/team\/b/.test(p)?'Kontaktmaske öffnen':/^\/team\/c/.test(p)?'Bewertungsmaske öffnen':/^\/team\/schreiben/.test(p)?'Schreibplatz öffnen':/^\/team\/projekt/.test(p)?'Projekt öffnen':/^\/team\/dashboard/.test(p)?'Dashboard öffnen':'Pia fragen'):'Unterlagen öffnen';
+  const p=url.pathname,label=doc?'Kapitel-Doc öffnen':notionLink?'In Notion öffnen':internal?(/^\/team\/b/.test(p)?'Kontaktmaske öffnen':/^\/team\/c/.test(p)?'Bewertungsmaske öffnen':/^\/team\/schreiben/.test(p)?'Schreibplatz öffnen':/^\/team\/projekt/.test(p)?'Projekt öffnen':/^\/team\/dashboard/.test(p)?'Dashboard öffnen':/^\/team\/frag/.test(p)?'Pia fragen':url.search==='?view=sharing'?'Umfrage teilen':'Öffnen'):'Unterlagen öffnen';
   return el('a',{class:'button secondary work-link',...(notionLink?{target:'_blank'}:{}),href:internal?url.pathname+url.search:preview.active()&&doc?url.origin+url.pathname.replace(/(?:\/edit)?\/?$/, '/preview'):url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
 }
 function steps(row,readOnly=false) {
