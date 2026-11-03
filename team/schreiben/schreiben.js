@@ -167,6 +167,9 @@ function chooser() {
   $('title').textContent = 'Kapitelübersicht';
   $('tabs').hidden = true;
   document.body.classList.add('choosing');
+  document.body.classList.remove('kapitel');
+  $('tab-auftrag').removeAttribute('role');
+  fill($('pick'));
   fill($('doc'));
   const me = state.person, all = state.chapters;
   const mineOf = c => c.owner === me || c.reader === me;
@@ -271,26 +274,91 @@ function schreibZeitKontext(c) {
   }
   return {aufgabe, paket};
 }
+// ---------- Kapitelmenü (statt nativer Auswahl): gleiche Kapitel wie bisher, nach Frist sortiert, mit Tastatur bedienbar ----------
+function renderMenu(c) {
+  const me = state.person, box = $('pick');
+  const list = state.chapters.filter(x => state.lead || me === 'SA' || x.owner === me || x.reader === me);
+  if (list.length < 2) { fill(box); return; }
+  const byDue = (x, y) => String(x.due || '9999').localeCompare(String(y.due || '9999')) || (x.ref || '').localeCompare(y.ref || '', 'de', {numeric:true});
+  const groups = [
+    ['Deine Kapitel', list.filter(x => x.owner === me)],
+    ['Du liest gegen', list.filter(x => x.reader === me && x.owner !== me)],
+    ['Weitere Kapitel', list.filter(x => x.owner !== me && x.reader !== me)]].filter(([, xs]) => xs.length);
+  const btn = el('button', {type:'button', class:'pick-btn', id:'pick-btn', 'aria-haspopup':'true', 'aria-expanded':'false', 'aria-controls':'pick-menu'},
+    el('span', {class:'pb-l'}, 'Kapitel wechseln'), el('span', {class:'pb-s'}, 'Wechseln'), el('span', {class:'chev', 'aria-hidden':'true'}));
+  const item = x => {
+    const an = anatomy(x.ref), cur = x.ref === c.ref, g = state.guide[x.ref] || {};
+    return el('a', {role:'menuitem', class:'mi-row' + (cur ? ' cur' : ''), href:'?k=' + encodeURIComponent(x.ref) + (DEMO ? '&demo' : ''), 'aria-current':cur ? 'page' : null, tabindex:'-1'},
+      el('span', {class:'mi-num'}, an.number || '–'),
+      el('span', {class:'mi-main'}, el('span', {class:'mi-t'}, x.title || g.titel || x.ref),
+        el('span', {class:'mi-s'}, (x.ref.startsWith('6b') ? 'PA6b' : 'PA6a') + (x.due ? ' · Frist ' + day(x.due) : '') + (STAND[x.status] ? ' · ' + (x.status === 'fertig' ? 'Fertig' : x.status) : ''))),
+      cur ? el('span', {class:'mi-cur'}, el('span', {class:'sr'}, 'aktuell')) : null);
+  };
+  const menu = el('div', {class:'pick-menu', id:'pick-menu', role:'menu', 'aria-label':'Kapitel wechseln', hidden:true},
+    el('p', {class:'pm-h', 'aria-hidden':'true'}, 'Kapitel wechseln'),
+    groups.map(([name, xs], i) => el('div', {role:'group', 'aria-labelledby':'pm-g' + i, class:'pm-g'},
+      el('p', {class:'pm-gh', id:'pm-g' + i}, name), xs.sort(byDue).map(item))),
+    el('a', {role:'menuitem', class:'pm-all', href:'./' + (DEMO ? '?demo' : ''), tabindex:'-1'}, 'Alle Kapitel im Überblick', el('span', {'aria-hidden':'true'}, ' ›')));
+  const scrim = el('div', {class:'pick-scrim', hidden:true, onclick:() => close(false)});
+  const items = () => [...menu.querySelectorAll('[role=menuitem]')];
+  function open(focusLast) {
+    menu.hidden = false; scrim.hidden = false; btn.setAttribute('aria-expanded', 'true'); document.body.classList.add('menu-open');
+    const all = items(), start = focusLast ? all[all.length - 1] : menu.querySelector('.cur') || all[0];
+    start.focus({preventScroll:true}); start.scrollIntoView({block:'nearest'});
+  }
+  function close(refocus) {
+    if (menu.hidden) return;
+    menu.hidden = true; scrim.hidden = true; btn.setAttribute('aria-expanded', 'false'); document.body.classList.remove('menu-open');
+    if (refocus) btn.focus();
+  }
+  btn.addEventListener('click', () => menu.hidden ? open(false) : close(true));
+  btn.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open(e.key === 'ArrowUp'); } });
+  menu.addEventListener('keydown', e => {
+    const all = items(), i = all.indexOf(document.activeElement);
+    const go = n => { const t = all[(n + all.length) % all.length]; t.focus(); t.scrollIntoView({block:'nearest'}); };
+    if (e.key === 'ArrowDown') { e.preventDefault(); go(i + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); go(i - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); go(0); }
+    else if (e.key === 'End') { e.preventDefault(); go(all.length - 1); }
+    else if (e.key === 'Escape') { e.preventDefault(); close(true); }
+    else if (e.key === 'Tab') close(false);
+    else if (e.key === ' ' && document.activeElement.matches('a')) { e.preventDefault(); document.activeElement.click(); }
+  });
+  menu.addEventListener('focusout', e => { if (!box.contains(e.relatedTarget) && e.relatedTarget) close(false); });
+  fill(box, btn, scrim, menu);
+}
+document.addEventListener('pointerdown', e => {
+  const box = $('pick'), menu = $('pick-menu');
+  if (menu && !menu.hidden && !box.contains(e.target)) { menu.hidden = true; box.querySelector('.pick-scrim').hidden = true; $('pick-btn').setAttribute('aria-expanded', 'false'); document.body.classList.remove('menu-open'); }
+});
 function renderAll() {
   const c = state.chapter, g = state.guide[c.ref] || {};
   document.title = c.ref + ' · Schreibplatz';
-  $('part').textContent = (c.ref.startsWith('6b') ? 'PA6b' : 'PA6a') + ' · Kapitel ' + c.ref.replace(/^6[ab]-/, '');
+  document.body.classList.add('kapitel');
+  $('tabs').hidden = false;
+  $('tab-auftrag').setAttribute('role', 'tabpanel');
+  const a = anatomy(c.ref), part = c.ref.startsWith('6b') ? 'PA6b' : 'PA6a';
+  const label = a.number ? 'Kapitel ' + a.number : a.main === 'reserve' ? 'Reserve' : 'Kapitel ' + a.main + ' · Unterkapitel';
+  fill($('part'), el('a', {class:'crumb', href:'./' + (DEMO ? '?demo' : '')}, el('span', {'aria-hidden':'true'}, '‹ '), 'Schreibwerk'), el('span', {class:'sep', 'aria-hidden':'true'}, '/'), part + ' · ' + label);
   $('title').textContent = g.titel || c.title;
+  // Eine ruhige Metazeile statt gleichgewichteter Chips: Rolle, Frist, Umfang, Stand, Mitschreibende.
+  const today = new Date().toISOString().slice(0, 10), late = c.due && String(c.due).slice(0, 10) < today && c.status !== 'fertig';
+  const other = c.owner === state.person ? [c.reader, 'liest gegen', 'reader'] : c.reader === state.person ? [c.owner, 'schreibt', 'owner'] : null;
+  const dot = () => el('span', {class:'dot', 'aria-hidden':'true'}, '·');
   fill($('meta'),
-    el('span', {class:'chip role'}, roleOf(c)),
-    c.due ? el('span', {class:'chip'}, 'Frist ' + day(c.due)) : null,
-    g.seiten ? el('span', {class:'chip'}, 'rund ' + String(g.seiten).replace('.', ',') + (g.seiten === 1 ? ' Seite' : ' Seiten')) : null,
-    c.reader && c.owner === state.person ? el('span', {class:'chip soft'}, 'Gegenlesen: ' + (NAMES[c.reader] || c.reader)) : null);
+    el('span', {class:'role-pill ' + (c.owner === state.person ? 'w' : c.reader === state.person ? 'l' : 'o')}, roleOf(c)),
+    c.due ? el('span', {class:'mi' + (late ? ' late' : '')}, 'Frist ' + day(c.due), late ? el('b', {}, ' überfällig') : null) : null,
+    g.seiten ? [dot(), el('span', {class:'mi'}, 'rund ' + String(g.seiten).replace('.', ',') + (g.seiten === 1 ? ' Seite' : ' Seiten'))] : null,
+    c.plan ? null : [dot(), standBadge(c)],
+    other && NAMES[other[0]] ? [dot(), el('span', {class:'mi person'}, initials(other[0], other[2]), el('span', {'aria-hidden':'true'}, NAMES[other[0]] + ' ' + other[1]))] : null,
+    !other ? [dot(), el('span', {class:'mi person'}, initials(c.owner, 'owner'), initials(c.reader, 'reader'), el('span', {'aria-hidden':'true'}, [NAMES[c.owner], NAMES[c.reader]].filter(Boolean).join(' und ')))] : null);
   // Zeitleiste entfernt (Salah 03.11.): Zeit wird mit dem Auftrag erfasst, nicht separat im Schreibplatz.
-  const picker = $('picker');
-  picker.replaceChildren(...state.chapters.filter(x => state.lead || state.person === 'SA' || x.owner === state.person || x.reader === state.person)
-    .map(x => el('option', {value:x.ref, selected:x.ref === c.ref}, x.ref + ' · ' + x.title)));
-  picker.hidden = picker.options.length < 2;
-  picker.onchange = () => { location.search = '?k=' + encodeURIComponent(picker.value) + (DEMO ? '&demo' : ''); };
+  renderMenu(c);
   renderAuftrag(c, g); renderInfos(g); renderRegeln(g); renderHilfe(c, g); renderDoc(c);
   setTab(store.get('pa6-sp-tab', 'auftrag'));
 }
-function block(title, ...kids) { const body = kids.flat().filter(Boolean); return body.length ? el('section', {class:'block'}, el('h2', {}, title), body) : null; }
+function block(title, ...kids) { return card(title, '', ...kids); }
+function card(title, cls, ...kids) { const body = kids.flat().filter(Boolean); return body.length ? el('section', {class:'card' + (cls ? ' ' + cls : '')}, title ? el('h2', {class:'card-h'}, title) : null, body) : null; }
 function sourceTag(t) { return t ? el('span', {class:'src'}, t) : null; }
 
 function renderAuftrag(c, g) {
@@ -299,22 +367,25 @@ function renderAuftrag(c, g) {
     const id = 'm' + i, input = el('input', {type:'checkbox', id});
     input.checked = !!done[i];
     input.addEventListener('change', () => { done[i] = input.checked; store.set(checksKey, done); progress(); });
-    return el('li', {}, input, el('label', {for:id}, m.punkt, sourceTag(m.quelle)));
+    return el('li', {}, input, el('label', {for:id}, el('span', {class:'lt'}, m.punkt, sourceTag(m.quelle))));
   });
   const bar = el('span', {}), meter = el('div', {class:'meter'}, el('i', {}, bar), el('b', {}));
-  function progress() { const n = Object.values(done).filter(Boolean).length, all = muss.length; bar.style.width = (all ? n / all * 100 : 0) + '%'; meter.lastChild.textContent = all ? n + ' von ' + all + ' drin' : ''; }
+  function progress() { const n = Object.values(done).filter(Boolean).length, all = muss.length; bar.style.width = (all ? n / all * 100 : 0) + '%'; meter.lastChild.textContent = all ? n + ' von ' + all + ' drin' : ''; meter.classList.toggle('full', !!all && n === all); }
   const hasGuide = !!(g.kurz || (g.muss || []).length);
-  fill($('tab-auftrag'), 
-    hasGuide ? el('div', {class:'lead'}, el('p', {class:'k'}, 'Das schreibst du'), el('p', {class:'big'}, g.kurz || c.Was || '')) :
-      el('div', {class:'lead'}, el('p', {class:'k'}, 'Auftrag'), el('p', {class:'big'}, c.Was && c.Was !== 'noch offen' ? c.Was : 'Der ausführliche Auftrag für dieses Kapitel wird gerade ergänzt.')),
-    g.daten_ab ? el('p', {class:'note'}, 'Daten liegen vor ab ' + g.daten_ab + '. Bis dahin Aufbau und Methode schreiben, keine Ergebnisse.') : null,
-    block('Diese Fragen beantwortet dein Text', el('ol', {class:'qs'}, (g.fragen || []).map(q => el('li', {}, q)))),
-    muss.length ? el('section', {class:'block'}, el('div', {class:'row'}, el('h2', {}, 'Muss drin sein'), meter), el('ul', {class:'checks'}, muss)) : null,
-    block('So gibt es volle Punkte', (g.raster || []).map(r => el('div', {class:'pts'}, el('span', {class:'pn'}, r.punkte + ' P.'), el('p', {}, r.volle_punkte_wenn)))),
-    block('Aufbau laut Vorgabe', (g.gliederung || []).length ? el('ol', {class:'outline'}, g.gliederung.map(x => el('li', {}, x))) : null),
-    block('Gehört nicht hierhin', (g.nicht || []).length ? el('ul', {class:'plain'}, g.nicht.map(x => el('li', {}, x))) : null),
-    block('Typische Fehler', (g.fallen || []).length ? el('ul', {class:'plain warn'}, g.fallen.map(x => el('li', {}, x))) : null),
-    c.reader === state.person && c.owner !== state.person ? block('Beim Gegenlesen', el('p', {}, 'Prüfe mit der Liste «Muss drin sein» und den Punkten oben. Schreib Kommentare ins Doc, ändere den Text nicht selbst.')) : null);
+  const reading = c.reader === state.person && c.owner !== state.person;
+  fill($('tab-auftrag'),
+    el('section', {class:'card lead'},
+      el('p', {class:'k'}, hasGuide ? (reading ? 'Worum es geht' : 'Das schreibst du') : 'Auftrag'),
+      el('p', {class:'big'}, hasGuide ? (g.kurz || c.Was || '') : c.Was && c.Was !== 'noch offen' ? c.Was : 'Der ausführliche Auftrag für dieses Kapitel wird gerade ergänzt.'),
+      g.daten_ab ? el('p', {class:'note'}, 'Daten liegen vor ab ' + g.daten_ab + '. Bis dahin Aufbau und Methode schreiben, keine Ergebnisse.') : null),
+    reading ? card('Beim Gegenlesen', 'soft-card', el('p', {}, 'Prüfe mit der Liste «Muss drin sein» und den Punkten unten. Schreib Kommentare ins Doc, ändere den Text nicht selbst.')) : null,
+    card('Diese Fragen beantwortet dein Text', '', (g.fragen || []).length ? el('ol', {class:'qs'}, g.fragen.map(q => el('li', {}, q))) : null),
+    card('Aufbau laut Vorgabe', '', (g.gliederung || []).length ? el('ol', {class:'steps'}, g.gliederung.map(x => el('li', {}, x))) : null),
+    muss.length ? el('section', {class:'card'}, el('div', {class:'row'}, el('h2', {class:'card-h'}, 'Muss drin sein'), meter), el('ul', {class:'checks'}, muss)) : null,
+    card('So gibt es volle Punkte', '', (g.raster || []).map(r => el('div', {class:'pts'}, el('span', {class:'pn'}, r.punkte + ' P.'), el('p', {}, r.volle_punkte_wenn)))),
+    (g.nicht || []).length || (g.fallen || []).length ? el('section', {class:'card'},
+      (g.nicht || []).length ? el('div', {class:'sub-block'}, el('h2', {class:'card-h'}, 'Gehört nicht hierhin'), el('ul', {class:'plain'}, g.nicht.map(x => el('li', {}, x)))) : null,
+      (g.fallen || []).length ? el('div', {class:'sub-block'}, el('h2', {class:'card-h'}, 'Typische Fehler'), el('ul', {class:'plain warn'}, g.fallen.map(x => el('li', {}, x)))) : null) : null);
   progress();
 }
 function renderInfos(g) {
@@ -325,7 +396,7 @@ function renderInfos(g) {
     {titel:'Pia fragen', wo:'Team-App', href:'/team/frag/', inhalt:'Fragen zu Regeln, Terminen und Unterlagen.'}];
   fill($('tab-infos'), 
     block('Hier findest du, was du brauchst', (g.infos || []).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), el('p', {class:'where'}, i.wo)))),
-    block('Direkt in der Team-App', el('div', {class:'links'}, inApp.map(i => el('a', {class:'lnk', href:i.href}, el('b', {}, i.titel), el('span', {}, i.inhalt))))));
+    block('Direkt in der Team-App', el('div', {class:'links'}, inApp.map(i => el('a', {class:'lnk', href:i.href}, el('b', {}, i.titel), el('span', {}, i.inhalt), el('i', {class:'go', 'aria-hidden':'true'}, '›'))))));
 }
 function copyBtn(text) {
   return el('button', {class:'copy', type:'button', onclick:async e => { try { await navigator.clipboard.writeText(text); e.currentTarget.textContent = 'Kopiert'; announce('Beispiel kopiert'); } catch { announce('Kopieren nicht möglich'); } }}, 'Kopieren');
@@ -363,12 +434,18 @@ function renderRegeln(g) {
 // Kleine Markdown-Darstellung fuer Antworten: Fett, Aufzaehlungen, Absaetze. Kein HTML aus der Antwort.
 function inline(t) { const out = []; String(t).split(/(\*\*[^*]+\*\*)/).forEach(p => { if (/^\*\*[^*]+\*\*$/.test(p)) out.push(el('strong', {}, p.slice(2, -2))); else if (p) out.push(p); }); return out; }
 function rich(t) {
-  const nodes = []; let list = null;
+  const nodes = []; let list = null, kind = '';
   for (const line of String(t).split('\n')) {
-    const m = /^\s*(?:[-*•]|\d+\.)\s+(.*)$/.exec(line);
-    if (m) { if (!list) { list = el('ul', {class:'md'}); nodes.push(list); } list.append(el('li', {}, inline(m[1]))); continue; }
+    const m = /^\s*([-*•]|\d+\.)\s+(.*)$/.exec(line);
+    if (m) {
+      const k = /\d/.test(m[1]) ? 'ol' : 'ul';
+      if (!list || kind !== k) { list = el(k, {class:'md'}); kind = k; nodes.push(list); }
+      list.append(el('li', {}, inline(m[2]))); continue;
+    }
     list = null;
-    if (line.trim()) nodes.push(el('p', {class:'md'}, inline(line.replace(/^#+\s*/, ''))));
+    if (!line.trim()) continue;
+    if (/^#+\s/.test(line)) nodes.push(el('p', {class:'md h'}, inline(line.replace(/^#+\s*/, ''))));
+    else nodes.push(el('p', {class:'md'}, inline(line)));
   }
   return nodes;
 }
@@ -378,54 +455,85 @@ function renderHilfe(c, g) {
   const histKey = 'pa6-sp-chat:' + state.person + ':' + c.ref;
   state.chat = store.get(histKey, []);
   const thread = el('div', {class:'thread', 'aria-live':'polite'});
-  const input = el('textarea', {rows:'3', maxlength:'900', placeholder:'Frag nach Gliederung, Leitfragen, Quellen oder APA …', 'aria-label':'Frage an die Schreibhilfe'});
-  const send = el('button', {class:'btn', type:'submit'}, 'Fragen');
-  const draw = () => { thread.replaceChildren(...(state.chat.length ? state.chat.map(m => el('div', {class:'msg ' + m.r + (m.err ? ' err' : '')}, el('p', {class:'who'}, m.r === 'du' ? 'Du' : 'Schreibhilfe'), el('div', {class:'txt'}, m.r === 'du' ? m.t : rich(m.t)))) :
-    [el('p', {class:'quiet'}, 'Die Hilfe kennt den Auftrag dieses Kapitels. Sie gibt Stichworte und Hinweise, schreibt aber keine Absätze für dich.')])); thread.scrollTop = thread.scrollHeight; };
+  const input = el('textarea', {rows:'2', maxlength:'900', placeholder:'Frag nach Gliederung, Leitfragen, Quellen oder APA …', 'aria-label':'Frage an die Schreibhilfe'});
+  const send = el('button', {class:'btn send', type:'submit'}, 'Fragen');
+  const head = m => el('p', {class:'msg-who'}, m.r === 'du' ? 'Du' : [el('span', {class:'mark', 'aria-hidden':'true'}), 'Schreibhilfe']);
+  const suggest = el('div', {class:'suggest'}), composer = el('div', {class:'composer'});
+  const drawSuggest = () => {
+    const empty = !state.chat.length;
+    suggest.className = 'suggest' + (empty ? ' list' : ' row');
+    if (empty) thread.before(suggest); else composer.prepend(suggest);
+    fill(suggest, empty ? el('p', {class:'sg-h'}, 'Zum Beispiel') : null,
+      PROMPTS.map(p => el('button', {type:'button', class:'sg', onclick:() => ask(p)}, el('span', {}, p), empty ? el('i', {class:'go', 'aria-hidden':'true'}, '›') : null)));
+  };
+  const draw = scroll => {
+    thread.replaceChildren(...state.chat.map(m => el('div', {class:'msg ' + m.r + (m.err ? ' err' : '')}, head(m), el('div', {class:'txt'}, m.r === 'du' ? m.t : rich(m.t)))));
+    drawSuggest();
+    if (scroll && thread.lastElementChild) thread.lastElementChild.scrollIntoView({block:'nearest', behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+  };
   async function ask(text) {
     text = String(text || '').trim(); if (!text || state.busy) return;
     state.busy = true; send.disabled = true; input.value = '';
-    state.chat.push({r:'du', t:text}); draw();
-    const wait = el('div', {class:'msg as wait'}, el('p', {class:'who'}, 'Schreibhilfe'), el('div', {class:'txt'}, 'Schaut in den Auftrag …')); thread.append(wait);
+    state.chat.push({r:'du', t:text}); draw(true);
+    const wait = el('div', {class:'msg as wait', 'aria-busy':'true'}, head({r:'as'}), el('div', {class:'txt'}, el('span', {class:'dots', 'aria-hidden':'true'}, el('i'), el('i'), el('i')), 'Schaut in den Auftrag …'));
+    thread.append(wait); wait.scrollIntoView({block:'nearest'});
     try {
       const verlauf = state.chat.slice(-7, -1).filter(m => !m.err).map(m => ({rolle:m.r === 'du' ? 'du' : 'assistent', text:m.t}));
       const r = await post({typ:'frage', k:state.key, text, leitung:false, ctx:c.overview ? undefined : c.id, verlauf, modus:'schreiben', kapitel:c.ref}, 90000);
       if (!r || r.ok === false || typeof r.antwort !== 'string') throw Error(r && r.fehler || 'Keine Antwort erhalten.');
       state.chat.push({r:'as', t:r.antwort});
     } catch (e) { state.chat.push({r:'as', t:e.message || 'Gerade nicht erreichbar.', err:true}); }
-    finally { wait.remove(); state.chat = state.chat.slice(-30); store.set(histKey, state.chat); state.busy = false; send.disabled = false; draw(); }
+    finally { wait.remove(); state.chat = state.chat.slice(-30); store.set(histKey, state.chat); state.busy = false; send.disabled = false; draw(true); }
   }
-  const form = el('form', {class:'ask', onsubmit:e => { e.preventDefault(); ask(input.value); }}, input, el('div', {class:'row'}, el('p', {class:'quiet small'}, 'Wird als KI-Nutzung protokolliert.'), send));
+  const form = el('form', {class:'ask', onsubmit:e => { e.preventDefault(); ask(input.value); }},
+    el('div', {class:'field'}, input, send),
+    el('p', {class:'ask-foot'}, el('span', {}, 'Wird als KI-Nutzung protokolliert.'), el('span', {class:'kbd-hint'}, 'Enter sendet, Shift und Enter macht eine neue Zeile.')));
   input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); ask(input.value); } });
-  fill($('tab-hilfe'), 
-    el('div', {class:'chips'}, PROMPTS.map(p => el('button', {type:'button', class:'chip-btn', onclick:() => ask(p)}, p))),
-    thread, form);
-  draw();
+  fill($('tab-hilfe'),
+    el('div', {class:'help-intro'}, el('p', {class:'hi-t'}, 'Schreibhilfe für dieses Kapitel'),
+      el('p', {class:'hi-s'}, 'Sie kennt den Auftrag und gibt Gliederung und Tipps, schreiben musst du selbst.')),
+    thread, composer);
+  composer.append(form);
+  draw(false);
 }
 
 // ---------- Doc ----------
 function renderDoc(c) {
   const url = docUrl(c);
-  if (!url && c.plan) { fill($('doc'), el('div', {class:'doc-empty'}, el('p', {}, 'Das Doc dieses Kapitels sehen Pate und Gegenleser.'), el('p', {class:'quiet'}, 'Den Auftrag kannst du links lesen.'))); return; }
-  if (!url) { fill($('doc'), el('div', {class:'doc-empty'}, el('p', {}, 'Für dieses Kapitel ist noch kein Doc verknüpft.'), el('p', {class:'quiet'}, 'Salah legt es an.'))); return; }
+  const empty = (title, text, action) => fill($('doc'), el('div', {class:'doc-card doc-empty'}, el('span', {class:'doc-ico', 'aria-hidden':'true'}), el('p', {class:'big-note'}, title), el('p', {class:'quiet'}, text), action || null));
+  if (!url && c.plan) return empty('Das Doc dieses Kapitels sehen Pate und Gegenleser.', 'Den Auftrag kannst du hier lesen.');
+  if (!url) return empty('Für dieses Kapitel ist noch kein Doc verknüpft.', 'Salah legt es an.');
+  const open = (cls, text) => el('a', {class:'btn ' + cls, href:url + '/edit', target:'_blank', rel:'noopener noreferrer'}, text, el('span', {class:'ext', 'aria-hidden':'true'}, '↗'));
   // Safari und iOS sperren Drittanbieter-Cookies: dort ist man im eingebetteten Doc nicht angemeldet und kann nicht schreiben.
   const ua = navigator.userAgent, safari = /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS/.test(ua);
-  if (safari) { fill($('doc'), el('div', {class:'doc-empty'}, el('p', {class:'big-note'}, 'In Safari öffnet sich dein Doc im eigenen Fenster.'), el('p', {class:'quiet'}, 'Safari erlaubt das Schreiben im eingebetteten Doc nicht. Stell die Fenster nebeneinander, dann hast du den Auftrag immer daneben.'), el('a', {class:'btn', href:url + '/edit', target:'_blank', rel:'noopener noreferrer'}, 'Doc öffnen ↗'))); return; }
+  if (safari) return empty('In Safari öffnet sich dein Doc im eigenen Fenster.', 'Safari erlaubt das Schreiben im eingebetteten Doc nicht. Stell die Fenster nebeneinander, dann hast du den Auftrag immer daneben.', open('primary', 'Doc öffnen'));
   const frame = el('iframe', {src:url + '/edit?usp=sharing', title:'Google Doc ' + c.ref, allow:'clipboard-read; clipboard-write', referrerpolicy:'no-referrer'});
-  fill($('doc'), 
-    el('div', {class:'doc-bar'}, el('span', {}, 'Google Doc · speichert automatisch'), el('a', {href:url + '/edit', target:'_blank', rel:'noopener noreferrer'}, 'Im eigenen Fenster öffnen ↗')),
-    frame,
+  fill($('doc'),
+    el('div', {class:'doc-card'},
+      el('div', {class:'doc-bar'},
+        el('span', {class:'doc-ico', 'aria-hidden':'true'}),
+        el('span', {class:'doc-t'}, el('b', {}, 'Kapitel-Doc'), el('span', {class:'saved'}, 'Google Doc · speichert automatisch')),
+        open('secondary wide', 'Im eigenen Fenster öffnen'), open('primary narrow', 'Doc öffnen')),
+      frame),
     el('p', {class:'doc-hint'}, 'Leer oder Anmeldung verlangt? Einmal «Im eigenen Fenster öffnen», bei Google anmelden, dann hier neu laden.'));
 }
 
 // ---------- Tabs ----------
 function setTab(name) {
-  const small = matchMedia('(max-width: 1099px)').matches;
-  if (name === 'doc' && !small) name = 'auftrag';
-  if (name === 'doc' && small) { const u = docUrl(state.chapter); if (u) window.open(u + '/edit', '_blank', 'noopener'); return; }
+  if (!['auftrag', 'infos', 'regeln', 'hilfe'].includes(name)) name = 'auftrag';
   state.tab = name; store.set('pa6-sp-tab', name);
-  for (const b of $('tabs').querySelectorAll('button')) b.setAttribute('aria-selected', String(b.dataset.tab === name));
+  for (const b of $('tabs').querySelectorAll('button')) { const on = b.dataset.tab === name; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; }
   for (const t of ['auftrag', 'infos', 'regeln', 'hilfe']) $('tab-' + t).hidden = t !== name;
+  $('panel').scrollTop = 0;
+  // Schmal scrollt die ganze Seite: beim Wechsel an den Anfang des Bereichs, nicht mitten in den neuen Inhalt.
+  const side = document.querySelector('.side'), top = side ? side.getBoundingClientRect().top + scrollY : 0;
+  if (document.body.classList.contains('kapitel') && scrollY > top) scrollTo(0, top);
 }
 $('tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
+$('tabs').addEventListener('keydown', e => {
+  const bs = [...$('tabs').querySelectorAll('button')], i = bs.indexOf(document.activeElement);
+  const n = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? bs.length - 1 : null;
+  if (n === null || i < 0) return;
+  e.preventDefault(); const b = bs[(n + bs.length) % bs.length]; setTab(b.dataset.tab); b.focus();
+});
 load();

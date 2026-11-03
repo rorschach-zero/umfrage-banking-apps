@@ -3,38 +3,37 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#f8f8f5">
+<meta name="theme-color" content="#F8F9F6">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://docs.google.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Schreibplatz · PA6</title>
-<link rel="stylesheet" href="schreiben.css?v=4b9f5a53491f">
+<link rel="stylesheet" href="schreiben.css?v=697c2a2e253e">
 <link rel="stylesheet" href="../zeit.css?v=89af72ec7702">
 <script src="../config.js?v=913895d9d484" defer></script>
 <script src="../zeit.js?v=88cf8e4ad5e0" defer></script>
-<script src="schreiben.js?v=15177801f289" defer></script>
+<script src="schreiben.js?v=2f2da6e0a7a6" defer></script>
 </head>
 <body>
 <a class="skip" href="#panel">Direkt zum Auftrag</a>
 <header class="bar">
   <a class="back" href="/team/">← Unser Projekt</a>
-  <div class="bar-title"><span class="eyebrow" id="part">Schreibplatz</span><h1 id="title">Kapitel wird geladen …</h1></div>
-  <div class="bar-meta" id="meta"></div>
-  <label class="pick"><span class="sr">Kapitel wechseln</span><select id="picker" hidden></select></label>
+  <div class="bar-title"><span class="eyebrow" id="part">Schreibplatz</span><h1 id="title">Kapitel wird geladen …</h1><div class="bar-meta" id="meta"></div></div>
+  <div class="pick" id="pick"></div>
 </header>
-<nav class="tabs" id="tabs" aria-label="Bereiche">
-  <button data-tab="auftrag" aria-selected="true">Auftrag</button>
-  <button data-tab="infos" aria-selected="false">Infos</button>
-  <button data-tab="regeln" aria-selected="false">APA &amp; Regeln</button>
-  <button data-tab="hilfe" aria-selected="false">Hilfe</button>
-  <button data-tab="doc" class="only-small" aria-selected="false">Doc</button>
-</nav>
 <div class="layout">
-  <main class="panel" id="panel" tabindex="-1">
-    <section id="tab-auftrag" class="tab"></section>
-    <section id="tab-infos" class="tab" hidden></section>
-    <section id="tab-regeln" class="tab" hidden></section>
-    <section id="tab-hilfe" class="tab" hidden></section>
-    <p class="self">Du schreibst selbst. Die Hilfe gibt Stichworte, keine fertigen Sätze.</p>
-  </main>
+  <div class="side">
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Bereiche">
+      <button type="button" role="tab" id="t-auftrag" data-tab="auftrag" aria-controls="tab-auftrag" aria-selected="true">Auftrag</button>
+      <button type="button" role="tab" id="t-infos" data-tab="infos" aria-controls="tab-infos" aria-selected="false" tabindex="-1">Infos</button>
+      <button type="button" role="tab" id="t-regeln" data-tab="regeln" aria-controls="tab-regeln" aria-selected="false" tabindex="-1"><span class="long">APA &amp; </span>Regeln</button>
+      <button type="button" role="tab" id="t-hilfe" data-tab="hilfe" aria-controls="tab-hilfe" aria-selected="false" tabindex="-1">Hilfe</button>
+    </nav>
+    <main class="panel" id="panel" tabindex="-1">
+      <section id="tab-auftrag" class="tab" role="tabpanel" aria-labelledby="t-auftrag"></section>
+      <section id="tab-infos" class="tab" role="tabpanel" aria-labelledby="t-infos" hidden></section>
+      <section id="tab-regeln" class="tab" role="tabpanel" aria-labelledby="t-regeln" hidden></section>
+      <section id="tab-hilfe" class="tab" role="tabpanel" aria-labelledby="t-hilfe" hidden></section>
+    </main>
+  </div>
   <section class="doc" id="doc" aria-label="Kapitel-Dokument"></section>
 </div>
 <div id="live" class="sr" role="status" aria-live="polite"></div>
