@@ -1,52 +1,55 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-WjI7KMMOVyS2AnOTJKyXav421V5JPSK1rAb0aJWWUjM='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-0/K5AFo0cyl7EuDNuzRoHKWddjuf6tprGlXoHUVIZDk='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>C Bewertungen</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 </head>
 <body>
-<header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=c">← Meine Arbeit</a><div class="titel"><small>C · Bewertungen</small>Bewertungen codieren</div><div class="zeile"><span id="fort" class="pille">…</span><span id="wer" class="pille">…</span></div></div></header>
+<header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=c">← Meine Arbeit</a><div class="titel"><small>C · Bewertungen</small>Bewertungen einordnen</div><div class="zeile"><span id="fort" class="pille">…</span><span id="wer" class="pille">…</span></div></div></header>
 <div class="purpose-slot" data-purpose-area="c"></div>
 <section id="workspace-progress" class="workspace-progress" aria-live="polite" hidden></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
-<div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zurueck" title="Pfeil links">‹</button><button class="knopf" id="speichern" title="Enter">Speichern und weiter</button></div></div></div>
+<div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zurueck" title="Pfeil links">‹ Zurück</button><button class="knopf" id="speichern" title="Enter">Speichern und weiter</button></div></div></div>
 <script src="../view-as.js?v=41cc5d81f7cc"></script>
 <script src="../team.js?v=91ca8ca4ac11"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
 <script>
 // Regeln aus 10_pa6a/bewertungen/Codebuch.md, Version 10. Die zweite Person (Rolle B) sieht nie die Codes der ersten.
 const KAT = [
-  [1, "Wartezeit", "Dauer von abgeschickter Anfrage bis Antwort oder Lösung", "nicht: kein Zugang (2); Eröffnung (5), Kartenlieferung (6), Auftrag (9)"],
-  [2, "Erreichbarkeit", "Ob und wie man den Kundendienst überhaupt erreicht", "nicht: Antwortdauer nach abgesetzter Anfrage (1)"],
-  [3, "Antwortqualität", "Inhalt und Haltung einer erhaltenen Antwort, oder pauschales Urteil über den Support", "nicht: Dauer (1), Zugang (2)"],
-  [4, "Sperrung", "Konto, Karte oder Guthaben nach Freischaltung gesperrt, blockiert, gekündigt", "nicht: vor Freischaltung (5); Zahlungsablehnung ohne Sperre (6)"],
-  [5, "Kontoeröffnung", "Vom Antrag bis zur Freischaltung", "nicht: alles nach der Freischaltung (4)"],
-  [6, "Karte", "Karte und Bezahlen damit", "nicht: Kosten (7); ausdrückliche Sperre (4)"],
-  [7, "Preis", "Kosten, Gebühren, Zinsen, Kurse", "nicht: Rendite einer Anlage (9)"],
-  [8, "App", "Technik und Bedienung der App", "nicht: Anlagefunktion (9); Zahlungsablehnung (6)"],
-  [9, "Anlage", "Investieren, Sparen, Krypto, Vorsorge", "nicht: Kosten (7); Absturz (8)"],
-  [10, "Sonstiges", "Nur wenn keine der neun passt", "nie neben einer passenden Kategorie"]
+  [1, "Wartezeit", "Dauer von abgeschickter Anfrage bis Antwort oder Lösung", "nicht hier · kein Zugang (Erreichbarkeit); Eröffnung (Kontoeröffnung), Kartenlieferung (Karte), Auftrag (Anlage)"],
+  [2, "Erreichbarkeit", "Ob und wie man den Kundendienst überhaupt erreicht", "nicht hier · Antwortdauer nach abgeschickter Anfrage (Wartezeit)"],
+  [3, "Antwortqualität", "Inhalt und Haltung einer erhaltenen Antwort, oder allgemeines Urteil über den Support", "nicht hier · Dauer (Wartezeit), Zugang (Erreichbarkeit)"],
+  [4, "Sperrung", "Konto, Karte oder Guthaben nach Freischaltung gesperrt, blockiert, gekündigt", "nicht hier · vor der Freischaltung (Kontoeröffnung); abgelehnte Zahlung ohne Sperre (Karte)"],
+  [5, "Kontoeröffnung", "Vom Antrag bis zur Freischaltung", "nicht hier · alles nach der Freischaltung (Sperrung)"],
+  [6, "Karte", "Karte und Bezahlen damit", "nicht hier · Kosten (Preis); ausdrückliche Sperre (Sperrung)"],
+  [7, "Preis", "Kosten, Gebühren, Zinsen, Kurse", "nicht hier · Rendite einer Anlage (Anlage)"],
+  [8, "App", "Technik und Bedienung der App", "nicht hier · Anlagefunktion (Anlage); abgelehnte Zahlung (Karte)"],
+  [9, "Anlage", "Investieren, Sparen, Krypto, Vorsorge", "nicht hier · Kosten (Preis); Absturz (App)"],
+  [10, "Sonstiges", "Nur wenn keine der neun passt", "nie zusammen mit einem passenden Thema"]
 ];
 const GRENZE = {
-  "1-2": "1 gegen 2: 2, solange keine Anfrage abgesetzt werden konnte; 1, sobald eine Anfrage abgeschickt oder eine Verbindung hergestellt war.",
-  "4-5": "4 gegen 5: 5 bis zur Freischaltung; 4 erst ab beschriebener Nutzung (Zahlung, Eingang, Karte benutzt). Unklar heisst 5.",
-  "4-6": "4 gegen 6: ausdrückliche Sperre ist 4; abgelehnte Zahlung ohne Sperre ist 6.",
-  "6-7": "6 gegen 7: Kosten sind immer 7; ein zusätzliches Funktionsproblem der Karte ist 6.",
-  "7-9": "7 gegen 9: Preise, Gebühren, Zinsen, Kurse sind 7; Angebot, Ausführung, Rendite sind 9.",
-  "8-9": "8 gegen 9: technischer Fehler ist 8, auch beim Handel; fehlende Anlagefunktion ist 9."
+  "1-2": "Wartezeit oder Erreichbarkeit? Erreichbarkeit, solange keine Anfrage abgeschickt werden konnte. Wartezeit, sobald eine Anfrage abgeschickt oder eine Verbindung hergestellt war.",
+  "4-5": "Sperrung oder Kontoeröffnung? Bis zur Freischaltung Kontoeröffnung. Sperrung erst, wenn das Konto schon genutzt wurde (Zahlung, Eingang, Karte benutzt). Im Zweifel Kontoeröffnung.",
+  "4-6": "Sperrung oder Karte? Ausdrücklich gesperrt heisst Sperrung. Nur eine abgelehnte Zahlung ohne Sperre heisst Karte.",
+  "6-7": "Karte oder Preis? Kosten sind immer Preis. Ein Problem mit der Karte selbst ist zusätzlich Karte.",
+  "7-9": "Preis oder Anlage? Preise, Gebühren, Zinsen und Kurse sind Preis. Angebot, Ausführung und Rendite sind Anlage.",
+  "8-9": "App oder Anlage? Ein technischer Fehler ist App, auch beim Handeln. Eine fehlende Anlagefunktion ist Anlage."
 };
 const AUSSCHLUSS = ["Sprache", "kein Text", "nicht Zak", "Duplikat", "nicht im Zeitraum"];
+// Gespeichert wird weiter der linke Wert, angezeigt der rechte. «nicht Zak» entsteht nur über die Zak-Frage (Entscheid 03.11.).
+const AUSSCHLUSS_TEXT = { "Sprache": "Andere Sprache", "kein Text": "Nur Sterne, kein Text", "nicht Zak": "Nicht über die Zak-App", "Duplikat": "Doppelt erfasst", "nicht im Zeitraum": "Datum passt nicht" };
+function ausschlussText(w) { return AUSSCHLUSS_TEXT[w] || w; }
 let q = [], i = 0, wer = "", c = null, savePending = false;
 
 async function start() {
-  if (!schluessel()) { document.getElementById("main").replaceChildren(el("h1", {}, "Persönlicher Link fehlt"), el("p", {}, "Öffne die Maske über den Link, den du von Salah bekommen hast.")); return; }
+  if (!schluessel()) { document.getElementById("main").replaceChildren(el("h1", {}, "Persönlicher Link fehlt"), el("p", {}, "Öffne die Seite über den Link, den du von Salah bekommen hast.")); return; }
   return fieldStart("queue", value => {
   q = value.queue; wer = value.person;
   document.getElementById("wer").textContent = TEAM[wer] || wer;
   q.sort((a, b) => (a.rolle + a.anbieter + a.quelle + a.schicht + String(a.position).padStart(4, "0")).localeCompare(b.rolle + b.anbieter + b.quelle + b.schicht + String(b.position).padStart(4, "0")));
   const offen = q.findIndex(x => !x.eigen); i = offen >= 0 ? offen : 0;
   document.getElementById("fuss").hidden = !q.length;
-  if (!q.length) { c = null; document.getElementById("main").replaceChildren(el("h1", {}, "Noch nichts zugeteilt"), el("p", { class: "leise" }, "Die Ziehung ist am Stichtag 03.11. Danach erscheinen deine Bewertungen hier.")); return; }
+  if (!q.length) { c = null; document.getElementById("main").replaceChildren(el("h1", {}, "Noch nichts zugeteilt"), el("p", { class: "leise" }, "Am 03.11. werden die Bewertungen verteilt. Danach erscheinen deine hier.")); return; }
   document.getElementById("fuss").hidden = false; zeige();
   });
 }
@@ -55,11 +58,11 @@ function aus(e) { const k = []; const v = {}; [1, 2, 3].forEach(n => { if (e["ka
 function renderExtraCases() {
   let box=document.getElementById('extra-cases');if(box)box.remove();
   if(!q.length||!q.every(row=>row.eigen)||!q.some(row=>!row.probe))return;
-  box=el('section',{id:'extra-cases',class:'karte'},el('h2',{},'Deine Warteschlange ist abgeschlossen'),el('p',{},'Du kannst unbegonnene Fälle von Personen im Rückstand übernehmen. Bestehende Codierungen bleiben geschützt.'));
-  const message=el('p',{role:'status'}),button=el('button',{class:'knopf',on:{click:async()=>{button.disabled=true;try{const result=await sende({typ:'take_more',area:'c'});await start();window.dispatchEvent(new Event('workspace-saved'));(document.querySelector('#extra-cases [role=status]')||document.getElementById('meldung')).textContent=result.assigned+' Fälle übernommen.';}catch(error){message.textContent=error.message;}finally{button.disabled=false;}}}},'Weitere Fälle übernehmen');
+  box=el('section',{id:'extra-cases',class:'karte'},el('h2',{},'Deine Warteschlange ist abgeschlossen'),el('p',{},'Du kannst noch nicht begonnene Bewertungen von anderen übernehmen. Was sie schon eingeordnet haben, bleibt.'));
+  const message=el('p',{role:'status'}),button=el('button',{class:'knopf',on:{click:async()=>{button.disabled=true;try{const result=await sende({typ:'take_more',area:'c'});await start();window.dispatchEvent(new Event('workspace-saved'));(document.querySelector('#extra-cases [role=status]')||document.getElementById('meldung')).textContent=result.assigned+' Bewertungen übernommen.';}catch(error){message.textContent=error.message;}finally{button.disabled=false;}}}},'Weitere Fälle übernehmen');
   box.append(button,message);document.getElementById('workspace-progress').after(box);
 }
-function fortschritt() { renderExtraCases(); const n = q.filter(x => x.eigen).length; document.getElementById("fort").textContent = `${q.every(x => x.probe) ? "Probe · " : ""}${n} von ${q.length}`; }
+function fortschritt() { renderExtraCases(); const n = q.filter(x => x.eigen).length; document.getElementById("fort").textContent = `${q.every(x => x.probe) ? "Übung · " : ""}${n} von ${q.length}`; }
 function draftKey(x) { return "c-" + wer + ":" + x.rolle + ":" + x.nr; }
 function zeige() {
   const x = q[i]; c = lokal(draftKey(x)) || (x.eigen ? aus(x.eigen) : leer(x)); fortschritt(); bild();
@@ -76,9 +79,9 @@ function kat(n) {
 function hinweise() {
   const h = [], k = c.kats;
   for (const key of Object.keys(GRENZE)) { const [a, b] = key.split("-").map(Number); if (k.includes(a) && k.includes(b)) h.push(GRENZE[key]); }
-  if (k.includes(4) && c.kundendienst_kontakt === "ja" && !k.some(n => n <= 3)) h.push("Sperrung zählt nur zum Kundendienst, wenn zusätzlich 1, 2 oder 3 vergeben ist.");
-  if (k.includes(3) && c.kundendienst_kontakt === "nein") h.push("Pauschales Urteil über den Support ohne beschriebenen Kontakt: Kategorie 3 mit Kontakt «nein» ist richtig.");
-  if (k.length > 1) h.push("Reihenfolge: die Kategorie mit den meisten Sätzen zuerst; bei Gleichstand die zuerst genannte. Mit den Pfeilen verschieben.");
+  if (k.includes(4) && c.kundendienst_kontakt === "ja" && !k.some(n => n <= 3)) h.push("Sperrung allein ist kein Kundendienst. Dafür braucht es zusätzlich Wartezeit, Erreichbarkeit oder Antwortqualität.");
+  if (k.includes(3) && c.kundendienst_kontakt === "nein") h.push("Allgemeines Urteil über den Support ohne beschriebenen Kontakt? Dann stimmt Antwortqualität mit Kontakt «nein».");
+  if (k.length > 1) h.push("Reihenfolge nach Gewicht. Das Thema mit den meisten Sätzen kommt zuerst, bei Gleichstand das zuerst genannte. Mit den Pfeilen verschieben.");
   return h;
 }
 // Numbered presentation; keep the existing instrument and keyboard rules.
@@ -101,17 +104,17 @@ function bild() {
   const offen = pruefe(), zak = x.anbieter === "Zak" && x.quelle === "Trustpilot";
   const prog = el("div", { class: "c-progress" }, el("div", { class: "c-progress-top" }, el("b", {}, (probe ? "Übung " : "Fall ") + (i + 1) + " von " + q.length), el("span", { class: "leise" }, n + " gespeichert")), el("progress", { max: q.length, value: n }));
   fuelle(m, prog,
-    x.probe ? el("p", { class: "c-probe" }, el("b", {}, "Übungsfall, zählt nicht. "), "Das Datum ist absichtlich alt. Codiere trotzdem normal und wähle nicht «nicht im Zeitraum» nur wegen des Datums.") : null,
+    x.probe ? el("p", { class: "c-probe" }, el("b", {}, "Übungsfall, zählt nicht. "), "Das Datum ist absichtlich alt. Ordne trotzdem normal ein und wähle nicht «Datum passt nicht» nur wegen des alten Datums.") : null,
     el("section", { class: "c-review" },
-      el("div", { class: "c-review-meta" }, el("span", {}, `${x.anbieter} · ${x.quelle}`), el("span", { class: "sterne" }, "★".repeat(Number(x.sterne) || 0) + "☆".repeat(5 - (Number(x.sterne) || 0))), el("span", { class: "leise" }, `${x.datum} · ${x.sprache}`), x.rolle === "B" ? el("span", { class: "pille" }, "Zweitcodierung, unabhängig") : null),
+      el("div", { class: "c-review-meta" }, el("span", {}, `${x.anbieter} · ${x.quelle}`), el("span", { class: "sterne" }, "★".repeat(Number(x.sterne) || 0) + "☆".repeat(5 - (Number(x.sterne) || 0))), el("span", { class: "leise" }, `${x.datum} · ${x.sprache}`), x.rolle === "B" ? el("span", { class: "pille" }, "Zweite Einschätzung, ohne die erste zu kennen") : null),
       x.text ? el("div", { class: "textbox" }, x.text) : x.fundort && /^https:\/\//.test(x.fundort)
-        ? el("a", { class: "knopf c-open", href: x.fundort, target: "_blank", rel: "noopener noreferrer", "data-read-navigation": true }, "Bewertung lesen ↗") : el("div", { class: "textbox" }, x.fundort || "Text und Fundort fehlen, bitte Salah melden."),
+        ? el("a", { class: "knopf c-open", href: x.fundort, target: "_blank", rel: "noopener noreferrer", "data-read-navigation": true }, "Bewertung lesen ↗") : el("div", { class: "textbox" }, x.fundort || "Text fehlt. Bitte Salah melden."),
       el("p", { class: "leise" }, "Nur lesen. Nichts kopieren, nichts antworten, kein Konto nötig.")),
-    frage(1, "Zählt diese Bewertung?", "Normalerweise ja. Nur ausschliessen, wenn einer dieser Gründe zutrifft.", !!c.ausschluss || ["de", "en", "fr"].includes(c.sprache),
-      chips(AUSSCHLUSS, c.ausschluss, w => { c.ausschluss = w; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }, { abwaehlbar: true }),
-      c.ausschluss ? el("p", { class: "c-excluded" }, "Ausgeschlossen: " + c.ausschluss + ". Fertig, speichern und weiter.") : el("div", {}, el("label", { class: "f" }, "Sprache"), chips([["de", "Deutsch"], ["en", "Englisch"], ["fr", "Französisch"]], c.sprache, w => { c.sprache = w; merke(); })),
-      c.ausschluss && VERBOTEN.test(c.bemerkung) ? el("div", {}, el("label", { class: "f" }, "Bemerkung korrigieren: ohne Nummern und Adressen"), el("input", { class: "t", value: c.bemerkung, on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })) : null,
-      zak ? el("div", {}, el("label", { class: "f" }, "Geht es wirklich um Zak?"), chips(["ja", "nein"], c.zak_bezug, w => { c.zak_bezug = w; if (w === "nein") { c.ausschluss = "nicht Zak"; c.kats = []; } merke(); })) : null),
+    frage(1, "Zählt diese Bewertung?", "Meistens ja. Nur einen Grund wählen, wenn er klar zutrifft.", !!c.ausschluss || ["de", "en", "fr"].includes(c.sprache),
+      chips(AUSSCHLUSS.filter(w => w !== "nicht Zak" || (c.ausschluss === "nicht Zak" && !zak)).map(w => [w, ausschlussText(w)]), c.ausschluss, w => { c.ausschluss = w; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }, { abwaehlbar: true }),
+      c.ausschluss ? el("p", { class: "c-excluded" }, "Zählt nicht: " + ausschlussText(c.ausschluss) + ". Fertig, speichern und weiter.") : el("div", {}, el("label", { class: "f" }, "Sprache"), chips([["de", "Deutsch"], ["en", "Englisch"], ["fr", "Französisch"]], c.sprache, w => { c.sprache = w; merke(); })),
+      c.ausschluss && VERBOTEN.test(c.bemerkung) ? el("div", {}, el("label", { class: "f" }, "Bemerkung bitte ohne Nummern und Adressen"), el("input", { class: "t", value: c.bemerkung, on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })) : null,
+      zak ? el("div", {}, el("label", { class: "f" }, "Geht es um die Zak-App? ", el("span", { class: "hilfe" }, "Trustpilot führt Zak unter der Bank Cler.")), chips([["ja", "Ja, um die App"], ["nein", "Nein, um die Bank Cler allgemein"]], c.zak_bezug, w => { c.zak_bezug = w; if (w === "nein") { c.ausschluss = "nicht Zak"; c.kats = []; } else if (c.ausschluss === "nicht Zak") c.ausschluss = ""; merke(); })) : null),
     c.ausschluss ? null : frage(2, "Beschreibt sie einen Kontakt mit dem Kundendienst?", "Also eine Anfrage, einen Chat, ein Telefonat oder eine Antwort. Taste J oder N.", !!c.kundendienst_kontakt,
       chips(["ja", "nein"], c.kundendienst_kontakt, w => { c.kundendienst_kontakt = w; merke(); })),
     c.ausschluss ? null : frage(3, "Worum geht es?", "Höchstens drei Themen, das wichtigste zuerst. Tasten 1 bis 9, 0 für Sonstiges. Pro Thema: Kritik, Lob oder gemischt.", c.kats.length > 0 && c.kats.every(k => c.vals[k]),
@@ -120,15 +123,15 @@ function bild() {
         el("span", { class: "c-theme-def" }, d)))),
       c.kats.length ? el("div", { class: "c-vals" }, c.kats.map((k, r) => el("div", { class: "c-val-row" },
         el("b", {}, `${r + 1}. ${KAT[k - 1][1]}`),
-        el("div", { class: "val chips" }, [["-", "Kritik"], ["+", "Lob"], ["0", "gemischt"]].map(([w, tx]) => el("button", { type: "button", class: "chip", "data-focus": "value-" + k + "-" + w, "aria-pressed": String(c.vals[k] === w), on: { click: () => { c.vals[k] = w; merke(); } } }, tx))),
+        el("div", { class: "val chips" }, [["-", "Kritik"], ["+", "Lob"], ["0", "gemischt oder neutral"]].map(([w, tx]) => el("button", { type: "button", class: "chip", "data-focus": "value-" + k + "-" + w, "aria-pressed": String(c.vals[k] === w), on: { click: () => { c.vals[k] = w; merke(); } } }, tx))),
         r > 0 ? el("button", { type: "button", class: "chip", title: "nach vorne", "aria-label": "nach vorne", on: { click: () => { c.kats.splice(r, 1); c.kats.splice(r - 1, 0, k); merke(); } } }, "↑") : null))) : null,
       hinweise().map(h => el("div", { class: "hinweisbox" }, h)), def),
-    c.ausschluss ? null : frage(4, "Kurz festhalten", "Optional. Anker sind höchstens fünf eigene Wörter, nie der Wortlaut.", false,
+    c.ausschluss ? null : frage(4, "Kurz festhalten", "Freiwillig. Fass den Kern in höchstens fünf eigenen Wörtern zusammen, nie abschreiben.", false,
       el("div", { class: "gitter" },
-        el("div", {}, el("label", { class: "f" }, "Anker"), el("input", { class: "t", value: c.anker, maxlength: "60", placeholder: "z. B. Antwort kam nach drei Tagen", on: { input: e => { c.anker = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })),
-        el("div", {}, el("label", { class: "f" }, "Bemerkung"), el("input", { class: "t", value: c.bemerkung, placeholder: "Zweifel oder Grenzregel", on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })))),
+        el("div", {}, el("label", { class: "f" }, "Kern in deinen Worten"), el("input", { class: "t", value: c.anker, maxlength: "60", placeholder: "z. B. Antwort kam nach drei Tagen", on: { input: e => { c.anker = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })),
+        el("div", {}, el("label", { class: "f" }, "Bemerkung"), el("input", { class: "t", value: c.bemerkung, placeholder: "Was war unsicher?", on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })))),
     el("p", { class: "c-ready" + (offen ? "" : " ok") }, offen ? "Noch offen · " + offen : "Bereit. Enter oder «Speichern und weiter»."),
-    el("p", { class: "leise c-rules" }, "Keine Namen, Beträge oder Orte. Die Sterne werden nicht gedeutet.")
+    el("p", { class: "leise c-rules" }, "Keine Namen, Beträge oder Orte. Achte auf den Text, nicht auf die Sterne.")
   );
   if (focusKey) [...m.querySelectorAll("[data-focus]")].find(node => node.getAttribute("data-focus") === focusKey)?.focus({preventScroll:true});
   else if (focusQuestion && focusText) [...m.querySelectorAll(".c-q")].find(node => node.querySelector("h2")?.textContent === focusQuestion)?.querySelectorAll("button").forEach(node => { if (node.textContent === focusText) node.focus({preventScroll:true}); });
@@ -136,16 +139,16 @@ function bild() {
 }
 function pruefe() {
   const x = q[i];
-  if (x.anbieter === "Zak" && x.quelle === "Trustpilot" && !["ja", "nein"].includes(c.zak_bezug)) return "Zak-Bezug ja oder nein fehlt";
-  if (VERBOTEN.test(c.bemerkung)) return "Bemerkung ohne Nummern und Adressen";
+  if (x.anbieter === "Zak" && x.quelle === "Trustpilot" && !["ja", "nein"].includes(c.zak_bezug)) return "Beantworte, ob es um die Zak-App geht";
+  if (VERBOTEN.test(c.bemerkung)) return "Bemerkung bitte ohne Nummern und Adressen";
   if (c.ausschluss) return "";
-  if (!["de", "en", "fr"].includes(c.sprache)) return "Sprache wählen oder Ausschluss «Sprache»";
-  if (!c.kundendienst_kontakt) return "Kontakt ja oder nein fehlt";
-  if (!c.kats.length) return "Mindestens ein Thema oder ein Ausschluss";
-  if (c.kats.some(n => !c.vals[n])) return "Valenz fehlt bei einem Thema";
+  if (!["de", "en", "fr"].includes(c.sprache)) return "Wähle die Sprache oder «Andere Sprache»";
+  if (!c.kundendienst_kontakt) return "Beantworte Frage 2 zum Kontakt mit dem Kundendienst";
+  if (!c.kats.length) return "Wähle ein Thema oder einen Grund, warum sie nicht zählt";
+  if (c.kats.some(n => !c.vals[n])) return "Bei einem Thema fehlt Kritik, Lob oder gemischt";
   const w = c.anker.trim().split(/\s+/).filter(Boolean);
-  if (w.length > 5) return "Anker hat mehr als fünf Wörter";
-  if (/\d|@|https?:/i.test(c.anker)) return "Anker ohne Zahlen und Adressen";
+  if (w.length > 5) return "Kern bitte in höchstens fünf Wörtern";
+  if (/\d|@|https?:/i.test(c.anker)) return "Kern bitte ohne Zahlen und Adressen";
   return "";
 }
 async function speichern() {
@@ -168,7 +171,7 @@ async function speichern() {
     msg.className = "meldung ok"; msg.textContent = "Gespeichert.";
     fortschritt();
     renderExtraCases();
-    if (q.every(y => y.eigen)) { msg.textContent = "Alles codiert. Danke."; }
+    if (q.every(y => y.eigen)) { msg.textContent = "Alle Bewertungen eingeordnet. Danke."; }
   } catch (e) { x.eigen = previous; i = previousIndex; zeige(); msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
   finally { savePending = false; updateReadiness(); }
 }
