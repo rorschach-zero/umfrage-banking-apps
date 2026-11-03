@@ -85,7 +85,7 @@ function chooser(mine) {
   const reading = state.chapters.filter(c => c.reader === state.person);
   const others = state.person === 'SA' ? state.chapters.filter(c => c.owner !== 'SA' && c.reader !== 'SA') : [];
   fill($('tab-auftrag'), 
-    el('div', {class:'intro'}, el('p', {}, 'Hier schreibst du dein Kapitel. Links steht, was gefordert ist, rechts dein Google Doc.')),
+    el('div', {class:'intro'}, el('p', {}, 'Hier schreibst du dein Kapitel. Neben deinem Google Doc steht, was gefordert ist und wo du die Infos findest.')),
     list(mine, 'Deine Kapitel') || el('p', {class:'quiet'}, 'Dir ist noch kein Kapitel zugeteilt.'),
     list(reading, 'Du liest gegen'), list(others, 'Alle weiteren Kapitel'));
   fill($('doc'), el('div', {class:'doc-empty'}, el('p', {}, 'Wähle links ein Kapitel. Das Doc öffnet sich hier.')));

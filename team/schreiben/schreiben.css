@@ -18,7 +18,7 @@ h1{margin:0;font-size:17px;line-height:1.25;font-weight:850;white-space:nowrap;o
 .chip.soft{background:var(--lilac-faint);color:var(--lilac)}
 .pick select{min-height:36px;max-width:260px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:13px;padding:4px 8px}
 .tabs{display:flex;gap:4px;padding:8px 20px 0;background:var(--paper)}
-.tabs button{appearance:none;border:0;background:none;font:inherit;font-size:14px;font-weight:800;color:var(--muted);padding:8px 12px;min-height:40px;border-bottom:3px solid transparent;cursor:pointer}
+.tabs button{white-space:nowrap;appearance:none;border:0;background:none;font:inherit;font-size:14px;font-weight:800;color:var(--muted);padding:8px 12px;min-height:40px;border-bottom:3px solid transparent;cursor:pointer}
 .tabs button[aria-selected=true]{color:var(--ink);border-color:var(--lilac)}
 .only-small{display:none}
 .layout{display:grid;grid-template-columns:minmax(380px,460px) 1fr;height:calc(100vh - var(--bar) - 50px);min-height:520px}
