@@ -3,6 +3,11 @@
 // Uebersetzung aus der Gruppe mit zweiter Lesung und stichprobenweiser Rueckuebersetzung (30.10.2026); der deutsche Text ist massgeblich.
 const SPRACHEN = {
 fr: {
+  "Wie erlebst du den Kundendienst deiner Banking-App? Studierende der KV Business School Zürich wollen es wissen.": "Comment trouves-tu le service clientèle de ton application bancaire ? Des étudiant·e·s de la KV Business School Zürich aimeraient le savoir.",
+  "Galaxus-Gutschein zu gewinnen": "Bon d'achat Galaxus à gagner",
+  "Umfrage starten": "Commencer le sondage",
+  "Mit «Umfrage starten» stimmst du der Teilnahme zu.": "En appuyant sur «Commencer le sondage», tu acceptes de participer.",
+  "Details zur Teilnahme": "Détails sur la participation",
   "Diese Adresse ist schon dabei.": "Cette adresse participe déjà.",
   "Für diese Antwort ist schon eine Adresse hinterlegt.": "Une adresse a déjà été enregistrée pour cette réponse.",
   "Die Umfrage ist seit dem 1. Dezember 2026 beendet. Danke für dein Interesse.": "Le sondage est terminé depuis le 1er décembre 2026. Merci de ton intérêt.",
@@ -215,6 +220,11 @@ fr: {
   "Sprache": "Langue"
 },
 it: {
+  "Wie erlebst du den Kundendienst deiner Banking-App? Studierende der KV Business School Zürich wollen es wissen.": "Come ti trovi con il servizio clienti della tua app bancaria? Studenti della KV Business School Zürich vogliono saperlo.",
+  "Galaxus-Gutschein zu gewinnen": "Buono Galaxus da vincere",
+  "Umfrage starten": "Inizia il sondaggio",
+  "Mit «Umfrage starten» stimmst du der Teilnahme zu.": "Premendo «Inizia il sondaggio» accetti di partecipare.",
+  "Details zur Teilnahme": "Dettagli sulla partecipazione",
   "Diese Adresse ist schon dabei.": "Questo indirizzo partecipa già.",
   "Für diese Antwort ist schon eine Adresse hinterlegt.": "Per questa risposta è già stato registrato un indirizzo.",
   "Die Umfrage ist seit dem 1. Dezember 2026 beendet. Danke für dein Interesse.": "Il sondaggio è terminato il 1° dicembre 2026. Grazie per il tuo interesse.",
@@ -427,6 +437,11 @@ it: {
   "Sprache": "Lingua"
 },
 en: {
+  "Wie erlebst du den Kundendienst deiner Banking-App? Studierende der KV Business School Zürich wollen es wissen.": "How do you find the customer service of your banking app? Students at KV Business School Zürich want to know.",
+  "Galaxus-Gutschein zu gewinnen": "Galaxus voucher to win",
+  "Umfrage starten": "Start the survey",
+  "Mit «Umfrage starten» stimmst du der Teilnahme zu.": "By tapping “Start the survey” you agree to take part.",
+  "Details zur Teilnahme": "Details on taking part",
   "Diese Adresse ist schon dabei.": "This address is already entered.",
   "Für diese Antwort ist schon eine Adresse hinterlegt.": "An address has already been registered for this response.",
   "Die Umfrage ist seit dem 1. Dezember 2026 beendet. Danke für dein Interesse.": "The survey closed on 1 December 2026. Thank you for your interest.",

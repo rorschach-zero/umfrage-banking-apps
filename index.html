@@ -182,47 +182,75 @@ main a, footer a { text-decoration-color: #9aa6b8; }
 .ende .gross { color:#001B35; }
 .fakt::before { color:#001B35; }
 details summary::before { border-color: #5d636b; }
-/* Startseite wie ein Typeform-Willkommensbildschirm */
-.schirm.start { min-height: calc(100dvh - 210px); justify-content: center; max-width: 620px; }
-.schirm.start > .sprachen { order:-1; margin: 0 0 clamp(20px, 6vh, 56px); gap: 2px; }
-.schirm.start .sprache { border:0; background:none; color: var(--grey); font-weight: 600; font-size: 14px; padding: 6px 10px; border-radius: 8px; }
-.schirm.start .sprache:hover { color: var(--ink); background: var(--surface); }
-.schirm.start .sprache[aria-pressed="true"] { background: var(--surface); color: var(--ink); }
-.schirm.start > h1 { order:0; font-size: clamp(34px, 6.4vw, 56px); line-height: 1.04; letter-spacing: -0.032em; margin-bottom: 16px; }
-.schirm.start > p:not(.kurz) { order:1; font-size: clamp(18px, 2.4vw, 21px); color: #3a4048; max-width: 34ch; margin-bottom: 28px; }
-.schirm.start > .fehler { order:2; }
-.schirm.start > .nav { order:3; margin-top: 0; }
-.schirm.start .nav .knopf { min-width: 0; padding: 15px 34px; font-size: 19px; }
-.schirm.start > .kurz { order:4; margin: 14px 0 0; font-size: 14px; color: var(--grey); }
-.schirm.start > .kurz b { color: var(--grey); font-weight: 700; }
-.schirm.start > .gewinn { order:5; margin-top: 28px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; gap: 12px; max-width: 460px; }
-.schirm.start .gewinn .ikon { width: 36px; height: 36px; background: var(--tint); }
-.schirm.start .gewinn .ikon svg { stroke: #001B35; width: 18px; height: 18px; }
-.schirm.start .gewinn .klein { display:none; }
-.schirm.start .gewinn b { font-size: 15px; font-weight: 700; }
-.schirm.start .gewinn .sub { font-size: 13px; }
-.schirm.start > .start-unten { order:10; margin-top: 24px; max-width: 460px; }
-.schirm.start .start-unten .hinweis { font-size: 13px; }
-@media (max-width: 520px) { .schirm.start { min-height: 0; } .schirm.start .nav .knopf { width: 100%; } .schirm.start > .sprachen { margin-bottom: 20px; } }
 
-/* Grosse Bildschirme: alles wächst mit, statt als schmale 720-px-Spalte zu verloren zu wirken */
-:root { --z: 1; }
-@media (min-width: 1280px) and (min-height: 760px) { :root { --z: 1.12; } }
-@media (min-width: 1600px) and (min-height: 860px) { :root { --z: 1.25; } }
-@media (min-width: 1900px) and (min-height: 1000px) { :root { --z: 1.4; } }
-@media (min-width: 2400px) and (min-height: 1300px) { :root { --z: 1.75; } }
-header, main, footer { zoom: var(--z); }
-.schirm.start { min-height: calc((100dvh - 210px * var(--z)) / var(--z)); }
 
-/* Ab Laptopbreite: Willkommensbildschirm mittig wie bei Typeform */
-@media (min-width: 900px) {
-  .schirm.start { margin: 0 auto; align-items: center; text-align: center; }
-  .schirm.start > .sprachen, .schirm.start .nav { justify-content: center; }
-  .schirm.start > p:not(.kurz) { margin-left: auto; margin-right: auto; }
-  .schirm.start > .gewinn { text-align: left; width: 100%; }
-  .schirm.start > .start-unten { width: 100%; }
-  .schirm.start .start-unten .hinweis { text-align: center; }
-  .schirm.start details { text-align: left; }
+
+/* Startseite (03.11. abends, nach Recherche): links Text und Knopf, rechts der Gewinn als Bild; Handy gestapelt.
+   Fluid mit clamp(rem + vw), keine zoom-Skalierung (WCAG 1.4.4). */
+main:has(.schirm.start) { max-width: 1180px; padding-top: clamp(24px, 6vh, 64px); }
+header:has(+ * .schirm.start), body:has(.schirm.start) header { max-width: 1180px; }
+.schirm.start { display:grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); grid-template-areas: "spr bild" "titel bild" "text bild" "nav bild" "kurz bild" "unten bild"; column-gap: clamp(32px, 6vw, 96px); align-content:center; align-items:start; min-height: calc(100dvh - 200px); }
+.schirm.start > .sprachen { grid-area: spr; display:flex; flex-wrap:wrap; gap: 8px; margin: 0 0 clamp(20px, 4vh, 40px); }
+.schirm.start .sprache { display:inline-flex; align-items:center; gap: 8px; font-size: 0.875rem; font-weight: 600; color: var(--ink); background:#fff; border: 1px solid var(--line); border-radius: 999px; padding: 7px 14px 7px 9px; transition: border-color 160ms, background-color 160ms, color 160ms; }
+.schirm.start .sprache:hover { border-color: #9aa6b8; }
+.schirm.start .sprache[aria-pressed="true"] { border-color:#001B35; background:#001B35; color:#fff; }
+.flagge { display:inline-flex; width: 21px; height: 14px; border-radius: 3px; overflow:hidden; box-shadow: 0 0 0 1px rgba(0,0,0,.14); flex:none; }
+.flagge svg { width:100%; height:100%; display:block; }
+.schirm.start > h1 { grid-area: titel; font-size: clamp(2.25rem, 1.4rem + 3.4vw, 4.25rem); line-height: 1.0; letter-spacing: -0.035em; margin: 0 0 clamp(14px, 2vh, 22px); max-width: 12ch; }
+.schirm.start > p:not(.kurz) { grid-area: text; font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem); line-height: 1.45; color: #3a4048; max-width: 30ch; margin: 0 0 clamp(24px, 4vh, 36px); }
+.schirm.start > .fehler { grid-area: nav; }
+.schirm.start > .nav { grid-area: nav; margin: 0; justify-content:flex-start; }
+.schirm.start .nav .knopf { min-width: 0; padding: 18px 30px; font-size: 1.1875rem; border-radius: 14px; }
+.schirm.start .nav .knopf::after { content: "\2192"; margin-left: 10px; display:inline-block; transition: transform 180ms cubic-bezier(.16,1,.3,1); }
+.schirm.start .nav .knopf:hover::after { transform: translateX(3px); }
+.schirm.start > .kurz { grid-area: kurz; margin: 14px 0 0; font-size: 0.9375rem; color: var(--grey); }
+.schirm.start > .kurz b { color: var(--ink); }
+.schirm.start > .start-unten { grid-area: unten; margin-top: clamp(28px, 5vh, 48px); max-width: 440px; }
+.schirm.start .start-unten .hinweis { font-size: 0.8125rem; margin: 0 0 6px; text-align:left; }
+.schirm.start details { border: 0 !important; }
+.schirm.start details summary { font-size: 0.8125rem; color: var(--grey); padding: 6px 0; }
+.schirm.start details p { font-size: 0.8125rem; }
+/* Gewinn als Bildflaeche rechts */
+.schirm.start > .gewinn { grid-area: bild; align-self: center; position:relative; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end; gap: 6px; aspect-ratio: 1 / 1; padding: clamp(24px, 3vw, 40px); margin: 0; border-radius: 28px; overflow:hidden; color:#fff; background: radial-gradient(120% 90% at 85% 0%, #2c4a72 0%, transparent 60%), linear-gradient(160deg, #0b2a4a 0%, #001B35 70%); box-shadow: 0 30px 60px -30px rgba(0,27,53,.55); }
+.schirm.start > .gewinn::before { content:""; position:absolute; inset: 9% -16% auto auto; width: 56%; aspect-ratio: 1.6; border-radius: 20px; background: linear-gradient(135deg, #f8d26a, #e8a92e); transform: rotate(-9deg); box-shadow: 0 24px 40px -18px rgba(0,0,0,.5); }
+.schirm.start > .gewinn::after { content:""; position:absolute; inset: 9% -16% auto auto; width: 56%; aspect-ratio: 1.6; border-radius: 20px; background: repeating-linear-gradient(90deg, transparent 0 22px, rgba(255,255,255,.18) 22px 24px); transform: rotate(-9deg); mix-blend-mode: soft-light; }
+.schirm.start .gewinn .ikon { position:absolute; top: clamp(24px, 3vw, 40px); left: clamp(24px, 3vw, 40px); width: 56px; height: 56px; border-radius: 16px; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,.1); color: #f8d26a; }
+.schirm.start .gewinn .betrag { position:relative; font-size: clamp(3rem, 1.6rem + 4vw, 5.25rem); font-weight: 800; line-height: .95; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.schirm.start .gewinn b { position:relative; display:block; font-size: clamp(1.125rem, 1rem + .4vw, 1.375rem); line-height: 1.25; font-weight: 700; }
+.schirm.start .gewinn .sub { position:relative; margin: 0; font-size: 0.9375rem; line-height: 1.4; color: #c9d4e3; max-width: 30ch; }
+/* Tablet und Handy: gestapelt, Gewinn als kompakte Karte zwischen Text und Knopf */
+@media (max-width: 900px) {
+  main:has(.schirm.start) { max-width: 640px; }
+  .schirm.start { grid-template-columns: minmax(0,1fr); grid-template-areas: "spr" "titel" "text" "bild" "nav" "kurz" "unten"; min-height: 0; }
+  .schirm.start > .gewinn { aspect-ratio: auto; display:grid; grid-template-columns: auto 1fr; grid-template-areas: "betrag betrag" "b b" "sub sub"; padding: 20px 22px; border-radius: 20px; margin: 0 0 24px; gap: 2px; }
+  .schirm.start > .gewinn::before, .schirm.start > .gewinn::after { inset: -34% -12% auto auto; width: 36%; }
+  .schirm.start .gewinn .ikon { display:none; }
+  .schirm.start .gewinn .betrag { grid-area: betrag; font-size: 2.5rem; margin-bottom: 4px; }
+  .schirm.start .gewinn b { grid-area: b; }
+  .schirm.start .gewinn .sub { grid-area: sub; margin-top: 2px; }
+}
+@media (max-width: 520px) {
+  .schirm.start > .sprachen { gap: 6px; margin-bottom: 20px; }
+  .schirm.start .sprache { font-size: 0.8125rem; padding: 6px 10px 6px 7px; gap: 6px; }
+  .flagge { width: 18px; height: 12px; }
+  .schirm.start .nav .knopf { width: 100%; }
+  .schirm.start > .kurz { text-align:center; }
+}
+@media (prefers-reduced-motion: reduce) { .schirm.start .nav .knopf::after { transition: none; } }
+
+.lcode { display:none; }
+@media (max-width: 520px) {
+  .schirm.start .lname { display:none; }
+  .schirm.start .lcode { display:inline; letter-spacing: .02em; }
+  .schirm.start > .sprachen { margin-bottom: 18px; }
+  .schirm.start > h1 { font-size: 2.125rem; margin-bottom: 10px; }
+  .schirm.start > p:not(.kurz) { font-size: 1.0625rem; margin-bottom: 18px; }
+  .schirm.start > .gewinn { padding: 16px 18px; margin-bottom: 18px; border-radius: 18px; }
+  .schirm.start .gewinn .betrag { font-size: 2.125rem; }
+  .schirm.start .gewinn b { font-size: 1.0625rem; }
+  .schirm.start .gewinn .sub { font-size: 0.875rem; }
+  .schirm.start .nav .knopf { padding: 16px 24px; font-size: 1.125rem; }
+  main:has(.schirm.start) { padding-top: 16px; }
 }
 </style>
 </head>
@@ -244,6 +272,12 @@ const VERSION = "3.31";                   // Stand des Fragebogens, wird mitgesp
 const KONTAKT = "umfrage@hydeout.ch";    // Kontakt der Studierendengruppe fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
+const FLAGGEN = {
+ de:'<svg viewBox="0 0 5 3" aria-hidden="true" preserveAspectRatio="none"><rect width="5" height="3" fill="#FFCE00"/><rect width="5" height="2" fill="#DD0000"/><rect width="5" height="1" fill="#000"/></svg>',
+ fr:'<svg viewBox="0 0 3 2" aria-hidden="true" preserveAspectRatio="none"><rect width="3" height="2" fill="#ED2939"/><rect width="2" height="2" fill="#fff"/><rect width="1" height="2" fill="#002654"/></svg>',
+ it:'<svg viewBox="0 0 3 2" aria-hidden="true" preserveAspectRatio="none"><rect width="3" height="2" fill="#CE2B37"/><rect width="2" height="2" fill="#fff"/><rect width="1" height="2" fill="#009246"/></svg>',
+ en:'<svg viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><clipPath id="fl-uk"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#fl-uk)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></svg>'
+};
 const SPRACHEN_LISTE = {de:"Deutsch", fr:"Français", it:"Italiano", en:"English"};
 let SPRACHE = (new URLSearchParams(location.search).get("lang") || "").toLowerCase(); if (!Object.hasOwn(SPRACHEN_LISTE, SPRACHE)) SPRACHE = "";
 const t = s => { if (typeof s !== "string" || !SPRACHE || SPRACHE === "de") return s; const w = (typeof SPRACHEN !== "undefined" && SPRACHEN[SPRACHE]) ? SPRACHEN[SPRACHE][s] : undefined; return w === undefined ? s : w; };
@@ -314,7 +348,7 @@ const kenntYuh = () => nutztYuh() || A.t13a === "ja" || A.t6 === "Yuh" || A.t3c_
 
 /* ---------- Bildschirme ---------- */
 const S = [
- {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Umfrage zu Banking-Apps", text:`Fünf Studierende der KV Business School Zürich fragen dich nach deiner Banking-App und ihrem Kundendienst.`, html: () => `<div class="sprachen" role="group" aria-label="${t("Sprache")}">${Object.keys(SPRACHEN_LISTE).map(k => `<button type="button" class="sprache" data-lang="${k}" aria-pressed="${SPRACHE===k}" lang="${k}">${SPRACHEN_LISTE[k]}</button>`).join("")}</div><p class="kurz"><b>${t(DAUER_TEXT)}</b> · ${t("ohne Namen und Kontodaten")}</p><div class="gewinn"><div class="ikon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div><div class="klein">${t("Verlosung")}</div><b>${t("Wir verlosen einen Galaxus-Gutschein im Wert von 100 Franken")}</b><p class="sub">${t("Unter allen, die bis zum Schluss ausfüllen und eine Mailadresse hinterlassen.")}</p></div></div><div class="start-unten"><p class="hinweis">${t("Mit «Los» stimmst du der Teilnahme zu.")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a></p><details><summary>${t("Mehr zur Verlosung")}</summary><p>${t("Unter allen vollständigen Antworten mit Mailadresse verlosen wir einen Galaxus-Gutschein im Wert von 100 Franken (16 bis 65 Jahre, Wohnsitz Schweiz).")} <a href="${tbLink()}" target="_blank" rel="noopener">${t("Teilnahmebedingungen")}</a></p></details><details><summary>${t("Datenschutz und Teilnahme")}</summary><p>${t("Gehörst du nicht zur Zielgruppe (Schweiz, 16 bis 65, Banking-App), endet die Umfrage nach bis zu drei Fragen; gespeichert werden dann nur diese Antworten.")} ${t("Hörst du vorher auf, merken wir uns nur die Stelle, keine Antworten.")} ${t("Die Rohdaten bleiben bei der Studierendengruppe, der Praxispartner wird am Ende genannt.")} ${t("Fragen mit Stern sind Pflicht.")}</p></details></div>`, knopf:"Los"},
+ {id:"start", art:"info", kicker:"Praxisarbeit HFW", titel:"Umfrage zu Banking-Apps", text:`Wie erlebst du den Kundendienst deiner Banking-App? Studierende der KV Business School Zürich wollen es wissen.`, html: () => `<div class="sprachen" role="group" aria-label="${t("Sprache")}">${Object.keys(SPRACHEN_LISTE).map(k => `<button type="button" class="sprache" data-lang="${k}" aria-pressed="${SPRACHE===k}" lang="${k}"><span class="flagge">${FLAGGEN[k]}</span><span class="lname">${SPRACHEN_LISTE[k]}</span><span class="lcode" aria-hidden="true">${k.toUpperCase()}</span></button>`).join("")}</div><div class="gewinn"><div class="ikon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><div class="betrag">CHF 100.–</div><b>${t("Galaxus-Gutschein zu gewinnen")}</b><p class="sub">${t("Unter allen, die bis zum Schluss ausfüllen und eine Mailadresse hinterlassen.")}</p></div><p class="kurz"><b>${t(DAUER_TEXT)}</b> · ${t("ohne Namen und Kontodaten")}</p><div class="start-unten"><p class="hinweis">${t("Mit «Umfrage starten» stimmst du der Teilnahme zu.")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a> · <a href="${tbLink()}" target="_blank" rel="noopener">${t("Teilnahmebedingungen")}</a></p><details><summary>${t("Details zur Teilnahme")}</summary><p>${t("Unter allen vollständigen Antworten mit Mailadresse verlosen wir einen Galaxus-Gutschein im Wert von 100 Franken (16 bis 65 Jahre, Wohnsitz Schweiz).")}</p><p>${t("Gehörst du nicht zur Zielgruppe (Schweiz, 16 bis 65, Banking-App), endet die Umfrage nach bis zu drei Fragen; gespeichert werden dann nur diese Antworten.")} ${t("Hörst du vorher auf, merken wir uns nur die Stelle, keine Antworten.")} ${t("Die Rohdaten bleiben bei der Studierendengruppe, der Praxispartner wird am Ende genannt.")} ${t("Fragen mit Stern sind Pflicht.")}</p></details></div>`, knopf:"Umfrage starten"},
  {id:"s1", art:"einfach", pflicht:true, titel:"Wohnst du in der Schweiz?", optionen:["ja","nein"], ende: v => v==="nein"},
  {id:"s2", art:"einfach", pflicht:true, titel:"Wie alt bist du?", optionen:["unter 16","16 bis 29","30 bis 49","50 bis 65","über 65"], ende: v => v==="unter 16"||v==="über 65"},
  {id:"s3", art:"einfach", pflicht:true, titel:"Nutzt du zurzeit mindestens eine Banking-App auf dem Handy?", optionen:["ja","nein"], ende: v => v==="nein"},
