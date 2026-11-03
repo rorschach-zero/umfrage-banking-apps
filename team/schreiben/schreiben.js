@@ -65,7 +65,7 @@ async function load() {
     let r = await post({typ:'team', k:state.key, leitung:false});
     if (!r || r.ok === false) throw Object.assign(Error(r && r.fehler || 'Kein Zugriff.'), {key:true});
     if (r.person === 'SA') { const lead = await post({typ:'team', k:state.key, leitung:true}).catch(() => null); if (lead && lead.ok !== false && Array.isArray(lead.chapters)) r = lead; }
-    return {person:r.person, chapters:r.chapters || [], chapterOverview:r.chapterOverview || null, tasks:r.tasks || []};
+    return {person:r.person, chapters:r.chapters || [], chapterOverview:r.chapterOverview || null, chapterLeitung:r.chapterLeitung, tasks:r.tasks || []};
   })();
   const [guide, apa, wiar] = await assets; state.guide = guide || {}; state.apa = apa; state.wiar = wiar;
   if (cached && cached.person) { apply(cached); route(); }
@@ -81,7 +81,7 @@ function apply(r) {
   const own = r.chapters || [], byRef = new Map(own.map(c => [c.ref, c]));
   // Schreibwerk-Leitung: Gesamtsicht aller Kapitel (eigene Zeilen behalten ihre volle Form).
   (r.chapterOverview || []).forEach(c => { if (!byRef.has(c.ref)) byRef.set(c.ref, Object.assign({overview:true}, c)); });
-  state.lead = Array.isArray(r.chapterOverview);
+  state.lead = typeof r.chapterLeitung === 'boolean' ? r.chapterLeitung : Array.isArray(r.chapterOverview);
   state.chapters = [...byRef.values()].sort((a, b) => (a.ref || '').localeCompare(b.ref || '', 'de', {numeric:true}));
   planMerge();
 }
