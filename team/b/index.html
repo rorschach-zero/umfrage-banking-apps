@@ -1,19 +1,19 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-OzaQ2kwkUm3RXg3TMPLTcmeslRas55E0O1WwoqdQFUw='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-f3ldnEvFWrn8hxZlwm8lWzwMET57e9i+05b6FwKYDOE='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
-<link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=84d3596daea8">
+<link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 </head>
 <body>
 <header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=b">← Meine Arbeit</a><div class="titel"><small>B · Servicetest</small>Servicetest</div><div id="wer" class="pille">…</div></div></header>
 <div class="purpose-slot" data-purpose-area="b"></div>
 <section id="workspace-progress" class="workspace-progress" aria-live="polite" hidden></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
-<div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zwischen">Zwischenstand</button><button class="knopf" id="fertig">Abschliessen</button></div></div></div>
+<div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zwischen">Zwischenstand speichern</button><button class="knopf" id="fertig">Speichern und abschliessen</button></div></div></div>
 <script src="../view-as.js?v=41cc5d81f7cc"></script>
 <script src="../team.js?v=91ca8ca4ac11"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
-<script src="../service.js?v=ee046eda636c"></script>
+<script src="../service.js?v=c08e4cdbb6a6"></script>
 <script>
 // Regeln aus 10_pa6a/beobachtung/Testprotokoll.md, Version 4. Die Maske schlaegt vor, die Person entscheidet.
 const SKRIPT = {
@@ -70,13 +70,14 @@ function openForm(r) {
   z = Object.assign({ nr: r.nr, code: "durchgefuehrt", kanal_angeboten: "ja", sprache_antwort: "Deutsch", stand: "laufend", hinweise: [], elemente: [] }, lokal("b-" + r.nr) || {}, r.erfasst || {});
   if (r.nr.startsWith('PROBE-B-')) { z.nachrichten_anbieter='0';z.minuten_anbieter='0'; }
   if (r.status==='nicht angeboten'&&!r.erfasst) {z.code='nicht angeboten';z.kanal_angeboten='nein';}
+  if (r.status==='nicht angeboten'&&!z.ausfall_grund) z.ausfall_grund='Telefon im Gratisplan nicht angeboten';
   if (typeof z.mensch_hinweise === "string") z.hinweise = z.mensch_hinweise ? z.mensch_hinweise.split("|") : [];
   if (!Array.isArray(z.elemente)) z.elemente = z.elemente ? String(z.elemente).split("|") : [];
   ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].forEach(k => { if (z[k]) z[k] = String(z[k]).replace(" ", "T").slice(0, 16); });
   bBesucht = new Set(); bStep = 0; for (let i = 0; i < B_SCHRITTE.length; i++) { if (bFehltIn(i).length) { bStep = i; break; } }
   if (!z.t_start && r.status !== "nicht angeboten") bStep = 0;
   formular(); document.getElementById("fuss").hidden = false; document.getElementById("meldung").textContent = ""; focusStep();
-  ["zwischen", "fertig"].forEach(id => document.getElementById(id).disabled = window.PA6View.active() || gesperrt());
+  bUpdateReadiness();
 }
 function setze(k, v) { z[k] = v; lokal("b-" + aktiv.nr, z); formular(); }
 function vorschlaege() {
@@ -112,14 +113,14 @@ function wahl(k, titel, werte, hilfe, vorschlag) {
     !z[k] && vorschlag ? el("div", { class: "leise" }, "Noch nicht gewählt. Der Vorschlag gilt erst, wenn du ihn übernimmst.") : null);
 }
 function text(k, titel, hilfe, mehr) {
-  const a = { class: "t", value: z[k] || "", on: { input: e => { z[k] = e.target.value; lokal("b-" + aktiv.nr, z); } } };
+  const a = { class: "t", value: z[k] || "", on: { input: e => { z[k] = e.target.value; lokal("b-" + aktiv.nr, z); bUpdateReadiness(); } } };
   return el("div", {}, el("label", { class: "f" }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")), mehr ? el("textarea", a, z[k] || "") : el("input", a));
 }
-// Keep the existing fields and validation in five presentation steps.
-const B_SCHRITTE = ["Frage stellen", "Zeitstempel", "Mensch oder Automat", "Antwort beurteilen", "Ergebnis"];
-const B_FELDER = [["Bestätigung der internen Simulation", "Kanal erreichbar"], ["Start", "Ende", "Ende liegt vor dem Start", "Zeitfolge", "Mindestantwort vor der ersten menschlichen Antwort"], ["Mensch oder Automat"],
+// Keep the existing fields and validation in five chronological presentation steps.
+const B_SCHRITTE = ["Vorbereiten", "Kontakt starten", "Antwort festhalten", "Lösung beurteilen", "Beenden"];
+const B_FELDER = [["Bestätigung der internen Simulation", "Kanal erreichbar"], ["Start"], ["Mensch oder Automat"],
   ["Vollständigkeit", "erster Kontakt", "Richtigkeit", "wie geht es weiter", "Höflichkeit", "Rückfragen", "Deutsch beibehalten", "Standort", "Quelle (https) und Abrufdatum zur Richtigkeit"],
-  ["Code", "Grund", "Gesprächsminuten", "Nachrichten des Anbieters", "Belastung als ganze Zahl von 0 bis 500", "Notizen ohne Nummern, Mail- und Netzadressen"]];
+  ["Ende", "Ende liegt vor dem Start", "Zeitfolge", "Mindestantwort vor der ersten menschlichen Antwort", "Code", "Grund", "Gesprächsminuten", "Nachrichten des Anbieters", "Belastung als ganze Zahl von 0 bis 500", "Notizen ohne Nummern, Mail- und Netzadressen"]];
 let bStep = 0, bBesucht = new Set();
 function bFehltIn(i) { return fehlt().filter(x => B_FELDER[i].some(k => x === k || x.startsWith(k + " "))); }
 function focusStep() {
@@ -138,10 +139,25 @@ function bStepper() {
 function bStepNav() {
   const offen = bFehltIn(bStep), letzter = bStep === B_SCHRITTE.length - 1, alle = fehlt();
   return el("div", { class: "b-stepnav" },
-    offen.length ? el("p", { class: "b-stepnav-missing" }, "In diesem Schritt fehlt noch: " + offen.join(", ")) : el("p", { class: "b-stepnav-ok" }, letzter ? (alle.length ? "Fehlt noch in anderen Schritten: " + alle.join(", ") : "Alles ausgefüllt. Unten auf «Abschliessen» tippen.") : "Dieser Schritt ist vollständig."),
+    offen.length ? el("p", { class: "b-stepnav-missing", id:"b-step-status" }, "In diesem Schritt fehlt noch " + offen.join(", ")) : el("p", { class: "b-stepnav-ok", id:"b-step-status" }, letzter ? (alle.length ? "In anderen Schritten fehlt noch " + alle.join(", ") : "Alles ausgefüllt. Unten auf «Speichern und abschliessen» tippen.") : "Dieser Schritt ist vollständig."),
     el("div", { class: "zeile" },
       bStep > 0 ? el("button", { type: "button", class: "knopf hell", "data-read-navigation": true, on: { click: () => { showStep(bStep - 1); } } }, "‹ Zurück") : null,
-      !letzter ? el("button", { type: "button", class: "knopf", "data-read-navigation": true, on: { click: () => { showStep(bStep + 1); } } }, "Weiter ›") : null));
+      !letzter ? el("button", { type: "button", class: "knopf b-next-step", disabled:offen.length>0, "data-read-navigation": true, on: { click: () => { if(!bFehltIn(bStep).length)showStep(bStep + 1); } } }, "Weiter ›") : null));
+}
+function bUpdateReadiness() {
+  if(!aktiv)return;
+  const current=bFehltIn(bStep),all=fehlt(),status=document.getElementById("b-step-status"),next=document.querySelector(".b-next-step");
+  if(next)next.disabled=window.PA6View.active()||fieldPending||gesperrt()||current.length>0;
+  if(status){
+    status.className=current.length?"b-stepnav-missing":"b-stepnav-ok";
+    status.textContent=current.length?"In diesem Schritt fehlt noch "+current.join(", "):(bStep===B_SCHRITTE.length-1?(all.length?"In anderen Schritten fehlt noch "+all.join(", "):"Alles ausgefüllt. Unten auf «Speichern und abschliessen» tippen."):"Dieser Schritt ist vollständig.");
+  }
+  document.getElementById("zwischen").disabled=window.PA6View.active()||fieldPending||gesperrt()||current.length>0;
+  document.getElementById("fertig").disabled=window.PA6View.active()||fieldPending||gesperrt()||all.length>0;
+}
+function bEventButton(key,label) {
+  const value=z[key],button=el("button",{type:"button",class:"b-event",on:{click:()=>setze(key,jetztLokal())}},label);
+  return el("div",{class:"b-event-row"},button,el("span",{},value?new Intl.DateTimeFormat("de-CH",{hour:"2-digit",minute:"2-digit"}).format(new Date(value)):"noch nicht erfasst"));
 }
 function formular() {
   const r = aktiv, s = SKRIPT[r.anliegen] || { frage: "", elemente: [] }, f = FRIST[r.kanal] || FRIST.chat, v = vorschlaege(), m = document.getElementById("main");
@@ -165,15 +181,15 @@ function formular() {
       chips([["ja", "ja"], ["nein", "nicht angeboten"], ["nicht erreichbar", "nicht erreichbar"]], z.kanal_angeboten || "", w => setze("kanal_angeboten", w)))
   ],
   [
-    el("p", { class: "leise" }, "Auf «Jetzt» tippen, wenn es passiert. Bei Mail und Formular die Zeit aus dem Verlauf eintragen."),
-    zeitfeld("t_start", "Start", "Anruf gewählt, Nachricht gesendet, Mail abgeschickt"),
-    zeitfeld("t_auto", "Erste automatische Reaktion", "Bot, Autoreply, Ansage; leer lassen, wenn keine"),
-    zeitfeld("t_mensch", "Erste menschliche Antwort", r.kanal === "telefon" ? "eine Person spricht, nicht Ansage oder Menü" : "erste Antwort mit Hinweisen auf eine Person"),
-    zeitfeld("t_antwort", "Mindestantwort vollständig", "leer lassen, wenn sie nicht kam"),
-    zeitfeld("t_ende", "Ende", "Antwort erhalten, Abbruch oder Frist abgelaufen"),
-    z.t_start ? el("p", { class: "leise" }, `Bis Mensch: ${minuten(z.t_start, z.t_mensch) ?? "–"} min · bis Mindestantwort: ${minuten(z.t_start, z.t_antwort) ?? "–"} min`) : null
+    el("p", { class: "leise" }, r.kanal==="telefon"?"Wähle zuerst die Nummer. Halte den Start fest, sobald der Anruf rausgeht.":r.kanal==="chat"?"Öffne den belegten Chat. Halte den Start fest, sobald deine Nachricht gesendet ist.":"Trage den Start aus dem Verlauf ein."),
+    ["telefon","chat"].includes(r.kanal)?bEventButton("t_start","gestartet"):null,
+    zeitfeld("t_start", "Start", "Anruf gewählt, Nachricht gesendet, Mail abgeschickt")
   ],
   [
+    el("p", { class: "leise" }, r.kanal==="telefon"?"Halte den Moment fest, in dem eine Person spricht. Ansage und Menü zählen nicht.":"Halte die erste Antwort mit Hinweisen auf eine Person fest."),
+    ["telefon","chat"].includes(r.kanal)?bEventButton("t_mensch",r.kanal==="telefon"?"Mensch erreicht":"erste Antwort"):null,
+    zeitfeld("t_auto", "Erste automatische Reaktion", "Bot, Autoreply, Ansage; leer lassen, wenn keine"),
+    zeitfeld("t_mensch", "Erste menschliche Antwort", r.kanal === "telefon" ? "eine Person spricht, nicht Ansage oder Menü" : "erste Antwort mit Hinweisen auf eine Person"),
     r.kanal !== "telefon" ? el("div", {}, 
       el("label", { class: "f" }, "Hinweise auf eine Person ", el("span", { class: "hilfe" }, "zwei oder mehr heisst «wahrscheinlich Mensch»")),
       el("div", { class: "chips" }, HINWEISE.map(h => el("button", { type: "button", class: "chip", "aria-pressed": String((z.hinweise || []).includes(h)), on: { click: () => { const a = new Set(z.hinweise || []); a.has(h) ? a.delete(h) : a.add(h); setze("hinweise", [...a]); } } }, h))),
@@ -181,6 +197,9 @@ function formular() {
     wahl("mensch_status", "Status", ["Mensch", "wahrscheinlich Mensch", "unklar", "Automat"], "", v.mensch_status)
   ],
   [
+    el("p", { class: "leise" }, "Beurteile die Antwort erst, wenn die Mindestantwort vollständig ist oder feststeht, dass sie fehlt."),
+    ["telefon","chat"].includes(r.kanal)?bEventButton("t_antwort","gelöst"):null,
+    zeitfeld("t_antwort", "Mindestantwort vollständig", "leer lassen, wenn sie nicht kam"),
     el("label", { class: "f" }, "Welche Elemente der Mindestantwort kamen?"),
     el("div", { class: "chips" }, s.elemente.map(x => el("button", { type: "button", class: "chip", "aria-pressed": String((z.elemente || []).includes(x)), on: { click: () => { const a = new Set(z.elemente || []); a.has(x) ? a.delete(x) : a.add(x); setze("elemente", [...a]); } } }, x))),
     wahl("vollstaendig", "Vollständigkeit", ["vorhanden", "teilweise", "fehlt"], "unabhängig von der Richtigkeit", v.vollstaendig),
@@ -197,6 +216,10 @@ function formular() {
     el("div", { class: "chips" }, HOEFLICH.map(([n, t]) => el("button", { type: "button", class: "chip", title: t, "aria-pressed": String(String(z.hoeflichkeit) === String(n)), on: { click: () => setze("hoeflichkeit", String(n)) } }, `${n} · ${t}`)))
   ],
   [
+    el("p", { class: "leise" }, "Beende den Kontakt, halte den letzten Zeitpunkt fest und notiere den Verlauf nur sinngemäss."),
+    ["telefon","chat"].includes(r.kanal)?bEventButton("t_ende","beendet"):null,
+    zeitfeld("t_ende", "Ende", "Antwort erhalten, Abbruch oder Frist abgelaufen"),
+    z.t_start ? el("p", { class: "leise" }, `Bis Mensch ${minuten(z.t_start, z.t_mensch) ?? "–"} min · bis Mindestantwort ${minuten(z.t_start, z.t_antwort) ?? "–"} min`) : null,
     wahl("code", "Code", ["durchgefuehrt", "nicht angeboten", "nicht zugaenglich", "erfolglos", "ausgefallen"], "", v.code),
     z.code && z.code !== "durchgefuehrt" ? text("ausfall_grund", "Grund", "z. B. Warteschleife 20 min, Kanal fehlt laut Website") : null,
     text("abbruch_grund", "Abbruch, falls ja", "Nachlauf überschritten, Kanal nicht erreichbar, Anbieter verlangt Kontoänderung, Testperson bricht ab"),
@@ -206,6 +229,7 @@ function formular() {
   ]];
   bBesucht.add(bStep);
   fuelle(m, kopf, bStepper(), el("h2", { class: "b-form-title", tabindex: "-1" }, (bStep + 1) + " · " + B_SCHRITTE[bStep]), teile[bStep], bStepNav());
+  bUpdateReadiness();
 }
 function zeile(stand) {
   const o = Object.assign({}, z, { stand });

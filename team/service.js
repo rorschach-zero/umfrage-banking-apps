@@ -62,13 +62,13 @@ const KANAELE_BELEGT={
   Yuh:{schriftlich:[{kanal:'chat',text:'Chat in der App («Support via Chat», kostenlos)',quelle:'https://www.yuh.com/de/pricing/'}],
        telefon:[{kanal:'telefon',text:'+41 44 825 87 89 · Mo–Fr 08–19 Uhr',quelle:'https://www.yuh.com/de/contact/'}]},
   Neon:{schriftlich:[{kanal:'chat',text:'In-App-Hilfe, laut Neon KI-gestützt',quelle:'https://www.neon-free.ch/blog/der-neon-kundenservice-ganz-ohne-filiale'},{kanal:'mail',text:'service@neon-free.ch · von der hinterlegten Adresse schreiben · Antwort innert zwei Arbeitstagen',quelle:'https://www.neon-free.ch/kontakt'}],
-        telefon:[{kanal:'telefon',text:'+41 43 508 03 19 · Mo–Fr 08–17 Uhr · nur Plan plus, global oder metal',quelle:'https://www.neon-free.ch/faq/wie-erreiche-ich-euch-am-besten'},{kanal:'keiner',text:'Gratis-Plan: kein Telefonservice laut Neon',quelle:'https://www.neon-free.ch/faq/wie-erreiche-ich-euch-am-besten'}]},
+        telefon:[{kanal:'keiner',text:'Gratis-Plan · kein Telefonservice laut Neon',quelle:'https://www.neon-free.ch/faq/wie-erreiche-ich-euch-am-besten'}]},
   Zak:{schriftlich:[{kanal:'chat',text:'Nachricht in der App («Nachricht im DigitalBanking»)',quelle:'https://www.cler.ch/de/services/hilfe-und-kontakt/hilfethemen/zak'},{kanal:'formular',text:'Zak-Kontaktformular · nur Domizil Schweiz',quelle:'https://www.cler.ch/de/services/kontakt/kontaktformular-zak'}],
        telefon:[{kanal:'telefon',text:'0848 845 245 · Mo–Fr 8–18 Uhr',quelle:'https://www.cler.ch/de/services/hilfe-und-kontakt/hilfethemen/zak'}]},
   Revolut:{schriftlich:[{kanal:'chat',text:'Chat in der App · Profil > Chats > Support · rund um die Uhr',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'}],
-           telefon:[{kanal:'keiner',text:'Keine Nummer · Anruf nur mit Ultra-Abo und nur Englisch',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'},{kanal:'telefon',text:'Anruf in der App mit Ultra-Abo, nur Englisch',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'}]}
+           telefon:[{kanal:'keiner',text:'Gratis-Plan · Anruf nur mit Ultra-Abo und deshalb nicht angeboten',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'}]}
 };
-function kanalInfo(anbieter,kanal){const art=kanal==='telefon'?'telefon':'schriftlich';return ((KANAELE_BELEGT[anbieter]||{})[art]||[]).find(v=>v.kanal===kanal)||null;}
+function kanalInfo(anbieter,kanal){const art=kanal==='telefon'?'telefon':'schriftlich',options=((KANAELE_BELEGT[anbieter]||{})[art]||[]);return options.find(v=>v.kanal===kanal)||(kanal==='telefon'?options.find(v=>v.kanal==='keiner'):null)||null;}
 function channelSetup(state){
   const provider=el('select',{id:'channel-provider'},state.selected.map(a=>el('option',{value:a},a))),kind=el('select',{id:'channel-kind'},el('option',{value:'schriftlich'},'Schriftlich'),el('option',{value:'telefon'},'Telefon')),
     channel=el('select',{id:'channel-value'},['chat','mail','formular','telefon','keiner'].map(a=>el('option',{value:a},a==='keiner'?'Nicht angeboten':a))),source=el('input',{id:'channel-source',type:'url',placeholder:'https://…'}),date=el('input',{id:'channel-date',type:'date',max:heute(),value:heute()}),checked=el('input',{type:'checkbox',id:'channel-checked'});
@@ -93,7 +93,8 @@ async function oeffne(row){
   if(!daten.service?.probeDone){serviceMessage('Schliesse zuerst deine eigene Probe ab.');return;}
   const channel=daten.service.channels.find(r=>r.anbieter===row.anbieter&&r.art===(row.kanal==='telefon'?'telefon':'schriftlich'));
   if(!channel){serviceMessage('Bestätige zuerst den Kanal mit Quelle und Abrufdatum.');return;}
-  openForm(row);
+  const unavailable=row.kanal==='telefon'&&channel.kanal==='keiner';
+  openForm(unavailable?{...row,status:'nicht angeboten'}:row);
 }
 function serviceSchedule(row){
   const input=el('input',{type:'date',value:row.tag,min:daten.service?.config.start,max:daten.service?.config.end,'aria-label':'Termin '+row.nr});
@@ -102,7 +103,7 @@ function serviceSchedule(row){
 function simulationNotice(){
   return el('aside',{class:'hinweisbox simulation'},el('h2',{},'Interne Probe ohne Bankkontakt'),el('p',{},'Rufe keine Bank an und sende keine Nachricht. Spiele nur diesen erfundenen Verlauf durch und erfasse ihn unten.'),
     el('p',{},'Übung am heutigen Tag. Start 09:00, erkennbare automatische Antwort 09:01, menschliche Antwort 09:05, beide Kartenschritte vollständig erklärt um 09:08, Ende 09:09. Freundlich, keine Rückfragen, Deutsch beibehalten, Standort nicht genannt, keine Richtigkeitsquelle. Belastung immer null.'),
-    el('label',{class:'checkline'},el('input',{type:'checkbox',checked:z.simulation_confirmed,on:{change:event=>{z.simulation_confirmed=event.target.checked;}}}),'Ich habe die interne Simulation ohne Bankkontakt durchgespielt.'));
+    el('label',{class:'checkline'},el('input',{type:'checkbox',checked:z.simulation_confirmed,on:{change:event=>{z.simulation_confirmed=event.target.checked;bUpdateReadiness();}}}),'Ich habe die interne Simulation ohne Bankkontakt durchgespielt.'));
 }
 
 async function startServiceContact(){

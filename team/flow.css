@@ -92,3 +92,4 @@
 .kanal-option a{font-size:13px;font-weight:700;color:#4f6fd8}
 .kanal-hinweis{background:var(--area-b-wash);border-radius:12px;padding:10px 14px;font-size:15px}
 .kanal-hinweis a{font-weight:700;color:var(--area-b);margin-left:4px}
+.b-event-row{display:flex;align-items:center;gap:12px;min-height:48px}.b-event{font:inherit;font-weight:850;border:0;border-radius:10px;padding:12px 18px;background:#202923;color:#fff;cursor:pointer}.b-event:hover{background:#2f493b}.b-event:focus-visible{outline:3px solid #8a63b5;outline-offset:3px}.b-event-row span{font-variant-numeric:tabular-nums;color:#52604f;font-weight:700}.b-event:disabled{background:#e4e8e1;color:#52604f;cursor:not-allowed}
