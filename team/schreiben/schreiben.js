@@ -375,7 +375,6 @@ function renderAuftrag(c, g) {
   const reading = c.reader === state.person && c.owner !== state.person;
   fill($('tab-auftrag'),
     el('section', {class:'card lead'},
-      el('p', {class:'k'}, hasGuide ? (reading ? 'Worum es geht' : 'Das schreibst du') : 'Auftrag'),
       el('p', {class:'big'}, hasGuide ? (g.kurz || c.Was || '') : c.Was && c.Was !== 'noch offen' ? c.Was : 'Der ausführliche Auftrag für dieses Kapitel wird gerade ergänzt.'),
       g.daten_ab ? el('p', {class:'note'}, 'Daten liegen vor ab ' + g.daten_ab + '. Bis dahin Aufbau und Methode schreiben, keine Ergebnisse.') : null),
     reading ? card('Beim Gegenlesen', 'soft-card', el('p', {}, 'Prüfe mit der Liste «Muss drin sein» und den Punkten unten. Schreib Kommentare ins Doc, ändere den Text nicht selbst.')) : null,
@@ -384,8 +383,9 @@ function renderAuftrag(c, g) {
     muss.length ? el('section', {class:'card'}, el('div', {class:'row'}, el('h2', {class:'card-h'}, 'Muss drin sein'), meter), el('ul', {class:'checks'}, muss)) : null,
     card('So gibt es volle Punkte', '', (g.raster || []).map(r => el('div', {class:'pts'}, el('span', {class:'pn'}, r.punkte + ' P.'), el('p', {}, r.volle_punkte_wenn)))),
     (g.nicht || []).length || (g.fallen || []).length ? el('section', {class:'card'},
-      (g.nicht || []).length ? el('div', {class:'sub-block'}, el('h2', {class:'card-h'}, 'Gehört nicht hierhin'), el('ul', {class:'plain'}, g.nicht.map(x => el('li', {}, x)))) : null,
-      (g.fallen || []).length ? el('div', {class:'sub-block'}, el('h2', {class:'card-h'}, 'Typische Fehler'), el('ul', {class:'plain warn'}, g.fallen.map(x => el('li', {}, x)))) : null) : null);
+      el('details', {class:'rule achten'}, el('summary', {}, 'Worauf du achten musst'), el('div', {},
+        (g.nicht || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Gehört nicht hierhin'), el('ul', {class:'plain'}, g.nicht.map(x => el('li', {}, x)))) : null,
+        (g.fallen || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Typische Fehler'), el('ul', {class:'plain'}, g.fallen.map(x => el('li', {}, x)))) : null))) : null);
   progress();
 }
 function renderInfos(g) {

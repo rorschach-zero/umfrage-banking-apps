@@ -418,3 +418,38 @@ body.choosing .empty .btn:hover{background:var(--c-acc-h)}
 .pk.done::before{background:var(--c-acc)}.pk.review::before{background:#5FA9A3}.pk.draft::before{background:#B5DCD6}
 .due small{display:block;font-size:11px;line-height:1.2}
 @media (max-width:899px){.stand.none{display:none}.due small{display:inline;margin-left:6px}}
+
+/* ---------- Ruhige Seitenleiste (03.11.2026, impeccable quieter, Bricks-Werte) ----------
+   Keine Kartenstapel: Abschnitte trennen sich durch Raum und eine Haarlinie. Eine Betonung pro Abschnitt. */
+.tabs{background:none;border:0;border-bottom:1px solid var(--c-line);border-radius:0;padding:0;gap:24px;margin:4px 24px 4px}
+.tabs button{flex:none;padding:10px 0;min-height:44px;border-radius:0;font-weight:600;color:var(--c-sub)}
+.tabs button[aria-selected=true]{background:none;color:var(--c-text);box-shadow:inset 0 -2px 0 var(--c-acc)}
+.panel .card{background:none;border:0;border-top:1px solid var(--c-line);border-radius:0;box-shadow:none;padding:24px 0;margin:0}
+.panel [role=tabpanel]>.card:first-child,.panel .card.lead{border-top:0}
+.panel .card.lead{padding:20px 0 24px}
+.lead .big{font-size:17px;line-height:1.55;font-weight:600;letter-spacing:-.005em}
+.card-h{font-size:14px;font-weight:600;margin:0 0 12px;color:var(--c-text)}
+.panel .soft-card{background:var(--c-tint);border:0;border-radius:12px;padding:14px 16px;margin:0 0 8px}
+.panel .soft-card .card-h{margin:0 0 4px}
+.qs li{padding-left:26px;margin-bottom:10px}
+.qs li::before{content:counter(q) ".";width:auto;height:auto;background:none;border-radius:0;display:block;font-size:15px;font-weight:500;color:var(--c-sub);font-variant-numeric:tabular-nums}
+.steps{border-left:1px solid var(--c-line);margin-left:2px}
+.steps li{padding:0 0 8px 16px;font-size:15px}
+.steps li::before,.steps li:not(:last-child)::after{content:none}
+.checks li{border-top:0;padding:8px 0}
+.checks li:first-child{padding-top:0}
+.checks label{font-size:15px}
+.checks input:checked+label{text-decoration:none;color:var(--c-sub)}
+.meter i{display:none}
+.meter b{font-weight:500}
+.meter.full b{color:var(--c-acc-h);font-weight:600}
+.pts{grid-template-columns:44px minmax(0,1fr);border-top:0;padding:6px 0}
+.pn{background:none;padding:0;text-align:left;font-size:13px;font-weight:600;color:var(--c-sub);font-variant-numeric:tabular-nums;line-height:1.6}
+.pts p{font-size:15px}
+.plain li::marker,.warn li::marker{color:#A9B3AE}
+.achten summary{padding:0;min-height:32px;font-size:14px;font-weight:600}
+.achten[open] summary{margin-bottom:12px}
+.sub-h{margin:0 0 6px;font-size:13px;font-weight:600;color:var(--c-sub)}
+.panel .sub-block+.sub-block{margin-top:16px;padding-top:0;border-top:0}
+.info h3,.lnk b{font-weight:600}
+.panel .achten{border-top:0}
