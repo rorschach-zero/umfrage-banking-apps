@@ -171,7 +171,7 @@ async function ask(rawText) {
   thread.append(thinking); $('notice').textContent = 'Pia schaut in den Unterlagen nach.'; scrollToLatest();
   try {
     // Pin the key and role to this request, including when browser storage is unavailable.
-    const reply = await sende({k:accessKey, typ:'frage', text, leitung:isLead, ctx:taskContext, verlauf:requestHistory});
+    const reply = await sende({k:accessKey, typ:'frage', text, leitung:isLead, ctx:taskContext, verlauf:requestHistory}, 90000);
     if (typeof reply.antwort !== 'string' || !reply.antwort.trim()) throw new Error('Es kam keine Antwort an. Versuch es bitte nochmals.');
     thinking.remove(); addMessage({rolle:'assistent', text:reply.antwort});
     setFigureState('answering');
