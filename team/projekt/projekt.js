@@ -53,7 +53,7 @@ function field(key,label,type,value,onInput){
  else input=el('input',{...attrs,type:type||'text',value:value||'',maxlength:6000});
  // t34 B6: Fehlertext immer im Dokument, sichtbar sobald das Feld berührt wurde.
  const error=el('p',{id:id+'-error',class:'field-error',role:'alert',hidden:true},type==='hours'?'Erfasse mehr als 0 und höchstens 24 Stunden. 0,5 mit Punkt oder Komma.':'Bitte ergänze '+label+'.');
- return el('div',{class:'project-field'+(type==='textarea'?' wide':'')+(invalid?' is-invalid':'')},el('label',{for:id},label),input,error);
+ return el('div',{class:'project-field'+(type==='textarea'?' wide':'')+(invalid&&draft.touched&&draft.touched.has(key)?' is-invalid':'')},el('label',{for:id},label),input,error);
 }
 function missing(){
  const result=[];
@@ -65,11 +65,11 @@ function missing(){
 }
 function update(){
  const absent=missing();$('project-save').disabled=saving||!loaded||draft.uncertain||absent.length>0;
- $('project-ready').textContent=draft.uncertain?'Der Eingang ist noch unbestätigt. Wiederhole denselben Speicherauftrag.':absent.length?'Bitte prüfe die markierten Felder.':'Alle Pflichtfelder sind vollständig.';
+ $('project-ready').textContent=draft.uncertain?'Der Eingang ist noch unbestätigt. Wiederhole denselben Speicherauftrag.':absent.length?(draft.touched&&[...draft.touched].some(k=>forms[active].fields.some(f=>f[0]===k&&fieldInvalid(f[0],f[1],f[2]||'text')))?'Bitte prüfe die markierten Felder.':'Füll die Felder aus, dann kannst du speichern.'):'Alle Pflichtfelder sind vollständig.';
  $('project-ready').className='project-ready'+(!absent.length?' ok':'');
  for(const [key,label,type] of forms[active].fields){
   const input=$('project-'+key),invalid=fieldInvalid(key,label,type||'text');
-  input?.closest('.project-field')?.classList.toggle('is-invalid',invalid);
+  input?.closest('.project-field')?.classList.toggle('is-invalid',invalid&&!!draft.touched&&draft.touched.has(key));
   if(input)input.setAttribute('aria-invalid',invalid?'true':'false');
   const err=$('project-'+key+'-error');if(err)err.hidden=!(invalid&&draft.touched&&draft.touched.has(key));
  }
