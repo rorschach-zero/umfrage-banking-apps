@@ -53,21 +53,41 @@ function docUrl(c) { return c && /^https:\/\/docs\.google\.com\/document\/d\/[A-
 // ---------- Laden ----------
 async function load() {
   state.key = readKey();
-  const [guide, apa, wiar] = await Promise.all([json('auftraege.json'), json('apa_kurz.json'), json('wiar_kurz.json')]);
-  state.guide = guide || {}; state.apa = apa; state.wiar = wiar;
-  if (DEMO) { state.person = 'LB'; state.chapters = [{id:'demo', ref:'6a-5', title:'Reflexion der Gruppenarbeit', owner:'LB', reader:'MG', due:'2026-12-08', doc:'https://docs.google.com/document/d/1HSNMA_5ZfPf4WguWlUWD1n7VDfrk6SaUKDq5utgIng4/edit'}, {id:'demo2', ref:'6a-1', title:'Ausgangslage und Problemstellung', owner:'SA', reader:'LB', due:'2026-11-27', doc:null}]; state.chapter = state.chapters.find(c => c.ref === new URLSearchParams(location.search).get('k')) || null; return state.chapter ? renderAll() : chooser(state.chapters.filter(c => c.owner === 'LB')); }
+  const assets = Promise.all([json('auftraege.json'), json('apa_kurz.json'), json('wiar_kurz.json')]);
+  if (DEMO) { const [guide, apa, wiar] = await assets; state.guide = guide || {}; state.apa = apa; state.wiar = wiar; state.person = 'LB'; state.chapters = [{id:'demo', ref:'6a-5', title:'Reflexion der Gruppenarbeit', owner:'LB', reader:'MG', due:'2026-12-08', doc:'https://docs.google.com/document/d/1HSNMA_5ZfPf4WguWlUWD1n7VDfrk6SaUKDq5utgIng4/edit'}, {id:'demo2', ref:'6a-1', title:'Ausgangslage und Problemstellung', owner:'SA', reader:'LB', due:'2026-11-27', doc:null}]; state.chapter = state.chapters.find(c => c.ref === new URLSearchParams(location.search).get('k')) || null; return state.chapter ? renderAll() : chooser(state.chapters.filter(c => c.owner === 'LB')); }
   if (!state.key) return fatal('Öffne den Schreibplatz über deinen persönlichen Link zur Team-App.', true);
-  try {
+  // Schnell: letzter Stand sofort zeigen, frischen Stand im Hintergrund holen.
+  let h = 0; for (const ch of state.key) h = (h * 31 + ch.charCodeAt(0)) | 0;
+  const cacheKey = 'pa6-sp-stand:' + (h >>> 0).toString(36);   // je Zugang getrennt, ohne den Schlüssel zu speichern
+  const cached = store.get(cacheKey, null);
+  const fresh = (async () => {
     let r = await post({typ:'team', k:state.key, leitung:false});
-    if (!r || r.ok === false) return fatal(r && r.fehler || 'Kein Zugriff.', true);
+    if (!r || r.ok === false) throw Object.assign(Error(r && r.fehler || 'Kein Zugriff.'), {key:true});
     if (r.person === 'SA') { const lead = await post({typ:'team', k:state.key, leitung:true}).catch(() => null); if (lead && lead.ok !== false && Array.isArray(lead.chapters)) r = lead; }
-    state.person = r.person;
-    state.chapters = (r.chapters || []).slice().sort((a, b) => (a.ref || '').localeCompare(b.ref || '', 'de', {numeric:true}));
-  } catch (e) { return fatal(e.message || 'Gerade nicht erreichbar.'); }
+    return {person:r.person, chapters:r.chapters || [], chapterOverview:r.chapterOverview || null};
+  })();
+  const [guide, apa, wiar] = await assets; state.guide = guide || {}; state.apa = apa; state.wiar = wiar;
+  if (cached && cached.person) { apply(cached); route(); }
+  try {
+    const f = await fresh;
+    store.set(cacheKey, f);
+    if (!cached || JSON.stringify(cached) !== JSON.stringify(f)) { apply(f); route(); }
+  } catch (e) { if (!cached) return fatal(e.message || 'Gerade nicht erreichbar.', e.key); }
+}
+function apply(r) {
+  state.person = r.person;
+  const own = r.chapters || [], byRef = new Map(own.map(c => [c.ref, c]));
+  // Schreibwerk-Leitung: Gesamtsicht aller Kapitel (eigene Zeilen behalten ihre volle Form).
+  (r.chapterOverview || []).forEach(c => { if (!byRef.has(c.ref)) byRef.set(c.ref, Object.assign({overview:true}, c)); });
+  state.lead = Array.isArray(r.chapterOverview);
+  state.chapters = [...byRef.values()].sort((a, b) => (a.ref || '').localeCompare(b.ref || '', 'de', {numeric:true}));
+}
+function route() {
   const wanted = new URLSearchParams(location.search).get('k');
   const mine = state.chapters.filter(c => c.owner === state.person);
   state.chapter = state.chapters.find(c => c.ref === wanted) || null;
   if (!state.chapter) return chooser(mine);
+  document.body.classList.remove('choosing');
   renderAll();
 }
 function fatal(text, keyProblem) {
@@ -83,15 +103,31 @@ function chooser(mine) {
     el('li', {}, el('a', {href:'?k=' + encodeURIComponent(c.ref) + (DEMO ? '&demo' : '')}, el('span', {class:'ref'}, c.ref), el('span', {class:'ct'}, c.title),
       el('span', {class:'cm'}, [c.due ? 'Frist ' + day(c.due) : null, state.guide[c.ref] && state.guide[c.ref].seiten ? 'rund ' + String(state.guide[c.ref].seiten).replace('.', ',') + ' S.' : null].filter(Boolean).join(' · '))))))) : null;
   const reading = state.chapters.filter(c => c.reader === state.person);
-  const others = state.person === 'SA' ? state.chapters.filter(c => c.owner !== 'SA' && c.reader !== 'SA') : [];
+  const others = state.lead || state.person === 'SA' ? state.chapters.filter(c => c.owner !== state.person && c.reader !== state.person) : [];
   fill($('tab-auftrag'), 
     el('div', {class:'intro'}, el('p', {}, 'Hier schreibst du dein Kapitel. Neben deinem Google Doc steht, was gefordert ist und wo du die Infos findest.')),
     list(mine, 'Deine Kapitel') || el('p', {class:'quiet'}, 'Dir ist noch kein Kapitel zugeteilt.'),
-    list(reading, 'Du liest gegen'), list(others, 'Alle weiteren Kapitel'));
+    list(reading, 'Du liest gegen'), state.lead ? overviewBlock() : list(others, 'Alle weiteren Kapitel'));
   fill($('doc'), el('div', {class:'doc-empty'}, el('p', {}, 'Wähle links ein Kapitel. Das Doc öffnet sich hier.')));
   $('tabs').hidden = true;
+  document.body.classList.add('choosing');
 }
 
+// Gesamtwerk für die Schreibwerk-Leitung: alle Kapitel mit Pate, Gegenlesen, Frist und Stand auf einen Blick.
+function overviewBlock() {
+  const today = new Date().toISOString().slice(0, 10);
+  const late = c => c.due && c.due < today && c.status !== 'fertig';
+  const row = c => el('tr', {class:late(c) ? 'late' : null},
+    el('td', {}, el('a', {href:'?k=' + encodeURIComponent(c.ref) + (DEMO ? '&demo' : '')}, c.ref)),
+    el('td', {}, c.title), el('td', {}, NAMES[c.owner] || '–'), el('td', {}, NAMES[c.reader] || '–'),
+    el('td', {}, c.due ? day(c.due) : '–'), el('td', {}, c.status || 'offen'), el('td', {}, c.doc ? '✓' : '–'));
+  const part = p => state.chapters.filter(c => c.ref.startsWith(p));
+  const n = state.chapters.length, ohneDoc = state.chapters.filter(c => !c.doc).length, spaet = state.chapters.filter(late).length;
+  const table = rows => el('div', {class:'tbl'}, el('table', {}, el('thead', {}, el('tr', {}, ['Kapitel', 'Titel', 'Pate', 'Gegenlesen', 'Frist', 'Stand', 'Doc'].map(h => el('th', {}, h)))), el('tbody', {}, rows.map(row))));
+  return el('section', {class:'block'}, el('h2', {}, 'Gesamtwerk'),
+    el('p', {class:'quiet'}, n + ' Kapitel · ' + spaet + ' überfällig · ' + ohneDoc + ' ohne Doc. Klick auf ein Kapitel öffnet Auftrag und Doc.'),
+    el('h2', {}, 'PA6a'), table(part('6a')), el('h2', {}, 'PA6b'), table(part('6b')));
+}
 // ---------- Darstellung ----------
 function renderAll() {
   const c = state.chapter, g = state.guide[c.ref] || {};
@@ -104,7 +140,7 @@ function renderAll() {
     g.seiten ? el('span', {class:'chip'}, 'rund ' + String(g.seiten).replace('.', ',') + (g.seiten === 1 ? ' Seite' : ' Seiten')) : null,
     c.reader && c.owner === state.person ? el('span', {class:'chip soft'}, 'Gegenlesen: ' + (NAMES[c.reader] || c.reader)) : null);
   const picker = $('picker');
-  picker.replaceChildren(...state.chapters.filter(x => state.person === 'SA' || x.owner === state.person || x.reader === state.person)
+  picker.replaceChildren(...state.chapters.filter(x => state.lead || state.person === 'SA' || x.owner === state.person || x.reader === state.person)
     .map(x => el('option', {value:x.ref, selected:x.ref === c.ref}, x.ref + ' · ' + x.title)));
   picker.hidden = picker.options.length < 2;
   picker.onchange = () => { location.search = '?k=' + encodeURIComponent(picker.value) + (DEMO ? '&demo' : ''); };
@@ -210,7 +246,7 @@ function renderHilfe(c, g) {
     const wait = el('div', {class:'msg as wait'}, el('p', {class:'who'}, 'Schreibhilfe'), el('div', {class:'txt'}, 'Schaut in den Auftrag …')); thread.append(wait);
     try {
       const verlauf = state.chat.slice(-7, -1).filter(m => !m.err).map(m => ({rolle:m.r === 'du' ? 'du' : 'assistent', text:m.t}));
-      const r = await post({typ:'frage', k:state.key, text, leitung:false, ctx:c.id, verlauf, modus:'schreiben', kapitel:c.ref}, 90000);
+      const r = await post({typ:'frage', k:state.key, text, leitung:false, ctx:c.overview ? undefined : c.id, verlauf, modus:'schreiben', kapitel:c.ref}, 90000);
       if (!r || r.ok === false || typeof r.antwort !== 'string') throw Error(r && r.fehler || 'Keine Antwort erhalten.');
       state.chat.push({r:'as', t:r.antwort});
     } catch (e) { state.chat.push({r:'as', t:e.message || 'Gerade nicht erreichbar.', err:true}); }
