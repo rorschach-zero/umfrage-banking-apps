@@ -35,7 +35,8 @@ function fieldInvalid(key,label,type){
 }
 function field(key,label,type,value,onInput){
  const id='project-'+key,invalid=fieldInvalid(key,label,type);
- const attrs={id,name:key,required:true,on:{input:onInput,change:onInput},...(invalid?{'aria-invalid':'true','aria-describedby':id+'-error'}:{})};
+ const mark=e=>{(draft.touched||(draft.touched=new Set())).add(key);onInput&&onInput(e);};
+ const attrs={id,name:key,required:true,'aria-describedby':id+'-error',on:{input:mark,change:mark},...(invalid?{'aria-invalid':'true'}:{})};
  let input;
  if(Array.isArray(type)||type==='person'||type==='self'){
   const options=Array.isArray(type)?type:(type==='self'?[who]:Object.keys(TEAM));
@@ -44,7 +45,8 @@ function field(key,label,type,value,onInput){
  }else if(type==='textarea')input=el('textarea',{...attrs,maxlength:6000,rows:4},value||'');
  else if(type==='hours')input=el('input',{...attrs,type:'text',inputMode:'decimal',value:value||'',maxlength:8,placeholder:'0.5 mit Punkt oder Komma'});
  else input=el('input',{...attrs,type:type||'text',value:value||'',maxlength:6000});
- const error=invalid?el('p',{id:id+'-error',class:'field-error',role:'alert'},type==='hours'?'Erfasse mehr als 0 und höchstens 24 Stunden. 0,5 mit Punkt oder Komma.':'Bitte ergänze '+label+'.'):null;
+ // t34 B6: Fehlertext immer im Dokument, sichtbar sobald das Feld berührt wurde.
+ const error=el('p',{id:id+'-error',class:'field-error',role:'alert',hidden:true},type==='hours'?'Erfasse mehr als 0 und höchstens 24 Stunden. 0,5 mit Punkt oder Komma.':'Bitte ergänze '+label+'.');
  return el('div',{class:'project-field'+(type==='textarea'?' wide':'')+(invalid?' is-invalid':'')},el('label',{for:id},label),input,error);
 }
 function missing(){
@@ -63,7 +65,7 @@ function update(){
   const input=$('project-'+key),invalid=fieldInvalid(key,label,type||'text');
   input?.closest('.project-field')?.classList.toggle('is-invalid',invalid);
   if(input)input.setAttribute('aria-invalid',invalid?'true':'false');
-  const err=$('project-'+key+'-error');if(err)err.hidden=!invalid;
+  const err=$('project-'+key+'-error');if(err)err.hidden=!(invalid&&draft.touched&&draft.touched.has(key));
  }
 }
 function taskFields(){

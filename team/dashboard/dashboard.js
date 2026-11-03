@@ -70,7 +70,7 @@
       const response=await fetch(window.TEAM_CONFIG.endpoint,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(input),cache:'no-store',signal:controller.signal});
       if(!response.ok)throw Error('Der Stand ist gerade nicht erreichbar.');
       const data=await response.json();if(version!==generation)return;render(data);
-    }catch(error){if(version===generation)root.innerHTML=`<section class="error"><span class="eyebrow">Projekt-Dashboard</span><h1>${publicView?'Noch nicht öffentlich.':'Stand nicht verfügbar.'}</h1><p>${esc(error.name==='AbortError'?'Die Abfrage hat zu lange gedauert. Bitte erneut aktualisieren.':error.message)}</p><a href="/team/">Zur Team-Startseite →</a></section>`;}
+    }catch(error){if(version===generation)root.innerHTML=`<section class="error"><h1>${publicView?'Noch nicht öffentlich.':'Stand nicht verfügbar.'}</h1><p>${esc(error.name==='AbortError'?'Die Abfrage hat zu lange gedauert. Bitte erneut aktualisieren.':error.message)}</p><a href="/team/">Zur Team-Startseite →</a></section>`;}
     finally{clearTimeout(timeout);if(version===generation){root.setAttribute('aria-busy','false');refresh.disabled=false;timer=setTimeout(load,60000);}}
   }
   function changeAccess() {

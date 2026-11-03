@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-gIDMPsXAR3JmQ6EFxa9bvhcEY2TUr8ZNDr91GNNN0Mc='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JmC+wQKx16ZejWHvncoSm3vUeBURoVzCsW+ONqCmwbU='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 </head>
@@ -150,13 +150,13 @@ function startBlock(r) {
   if (startCorrection) {
     rows.push(zeitfeld("t_start", "Start korrigieren", help, false),
       el("div", { class: "zeile" },
-        el("button", { type: "button", class: "chip", on: { click: () => { startCorrection = false; formular(); } } }, "Abbrechen"),
-        el("button", { type: "button", class: "knopf", on: { click: () => { z.start_korrektur = true; startCorrection = false; formular(); } } }, "Übernehmen")));
+        el("button", { type: "button", class: "chip", on: { click: () => { if (z._startVorher !== undefined) { z.t_start = z._startVorher; lokal("b-" + aktiv.nr, z); } delete z._startVorher; startCorrection = false; formular(); } } }, "Abbrechen"),
+        el("button", { type: "button", class: "knopf", on: { click: () => { z.start_korrektur = true; delete z._startVorher; startCorrection = false; formular(); } } }, "Übernehmen")));
     return rows;
   }
   rows.push(
-    el("p", {}, new Intl.DateTimeFormat("de-CH", { dateStyle: "short", timeStyle: "short", timeZone: "Europe/Zurich" }).format(new Date(String(z.t_start).replace(" ", "T")))),
-    el("button", { type: "button", class: "chip", on: { click: () => { startCorrection = true; formular(); } } }, "Korrigieren"));
+    el("p", {}, (m => m ? m[3] + "." + m[2] + "." + m[1].slice(2) + ", " + m[4] + ":" + m[5] : String(z.t_start))(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(String(z.t_start)))),
+    el("button", { type: "button", class: "chip", on: { click: () => { z._startVorher = z.t_start; startCorrection = true; formular(); } } }, "Korrigieren"));
   return rows;
 }
 const ANZEIGE = { durchgefuehrt: "durchgeführt", "nicht zugaenglich": "nicht zugänglich", "nicht pruefbar": "nicht prüfbar", "Schritt erklaert": "Schritt erklärt" };
@@ -282,7 +282,7 @@ function formular() {
   bUpdateReadiness();
 }
 function zeile(stand) {
-  const o = Object.assign({}, z, { stand });
+  const o = Object.assign({}, z, { stand }); delete o._startVorher;
   o.mensch_hinweise = (z.hinweise || []).join("|");
   o.elemente = (z.elemente || []).join("|");
   ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].forEach(k => { if (o[k]) o[k] = o[k].replace("T", " "); });
