@@ -403,7 +403,7 @@ function renderAuftrag(c, g) {
   if (!reading) {
     steps.push({id:'material', t:'Material holen', s:'Quellen und Daten, bevor du schreibst', body:() => [
       el('p', {}, 'Sammle zuerst, was du belegen kannst. Notiere Stichworte und Quellen im Doc unter «Notizen».'),
-      (g.infos || []).length ? el('ul', {class:'w-infos'}, g.infos.slice(0, 4).map(i => el('li', {}, el('b', {}, i.titel), el('span', {}, i.wo)))) : null,
+      (g.infos || []).length ? el('ul', {class:'w-infos'}, g.infos.slice(0, 4).map(i => el('li', {}, i.titel))) : null,
       el('button', {type:'button', class:'btn secondary', onclick:() => setTab('infos')}, 'Alle Unterlagen ansehen')]});
     steps.push({id:'geruest', t:'Gerüst ins Doc', s:glied.length ? glied.length + ' Abschnitte laut Vorgabe' : 'Aufbau laut Vorgabe', body:() => [
       el('p', {}, 'Übernimm den Aufbau als Zwischentitel ins Doc. Dann weisst du beim Schreiben immer, wo du bist.'),
@@ -479,7 +479,7 @@ function renderInfos(g) {
     {titel:'Dashboard', wo:'Team-App', href:'/team/dashboard/', inhalt:'Rücklauf und Stand der Erhebung.'},
     {titel:'Pia fragen', wo:'Team-App', href:'/team/frag/', inhalt:'Fragen zu Regeln, Terminen und Unterlagen.'}];
   fill($('tab-infos'), 
-    block('Hier findest du, was du brauchst', (g.infos || []).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), el('p', {class:'where'}, i.wo)))),
+    block('Hier findest du, was du brauchst', (g.infos || []).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), (state.person === 'SA' || !/notion/i.test(i.wo || '')) ? el('p', {class:'where'}, i.wo) : null))),
     block('Direkt in der Team-App', el('div', {class:'links'}, inApp.map(i => el('a', {class:'lnk', href:i.href}, el('b', {}, i.titel), el('span', {}, i.inhalt), el('i', {class:'go', 'aria-hidden':'true'}, '›'))))));
 }
 function copyBtn(text) {
