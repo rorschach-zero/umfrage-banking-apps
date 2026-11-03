@@ -56,6 +56,7 @@ async function load() {
   const assets = Promise.all([json('auftraege.json'), json('apa_kurz.json'), json('wiar_kurz.json')]);
   if (DEMO) { const [guide, apa, wiar] = await assets; state.guide = guide || {}; state.apa = apa; state.wiar = wiar; state.person = 'LB'; state.chapters = [{id:'demo', ref:'6a-5', title:'Reflexion der Gruppenarbeit', owner:'LB', reader:'MG', due:'2026-12-08', doc:'https://docs.google.com/document/d/1HSNMA_5ZfPf4WguWlUWD1n7VDfrk6SaUKDq5utgIng4/edit'}, {id:'demo2', ref:'6a-1', title:'Ausgangslage und Problemstellung', owner:'SA', reader:'LB', due:'2026-11-27', doc:null}]; state.chapter = state.chapters.find(c => c.ref === new URLSearchParams(location.search).get('k')) || null; return state.chapter ? renderAll() : chooser(state.chapters.filter(c => c.owner === 'LB')); }
   if (!state.key) return fatal('Öffne den Schreibplatz über deinen persönlichen Link zur Team-App.', true);
+  if (!new URLSearchParams(location.search).get('k')) renderLoading();
   // Schnell: letzter Stand sofort zeigen, frischen Stand im Hintergrund holen.
   let h = 0; for (const ch of state.key) h = (h * 31 + ch.charCodeAt(0)) | 0;
   const cacheKey = 'pa6-sp-stand:' + (h >>> 0).toString(36);   // je Zugang getrennt, ohne den Schlüssel zu speichern
@@ -82,6 +83,7 @@ function apply(r) {
   (r.chapterOverview || []).forEach(c => { if (!byRef.has(c.ref)) byRef.set(c.ref, Object.assign({overview:true}, c)); });
   state.lead = Array.isArray(r.chapterOverview);
   state.chapters = [...byRef.values()].sort((a, b) => (a.ref || '').localeCompare(b.ref || '', 'de', {numeric:true}));
+  planMerge();
 }
 function route() {
   const wanted = new URLSearchParams(location.search).get('k');
@@ -93,41 +95,166 @@ function route() {
 }
 function fatal(text, keyProblem) {
   $('title').textContent = 'Schreibplatz';
+  if (!new URLSearchParams(location.search).get('k')) { document.body.classList.add('choosing'); $('tabs').hidden = true; }
   fill($('tab-auftrag'), el('div', {class:'empty'}, el('h2', {}, keyProblem ? 'Kein Zugang' : 'Nicht geladen'), el('p', {}, text),
     el('a', {class:'btn', href:'/team/'}, 'Zur Team-App')));
   fill($('doc'), );
 }
-function chooser(mine) {
-  $('title').textContent = 'Wähle dein Kapitel';
-  $('part').textContent = 'Schreibplatz';
-  const list = (rows, label) => rows.length ? el('section', {class:'block'}, el('h2', {}, label), el('ul', {class:'choose'}, rows.map(c =>
-    el('li', {}, el('a', {href:'?k=' + encodeURIComponent(c.ref) + (DEMO ? '&demo' : '')}, el('span', {class:'ref'}, c.ref), el('span', {class:'ct'}, c.title),
-      el('span', {class:'cm'}, [c.due ? 'Frist ' + day(c.due) : null, state.guide[c.ref] && state.guide[c.ref].seiten ? 'rund ' + String(state.guide[c.ref].seiten).replace('.', ',') + ' S.' : null].filter(Boolean).join(' · '))))))) : null;
-  const reading = state.chapters.filter(c => c.reader === state.person);
-  const others = state.lead || state.person === 'SA' ? state.chapters.filter(c => c.owner !== state.person && c.reader !== state.person) : [];
-  fill($('tab-auftrag'), 
-    el('div', {class:'intro'}, el('p', {}, 'Hier schreibst du dein Kapitel. Neben deinem Google Doc steht, was gefordert ist und wo du die Infos findest.')),
-    list(mine, 'Deine Kapitel') || el('p', {class:'quiet'}, 'Dir ist noch kein Kapitel zugeteilt.'),
-    list(reading, 'Du liest gegen'), state.lead ? overviewBlock() : list(others, 'Alle weiteren Kapitel'));
-  fill($('doc'), el('div', {class:'doc-empty'}, el('p', {}, 'Wähle links ein Kapitel. Das Doc öffnet sich hier.')));
+// ---------- Übersicht (Einstieg Schreibwerk, 03.11.2026) ----------
+// Gesamtwerk auf einen Blick: alle Kapitel nach PA6a/PA6b und Hauptkapitel, mit Pate und Gegenleser als Initialen.
+// Zuteilung laut Kapitelplan (Schreibwerk, 39 Kapitel). Der Team-Empfänger liefert Stand und Doc für die eigenen Kapitel
+// (Leitung für alle); fehlt eine Zeile, füllt dieser Plan nur Titel, Pate und Gegenleser, nur zum Lesen.
+const PLAN = [
+  ['6a-1','SA','ES','Ausgangslage und Problemstellung'], ['6a-2','LB','AM','Analyse der aktuellen Markt- und Geschäftssituation'],
+  ['6a-2-ziel','MG','AM','Zielsetzung'], ['6a-2-partner','MG','AM','Schlüsselpartner*Innen'], ['6a-2-sicherheit','MG','AM','Sicherheit'],
+  ['6a-2-konkurrenz','ES','MG','Konkurrenzanalyse (Stärken und Schwächen der Mitbewerber)'], ['6a-2.4','AM','LB','Primäre Marktforschung'],
+  ['6a-2.4-design','AM','LB','Forschungsdesign'], ['6a-2.4-instrumente','AM','LB','Erhebungsinstrumente'], ['6a-2.4-stichprobe','AM','LB','Beschreibung der Stichprobe'],
+  ['6a-2.8','LB','AM','Auswertung'], ['6a-2.8-f12','AM','LB','F1/F2'], ['6a-2.8-f3','ES','MG','F3'], ['6a-2.8-f4','MG','AM','F4'],
+  ['6a-2.9','MG','AM','SWOT-Analyse'], ['6a-3','SA','ES','Strategische Überlegungen und mögliche Methoden das Ziel zu erreichen'],
+  ['6a-4','LB','SA','Fazit'], ['6a-5','LB','SA','Reflexion Gruppenarbeit'], ['6a-6','LB','SA','Literaturverzeichnis'],
+  ['6a-6-abbildungen','LB','SA','Abbildungsverzeichnis'], ['6a-6-tabellen','LB','SA','Tabellenverzeichnis'], ['6a-6-anhang','LB','SA','Anhang'],
+  ['6a-7','LB','SA','Eigenständigkeitserklärung'], ['6a-reserve-markt','ES','MG','Markt und Umfeld'],
+  ['6a-reserve-unternehmen','SA','ES','Yuh als eigene Unternehmung und Prognose'],
+  ['6b-1','SA','ES','Ausgangslage und Problemstellung'], ['6b-2','MG','AM','Fazit der Analyse und Diagnose der Datenanalyse PA6a'],
+  ['6b-3','SA','ES','Ökonomische und Vorökonomische Zielsetzungen'], ['6b-4','ES','MG','Risiko Map'], ['6b-5','LB','SA','Stakeholder-Analyse'],
+  ['6b-6','AM','LB','Zielgruppenanalyse'], ['6b-7','SA','ES','Strategische Ansätze und Begründungen'], ['6b-8','ES','MG','Marketing-Mix'],
+  ['6b-9','MG','AM','Nachhaltigkeitserläuterungen'], ['6b-10','ES','SA','Budget- und Kostenplanung'], ['6b-11','LB','SA','Fazit'],
+  ['6b-12','LB','SA','Reflexion'], ['6b-13','LB','SA','Alle nötigen Verzeichnisse'], ['6b-14','LB','SA','Eigenständigkeitserklärung']];
+const PARTS = [
+  {key:'6a', name:'PA6a', title:'Analyse und Marktforschung', due:'2026-12-12'},
+  {key:'6b', name:'PA6b', title:'Marketingkonzept', due:'2027-02-27'}];
+const PEOPLE = ['SA', 'ES', 'MG', 'AM', 'LB'];
+const STAND = {'Entwurf':'draft', 'In Prüfung':'review', 'fertig':'done'};
+function planMerge() {
+  // Kapitel, die der Empfänger nicht liefert, aus dem Kapitelplan ergänzen (nur lesen, ohne Stand und Doc).
+  const have = new Set(state.chapters.map(c => c.ref));
+  PLAN.forEach(([ref, owner, reader, title], i) => { if (!have.has(ref)) state.chapters.push({ref, owner, reader, title, plan:true, overview:true, due:PARTS[ref.startsWith('6b') ? 1 : 0].due}); });
+  const order = new Map(PLAN.map((p, i) => [p[0], i]));
+  state.chapters.sort((a, b) => (order.has(a.ref) ? order.get(a.ref) : 999) - (order.has(b.ref) ? order.get(b.ref) : 999) || (a.ref || '').localeCompare(b.ref || '', 'de', {numeric:true}));
+}
+function anatomy(ref) {
+  // «6a-2.4-design» → Teil 6a, Hauptkapitel 2, Nummer leer (Unterkapitel ohne eigene Nummer), Tiefe 2.
+  const m = /^(6[ab])-(?:(\d+)((?:\.\d+)*))?(?:-?(.+))?$/.exec(ref || '') || [];
+  const main = m[2] || 'reserve', dots = (m[3] || '').split('.').length - 1, suffix = m[4] && m[2] ? m[4] : '';
+  return {part:m[1] || '', main, number:m[2] && !suffix ? m[2] + (m[3] || '') : '', depth:m[2] ? dots + (suffix ? 1 : 0) : 0};
+}
+function pages(n) { return n ? String(n).replace('.', ',') + (n === 1 ? ' Seite' : ' S.') : ''; }
+function initials(code, kind) {
+  if (!NAMES[code]) return null;
+  const label = (kind === 'reader' ? 'Gegenlesen: ' : 'Pate: ') + NAMES[code];
+  return el('span', {class:'ini ' + kind + ' p-' + code, title:label}, el('span', {'aria-hidden':'true'}, code), el('span', {class:'sr'}, label));
+}
+function standBadge(c) {
+  if (c.plan) return el('span', {class:'stand none', title:'Stand sehen Pate und Gegenleser'}, el('span', {'aria-hidden':'true'}, '–'), el('span', {class:'sr'}, 'Stand nicht sichtbar'));
+  const s = c.status || 'Offen', cls = STAND[s] || 'open';
+  return el('span', {class:'stand ' + cls}, s === 'fertig' ? 'Fertig' : s === 'Nicht begonnen' ? 'Offen' : s);
+}
+function renderLoading() {
+  document.body.classList.add('choosing');
+  $('tabs').hidden = true;
+  $('part').textContent = 'Schreibwerk';
+  $('title').textContent = 'Kapitelübersicht';
+  fill($('tab-auftrag'), el('div', {class:'ov ov-loading', 'aria-busy':'true'},
+    el('div', {class:'sk sk-h'}), el('div', {class:'sk sk-p'}), el('div', {class:'sk sk-p short'}),
+    el('div', {class:'sk sk-card'}), el('div', {class:'sk sk-card'}), el('p', {class:'sr'}, 'Kapitel werden geladen …')));
+}
+function chooser() {
+  planMerge();
+  document.title = 'Schreibwerk · PA6';
+  $('part').textContent = 'Schreibwerk';
+  $('title').textContent = 'Kapitelübersicht';
   $('tabs').hidden = true;
   document.body.classList.add('choosing');
-}
-
-// Gesamtwerk für die Schreibwerk-Leitung: alle Kapitel mit Pate, Gegenlesen, Frist und Stand auf einen Blick.
-function overviewBlock() {
+  fill($('doc'));
+  const me = state.person, all = state.chapters;
+  const mineOf = c => c.owner === me || c.reader === me;
+  let mode = store.get('pa6-sp-filter', 'meine') === 'alle' ? 'alle' : 'meine';
   const today = new Date().toISOString().slice(0, 10);
-  const late = c => c.due && c.due < today && c.status !== 'fertig';
-  const row = c => el('tr', {class:late(c) ? 'late' : null},
-    el('td', {}, el('a', {href:'?k=' + encodeURIComponent(c.ref) + (DEMO ? '&demo' : '')}, c.ref)),
-    el('td', {}, c.title), el('td', {}, NAMES[c.owner] || '–'), el('td', {}, NAMES[c.reader] || '–'),
-    el('td', {}, c.due ? day(c.due) : '–'), el('td', {}, c.status || 'offen'), el('td', {}, c.doc ? '✓' : '–'));
-  const part = p => state.chapters.filter(c => c.ref.startsWith(p));
-  const n = state.chapters.length, ohneDoc = state.chapters.filter(c => !c.doc).length, spaet = state.chapters.filter(late).length;
-  const table = rows => el('div', {class:'tbl'}, el('table', {}, el('thead', {}, el('tr', {}, ['Kapitel', 'Titel', 'Pate', 'Gegenlesen', 'Frist', 'Stand', 'Doc'].map(h => el('th', {}, h)))), el('tbody', {}, rows.map(row))));
-  return el('section', {class:'block'}, el('h2', {}, 'Gesamtwerk'),
-    el('p', {class:'quiet'}, n + ' Kapitel · ' + spaet + ' überfällig · ' + ohneDoc + ' ohne Doc. Klick auf ein Kapitel öffnet Auftrag und Doc.'),
-    el('h2', {}, 'PA6a'), table(part('6a')), el('h2', {}, 'PA6b'), table(part('6b')));
+  const late = c => !c.plan && c.due && String(c.due).slice(0, 10) < today && c.status !== 'fertig';
+  const known = all.filter(c => !c.plan), complete = known.length === all.length;
+  const drafted = list => list.filter(c => STAND[c.status]).length;
+
+  // Kopf: Gesamtauftrag in einem Satz, Fortschritt, Abgaben, Team.
+  const seg = el('div', {class:'seg', role:'group', 'aria-label':'Welche Kapitel zeigen'});
+  const segBtn = (value, label) => el('button', {type:'button', 'data-mode':value, 'aria-pressed':String(mode === value), onclick:() => setMode(value)}, label);
+  seg.append(segBtn('meine', 'Meine'), segBtn('alle', 'Alle'));
+  const progressBase = complete ? all : known.filter(mineOf);
+  const n = progressBase.length, d = drafted(progressBase);
+  const bar = el('div', {class:'prog', 'aria-hidden':'true'});
+  ['done', 'review', 'draft'].forEach(k => { const part = progressBase.filter(c => STAND[c.status] === k).length; if (part) { const s = el('span', {class:k}); s.style.width = (part / Math.max(n, 1) * 100) + '%'; bar.append(s); } });
+  const count = (code, role) => all.filter(c => c[role] === code).length;
+  const hero = el('header', {class:'ov-hero'},
+    el('p', {class:'ov-eyebrow'}, 'PA6 · Praxisauftrag Yuh'),
+    el('h2', {class:'ov-h'}, 'Ein Bericht in zwei Teilen'),
+    el('p', {class:'ov-lede'}, 'Yuh fragt, wie bekannt sein Schweizer Kundendienst ist und wie er wirkt. In der PA6a untersuchen wir das mit Umfrage, Servicetest und Bewertungen, in der PA6b machen wir daraus ein Marketingkonzept mit einer ausgearbeiteten Massnahme.'),
+    el('div', {class:'ov-facts'},
+      el('div', {class:'fact wide'}, el('p', {class:'fk'}, complete ? 'Fortschritt' : 'Deine Kapitel'),
+        el('p', {class:'fv'}, n ? d + ' von ' + n + (complete ? ' Kapiteln im Entwurf oder weiter' : ' im Entwurf oder weiter') : 'Noch kein Kapitel zugeteilt'), bar,
+        n ? el('p', {class:'prog-key'}, [['done', 'Fertig'], ['review', 'In Prüfung'], ['draft', 'Entwurf']].map(([k, label]) => el('span', {class:'pk ' + k}, label + ' ' + progressBase.filter(c => STAND[c.status] === k).length))) : null),
+      PARTS.map(p => el('div', {class:'fact'}, el('p', {class:'fk'}, 'Abgabe ' + p.name), el('p', {class:'fv'}, day(p.due))))),
+    el('ul', {class:'team', 'aria-label':'Team'}, PEOPLE.map(code => el('li', {class:code === me ? 'me' : null},
+      el('span', {class:'ini owner p-' + code, 'aria-hidden':'true'}, code), el('span', {class:'tn'}, NAMES[code] + (code === me ? ' (du)' : '')),
+      el('span', {class:'tc', 'aria-hidden':'true'}, count(code, 'owner') + ' · ' + count(code, 'reader')),
+      el('span', {class:'sr'}, ', schreibt ' + count(code, 'owner') + ', liest ' + count(code, 'reader') + ' gegen')))),
+    el('p', {class:'legend'}, el('span', {class:'lg'}, el('span', {class:'ini owner p-legend', 'aria-hidden':'true'}, 'AB'), 'schreibt'),
+      el('span', {class:'lg'}, el('span', {class:'ini reader p-legend', 'aria-hidden':'true'}, 'AB'), 'liest gegen'),
+      el('span', {class:'lg'}, 'Die Zahlen beim Namen zählen beides.')));
+  const bodyBox = el('div', {class:'ov-body'});
+  const toolbar = el('div', {class:'ov-tools'}, seg, el('p', {class:'ov-count', 'aria-live':'polite'}));
+  fill($('tab-auftrag'), el('div', {class:'ov'}, hero, toolbar, bodyBox));
+
+  function row(c, context) {
+    const a = anatomy(c.ref), g = state.guide[c.ref] || {}, role = c.owner === me ? 'Du schreibst' : c.reader === me ? 'Du liest gegen' : '';
+    const sentence = g.kurz || '';
+    return el('li', {class:'r d' + Math.min(a.depth, 2) + (context ? ' ctx' : '') + (role ? ' mine' : '')},
+      el('a', {href:'?k=' + encodeURIComponent(c.ref) + (DEMO ? '&demo' : ''), title:c.ref},
+        el('span', {class:'num'}, a.number),
+        el('span', {class:'main'},
+          el('span', {class:'tt'}, c.title || g.titel || c.ref, role ? el('span', {class:'role ' + (c.owner === me ? 'w' : 'l')}, role) : null),
+          sentence && !context ? el('span', {class:'sum'}, sentence) : null),
+        el('span', {class:'meta'},
+          el('span', {class:'pg'}, g.seiten ? el('span', {}, el('span', {class:'sr'}, 'Umfang '), pages(g.seiten)) : el('span', {class:'dim', 'aria-hidden':'true'}, '–')),
+          el('span', {class:'due' + (late(c) ? ' late' : '')}, c.due ? [el('span', {class:'sr'}, 'Frist '), day(c.due), late(c) ? el('small', {}, 'überfällig') : null] : '–'),
+          standBadge(c),
+          el('span', {class:'who'}, initials(c.owner, 'owner'), initials(c.reader, 'reader'))),
+        el('span', {class:'go', 'aria-hidden':'true'}, '›')));
+  }
+  function draw() {
+    for (const b of seg.querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
+    const visible = mode === 'alle' ? all : all.filter(mineOf);
+    toolbar.lastChild.textContent = mode === 'alle' ? all.length + ' Kapitel' : visible.length === 1 ? '1 Kapitel mit dir' : visible.length + ' Kapitel mit dir';
+    if (!visible.length) {
+      fill(bodyBox, el('div', {class:'ov-empty'}, el('p', {class:'big'}, 'Dir ist noch kein Kapitel zugeteilt.'),
+        el('p', {class:'quiet'}, 'Unter «Alle» siehst du, wer welches Kapitel schreibt.'),
+        el('button', {type:'button', class:'btn ghost', onclick:() => setMode('alle')}, 'Alle Kapitel zeigen')));
+      return;
+    }
+    const sections = PARTS.map(p => {
+      const inPart = all.filter(c => (c.ref || '').startsWith(p.key + '-'));
+      const shown = inPart.filter(c => visible.includes(c));
+      if (!shown.length) return null;
+      const groups = new Map();
+      inPart.forEach(c => { const k = anatomy(c.ref).main; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(c); });
+      const sum = inPart.reduce((s, c) => s + ((state.guide[c.ref] || {}).seiten || 0), 0);
+      const cards = [...groups.entries()].map(([k, rows]) => {
+        const vis = rows.filter(c => visible.includes(c));
+        if (!vis.length) return null;
+        const head = rows[0], items = vis.map(c => row(c, false));
+        if (!vis.includes(head) && anatomy(head.ref).depth === 0 && k !== 'reserve') items.unshift(row(head, true));
+        return el('section', {class:'grp', 'aria-label':k === 'reserve' ? 'Reserve' : 'Kapitel ' + k},
+          k === 'reserve' ? el('p', {class:'grp-k'}, 'Reserve') : null, el('ul', {class:'rows'}, items));
+      });
+      return el('section', {class:'part', 'aria-labelledby':'part-' + p.key},
+        el('div', {class:'part-head'},
+          el('h3', {id:'part-' + p.key}, el('span', {class:'pn'}, p.name), p.title),
+          el('p', {class:'part-meta'}, 'Abgabe ' + day(p.due) + ' · rund ' + String(sum).replace('.', ',') + ' Seiten · ' + inPart.length + ' Kapitel')),
+        el('div', {class:'cols', 'aria-hidden':'true'}, el('span', {}, 'Kapitel'), el('span', {}, 'Umfang'), el('span', {}, 'Frist'), el('span', {}, 'Stand'), el('span', {}, 'Team')),
+        cards);
+    });
+    fill(bodyBox, sections, !complete && mode === 'alle' ? el('p', {class:'quiet foot'}, 'Stand und Doc siehst du bei deinen eigenen Kapiteln. Die übrigen Kapitel kannst du öffnen und den Auftrag lesen.') : null);
+  }
+  function setMode(m) { mode = m; store.set('pa6-sp-filter', m); draw(); announce(m === 'alle' ? 'Alle Kapitel' : 'Deine Kapitel'); }
+  draw();
 }
 // ---------- Darstellung ----------
 function schreibZeitKontext(c) {
@@ -277,6 +404,7 @@ function renderHilfe(c, g) {
 // ---------- Doc ----------
 function renderDoc(c) {
   const url = docUrl(c);
+  if (!url && c.plan) { fill($('doc'), el('div', {class:'doc-empty'}, el('p', {}, 'Das Doc dieses Kapitels sehen Pate und Gegenleser.'), el('p', {class:'quiet'}, 'Den Auftrag kannst du links lesen.'))); return; }
   if (!url) { fill($('doc'), el('div', {class:'doc-empty'}, el('p', {}, 'Für dieses Kapitel ist noch kein Doc verknüpft.'), el('p', {class:'quiet'}, 'Salah legt es an.'))); return; }
   // Safari und iOS sperren Drittanbieter-Cookies: dort ist man im eingebetteten Doc nicht angemeldet und kann nicht schreiben.
   const ua = navigator.userAgent, safari = /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS/.test(ua);
