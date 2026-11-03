@@ -52,7 +52,17 @@ function renderForm(){
 function showReceipts(){
  $('project-receipts').replaceChildren(...(receipts.length?receipts.slice().sort((a,b)=>b.zeitstempel.localeCompare(a.zeitstempel)).map(r=>el('article',{},el('strong',{},forms[r.formular].title+' · Zeile '+r.zeile),el('p',{},new Intl.DateTimeFormat('de-CH',{dateStyle:'short',timeStyle:'medium',timeZone:'Europe/Zurich'}).format(new Date(r.zeitstempel))+' · '+r.blatt),el('details',{},el('summary',{},'Prüfbeleg ansehen'),el('p',{},'Kennung '+r.id),el('code',{},r.pruefsumme)))):[el('p',{},'Du hast noch keine Einträge gespeichert.')]));
 }
-function showSync(sync){$('project-sync').replaceChildren(el('p',{},sync.enabled?'Der Abgleich läuft stündlich.':'Der automatische Übertrag ist ausgeschaltet. Deine Einträge bleiben im Projektblatt.'),...sync.forms.map(row=>el('p',{},forms[row.formular].title+' · '+(row.stale?'Abgleich ausstehend oder veraltet':row.status)+(row.blatt_anzahl!==undefined?' · Blatt '+row.blatt_anzahl+' · Notion '+(row.notion_anzahl||'unbekannt'):'')+(row.fehler?' · '+row.fehler:''))));}
+function showSync(sync){
+ $('project-sync').replaceChildren(
+  el('p',{},sync.enabled?'Der Abgleich läuft stündlich.':'Der automatische Übertrag ist ausgeschaltet. Deine Einträge bleiben im Projektblatt.'),
+  ...sync.forms.map(row=>{
+   const notion=row.notion_anzahl!==undefined&&row.notion_anzahl!==''?row.notion_anzahl:'unbekannt';
+   const state=row.stale?'Abgleich ausstehend oder veraltet':row.status;
+   return el('p',{class:'project-sync-row '+(row.stale||!['gleich','ungeprüft'].includes(row.status)?'warn':'ok')},
+    forms[row.formular].title+' · '+state+(row.blatt_anzahl!==undefined&&row.blatt_anzahl!==''?' · Blatt '+row.blatt_anzahl+' · Notion '+notion:'')+(row.fehler?' · '+row.fehler:''));
+  })
+ );
+}
 async function save(retry=false){
  if(saving||!loaded||window.PA6View.active()||(!retry&&(draft.uncertain||missing().length)))return;
  const current=draft,type=active,payload={...current.values};if(type==='coaching')payload.folgeaufgaben=JSON.stringify(current.none?[]:current.tasks);
@@ -66,7 +76,13 @@ async function save(retry=false){
 async function start(){
  if(window.PA6View.active()){$('project-loading').textContent='Öffne Projekt in deinem eigenen Zugang. Die Personenansicht bleibt nur lesend.';return;}
  if(!schluessel()){$('project-loading').textContent='Öffne deinen persönlichen Team-Link.';return;}
- try{const data=await hole('projekt');if(!TEAM[data.person]||!Array.isArray(data.receipts)||!data.sync)throw Error('Der Projektbereich ist noch nicht bereitgestellt');who=data.person;receipts=data.receipts;loaded=true;draft=newDraft();drafts.set(active,draft);$('wer').textContent=TEAM[who];$('project-loading').hidden=true;$('project-content').hidden=false;renderForm();showReceipts();showSync(data.sync);}
+ try{
+  const data=await hole('projekt'),keys=Object.keys(forms);
+  const receiptOk=row=>row&&forms[row.formular]&&typeof row.id==='string'&&Number.isInteger(row.zeile)&&row.zeile>=2&&Number.isFinite(Date.parse(row.zeitstempel))&&typeof row.blatt==='string'&&/^[a-f0-9]{64}$/.test(row.pruefsumme);
+  const syncOk=data.sync&&typeof data.sync.enabled==='boolean'&&Array.isArray(data.sync.forms)&&data.sync.forms.length===keys.length&&data.sync.forms.every(row=>row&&forms[row.formular]&&typeof row.status==='string');
+  if(!TEAM[data.person]||JSON.stringify(data.forms)!==JSON.stringify(keys)||!Array.isArray(data.receipts)||!data.receipts.every(receiptOk)||!syncOk)throw Error('Der Projektbereich ist noch nicht bereitgestellt');
+  who=data.person;receipts=data.receipts;loaded=true;draft=newDraft();drafts.set(active,draft);$('wer').textContent=TEAM[who];$('project-loading').hidden=true;$('project-content').hidden=false;renderForm();showReceipts();showSync(data.sync);
+ }
  catch(error){$('project-loading').replaceChildren(el('span',{},error.message+' '),el('button',{type:'button',class:'chip',on:{click:start}},'Erneut laden'));}
 }
 window.addEventListener('beforeunload',event=>{if([...drafts.values()].some(d=>d.uncertain||Object.keys(d.values).some(k=>k!=='person'&&d.values[k]))){event.preventDefault();event.returnValue='';}});
