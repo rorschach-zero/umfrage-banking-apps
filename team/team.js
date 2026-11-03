@@ -22,7 +22,8 @@ async function sende(obj) {
         (j.readOnly !== true || j.viewer !== 'SA' || j.person !== (obj.a === 'info' ? 'SA' : obj.als)))
       throw new Error('Die lesende Personenansicht ist noch nicht verfügbar.');
     return j;
-  } finally { clearTimeout(t); }
+  } catch (e) { if (e && e.name === 'AbortError') throw new Error('Die Verbindung hat zu lange gedauert. Lade die Seite neu, vielleicht ist es schon gespeichert.'); throw e; }
+  finally { clearTimeout(t); }
 }
 function el(tag, attr, ...kinder) {
   const e = document.createElement(tag);
