@@ -228,6 +228,9 @@ function renderHilfe(c, g) {
 function renderDoc(c) {
   const url = docUrl(c);
   if (!url) { fill($('doc'), el('div', {class:'doc-empty'}, el('p', {}, 'Für dieses Kapitel ist noch kein Doc verknüpft.'), el('p', {class:'quiet'}, 'Salah legt es an.'))); return; }
+  // Safari und iOS sperren Drittanbieter-Cookies: dort ist man im eingebetteten Doc nicht angemeldet und kann nicht schreiben.
+  const ua = navigator.userAgent, safari = /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS/.test(ua);
+  if (safari) { fill($('doc'), el('div', {class:'doc-empty'}, el('p', {class:'big-note'}, 'In Safari öffnet sich dein Doc im eigenen Fenster.'), el('p', {class:'quiet'}, 'Safari erlaubt das Schreiben im eingebetteten Doc nicht. Stell die Fenster nebeneinander, dann hast du den Auftrag immer daneben.'), el('a', {class:'btn', href:url + '/edit', target:'_blank', rel:'noopener noreferrer'}, 'Doc öffnen ↗'))); return; }
   const frame = el('iframe', {src:url + '/edit?usp=sharing', title:'Google Doc ' + c.ref, allow:'clipboard-read; clipboard-write', referrerpolicy:'no-referrer'});
   fill($('doc'), 
     el('div', {class:'doc-bar'}, el('span', {}, 'Google Doc · speichert automatisch'), el('a', {href:url + '/edit', target:'_blank', rel:'noopener noreferrer'}, 'Im eigenen Fenster öffnen ↗')),
