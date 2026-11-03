@@ -10,11 +10,11 @@ function schluessel() {
 }
 // Gelesen wird per POST: der Schluessel steht nur im Inhalt der Anfrage, nie in einer Adresse.
 async function hole(a) { return sende({ typ: "lesen", a: a }); }
-async function sende(obj) {
+async function sende(obj, ms) {
   if (fieldPending && !['lesen','team','frage'].includes(obj.typ)) throw Error('Bitte warte auf den aktuellen Stand.');
   window.PA6View.assertRead(obj); obj = window.PA6View.request(obj);
   if (!ENDPUNKT) throw new Error("Empfaenger noch nicht eingerichtet");
-  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 20000);
+  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), ms || 20000);
   try {
     const r = await fetch(ENDPUNKT, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(Object.assign({ k: schluessel() }, obj)), signal: ctrl.signal });
     const j = await r.json(); if (!j.ok) { const error = new Error(j.fehler || "Fehler"); error.denied = ["unauthorized","forbidden"].includes(j.code) || j.fehler === "kein Zugriff"; throw error; }
