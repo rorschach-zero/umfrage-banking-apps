@@ -1,0 +1,2741 @@
+{
+ "6a-1": {
+  "titel": "Ausgangslage und Problemstellung",
+  "teil": "6a",
+  "kurz": "Beschreibe Yuh, das Problem mit dem Kundendienst, unsere Forschungsfragen und wie wir vorgehen.",
+  "seiten": 1.25,
+  "fragen": [
+   "Wer ist Yuh, und warum ist der Kundendienst ein Thema?",
+   "Welche Frage stellt Yuh, und welche vier Forschungsfragen leiten wir daraus ab?",
+   "Was soll die Untersuchung liefern, und wie gehen wir vor?",
+   "Was gehört nicht zur 6a, und welche Risiken hat die Arbeit?"
+  ],
+  "muss": [
+   {
+    "punkt": "Inhaltlich auf das Unternehmen bezogen, nicht persönlich.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 2"
+   },
+   {
+    "punkt": "Unternehmensbeschrieb, Relevanz des Themas, Strategieansatz, Forschungsfrage und messbare Forschungsziele.",
+    "quelle": "Konzept PA6, S. 5 (Raster Ausgangslage und Forschungsdesign)"
+   },
+   {
+    "punkt": "Die zentrale Fragestellung von Yuh und die Forschungsfragen F1 bis F4 im Wortlaut des Lieferplans.",
+    "quelle": "Yuh-Praxisauftrag (Praxisauftrag 3/4); Berichtsgrundlage 6a, Gliederung 1.2"
+   },
+   {
+    "punkt": "Wofür die Analyse dient, welche Erkenntnisse sie liefern soll, Vorgehen, Risiken und Umfang, je ein Absatz.",
+    "quelle": "Fachregeln A2 (Deck 2, Folie 4); Berichtsgrundlage 6a, Gliederung 1"
+   },
+   {
+    "punkt": "Marketingdefinition nach Kotler sinngemäss mit Kurzbeleg im ersten Absatz.",
+    "quelle": "Fachregeln G2; Berichtsgrundlage 6a, Gliederung 1.1"
+   },
+   {
+    "punkt": "Abgrenzung, dass die 6a keine ausgearbeiteten Massnahmen und kein Budget enthält.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung 1.5"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [
+   "Motivation und Ausgangslage",
+   "Problemstellung und Fragestellung",
+   "Zielsetzung",
+   "Vorgehen und Aufbau",
+   "Risiken und Umfang"
+  ],
+  "infos": [
+   {
+    "titel": "Auftrag, Merkmalblätter und Yuh-Praxisauftrag",
+    "wo": "Moodle › Marketing › PA6a Auftragserteilung und Unterlagen",
+    "inhalt": "Originale von Konzept PA6, Merkmalblatt 6a und 6b und Praxisauftrag von Yuh."
+   },
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   },
+   {
+    "titel": "Übersicht Marketing 6a",
+    "wo": "Notion › PA6 › Marketing 6a",
+    "inhalt": "Arbeitsfolge der 6a von Markt und Konkurrenz bis zu den Ideen."
+   }
+  ],
+  "nicht": [
+   "Ergebnisse der eigenen Erhebung",
+   "Persönliche Motivation der Gruppe",
+   "Massnahmen, Budget oder Marketing-Mix, diese gehören in die 6b"
+  ],
+  "daten_ab": null,
+  "fallen": [
+   "Forschungsfragen anders formuliert als im Lieferplan",
+   "Ziele nicht messbar",
+   "Aussagen über Yuh ohne Quelle"
+  ],
+  "apa": [
+   "Yuh-Folien als betriebsinternes Dokument belegen, mit Firma, Jahr und Folie.",
+   "Unterrichtsunterlagen (z. B. Marketing-Skript) als Dokumente aus dem Studium im Literaturverzeichnis.",
+   "Wörtliche Zitate wie die Frage von Yuh in Anführungszeichen mit Kurzbeleg."
+  ]
+ },
+ "6a-2": {
+  "titel": "Analyse der aktuellen Markt- und Geschäftssituation",
+  "teil": "6a",
+  "kurz": "Leite das Analysekapitel ein und verbinde die Teilkapitel zu einem Gesamtbild ohne Widersprüche.",
+  "seiten": 0.25,
+  "fragen": [
+   "Welche Bereiche untersucht dieses Kapitel, und in welchem Unterkapitel steht was?",
+   "Wie hängen Markt, Konkurrenz, Yuh und unsere eigene Erhebung zusammen?",
+   "Wo widersprechen sich Teilkapitel, und wie lösen wir das?"
+  ],
+  "muss": [
+   {
+    "punkt": "Die vier Unterpunkte Zielsetzung, Schlüsselpartner*Innen, Sicherheit und Konkurrenzanalyse erscheinen mit genau diesen Titeln und in dieser Reihenfolge.",
+    "quelle": "Merkmalblatt 6a, Punkt 2"
+   },
+   {
+    "punkt": "Ein Einleitungsabsatz nennt die elf Analysebereiche aus dem Marketingunterricht mit der jeweiligen Kapitelnummer.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung Kapitel 2; Fachregeln A3 (Deck 2, Folie 5)"
+   },
+   {
+    "punkt": "Bestehende Quellen (Sekundärdaten) werden ausgewertet, bevor die eigene Erhebung beschrieben wird.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 3; Fachregeln R3"
+   },
+   {
+    "punkt": "Eine Zusammenfassung mit Ergebnissen der eigenen Erhebung kommt erst nach Feldschluss und Freigabe dazu.",
+    "quelle": "Kapitelplan Schreibwerk, Startbedingung 6a-2"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [
+   "Zielsetzung",
+   "Schlüsselpartner*Innen",
+   "Sicherheit",
+   "Konkurrenzanalyse (Stärken und Schwächen der Mitbewerber)"
+  ],
+  "infos": [
+   {
+    "titel": "Kapitelregister",
+    "wo": "Notion › PA6 › Kapitel",
+    "inhalt": "Je Kapitel stehen dort Was, Warum, Fertig wenn und So geht's sowie Pate und Zweitlesung."
+   },
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   }
+  ],
+  "nicht": [
+   "Ergebnisse aus Umfrage, Servicebeobachtung oder Bewertungsanalyse vor dem Feldschluss",
+   "Massnahmen, Budget oder Marketing-Mix, diese gehören in die 6b",
+   "Den Inhalt der Teilkapitel wiederholen, hier wird nur verbunden und eingeordnet"
+  ],
+  "daten_ab": "Einleitung sofort; Zusammenfassung mit Erhebungsergebnissen frühestens 02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "fallen": [
+   "Pflichttitel umbenennen oder Unterpunkte umstellen",
+   "Zahlen ohne Quelle und Jahr",
+   "Teilkapitel nennen für dieselbe Sache verschiedene Zahlen, und niemand klärt es"
+  ],
+  "apa": [
+   "Jede Marktzahl mit Kurzbeleg (Autor oder Organisation, Jahr), bei PDF-Dokumenten mit Seite.",
+   "Stützt sich ein ganzer Abschnitt auf dieselbe Quelle, genügt ein Verweis am Anfang des Abschnitts.",
+   "Organisation mit bekannter Abkürzung beim ersten Verweis ausschreiben, Abkürzung in eckigen Klammern, danach nur die Abkürzung."
+  ]
+ },
+ "6a-2-ziel": {
+  "titel": "Zielsetzung",
+  "teil": "6a",
+  "kurz": "Lege fest, was unsere Analyse für die 6b liefern muss, messbar und mit einem Zielkonflikt.",
+  "seiten": 0.5,
+  "fragen": [
+   "Was genau soll die Analyse am Ende liefern?",
+   "Woran messen wir, ob das Ziel erreicht ist?",
+   "Wo stehen zwei Ziele gegeneinander?"
+  ],
+  "muss": [
+   {
+    "punkt": "Zielsetzung für die PA6a als Teil der Überlegungen vor der Umfrage.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 3"
+   },
+   {
+    "punkt": "Jede Zielaussage hat eine Zahl oder ein Prüfkriterium.",
+    "quelle": "Fachregeln G12; Berichtsgrundlage 6a, Gliederung 2.1"
+   },
+   {
+    "punkt": "Mindestens ein Zielkonflikt ist benannt.",
+    "quelle": "Fachregeln G12; Berichtsgrundlage 6a, Gliederung 2.1"
+   },
+   {
+    "punkt": "Ziele von Yuh und unsere eigenen Untersuchungsziele getrennt darstellen.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6a-2-ziel"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Auftrag, Merkmalblätter und Yuh-Praxisauftrag",
+    "wo": "Moodle › Marketing › PA6a Auftragserteilung und Unterlagen",
+    "inhalt": "Originale von Konzept PA6, Merkmalblatt 6a und 6b und Praxisauftrag von Yuh."
+   },
+   {
+    "titel": "Projektauftrag",
+    "wo": "Notion › PA6 › Projektmanagement › Projektauftrag",
+    "inhalt": "Ziele, Abgrenzung und Zuständigkeiten des Projekts."
+   },
+   {
+    "titel": "Kapitelregister",
+    "wo": "Notion › PA6 › Kapitel",
+    "inhalt": "Je Kapitel stehen dort Was, Warum, Fertig wenn und So geht's sowie Pate und Zweitlesung."
+   }
+  ],
+  "nicht": [
+   "Ziele der Massnahme nach SMART, diese gehören in die 6b",
+   "Ergebnisse der Erhebung"
+  ],
+  "daten_ab": null,
+  "fallen": [
+   "Ziele ohne Messgrösse",
+   "Ziele von Yuh als eigene ausgeben",
+   "Zielkonflikt fehlt"
+  ],
+  "apa": [
+   "Ziele von Yuh mit Kurzbeleg auf die Yuh-Unterlagen (Firma, Jahr, Folie)."
+  ]
+ },
+ "6a-2-partner": {
+  "titel": "Schlüsselpartner*Innen",
+  "teil": "6a",
+  "kurz": "Zeige, wer an der Untersuchung beteiligt ist, welche Rolle jeder hat und was er beiträgt.",
+  "seiten": 0.5,
+  "fragen": [
+   "Wer ist an der Arbeit beteiligt, und in welcher Rolle?",
+   "Wer ist Auftraggeberin, wer Praxispartner, und wem gehören die Daten?",
+   "Was trägt jeder Partner bei?"
+  ],
+  "muss": [
+   {
+    "punkt": "Pflichtunterpunkt mit genau diesem Titel.",
+    "quelle": "Merkmalblatt 6a, Punkt 2"
+   },
+   {
+    "punkt": "Tabelle mit Partner, Rolle, Beitrag und Kontakt.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung 2.2"
+   },
+   {
+    "punkt": "Ein Absatz, dass die Schule Auftraggeberin ist, Yuh Praxispartner, und die Daten bei der Gruppe bleiben.",
+    "quelle": "Fachregeln R13; Berichtsgrundlage 6a, Gliederung 2.2"
+   },
+   {
+    "punkt": "Funktionen der Partner mit Originalquellen belegen.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6a-2-partner"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Auftrag, Merkmalblätter und Yuh-Praxisauftrag",
+    "wo": "Moodle › Marketing › PA6a Auftragserteilung und Unterlagen",
+    "inhalt": "Originale von Konzept PA6, Merkmalblatt 6a und 6b und Praxisauftrag von Yuh."
+   },
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   },
+   {
+    "titel": "Stakeholder",
+    "wo": "Notion › PA6 › Projektmanagement › Stakeholder",
+    "inhalt": "Sammelstelle für die Stakeholder mit Einfluss und Bewertung."
+   }
+  ],
+  "nicht": [
+   "Stakeholder-Analyse der Massnahme, diese gehört in die 6b",
+   "Partner ohne Beleg"
+  ],
+  "daten_ab": null,
+  "fallen": [
+   "Rollen von Schule und Yuh vermischen",
+   "Beitrag der Partner fehlt",
+   "Kapitelregister und Berichtsgrundlage verstehen den Begriff verschieden; vor dem Schreiben klären"
+  ],
+  "apa": [
+   "Angaben über Unternehmen mit Kurzbeleg (Organisation, Jahr).",
+   "Persönliche Auskünfte von Partnern als persönliche Kommunikation, nicht im Literaturverzeichnis."
+  ]
+ },
+ "6a-2-sicherheit": {
+  "titel": "Sicherheit",
+  "teil": "6a",
+  "kurz": "Beschreibe je Methode, wie wir Daten schützen, ethisch vorgehen und die Qualität der Daten sichern.",
+  "seiten": 0.75,
+  "fragen": [
+   "Wie schützen wir die Daten der Befragten und Beobachteten?",
+   "Welche ethischen Regeln halten wir bei Testkontakten und Bewertungen ein?",
+   "Wie prüfen wir, dass unsere Daten verlässlich sind?",
+   "Warum ist Sicherheit beim Banking für die Kundschaft so wichtig?"
+  ],
+  "muss": [
+   {
+    "punkt": "Pflichtunterpunkt mit genau diesem Titel.",
+    "quelle": "Merkmalblatt 6a, Punkt 2"
+   },
+   {
+    "punkt": "Je Methode Datenschutz mit Bezug zum Datenschutzgesetz und Löschfrist.",
+    "quelle": "Fachregeln R14; Berichtsgrundlage 6a, Gliederung 2.3"
+   },
+   {
+    "punkt": "Je Methode die ethischen Regeln, bei Testkontakten keine Vorinformation, keine Offenlegung der Identität, keine Aufzeichnung.",
+    "quelle": "Fachregeln X1 bis X7; Berichtsgrundlage 6a, Gliederung 2.3"
+   },
+   {
+    "punkt": "Nutzungsbedingungen der Bewertungsplattformen sinngemäss nennen und sagen, dass die Zulässigkeit nicht belegt ist.",
+    "quelle": "Fachregeln X9, X12, X13"
+   },
+   {
+    "punkt": "Qualitätssicherung je Methode (Pretest, Probelauf, Doppelcodierung).",
+    "quelle": "Berichtsgrundlage 6a, Gliederung 2.3"
+   },
+   {
+    "punkt": "Die fünf Besonderheiten von Dienstleistungen je ein Satz mit Bezug zum Kundendienst und ein Absatz zum Sicherheitsbedürfnis.",
+    "quelle": "Fachregeln G10, G14"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Servicebeobachtung",
+    "wo": "Team-App › Kundenservice testen",
+    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+   },
+   {
+    "titel": "Bewertungsanalyse",
+    "wo": "Team-App › Bewertungen untersuchen",
+    "inhalt": "Codierung der öffentlichen Bewertungen nach festen Kategorien."
+   },
+   {
+    "titel": "Datenschutzerklärung der Umfrage",
+    "wo": "Online-Umfrage, Seite Datenschutz",
+    "inhalt": "Zweck, Datenverarbeitung, Freiwilligkeit und Rechte der Befragten."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   }
+  ],
+  "nicht": [
+   "Sicherheitsversprechen, die wir nicht halten können",
+   "Angaben von Anbietern ohne Beleg mit eigenen Regeln vermischen",
+   "Tatsächliche Gütewerte vor Feldschluss"
+  ],
+  "daten_ab": "Regeln sofort; tatsächliche Güte- und Prüfwerte ab 02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "fallen": [
+   "Eine Methode vergessen",
+   "Restrisiko bei den Plattformbedingungen verschweigen",
+   "Anbieterangaben ohne Quelle"
+  ],
+  "apa": [
+   "Gesetze nach dem Muster Artikel, Gesetzesname mit Abkürzung, Datum, SR-Nummer; im Text genügt die Kurzform.",
+   "Branchenregeln und Plattformbedingungen als Internetquelle mit Organisation und Jahr."
+  ]
+ },
+ "6a-2-konkurrenz": {
+  "titel": "Konkurrenzanalyse (Stärken und Schwächen der Mitbewerber)",
+  "teil": "6a",
+  "kurz": "Vergleiche Yuh mit den Mitbewerbern nach denselben belegten Kriterien und zeige relative Stärken und Schwächen.",
+  "seiten": 1.25,
+  "fragen": [
+   "Welche Mitbewerber vergleichen wir, und warum diese?",
+   "Wie schneiden sie beim Kundendienst, beim Preis und beim Angebot ab?",
+   "Wo ist Yuh relativ stärker, wo schwächer?"
+  ],
+  "muss": [
+   {
+    "punkt": "Pflichtunterpunkt mit genau diesem Titel.",
+    "quelle": "Merkmalblatt 6a, Punkt 2"
+   },
+   {
+    "punkt": "Je Konkurrent Potenzial, Strategie, Infrastruktur und Marketing-Mix.",
+    "quelle": "Fachregeln A12; Berichtsgrundlage 6a, Gliederung 2.6"
+   },
+   {
+    "punkt": "Kriterientabelle zum Kundendienst mit Kanälen, Zeiten, Sprachen, Preis, Angebot, Erreichbarkeit und Kritikthemen, je mit Zahl und Quelle.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung 2.6"
+   },
+   {
+    "punkt": "Je Konkurrent dieselben Kriterien, gleiche Quellenart, gleicher Zeitraum.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung 2.6"
+   },
+   {
+    "punkt": "Werte aus der Vergleichsstudie mit Kurzbeleg; eigene Beobachtung als Ergänzung, nicht als Wiederholung.",
+    "quelle": "Fachregeln X8"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R4",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist fehlerfrei und umfassend, die Ergebnisse sind präzise, differenziert, vollständig und relevant dargestellt. Yuh erhält einen Mehrwert über die Erwartungen hinaus."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   },
+   {
+    "titel": "Servicebeobachtung",
+    "wo": "Team-App › Kundenservice testen",
+    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+   },
+   {
+    "titel": "Bewertungsanalyse",
+    "wo": "Team-App › Bewertungen untersuchen",
+    "inhalt": "Codierung der öffentlichen Bewertungen nach festen Kategorien."
+   }
+  ],
+  "nicht": [
+   "Ergebnisse aus Servicebeobachtung oder Bewertungen vor dem Feldschluss",
+   "Massnahmen gegen Mitbewerber"
+  ],
+  "daten_ab": "Anbieterangaben sofort; Vergleich mit eigenen Ergebnissen ab 02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "fallen": [
+   "Ungleiche Kriterien je Anbieter",
+   "Preise ohne Abrufdatum",
+   "Kundenzahlen verschiedener Anbieter zusammenzählen"
+  ],
+  "apa": [
+   "Anbieterseiten als Webseite einer Organisation, mit Abrufdatum, weil die Seiten laufend ändern.",
+   "Vergleichstabelle mit Nummer fett, Titel kursiv und Anmerkung mit den Quellen."
+  ]
+ },
+ "6a-2.4": {
+  "titel": "Primäre Marktforschung",
+  "teil": "6a",
+  "kurz": "Erkläre in einer kurzen Einleitung, welche Methode welche Forschungsfrage beantwortet.",
+  "seiten": 0.25,
+  "fragen": [
+   "Welche drei Methoden setzen wir ein?",
+   "Welche Forschungsfrage beantwortet welche Methode?",
+   "Welche Methoden sind eigene Erhebungen, welche werten Vorhandenes aus?"
+  ],
+  "muss": [
+   {
+    "punkt": "Kapitel mit der vorgegebenen Nummer 2.4 und den drei Unterpunkten.",
+    "quelle": "Merkmalblatt 6a, Punkt 2.4"
+   },
+   {
+    "punkt": "Formulierung des Marktforschungsauftrags, Skizze des Forschungsdesigns, Auflistung der sekundären und primären Bemühungen.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 3"
+   },
+   {
+    "punkt": "Umfrage und Servicebeobachtung als Primärdaten, Bewertungsanalyse als Sekundärdaten bezeichnen.",
+    "quelle": "Berichtsgrundlage 6a, Auftrag und Raster (Datenbasis)"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [
+   "Forschungsdesign",
+   "Erhebungsinstrumente",
+   "Beschreibung der Stichprobe"
+  ],
+  "infos": [
+   {
+    "titel": "Kapitelregister",
+    "wo": "Notion › PA6 › Kapitel",
+    "inhalt": "Je Kapitel stehen dort Was, Warum, Fertig wenn und So geht's sowie Pate und Zweitlesung."
+   },
+   {
+    "titel": "Forschungsdesign",
+    "wo": "Notion › PA6 › Marketing 6a › 2 · Forschungsdesign",
+    "inhalt": "Arbeitspaket zu Forschungsfragen, Methoden und Stichprobe."
+   }
+  ],
+  "nicht": [
+   "Details der Teilkapitel",
+   "Ergebnisse"
+  ],
+  "daten_ab": null,
+  "fallen": [
+   "Bewertungsanalyse als eigene Erhebung ausgeben",
+   "Unterpunkte umbenennen"
+  ],
+  "apa": [
+   "Fachbegriffe aus dem Marketing-Skript mit Kurzbeleg auf das Skript."
+  ]
+ },
+ "6a-2.4-design": {
+  "titel": "Forschungsdesign",
+  "teil": "6a",
+  "kurz": "Begründe, wie wir die Untersuchung geplant haben, Schritt für Schritt und je Methode.",
+  "seiten": 1,
+  "fragen": [
+   "Was ist Marktforschung, und welche Schritte sind wir gegangen?",
+   "Warum passt jede Methode zu ihrer Forschungsfrage?",
+   "Was haben wir vor der eigenen Erhebung an vorhandenen Quellen geprüft?",
+   "Welche Grenzen hat jede Methode?"
+  ],
+  "muss": [
+   {
+    "punkt": "Alle Überlegungen vor der Umfrage, also Vorgaben, Planung, Zielsetzung und Sekundärmarktforschung.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 3"
+   },
+   {
+    "punkt": "Erster Absatz definiert Marktforschung sinngemäss mit Kurzbeleg.",
+    "quelle": "Fachregeln R1"
+   },
+   {
+    "punkt": "Nummerierte Liste der zehn Schritte des Marktforschungsprozesses mit Datum, inklusive Pretest und Schulung.",
+    "quelle": "Fachregeln R15"
+   },
+   {
+    "punkt": "Je Methode ein Briefing mit Ausgangslage, Zielen, Methode und Stichprobe, Ergebnisdarstellung sowie Zeit- und Kostenbudget.",
+    "quelle": "Fachregeln R16"
+   },
+   {
+    "punkt": "Umfrage als schriftliche Online-Befragung, Servicebeobachtung als Beobachtung mit Markttest-Elementen, ohne Ursache-Wirkungs-Behauptung.",
+    "quelle": "Fachregeln R5, R11"
+   },
+   {
+    "punkt": "Vor- und Nachteile der Online-Befragung mit Gegenmassnahme.",
+    "quelle": "Fachregeln R7"
+   },
+   {
+    "punkt": "Methoden als quantitativ, Freitexte als qualitativ kennzeichnen.",
+    "quelle": "Fachregeln R8"
+   },
+   {
+    "punkt": "Reihenfolge der Sekundärprüfung mit Abrufdaten belegen und die Grenze dieses Belegs nennen.",
+    "quelle": "Fachregeln R3; Berichtsgrundlage 6a"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Forschungsdesign",
+    "wo": "Notion › PA6 › Marketing 6a › 2 · Forschungsdesign",
+    "inhalt": "Arbeitspaket mit Forschungsfragen, Methoden und Stichprobe."
+   },
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   },
+   {
+    "titel": "Arbeitspakete",
+    "wo": "Notion › PA6 › Projektmanagement › PSP",
+    "inhalt": "Arbeitspakete mit Abnahmekriterien, auch zu den Kapiteln."
+   }
+  ],
+  "nicht": [
+   "Ist-Zahlen der Stichprobe vor Feldschluss",
+   "Ergebnisse"
+  ],
+  "daten_ab": "Plan sofort; tatsächlich erreichte Fallzahlen ab 02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "fallen": [
+   "Pretest oder Schulung fehlen in den Schritten",
+   "Kostenbudget ohne Zahl",
+   "Planwerte als erreichte Werte darstellen"
+  ],
+  "apa": [
+   "Unterrichtsfolien mit Kurzbeleg und Foliennummer, im Verzeichnis als Dokument aus dem Studium.",
+   "Die zehn Schritte als Tabelle oder Abbildung mit Nummer fett und Titel kursiv; nach dem Skript «In Anlehnung an»."
+  ]
+ },
+ "6a-2.4-instrumente": {
+  "titel": "Erhebungsinstrumente",
+  "teil": "6a",
+  "kurz": "Stelle Fragebogen, Testprotokoll und Codebuch kurz vor und verweise für Details auf den Anhang.",
+  "seiten": 0.75,
+  "fragen": [
+   "Wie ist jedes Instrument aufgebaut, und warum so?",
+   "Wie haben wir die Instrumente vor dem Einsatz getestet?",
+   "Wo findet man die vollständigen Instrumente?"
+  ],
+  "muss": [
+   {
+    "punkt": "Der Fragebogen ist online oder in der Arbeit verfügbar; eine Beschreibung ist nicht nötig.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 4"
+   },
+   {
+    "punkt": "Weitere Methoden wie die Beobachtung dürfen hier beschrieben werden.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 4"
+   },
+   {
+    "punkt": "Kapitel auf Verweis und Aufbaulogik kürzen.",
+    "quelle": "Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+   },
+   {
+    "punkt": "Je Instrument Version, Messzweck, Probelauf und Verweis auf den Anhang.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6a-2.4-instrumente"
+   },
+   {
+    "punkt": "Programmfragen stehen vor den eigentlichen Testfragen; Fragen sind einfach, eindeutig, neutral und haben ein Thema.",
+    "quelle": "Fachregeln R18, R19"
+   },
+   {
+    "punkt": "Je Instrument ein Satz, was standardisiert ist, und ein Satz zum Nachteil.",
+    "quelle": "Fachregeln R22"
+   },
+   {
+    "punkt": "Übereinstimmung der Doppelcodierung (Kappa) mit Schwelle 0,6 als Gruppenentscheid kennzeichnen.",
+    "quelle": "Fachregeln X11"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R2",
+    "punkte": 10,
+    "volle_punkte_wenn": "Das Erhebungsinstrument ist perfekt durchdacht, sauber dargestellt und sinnvoll aufgebaut. Der Fragebogen ist vollständig, mit relevanten Fragen, klarer Struktur und konkreten Antwortmöglichkeiten."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Servicebeobachtung",
+    "wo": "Team-App › Kundenservice testen",
+    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+   },
+   {
+    "titel": "Bewertungsanalyse",
+    "wo": "Team-App › Bewertungen untersuchen",
+    "inhalt": "Codierung der öffentlichen Bewertungen nach festen Kategorien."
+   },
+   {
+    "titel": "Rücklauf der Umfrage",
+    "wo": "Team-App › Dashboard",
+    "inhalt": "Zeigt, wie viele Antworten die Umfrage hat. Daraus kommt die Ist-Zahl der Befragten."
+   }
+  ],
+  "nicht": [
+   "Jede Frage einzeln erklären",
+   "Ergebnisse"
+  ],
+  "daten_ab": null,
+  "fallen": [
+   "Zu lange Beschreibung statt Verweis",
+   "Version des Instruments fehlt",
+   "Pretest nicht berichtet"
+  ],
+  "apa": [
+   "Instrumente im Anhang nummerieren und im Text mit «siehe Anhang n» verweisen.",
+   "Übernommene Skalen oder Fragen aus Studien mit Kurzbeleg."
+  ]
+ },
+ "6a-2.4-stichprobe": {
+  "titel": "Beschreibung der Stichprobe",
+  "teil": "6a",
+  "kurz": "Beschreibe je Methode, wer oder was wann und wie ausgewählt wurde, geplant und tatsächlich.",
+  "seiten": 1.25,
+  "fragen": [
+   "Wen oder was wollten wir untersuchen, und wie haben wir ausgewählt?",
+   "Wer wurde wann und wie befragt, beobachtet oder ausgewertet?",
+   "Wie setzen sich die Befragten zusammen (Alter, Wohnort, Kanal)?",
+   "Wie weit taugt die Stichprobe für unsere Fragen, und wo nicht?"
+  ],
+  "muss": [
+   {
+    "punkt": "Wer wann wie befragt wurde, mit der Auswertung der persönlichen Daten.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 5"
+   },
+   {
+    "punkt": "Die Angaben zur Person (Alter, Wohnort, Kanal) gehören hierher, nicht in 2.8.",
+    "quelle": "Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+   },
+   {
+    "punkt": "Grundgesamtheit, Auswahlverfahren, Rekrutierung, Soll und Ist je Methode.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung 2.4"
+   },
+   {
+    "punkt": "Auswahlverfahren korrekt benennen, die Umfrage nicht als Quotaverfahren ausgeben.",
+    "quelle": "Fachregeln R9"
+   },
+   {
+    "punkt": "Repräsentativität besprechen und ausdrücklich sagen, dass die Stichprobe nicht repräsentativ ist.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 5; Fachregeln R10"
+   },
+   {
+    "punkt": "Belastungsgrenze der Testkontakte je Anbieter nennen.",
+    "quelle": "Fachregeln X2"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R3",
+    "punkte": 5,
+    "volle_punkte_wenn": "Die Stichprobe ist systematisch geplant und passt zur Fragestellung. Alle relevanten Angaben zur Stichprobe sind dargestellt."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Rücklauf der Umfrage",
+    "wo": "Team-App › Dashboard",
+    "inhalt": "Zeigt, wie viele Antworten die Umfrage hat. Daraus kommt die Ist-Zahl der Befragten."
+   },
+   {
+    "titel": "Servicebeobachtung",
+    "wo": "Team-App › Kundenservice testen",
+    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+   },
+   {
+    "titel": "Bewertungsanalyse",
+    "wo": "Team-App › Bewertungen untersuchen",
+    "inhalt": "Codierung der öffentlichen Bewertungen nach festen Kategorien."
+   }
+  ],
+  "nicht": [
+   "Ergebnisse zu den Forschungsfragen",
+   "Hochrechnungen auf alle Kundinnen und Kunden"
+  ],
+  "daten_ab": "Auswahlregeln sofort; tatsächliche Stichprobe ab 02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "fallen": [
+   "Soll und Ist vermischen",
+   "Stichprobe als repräsentativ bezeichnen",
+   "Ausschlüsse und Ausfälle nicht nennen"
+  ],
+  "apa": [
+   "Tabelle der Stichprobe mit Nummer fett, Titel kursiv, Anmerkung «eigene Erhebung, n, Zeitraum» (Gruppenentscheid).",
+   "Bevölkerungs- oder Nutzungszahlen zum Vergleich mit Kurzbeleg und Jahr."
+  ]
+ },
+ "6a-2.8": {
+  "titel": "Auswertung",
+  "teil": "6a",
+  "kurz": "Führe die Ergebnisse der drei Methoden zusammen und zeige, was Yuh damit gewinnt.",
+  "seiten": 0.5,
+  "fragen": [
+   "Was wollten wir mit jeder Methode herausfinden, und wen oder was haben wir untersucht?",
+   "Welche Antworten geben die Daten auf die vier Forschungsfragen?",
+   "Wo stützen sich Umfrage, Beobachtung und Bewertungen gegenseitig, wo nicht?",
+   "Was kann Yuh mit den Ergebnissen konkret anfangen?"
+  ],
+  "muss": [
+   {
+    "punkt": "Je Methode zu Beginn drei Sätze, nämlich Zweck, Art der Erhebung und wer oder was untersucht wurde.",
+    "quelle": "Berichtsgrundlage 6a, WIAR (Block 3, Folie 8)"
+   },
+   {
+    "punkt": "Je Forschungsfrage F1 bis F4 ein Unterkapitel; dieses Kapitel rahmt und verbindet sie.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung 2.8"
+   },
+   {
+    "punkt": "Jede Kennzahl mit Fallzahl n.",
+    "quelle": "Berichtsgrundlage 6a, Abnahme 2.8"
+   },
+   {
+    "punkt": "Statistische Verfahren, die über den Unterrichtsstoff hinausgehen, je mit Voraussetzungen und Grenzen.",
+    "quelle": "Konzept PA6, S. 7 (Raster Niveau der Umsetzung); Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+   },
+   {
+    "punkt": "Je Forschungsfrage ein Satz, was Yuh mit dem Ergebnis tun kann.",
+    "quelle": "Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+   },
+   {
+    "punkt": "Methoden nebeneinanderstellen, aber keine Zahlen über die Methoden hinweg verrechnen.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung 2.8"
+   },
+   {
+    "punkt": "Im Text nur die relevanten Ergebnisse, Fragebogen und alle Antworten im Anhang.",
+    "quelle": "Berichtsgrundlage 6a, WIAR (Block 3, Folie 8)"
+   },
+   {
+    "punkt": "Ergebnisse nicht als repräsentativ bezeichnen.",
+    "quelle": "Fachregeln R10; Berichtsgrundlage 6a"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R4",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist fehlerfrei und umfassend, die Ergebnisse sind präzise, differenziert, vollständig und relevant dargestellt. Yuh erhält einen Mehrwert über die Erwartungen hinaus."
+   },
+   {
+    "code": "R5",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Ergebnisse sind differenziert im Kontext der Fragestellung interpretiert, Auffälligkeiten erörtert und Ideen für Anschlussuntersuchungen entwickelt. SWOT und SWOT-Matrix sind perfekt, das Fazit ebenso. Keine Spekulation, objektive Sprache."
+   },
+   {
+    "code": "R6",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist statistisch anspruchsvoll, die Methoden gehen über den Unterrichtsstoff hinaus. Daten sind verknüpft, Zahlen korrekt, der Aufbau ist perfekt."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [
+   "F1/F2 (Umfrage)",
+   "F3 (Servicebeobachtung)",
+   "F4 (Bewertungsanalyse)"
+  ],
+  "infos": [
+   {
+    "titel": "Rücklauf der Umfrage",
+    "wo": "Team-App › Dashboard",
+    "inhalt": "Zeigt, wie viele Antworten die Umfrage hat. Daraus kommt die Ist-Zahl der Befragten."
+   },
+   {
+    "titel": "Servicebeobachtung",
+    "wo": "Team-App › Kundenservice testen",
+    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+   },
+   {
+    "titel": "Bewertungsanalyse",
+    "wo": "Team-App › Bewertungen untersuchen",
+    "inhalt": "Codierung der öffentlichen Bewertungen nach festen Kategorien."
+   },
+   {
+    "titel": "Arbeitspaket Auswertung",
+    "wo": "Notion › PA6 › Projektmanagement › PSP › Auswertung der drei Methoden (Kapitel 2.8)",
+    "inhalt": "Umfang und Abnahmekriterien für dieses Kapitel."
+   }
+  ],
+  "nicht": [
+   "Eigene Berechnungen, übernommen werden nur freigegebene Ergebnisse der Teilkapitel",
+   "Ideen oder Massnahmen, diese gehören in Kapitel 3 und in die 6b",
+   "Einzelne Antworten, Kontakte oder Bewertungen, berichtet wird nur zusammengefasst",
+   "Den Zusatzblock zu Servicebotschaften, er ist seit Fragebogen-Version 3.3 gestrichen"
+  ],
+  "daten_ab": "02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "fallen": [
+   "Prozentwerte ohne n",
+   "Aus wenigen Fällen auf «die Kundschaft» schliessen",
+   "Den Mehrwert für Yuh nicht ausdrücklich benennen"
+  ],
+  "apa": [
+   "Jede Grafik und Tabelle mit Nummer fett darüber und Titel kursiv in der Zeile darunter.",
+   "Eigene Darstellungen brauchen keinen Quellenhinweis; Gruppenentscheid ist die Anmerkung «eigene Erhebung, n = …, Zeitraum».",
+   "Jeder Anhang (z. B. alle Antworten) wird im Text mindestens einmal genannt, etwa «siehe Anhang 3»."
+  ]
+ },
+ "6a-2.8-f12": {
+  "titel": "F1/F2",
+  "teil": "6a",
+  "kurz": "Werte die Umfrage aus, wie bekannt Yuhs Schweizer Kundendienst ist und welche Erwartungen erfüllt werden.",
+  "seiten": 2.5,
+  "fragen": [
+   "Wie bekannt ist der Schweizer Kundendienst von Yuh, und gilt er als Vorteil?",
+   "Was erwarten Nutzerinnen von einem modernen Kundendienst?",
+   "Was davon erfüllt Yuh aus ihrer Sicht, im Vergleich zu anderen?",
+   "Welche Unterschiede zwischen Gruppen sind statistisch belastbar?"
+  ],
+  "muss": [
+   {
+    "punkt": "Zu Beginn drei Sätze zu Zweck, Art der Umfrage und Befragten.",
+    "quelle": "Berichtsgrundlage 6a, WIAR (Block 3, Folie 8)"
+   },
+   {
+    "punkt": "Auswertung nach Nutzergruppen (Yuh, andere Neobank, nur Hausbank), Bekanntheit in Prozent mit n.",
+    "quelle": "Lieferplan, Methode A"
+   },
+   {
+    "punkt": "Wichtigkeit und Erfüllung getrennt erheben und als Matrix gegenüberstellen.",
+    "quelle": "Lieferplan, Methode A; Fachregeln G6"
+   },
+   {
+    "punkt": "Statistische Verfahren über den Unterrichtsstoff hinaus, je mit Voraussetzungen und Grenzen.",
+    "quelle": "Konzept PA6, S. 7; Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+   },
+   {
+    "punkt": "Freitexte als qualitative Hinweise kennzeichnen.",
+    "quelle": "Fachregeln R8"
+   },
+   {
+    "punkt": "Ein Satz, was Yuh mit dem Ergebnis tun kann.",
+    "quelle": "Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R4",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist fehlerfrei und umfassend, die Ergebnisse sind präzise, differenziert, vollständig und relevant dargestellt. Yuh erhält einen Mehrwert über die Erwartungen hinaus."
+   },
+   {
+    "code": "R6",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist statistisch anspruchsvoll, die Methoden gehen über den Unterrichtsstoff hinaus. Daten sind verknüpft, Zahlen korrekt, der Aufbau ist perfekt."
+   },
+   {
+    "code": "R5",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Ergebnisse sind differenziert im Kontext der Fragestellung interpretiert, Auffälligkeiten erörtert und Ideen für Anschlussuntersuchungen entwickelt. SWOT und SWOT-Matrix sind perfekt, das Fazit ebenso. Keine Spekulation, objektive Sprache."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Rücklauf der Umfrage",
+    "wo": "Team-App › Dashboard",
+    "inhalt": "Zeigt, wie viele Antworten die Umfrage hat. Daraus kommt die Ist-Zahl der Befragten."
+   },
+   {
+    "titel": "Arbeitspaket Auswertung",
+    "wo": "Notion › PA6 › Projektmanagement › PSP › Auswertung der drei Methoden (Kapitel 2.8)",
+    "inhalt": "Umfang und Abnahmekriterien der Auswertung."
+   }
+  ],
+  "nicht": [
+   "Angaben zur Person der Befragten, diese gehören in die Stichprobe",
+   "Einzelne Antworten",
+   "Werte ohne geprüfte Auswertung"
+  ],
+  "daten_ab": "02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "fallen": [
+   "Prozentwerte ohne n",
+   "Unterschiede als bewiesen darstellen, ohne Test",
+   "Wichtigkeit und Erfüllung vermischen"
+  ],
+  "apa": [
+   "Jede Grafik mit Nummer fett, Titel kursiv und Anmerkung «eigene Erhebung, n, Zeitraum» (Gruppenentscheid).",
+   "Statistische Verfahren mit Kurzbeleg auf ein Lehrbuch.",
+   "Alle Antworten im Anhang, im Text mit «siehe Anhang n» verweisen."
+  ]
+ },
+ "6a-2.8-f3": {
+  "titel": "F3",
+  "teil": "6a",
+  "kurz": "Vergleiche das beobachtete Serviceverhalten von Yuh und den Mitbewerbern bei gleichen Anliegen und Kanälen.",
+  "seiten": 1.5,
+  "fragen": [
+   "Wie schnell und wie richtig antworten die Anbieter auf gleiche Anliegen?",
+   "Wie oft erreicht man einen Menschen, und wie oft ist das Anliegen beim ersten Kontakt erledigt?",
+   "Wo unterscheidet sich Yuh deutlich von den anderen?"
+  ],
+  "muss": [
+   {
+    "punkt": "Zu Beginn drei Sätze zu Zweck, Art der Beobachtung und Beobachtetem.",
+    "quelle": "Berichtsgrundlage 6a, WIAR (Block 3, Folie 8)"
+   },
+   {
+    "punkt": "Je Anbieter, Anliegen und Kanal gültiges n, Ausfälle, Anteil in der Frist erledigt, Median, Anteile beantwortet, Mensch erreicht und richtig.",
+    "quelle": "Lieferplan, Methode B"
+   },
+   {
+    "punkt": "Als explorative Beobachtung von n Kontakten bezeichnen, ohne Hochrechnung.",
+    "quelle": "Lieferplan, Methode B"
+   },
+   {
+    "punkt": "Nur zusammengefasst berichten, kleinste Zelle ist Anbieter mal Kanal, nie einzelne Kontakte.",
+    "quelle": "Fachregeln X3"
+   },
+   {
+    "punkt": "Ein Satz, was Yuh mit dem Ergebnis tun kann.",
+    "quelle": "Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R4",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist fehlerfrei und umfassend, die Ergebnisse sind präzise, differenziert, vollständig und relevant dargestellt. Yuh erhält einen Mehrwert über die Erwartungen hinaus."
+   },
+   {
+    "code": "R6",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist statistisch anspruchsvoll, die Methoden gehen über den Unterrichtsstoff hinaus. Daten sind verknüpft, Zahlen korrekt, der Aufbau ist perfekt."
+   },
+   {
+    "code": "R5",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Ergebnisse sind differenziert im Kontext der Fragestellung interpretiert, Auffälligkeiten erörtert und Ideen für Anschlussuntersuchungen entwickelt. SWOT und SWOT-Matrix sind perfekt, das Fazit ebenso. Keine Spekulation, objektive Sprache."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Servicebeobachtung",
+    "wo": "Team-App › Kundenservice testen",
+    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+   },
+   {
+    "titel": "Arbeitspaket Auswertung",
+    "wo": "Notion › PA6 › Projektmanagement › PSP › Auswertung der drei Methoden (Kapitel 2.8)",
+    "inhalt": "Umfang und Abnahmekriterien der Auswertung."
+   }
+  ],
+  "nicht": [
+   "Einzelne Kontakte oder Mitarbeitende beschreiben",
+   "Ursache-Wirkungs-Aussagen",
+   "Werte ohne geprüfte Auswertung"
+  ],
+  "daten_ab": "02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "fallen": [
+   "Ungleiche Anliegen oder Kanäle vergleichen",
+   "Abbrüche und offene Werte verschweigen",
+   "Kleine Fallzahlen verallgemeinern"
+  ],
+  "apa": [
+   "Tabellen mit Nummer fett, Titel kursiv, Anmerkung «eigene Erhebung, n, Zeitraum» (Gruppenentscheid).",
+   "Beobachtungsdaten je Anbieter und Kanal im Anhang und im Text verweisen."
+  ]
+ },
+ "6a-2.8-f4": {
+  "titel": "F4",
+  "teil": "6a",
+  "kurz": "Zeige anhand der codierten Bewertungen, welche Themen die öffentliche Kritik an Yuh und Mitbewerbern prägen.",
+  "seiten": 1.5,
+  "fragen": [
+   "Welche Themen kommen in schlechten und guten Bewertungen vor?",
+   "Wie unterscheiden sich Yuh und die Mitbewerber dabei?",
+   "Wie oft geht es um den Kundendienst selbst?",
+   "Wie gut stimmen die beiden Codierenden überein?"
+  ],
+  "muss": [
+   {
+    "punkt": "Zu Beginn drei Sätze zu Zweck, Art der Analyse und untersuchten Bewertungen.",
+    "quelle": "Berichtsgrundlage 6a, WIAR (Block 3, Folie 8)"
+   },
+   {
+    "punkt": "Anteile je Kategorie, Anbieter, Quelle und Zeitfenster, nur Gleiches mit Gleichem vergleichen.",
+    "quelle": "Lieferplan, Methode C"
+   },
+   {
+    "punkt": "Lob- und Kritikanteil zum Kundendienst ausweisen.",
+    "quelle": "Lieferplan, Methode C"
+   },
+   {
+    "punkt": "Ergebnisse nur als Sicht der Bewertenden deuten, nicht als Häufigkeit in der Kundschaft.",
+    "quelle": "Lieferplan, Methode C"
+   },
+   {
+    "punkt": "Übereinstimmung (Kappa) je Kategorie mit n berichten.",
+    "quelle": "Fachregeln X11"
+   },
+   {
+    "punkt": "Keine wörtlichen Zitate aus Bewertungen, Beispiele nur sinngemäss.",
+    "quelle": "Fachregeln X10"
+   },
+   {
+    "punkt": "Ein Satz, was Yuh mit dem Ergebnis tun kann.",
+    "quelle": "Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R4",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist fehlerfrei und umfassend, die Ergebnisse sind präzise, differenziert, vollständig und relevant dargestellt. Yuh erhält einen Mehrwert über die Erwartungen hinaus."
+   },
+   {
+    "code": "R6",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist statistisch anspruchsvoll, die Methoden gehen über den Unterrichtsstoff hinaus. Daten sind verknüpft, Zahlen korrekt, der Aufbau ist perfekt."
+   },
+   {
+    "code": "R5",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Ergebnisse sind differenziert im Kontext der Fragestellung interpretiert, Auffälligkeiten erörtert und Ideen für Anschlussuntersuchungen entwickelt. SWOT und SWOT-Matrix sind perfekt, das Fazit ebenso. Keine Spekulation, objektive Sprache."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Bewertungsanalyse",
+    "wo": "Team-App › Bewertungen untersuchen",
+    "inhalt": "Codierung der öffentlichen Bewertungen nach festen Kategorien."
+   },
+   {
+    "titel": "Arbeitspaket Auswertung",
+    "wo": "Notion › PA6 › Projektmanagement › PSP › Auswertung der drei Methoden (Kapitel 2.8)",
+    "inhalt": "Umfang und Abnahmekriterien der Auswertung."
+   }
+  ],
+  "nicht": [
+   "Wörtliche Bewertungstexte oder Namen von Bewertenden",
+   "Vergleiche über verschiedene Plattformen oder Zeiträume hinweg",
+   "Werte ohne geprüfte Auswertung"
+  ],
+  "daten_ab": "02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "fallen": [
+   "Mehrfachnennungen nicht erklären",
+   "Bewertungen als Meinung aller Kunden deuten",
+   "Kappa fehlt"
+  ],
+  "apa": [
+   "Plattformen als Internetquelle mit Abrufdatum belegen.",
+   "Grafiken mit Nummer fett, Titel kursiv und Anmerkung zu Quelle, n und Zeitraum."
+  ]
+ },
+ "6a-2.9": {
+  "titel": "SWOT-Analyse",
+  "teil": "6a",
+  "kurz": "Fasse die belegten Stärken, Schwächen, Chancen und Risiken von Yuh gewichtet zusammen und leite die Matrix ab.",
+  "seiten": 1.5,
+  "fragen": [
+   "Was sind die wichtigsten Stärken und Schwächen von Yuh beim Kundendienst?",
+   "Welche Chancen und Risiken kommen aus Markt und Umfeld?",
+   "Wie gewichten wir sie, und warum?",
+   "Welche Kombinationen ergeben sich daraus?"
+  ],
+  "muss": [
+   {
+    "punkt": "Form nach der SWOT-Vorlage des Marketingunterrichts mit Kriterium, Begründung, Gewichtung 1 bis 10, Total und Fazit in zwei bis drei Sätzen.",
+    "quelle": "Raster-Checkliste A5 (Template_SWOT); Merkmalblatt 6a, Punkt 2.9"
+   },
+   {
+    "punkt": "Stärken und Schwächen aus Konkurrenz- und Unternehmensanalyse und Auswertung, Chancen und Risiken aus Markt und Umfeld.",
+    "quelle": "Fachregeln A15"
+   },
+   {
+    "punkt": "Matrix mit den vier Feldern SO, ST, WO und WT, je mindestens ein Eintrag.",
+    "quelle": "Fachregeln A16"
+   },
+   {
+    "punkt": "Jeder Eintrag mit Kapitelverweis, Zahl und Quelle.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung 2.9"
+   },
+   {
+    "punkt": "Gewichte nach der festgelegten Regel und im Begründungsprotokoll festgehalten.",
+    "quelle": "Berichtsgrundlage 6a, Fachregel A16"
+   },
+   {
+    "punkt": "Für Dritte ohne Erklärung verständlich.",
+    "quelle": "Fachregeln A17"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R5",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Ergebnisse sind differenziert im Kontext der Fragestellung interpretiert, Auffälligkeiten erörtert und Ideen für Anschlussuntersuchungen entwickelt. SWOT und SWOT-Matrix sind perfekt, das Fazit ebenso. Keine Spekulation, objektive Sprache."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "SWOT nach Template",
+    "wo": "Notion › PA6 › Projektmanagement › PSP › SWOT nach Template (Kapitel 2.9)",
+    "inhalt": "Arbeitspaket mit Zweck und Abnahmekriterien der SWOT."
+   },
+   {
+    "titel": "Kapitelregister",
+    "wo": "Notion › PA6 › Kapitel",
+    "inhalt": "Je Kapitel stehen dort Was, Warum, Fertig wenn und So geht's sowie Pate und Zweitlesung."
+   }
+  ],
+  "nicht": [
+   "Einträge ohne Beleg",
+   "Massnahmen, diese folgen in Kapitel 3 als Ideen und in der 6b"
+  ],
+  "daten_ab": "02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe); erst nach Freigabe aller Teilanalysen",
+  "fallen": [
+   "Interne und externe Faktoren vermischen",
+   "Gewichte ohne Begründung",
+   "Matrix fehlt oder ist leer"
+  ],
+  "apa": [
+   "SWOT-Tabelle mit Nummer fett, Titel kursiv; Form nach der Vorlage mit «In Anlehnung an» und Quelle.",
+   "Belege in den Zellen als Kurzbeleg oder Kapitelverweis."
+  ]
+ },
+ "6a-3": {
+  "titel": "Strategische Überlegungen und mögliche Methoden das Ziel zu erreichen",
+  "teil": "6a",
+  "kurz": "Leite aus den Befunden erfolgsversprechende Ideen ab, je mit Nutzen und Risiko, ohne Budget.",
+  "seiten": 1.25,
+  "fragen": [
+   "Welche Ideen folgen direkt aus unseren Befunden?",
+   "Welchen Nutzen bringt jede Idee Yuh und der Kundschaft?",
+   "Welches Risiko hat jede Idee?",
+   "Wohin soll sich Yuh positionieren?"
+  ],
+  "muss": [
+   {
+    "punkt": "Drei bis sechs Ideen, jede mit Befundnummer, Nutzen und Risiko.",
+    "quelle": "Berichtsgrundlage 6a, Abnahme Kapitel 3"
+   },
+   {
+    "punkt": "Die 6a liefert erfolgsversprechende Ideen, auf die sich die 6b stützt.",
+    "quelle": "Merkmalblatt 6b, Punkte 3 bis 8"
+   },
+   {
+    "punkt": "Zielrichtung auf der Stufe Positionierung, mit Kurzbeleg.",
+    "quelle": "Fachregeln G4, A1"
+   },
+   {
+    "punkt": "Jede Idee nennt neben Kommunikation mindestens ein weiteres Element (Leistung, Prozess oder Infrastruktur).",
+    "quelle": "Fachregeln G15"
+   },
+   {
+    "punkt": "Ein Satz, dass die Ideen in der 6b als Marketing-Mix ausgearbeitet werden.",
+    "quelle": "Fachregeln G13"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R5",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Ergebnisse sind differenziert im Kontext der Fragestellung interpretiert, Auffälligkeiten erörtert und Ideen für Anschlussuntersuchungen entwickelt. SWOT und SWOT-Matrix sind perfekt, das Fazit ebenso. Keine Spekulation, objektive Sprache."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Ideen und Übernahme",
+    "wo": "Notion › PA6 › Marketing 6a › 6 · Ideen und Übernahme",
+    "inhalt": "Arbeitspaket, Ideen aus Befunden in die 6b zu überführen."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   },
+   {
+    "titel": "Vorgängerkapitel",
+    "wo": "Team-App › Schreibplatz, Kapitel 6a-2.8 und 6a-2.9",
+    "inhalt": "Befunde und SWOT, aus denen die Ideen folgen."
+   }
+  ],
+  "nicht": [
+   "Budget, Massnahmenplan oder Terminplan, diese gehören in die 6b",
+   "Ideen ohne Befund"
+  ],
+  "daten_ab": "02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe); erst nach geprüfter SWOT",
+  "fallen": [
+   "Idee ohne Verweis auf einen Befund",
+   "Nur Werbeideen ohne Leistung oder Prozess",
+   "Das Wort «Budget» im Kapitel"
+  ],
+  "apa": [
+   "Strategiebegriffe aus dem Unterricht mit Kurzbeleg auf das Skript.",
+   "Eigene Befunde mit Kapitelverweis statt Kurzbeleg."
+  ]
+ },
+ "6a-4": {
+  "titel": "Fazit",
+  "teil": "6a",
+  "kurz": "Beantworte jede Forschungsfrage und die Frage von Yuh knapp und zeige, was die 6b übernimmt.",
+  "seiten": 1,
+  "fragen": [
+   "Was ist die Antwort auf jede der vier Forschungsfragen?",
+   "Was heisst das für die zentrale Frage von Yuh zum Kundendienst?",
+   "Wo sind unsere Daten begrenzt, und was sollte man später noch untersuchen?",
+   "Welche Erkenntnisse nimmt die 6b mit?"
+  ],
+  "muss": [
+   {
+    "punkt": "Zu jeder Forschungsfrage F1 bis F4 und zur Frage von Yuh ein Antwortabsatz mit Verweis auf das Kapitel des Befunds.",
+    "quelle": "Berichtsgrundlage 6a, Abnahme Kapitel 4"
+   },
+   {
+    "punkt": "Je Forschungsfrage ein Satz Interpretation und ein Satz Schlussfolgerung.",
+    "quelle": "Berichtsgrundlage 6a, WIAR (Block 3, Folie 8)"
+   },
+   {
+    "punkt": "Ein Abschnitt «Mehrwert für Yuh».",
+    "quelle": "Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster (Entscheid 03.11.2026)"
+   },
+   {
+    "punkt": "Ein Abschnitt mit Ideen für Anschlussuntersuchungen.",
+    "quelle": "Konzept PA6, S. 7 (Raster Interpretation); Berichtsgrundlage 6a, Abgleich"
+   },
+   {
+    "punkt": "Grenzen der Daten nennen.",
+    "quelle": "Berichtsgrundlage 6a, Gliederung Kapitel 4"
+   },
+   {
+    "punkt": "Erkenntnisse als Grundlage für Entscheide formulieren, nicht als Beweis.",
+    "quelle": "Fachregeln R2"
+   },
+   {
+    "punkt": "Sagen, welche Erkenntnis die 6b wie übernimmt.",
+    "quelle": "Fachregeln R23; Konzept PA6, S. 3"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R5",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Ergebnisse sind differenziert im Kontext der Fragestellung interpretiert, Auffälligkeiten erörtert und Ideen für Anschlussuntersuchungen entwickelt. SWOT und SWOT-Matrix sind perfekt, das Fazit ebenso. Keine Spekulation, objektive Sprache."
+   },
+   {
+    "code": "R4",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Auswertung ist fehlerfrei und umfassend, die Ergebnisse sind präzise, differenziert, vollständig und relevant dargestellt. Yuh erhält einen Mehrwert über die Erwartungen hinaus."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [
+   "Antworten auf F1 bis F4 und auf die Frage von Yuh",
+   "Mehrwert für Yuh",
+   "Ideen für Anschlussuntersuchungen"
+  ],
+  "infos": [
+   {
+    "titel": "Geprüfte Kapitel 2.8, 2.9 und 3",
+    "wo": "Team-App › Schreibplatz, Kapitel 6a-2.8, 6a-2.9 und 6a-3",
+    "inhalt": "Daraus stammen alle Aussagen des Fazits. Nur freigegebene Fassungen verwenden."
+   },
+   {
+    "titel": "Zentrale Frage von Yuh",
+    "wo": "Notion › PA6 › Marketing 6a",
+    "inhalt": "Übersicht der 6a mit dem Auftrag von Yuh, den Kundendienst als Stärke zu positionieren."
+   },
+   {
+    "titel": "Kapitelregister",
+    "wo": "Notion › PA6 › Kapitel",
+    "inhalt": "Je Kapitel stehen dort Was, Warum, Fertig wenn und So geht's sowie Pate und Zweitlesung."
+   }
+  ],
+  "nicht": [
+   "Neue Zahlen oder Ergebnisse, die nicht schon in 2.8 stehen",
+   "Ausgearbeitete Massnahmen mit Budget, diese gehören in die 6b",
+   "Wörter wie «beweist» oder «belegt eindeutig»"
+  ],
+  "daten_ab": "02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe); schreibbar erst, wenn 2.8, 2.9 und 3 geprüft sind",
+  "fallen": [
+   "Das Fazit wiederholt Zahlen, statt die Fragen zu beantworten",
+   "Ideen für Anschlussuntersuchungen fehlen",
+   "Aussagen gehen über die Daten hinaus"
+  ],
+  "apa": [
+   "Eigene Ergebnisse brauchen keinen Kurzbeleg, verweise auf das Kapitel. Fremde Aussagen immer mit Kurzbeleg (Name, Jahr).",
+   "Wörtliche Zitate unter 40 Wörtern in Anführungszeichen, mit Seite im Kurzbeleg.",
+   "Abkürzungen beim ersten Mal ausschreiben und die Abkürzung in Klammern dahinter setzen."
+  ]
+ },
+ "6a-5": {
+  "titel": "Reflexion Gruppenarbeit",
+  "teil": "6a",
+  "kurz": "Schildere ehrlich, was in der Gruppe schwierig war, was ihr gelernt habt und was die 6b übernimmt.",
+  "seiten": 1,
+  "fragen": [
+   "Was lief in der Zusammenarbeit gut, was war schwierig, und warum?",
+   "Was hat jede Person konkret gelernt?",
+   "Was machen wir in der 6b anders?",
+   "Wie baut die 6b auf den Ergebnissen der 6a auf?"
+  ],
+  "muss": [
+   {
+    "punkt": "Gruppenreflexion zur 6a und ein Ausblick auf die 6b.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 7"
+   },
+   {
+    "punkt": "Kritischer Rückblick mit Schwierigkeiten im Detail, dem jeweiligen Learning und einer konkreten Retrospektive.",
+    "quelle": "Konzept PA6, S. 7 (Raster Reflexion und Ausblick)"
+   },
+   {
+    "punkt": "Ein eigener Absatz «Ausblick PA6b» mit ausdrücklichem Bezug.",
+    "quelle": "Konzept PA6, S. 7; Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+   },
+   {
+    "punkt": "Je Person ein Absatz mit Schwierigkeit und Learning.",
+    "quelle": "Berichtsgrundlage 6a, Abnahme Kapitel 5"
+   },
+   {
+    "punkt": "Nur echte, datierte Beiträge der Gruppenmitglieder, nichts erfinden.",
+    "quelle": "Kapitelplan Schreibwerk, Startbedingung 6a-5"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R7",
+    "punkte": 5,
+    "volle_punkte_wenn": "Die Reflexion ist kritisch und umfassend, nennt Schwierigkeiten im Detail mit dem Learning, enthält eine konkrete Retrospektive und einen ausdrücklichen Bezug zur 6b."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [
+   "Rückblick je Person (ein Absatz pro Person)",
+   "Ausblick PA6b"
+  ],
+  "infos": [
+   {
+    "titel": "Reflexion",
+    "wo": "Notion › PA6 › Projektmanagement › Reflexion",
+    "inhalt": "Ort für die persönlichen Rückblicke der Gruppenmitglieder."
+   },
+   {
+    "titel": "Sitzungen",
+    "wo": "Notion › PA6 › Projektmanagement › Sitzungen",
+    "inhalt": "Protokolle der Gruppentreffen. Zeigen, was wann entschieden wurde."
+   },
+   {
+    "titel": "Coaching",
+    "wo": "Notion › PA6 › Projektmanagement › Coaching",
+    "inhalt": "Vorbereitung und Protokolle der Coachings mit den offenen Fragen an die Dozierenden."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   }
+  ],
+  "nicht": [
+   "Erfundene oder geschönte Erfahrungen",
+   "Fachliche Ergebnisse der Analyse wiederholen",
+   "Massnahmen für Yuh, diese gehören in die 6b"
+  ],
+  "daten_ab": null,
+  "fallen": [
+   "Nur «es lief gut» ohne konkrete Schwierigkeit",
+   "Learning fehlt oder bleibt allgemein",
+   "Ausblick auf die 6b fehlt"
+  ],
+  "apa": [
+   "Aussagen aus Mails oder Gesprächen gelten als persönliche Kommunikation. Im Text so kennzeichnen, nicht ins Literaturverzeichnis.",
+   "Wird ein Protokoll im Anhang gezeigt, im Text darauf verweisen (siehe Anhang n)."
+  ]
+ },
+ "6a-reserve-markt": {
+  "titel": "Markt und Umfeld",
+  "teil": "6a",
+  "kurz": "Beschreibe den Markt der Neobanken in der Schweiz mit belegten Zahlen, Umfeld und Wettbewerbskräften.",
+  "seiten": 1,
+  "fragen": [
+   "Wie ist der Markt abgegrenzt, und welche Segmente gibt es?",
+   "Welche Umfeldfaktoren wirken als Chance oder Gefahr?",
+   "Wie stark sind die Wettbewerbskräfte?",
+   "Wie gross ist der Markt, und in welcher Phase steht er?"
+  ],
+  "muss": [
+   {
+    "punkt": "Marktdefinition, Teilmärkte, Segmente und strategische Geschäftsfelder.",
+    "quelle": "Fachregeln A4, A5, G11"
+   },
+   {
+    "punkt": "PESTEL-Tabelle mit sechs Zeilen, je Indikator, Beispiel mit Kurzbeleg und Chance oder Gefahr.",
+    "quelle": "Fachregeln A6"
+   },
+   {
+    "punkt": "Fünf Wettbewerbskräfte nach Porter mit Einstufung nach festem Massstab und genannter Grenze dieses Massstabs.",
+    "quelle": "Fachregeln A7; Berichtsgrundlage 6a"
+   },
+   {
+    "punkt": "Marktkennzahlen je mit Zahl, Quelle, Zeitraum und Bezugsgruppe, sonst als Lücke benannt.",
+    "quelle": "Fachregeln G9, A8"
+   },
+   {
+    "punkt": "Marktlebenszyklus mit Phase und zwei Zahlen, Beeinflusser und Vertrieb.",
+    "quelle": "Fachregeln A10, A9, A11"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [
+   "Marktdefinition, Teilmärkte und Segmente",
+   "PESTEL",
+   "Fünf Kräfte nach Porter",
+   "Marktsituation",
+   "Beeinflusser",
+   "Vertrieb"
+  ],
+  "infos": [
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   },
+   {
+    "titel": "Markt und Konkurrenz",
+    "wo": "Notion › PA6 › Marketing 6a › 1 · Markt und Konkurrenz",
+    "inhalt": "Arbeitspaket, Ergebnisse und Quellen zu Markt und Konkurrenz zusammenzuführen."
+   }
+  ],
+  "nicht": [
+   "Kundenzahlen verschiedener Anbieter zusammenzählen",
+   "Nutzungsquoten als Marktanteile bezeichnen",
+   "Prognosen, die von eigenen Ergebnissen abhängen, vor Feldschluss"
+  ],
+  "daten_ab": "Sekundärdaten sofort; Position im Bericht ist noch offen und wird vor dem Export geklärt",
+  "fallen": [
+   "Zahl ohne Bezugsgruppe und Zeitraum",
+   "Nur eine Quelle, ohne das zu vermerken",
+   "PESTEL-Zeile ohne Beleg"
+  ],
+  "apa": [
+   "Studien und Statistiken mit Organisation und Jahr, bei PDF mit Seite.",
+   "Presseartikel nur, wo das Original fehlt; Online-Zeitung mit Datum und URL.",
+   "Tabellen mit Nummer fett, Titel kursiv und Anmerkung mit Quelle."
+  ]
+ },
+ "6a-reserve-unternehmen": {
+  "titel": "Yuh als eigene Unternehmung und Prognose",
+  "teil": "6a",
+  "kurz": "Beschreibe Yuh mit Angebot, Kundendienst, Image und Portfolio und begründe vorsichtige Prognosen mit Zahlen.",
+  "seiten": 0.5,
+  "fragen": [
+   "Was bietet Yuh an, und was ist besonders?",
+   "Wie ist der Kundendienst von Yuh organisiert?",
+   "Was wissen wir nicht (z. B. Kosten), und wo fragen wir nach?",
+   "Was erwarten wir für Markt, Nachfrage, Wettbewerb und Vertrieb?"
+  ],
+  "muss": [
+   {
+    "punkt": "Sechs Bereiche der eigenen Unternehmung (Rechnungswesen, Kosten, Vorgaben, Rahmenbedingungen, Image, Portfolio und Wertkette), Lücken benannt.",
+    "quelle": "Fachregeln A13"
+   },
+   {
+    "punkt": "Kundendienst als Prozess aus Kundensicht, nicht als IT-System.",
+    "quelle": "Fachregeln G7"
+   },
+   {
+    "punkt": "Vier Prognosen, je gestützt auf eine Zahl mit Kurzbeleg oder Kapitelverweis.",
+    "quelle": "Fachregeln A14"
+   },
+   {
+    "punkt": "Belegte Angaben, Annahmen und Unsicherheiten getrennt.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6a-reserve-unternehmen"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R1",
+    "punkte": 10,
+    "volle_punkte_wenn": "Der Auftrag ist in allen Punkten erfüllt. Unternehmen, Relevanz des Themas, Strategieansatz, Forschungsfrage, messbare Forschungsziele, Analyse der Sekundärdaten und Planung von Vorgehen und Aufwand sind vollständig und fehlerfrei beschrieben."
+   },
+   {
+    "code": "R9",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, angemessener Wortschatz, kurze Sätze, logisch gegliedert mit Verbindungswörtern, ohne Umschweife, mit anschaulichen Beispielen."
+   }
+  ],
+  "gliederung": [
+   "Angebot und Alleinstellung",
+   "Kundendienst",
+   "Rechnungswesen und Kosten",
+   "Vorgaben und Rahmenbedingungen",
+   "Image",
+   "Portfolio und Wertkette",
+   "Prognose"
+  ],
+  "infos": [
+   {
+    "titel": "Auftrag, Merkmalblätter und Yuh-Praxisauftrag",
+    "wo": "Moodle › Marketing › PA6a Auftragserteilung und Unterlagen",
+    "inhalt": "Originale von Konzept PA6, Merkmalblatt 6a und 6b und Praxisauftrag von Yuh."
+   },
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   }
+  ],
+  "nicht": [
+   "Prognosen ohne Zahl",
+   "Image-Ergebnisse aus der Bewertungsanalyse vor Feldschluss"
+  ],
+  "daten_ab": "Unternehmensangaben sofort; Image und datenabhängige Prognose ab 02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe); Position im Bericht noch offen",
+  "fallen": [
+   "Werbeaussagen von Yuh als Tatsache übernehmen",
+   "Lücken verschweigen",
+   "Prognose als sicher darstellen"
+  ],
+  "apa": [
+   "Yuh-Folien als betriebsinternes Dokument mit Firma, Jahr und Folie.",
+   "Yuh-Webseite als Webseite einer Organisation mit Abrufdatum."
+  ]
+ },
+ "6b-1": {
+  "titel": "Ausgangslage und Problemstellung",
+  "teil": "6b",
+  "kurz": "Erkläre das Problem, das die 6b lösen soll, hergeleitet aus der 6a und dem Auftrag von Yuh.",
+  "seiten": 1.5,
+  "fragen": [
+   "Welches Problem hat Yuh mit der Wahrnehmung seines Kundendiensts?",
+   "Was hat die 6a dazu gezeigt?",
+   "Was will die 6b erreichen, und was gehört nicht dazu?"
+  ],
+  "muss": [
+   {
+    "punkt": "Ausgangslage und Problemstellung als Punkt 1.",
+    "quelle": "Merkmalblatt 6b, Punkt 1"
+   },
+   {
+    "punkt": "Einleitung mit Problemstellung und Zielsetzung.",
+    "quelle": "Konzept PA6, S. 12"
+   },
+   {
+    "punkt": "Problem, Zielrichtung und Abgrenzung aus der freigegebenen 6a und dem Praxisauftrag hergeleitet.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6b-1"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B1",
+    "punkte": 5,
+    "volle_punkte_wenn": "Vorgaben und Fakten aus der Analyse der 6a (Matrix, Diagnose) sind korrekt übernommen und bilden eine brauchbare Basis für die Arbeit."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Auftrag, Merkmalblätter und Yuh-Praxisauftrag",
+    "wo": "Moodle › Marketing › PA6a Auftragserteilung und Unterlagen",
+    "inhalt": "Originale von Konzept PA6, Merkmalblatt 6a und 6b und Praxisauftrag von Yuh."
+   },
+   {
+    "titel": "Projektauftrag",
+    "wo": "Notion › PA6 › Projektmanagement › Projektauftrag",
+    "inhalt": "Ziele, Abgrenzung und Zuständigkeiten des Projekts."
+   },
+   {
+    "titel": "Vorgängerkapitel",
+    "wo": "Team-App › Schreibplatz, Kapitel 6a-1 und 6a-4",
+    "inhalt": "Ausgangslage und Fazit der 6a als Basis."
+   }
+  ],
+  "nicht": [
+   "Die Ausgangslage der 6a einfach kopieren",
+   "Ergebnisse vorwegnehmen, die die 6a nicht freigegeben hat"
+  ],
+  "daten_ab": "Gerüst ab 16.11.2026; endgültiger Bezug nach freigegebener Diagnose der 6a; Planung der 6b ab 16.11.2026",
+  "fallen": [
+   "Problem nicht aus der 6a hergeleitet",
+   "Abgrenzung fehlt"
+  ],
+  "apa": [
+   "Yuh-Unterlagen als betriebsinternes Dokument belegen.",
+   "Verweis auf die eigene 6a als Kapitelverweis oder mit Gruppe und Jahr im Verzeichnis."
+  ]
+ },
+ "6b-2": {
+  "titel": "Fazit der Analyse und Diagnose der Datenanalyse PA6a",
+  "teil": "6b",
+  "kurz": "Übernimm die entscheidenden Fakten und Schlüsse der 6a kompakt und korrekt als Basis der Planung.",
+  "seiten": 2,
+  "fragen": [
+   "Welche Befunde der 6a sind für die Planung entscheidend?",
+   "Was sagt die SWOT-Matrix?",
+   "Welche Ideen aus der 6a verfolgen wir weiter?"
+  ],
+  "muss": [
+   {
+    "punkt": "Fazit der Analyse und Diagnose der Datenanalyse der 6a als Punkt 2.",
+    "quelle": "Merkmalblatt 6b, Punkt 2; Konzept PA6, S. 12"
+   },
+   {
+    "punkt": "Daten kompakt zusammengefasst, Matrix und Diagnose der 6a korrekt übernommen.",
+    "quelle": "Konzept PA6, S. 14 (Raster Analyse)"
+   },
+   {
+    "punkt": "Jede Schlussfolgerung verweist auf einen freigegebenen Befund der 6a.",
+    "quelle": "Grundlage Schreibwerk, Datenbasis und Übernahme"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B1",
+    "punkte": 5,
+    "volle_punkte_wenn": "Vorgaben und Fakten aus der Analyse der 6a (Matrix, Diagnose) sind korrekt übernommen und bilden eine brauchbare Basis für die Arbeit."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Vorgängerkapitel",
+    "wo": "Team-App › Schreibplatz, Kapitel 6a-2.8, 6a-2.9, 6a-3 und 6a-4",
+    "inhalt": "Freigegebene Auswertung, SWOT, Ideen und Fazit der 6a."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   }
+  ],
+  "nicht": [
+   "Neue Analysen oder Zahlen",
+   "Befunde, die in der 6a nicht stehen"
+  ],
+  "daten_ab": "nach freigegebener Diagnose der 6a; Planung der 6b ab 16.11.2026",
+  "fallen": [
+   "Zahlen anders als in der 6a",
+   "Zu lang statt kompakt",
+   "Matrix fehlt"
+  ],
+  "apa": [
+   "Übernommene Tabellen und Grafiken der 6a mit Nummer neu nummerieren und Anmerkung zur Herkunft."
+  ]
+ },
+ "6b-3": {
+  "titel": "Ökonomische und Vorökonomische Zielsetzungen",
+  "teil": "6b",
+  "kurz": "Formuliere wirtschaftliche und vorökonomische Ziele für die Ideen der 6a, nach SMART und den sechs W.",
+  "seiten": 2.5,
+  "fragen": [
+   "Welche messbaren wirtschaftlichen Ziele verfolgen wir?",
+   "Welche Wirkungen wie Bekanntheit oder Vertrauen wollen wir erreichen?",
+   "Erfüllt jedes Ziel SMART und die sechs W?",
+   "Wo stehen Ziele gegeneinander?"
+  ],
+  "muss": [
+   {
+    "punkt": "Ökonomische und vorökonomische Ziele, ausgerichtet auf die erfolgsversprechenden Ideen der 6a.",
+    "quelle": "Merkmalblatt 6b, Punkt 3"
+   },
+   {
+    "punkt": "Jedes Ziel nach SMART, die sechs W vollständig.",
+    "quelle": "Konzept PA6, S. 14–15 (Raster Ziele)"
+   },
+   {
+    "punkt": "Messbare Ziele und benannte Zielkonflikte.",
+    "quelle": "Fachregeln G12"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B2",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die ökonomischen Ziele sind nach SMART definiert, die sechs W vollständig aufgeführt, korrekt und vollständig ausformuliert, ohne Fehler."
+   },
+   {
+    "code": "B3",
+    "punkte": 5,
+    "volle_punkte_wenn": "Die vorökonomischen Ziele sind nach SMART definiert, die sechs W vollständig aufgeführt, korrekt und vollständig ausformuliert, ohne Fehler."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [
+   "Ökonomische Ziele",
+   "Vorökonomische Ziele"
+  ],
+  "infos": [
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   },
+   {
+    "titel": "Projektauftrag",
+    "wo": "Notion › PA6 › Projektmanagement › Projektauftrag",
+    "inhalt": "Ziele, Abgrenzung und Zuständigkeiten des Projekts."
+   },
+   {
+    "titel": "Vorgängerkapitel",
+    "wo": "Team-App › Schreibplatz, Kapitel 6b-2",
+    "inhalt": "Diagnose als Ausgangspunkt der Ziele."
+   }
+  ],
+  "nicht": [
+   "Ziele des Gruppenprojekts (diese stehen im Projektauftrag)",
+   "Massnahmen"
+  ],
+  "daten_ab": "nach freigegebener Diagnose der 6a; Planung der 6b ab 16.11.2026",
+  "fallen": [
+   "Ziel ohne Termin oder Messgrösse",
+   "Ein W fehlt",
+   "Ziele ohne Bezug zu den Ideen"
+  ],
+  "apa": [
+   "Zielmodelle aus dem Unterricht mit Kurzbeleg auf das Skript."
+  ]
+ },
+ "6b-4": {
+  "titel": "Risiko Map",
+  "teil": "6b",
+  "kurz": "Stelle die Risiken der Massnahme als Matrix dar, bewertet und mit Gegenmassnahme je Risiko.",
+  "seiten": 1.5,
+  "fragen": [
+   "Was kann bei der Umsetzung schiefgehen?",
+   "Wie wahrscheinlich ist das, und wie schlimm wäre es?",
+   "Was tun wir dagegen, und wer ist zuständig?"
+  ],
+  "muss": [
+   {
+    "punkt": "Risikomatrix abgeleitet aus der 6a.",
+    "quelle": "Merkmalblatt 6b, Punkt 4"
+   },
+   {
+    "punkt": "Initiale Risiko Map für die Umsetzung der Massnahme.",
+    "quelle": "Konzept PA6, S. 12"
+   },
+   {
+    "punkt": "Identifikation, Formulierung, Bewertung, Darstellung und Massnahmen je Risiko.",
+    "quelle": "Konzept PA6, S. 22 (Raster Initiale Risiko Map)"
+   }
+  ],
+  "raster": [
+   {
+    "code": "C8",
+    "punkte": 5,
+    "volle_punkte_wenn": "Risiken umfassend erkannt, strukturiert formuliert, eindeutig bewertet, übersichtlich dargestellt, mit Massnahmenkatalog je Risiko."
+   },
+   {
+    "code": "B8",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Umsetzung ist in der Praxis erfolgreich realisierbar, die Erfolgskontrolle ist lückenlos geplant."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Risiken Massnahme",
+    "wo": "Notion › PA6 › Projektmanagement › Risiken Massnahme",
+    "inhalt": "Risiken der geplanten Massnahme mit Bewertung und Gegenmassnahme."
+   },
+   {
+    "titel": "Risiken Projekt",
+    "wo": "Notion › PA6 › Projektmanagement › Risiken Projekt",
+    "inhalt": "Risiken unseres Gruppenprojekts und wie wir sie verfolgen."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   }
+  ],
+  "nicht": [
+   "Risiken unseres Gruppenprojekts, hier geht es um die Massnahme",
+   "Budget"
+  ],
+  "daten_ab": "vorläufige Risiken ab 16.11.2026; datenbasierte Risiken nach freigegebener Diagnose der 6a; Planung der 6b ab 16.11.2026",
+  "fallen": [
+   "Risiko ohne Gegenmassnahme",
+   "Bewertung ohne Begründung",
+   "Unübersichtliche Darstellung"
+  ],
+  "apa": [
+   "Risiko Map als Abbildung mit Nummer fett und Titel kursiv; Vorlage aus dem Unterricht mit «In Anlehnung an»."
+  ]
+ },
+ "6b-5": {
+  "titel": "Stakeholder-Analyse",
+  "teil": "6b",
+  "kurz": "Zeige, wer die Ideen aus der 6a beeinflusst oder betroffen ist und wie ihr mit ihnen umgeht.",
+  "seiten": 1.5,
+  "fragen": [
+   "Wer ist an den Ideen beteiligt oder von ihnen betroffen?",
+   "Wie gross ist der Einfluss jeder Gruppe, und wie steht sie zu den Ideen?",
+   "Wie gehen wir mit den wichtigen Stakeholdern um?"
+  ],
+  "muss": [
+   {
+    "punkt": "Stakeholder mit ihrem Einfluss auf die erfolgsversprechenden Ideen aus der 6a.",
+    "quelle": "Merkmalblatt 6b, Punkt 5"
+   },
+   {
+    "punkt": "Stakeholder-Map zu den Massnahmen.",
+    "quelle": "Konzept PA6, S. 12"
+   },
+   {
+    "punkt": "Identifikation, Bewertung und Massnahmenplan je Stakeholder.",
+    "quelle": "Konzept PA6, S. 22 (Raster Stakeholder-Analyse)"
+   },
+   {
+    "punkt": "Jede Bewertung ist begründet.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6b-5"
+   }
+  ],
+  "raster": [
+   {
+    "code": "C7",
+    "punkte": 5,
+    "volle_punkte_wenn": "Stakeholder-Map mit sinnvoller Bewertung und Massnahmen, alle relevanten Stakeholder vollständig aufgezählt und gut analysiert."
+   },
+   {
+    "code": "B8",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Umsetzung ist in der Praxis erfolgreich realisierbar, die Erfolgskontrolle ist lückenlos geplant."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Stakeholder",
+    "wo": "Notion › PA6 › Projektmanagement › Stakeholder",
+    "inhalt": "Sammelstelle für die Stakeholder mit Einfluss und Bewertung."
+   },
+   {
+    "titel": "Projektauftrag",
+    "wo": "Notion › PA6 › Projektmanagement › Projektauftrag",
+    "inhalt": "Ziele, Abgrenzung und Zuständigkeiten des Projekts."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   },
+   {
+    "titel": "Schlüsselpartner aus der 6a",
+    "wo": "Team-App › Schreibplatz, Kapitel 6a-2-partner",
+    "inhalt": "Partner und ihre Rollen aus der 6a als Ausgangspunkt."
+   }
+  ],
+  "nicht": [
+   "Stakeholder unseres Gruppenprojekts, hier geht es um die Stakeholder der Ideen und Massnahmen",
+   "Risiken, diese gehören in die Risiko Map",
+   "Kosten, diese gehören in die Budget- und Kostenplanung"
+  ],
+  "daten_ab": "Identifikation ab 16.11.2026 (Start 6b); Bezug zu den Ideen erst nach freigegebener Diagnose der 6a",
+  "fallen": [
+   "Wichtige Stakeholder fehlen",
+   "Bewertung ohne Begründung",
+   "Keine Massnahme je Stakeholder"
+  ],
+  "apa": [
+   "Angaben über Partner oder Organisationen mit Kurzbeleg (Organisation, Jahr).",
+   "Die Stakeholder-Map als Abbildung mit Nummer fett und Titel kursiv; eigene Darstellung ohne Quellenhinweis."
+  ]
+ },
+ "6b-6": {
+  "titel": "Zielgruppenanalyse",
+  "teil": "6b",
+  "kurz": "Bestimme und beschreibe die Zielgruppen, die die Ideen der 6a erreichen sollen, mit belegten Merkmalen.",
+  "seiten": 2,
+  "fragen": [
+   "Wen soll die Massnahme erreichen?",
+   "Welche Merkmale und Bedürfnisse hat diese Gruppe laut unseren Daten?",
+   "Warum gerade diese Gruppe und nicht eine andere?"
+  ],
+  "muss": [
+   {
+    "punkt": "Relevante Zielgruppen erfassen und analysieren, die für die erfolgsversprechenden Ideen ausgewählt oder berücksichtigt werden müssen.",
+    "quelle": "Merkmalblatt 6b, Punkt 6"
+   },
+   {
+    "punkt": "Zielgruppen mit belegten Merkmalen, Bezug zu Ideen, Bedarf und Zielen begründet.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6b-6"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B4",
+    "punkte": 5,
+    "volle_punkte_wenn": "Der Strategieansatz ist mit klarer fachlicher Definition vollständig erklärt. Die Wahl ist aus der Arbeit heraus sinnvoll und klar nachvollziehbar."
+   },
+   {
+    "code": "B5",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Massnahme ist korrekt und vollständig ausgearbeitet, in der Praxis umsetzbar und hat grosses Erfolgspotenzial."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Vorgängerkapitel",
+    "wo": "Team-App › Schreibplatz, Kapitel 6a-2.4-stichprobe und 6a-2.8",
+    "inhalt": "Merkmale der Befragten und Ergebnisse je Nutzergruppe."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   }
+  ],
+  "nicht": [
+   "Zielgruppen ohne Beleg aus Daten oder Quellen"
+  ],
+  "daten_ab": "nach freigegebener Diagnose der 6a; Planung der 6b ab 16.11.2026",
+  "fallen": [
+   "Zielgruppe zu breit",
+   "Merkmale geraten statt belegt"
+  ],
+  "apa": [
+   "Segmentierungsmodelle aus dem Unterricht mit Kurzbeleg.",
+   "Bevölkerungszahlen mit Organisation und Jahr."
+  ]
+ },
+ "6b-7": {
+  "titel": "Strategische Ansätze und Begründungen",
+  "teil": "6b",
+  "kurz": "Erkläre die gewählte Marketingstrategie fachlich und begründe, warum sie zu Zielen und Zielgruppe passt.",
+  "seiten": 2,
+  "fragen": [
+   "Welche Marketingstrategie wählen wir?",
+   "Wie ist diese Strategie fachlich definiert?",
+   "Warum passt sie zu unseren Befunden, Zielen und Zielgruppen?"
+  ],
+  "muss": [
+   {
+    "punkt": "Welche Marketingstrategien hinsichtlich der Zielsetzungen anzuwenden oder zu empfehlen sind.",
+    "quelle": "Merkmalblatt 6b, Punkt 7"
+   },
+   {
+    "punkt": "Strategischer Ansatz als Pflichtteil.",
+    "quelle": "Konzept PA6, S. 12"
+   },
+   {
+    "punkt": "Strategie mit klarer fachlicher Definition und Begründung aus der Arbeit.",
+    "quelle": "Konzept PA6, S. 15 (Raster Strategieansatz)"
+   },
+   {
+    "punkt": "Zielbereiche, Wettbewerbsstrategie, Positionierung und Mix in dieser Logik begründet.",
+    "quelle": "Fachregeln G4"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B4",
+    "punkte": 5,
+    "volle_punkte_wenn": "Der Strategieansatz ist mit klarer fachlicher Definition vollständig erklärt. Die Wahl ist aus der Arbeit heraus sinnvoll und klar nachvollziehbar."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   },
+   {
+    "titel": "Vorgängerkapitel",
+    "wo": "Team-App › Schreibplatz, Kapitel 6b-2 bis 6b-6",
+    "inhalt": "Diagnose, Ziele, Risiken, Stakeholder und Zielgruppen."
+   }
+  ],
+  "nicht": [
+   "Die Massnahme im Detail, diese gehört in den Marketing-Mix"
+  ],
+  "daten_ab": "nach freigegebener Diagnose der 6a; Planung der 6b ab 16.11.2026; nach den Kapiteln 2 bis 6",
+  "fallen": [
+   "Definition ohne Quelle",
+   "Strategie passt nicht zu den Zielen"
+  ],
+  "apa": [
+   "Definition der Strategie mit Kurzbeleg und Seite, bei wörtlichem Zitat in Anführungszeichen."
+  ]
+ },
+ "6b-8": {
+  "titel": "Marketing-Mix",
+  "teil": "6b",
+  "kurz": "Beschreibe den Marketing-Mix nach den 7 P und arbeite eine Massnahme mit Termin, Kosten und Kontrolle aus.",
+  "seiten": 6,
+  "fragen": [
+   "Wie sehen die sieben Bereiche des Mix für unsere Ideen aus?",
+   "Welche Massnahme arbeiten wir aus, und warum diese?",
+   "Wer macht was bis wann, und wie prüfen wir den Erfolg?",
+   "Was ist an der Massnahme neu und kreativ?"
+  ],
+  "muss": [
+   {
+    "punkt": "Marketing-Mix nach den 7 P, ausgerichtet auf die erfolgsversprechenden Ideen.",
+    "quelle": "Merkmalblatt 6b, Punkt 8"
+   },
+   {
+    "punkt": "Eine ausgearbeitete Massnahme inklusive Budget und Kontrollplanung.",
+    "quelle": "Konzept PA6, S. 12"
+   },
+   {
+    "punkt": "Terminplan für die Umsetzung der Massnahme, chronologisch, mit Reservezeit.",
+    "quelle": "Konzept PA6, S. 12; Raster Terminplan (fachlich)"
+   },
+   {
+    "punkt": "Massnahme mit Ziel, Zielgruppe, Kanal, Inhalt, Termin, Kosten, Zuständigkeit und Kontrolle.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6b-8"
+   },
+   {
+    "punkt": "Mix als Ganzes abgestimmt, inklusive Personal, Prozesse und Infrastruktur.",
+    "quelle": "Fachregeln G13, G15"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B5",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Massnahme ist korrekt und vollständig ausgearbeitet, in der Praxis umsetzbar und hat grosses Erfolgspotenzial."
+   },
+   {
+    "code": "B6",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Massnahmen sind originell und kreativ und haben grosses Erfolgspotenzial."
+   },
+   {
+    "code": "B7",
+    "punkte": 5,
+    "volle_punkte_wenn": "Der Terminplan ist chronologisch, die Massnahmen sind aufeinander abgestimmt, Reservezeit ist eingerechnet."
+   },
+   {
+    "code": "B8",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Umsetzung ist in der Praxis erfolgreich realisierbar, die Erfolgskontrolle ist lückenlos geplant."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Plan Massnahme",
+    "wo": "Notion › PA6 › Projektmanagement › Plan Massnahme",
+    "inhalt": "Zeitplan der Massnahme für die Umsetzung bei Yuh."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   },
+   {
+    "titel": "Risiken Massnahme",
+    "wo": "Notion › PA6 › Projektmanagement › Risiken Massnahme",
+    "inhalt": "Risiken der geplanten Massnahme mit Bewertung und Gegenmassnahme."
+   }
+  ],
+  "nicht": [
+   "Detaillierte Kostenrechnung, diese gehört in die Budget- und Kostenplanung"
+  ],
+  "daten_ab": "erst nach freigegebenen Zielen und Strategie der 6b",
+  "fallen": [
+   "Nur Kommunikation statt aller sieben Bereiche",
+   "Erfolgskontrolle fehlt",
+   "Terminplan ohne Reserve"
+  ],
+  "apa": [
+   "Terminplan und Mix-Übersicht als Tabelle oder Abbildung mit Nummer fett und Titel kursiv.",
+   "Beispiele anderer Unternehmen mit Kurzbeleg."
+  ]
+ },
+ "6b-9": {
+  "titel": "Nachhaltigkeitserläuterungen",
+  "teil": "6b",
+  "kurz": "Schätze die sozialen, wirtschaftlichen und ökologischen Folgen der Massnahme nachvollziehbar ab.",
+  "seiten": 2,
+  "fragen": [
+   "Welchen nachhaltigen Nutzen hat die Massnahme für die Zielgruppe?",
+   "Welche wirtschaftlichen Folgen hat sie für Yuh?",
+   "Gibt es ökologische oder soziale Nachteile?"
+  ],
+  "muss": [
+   {
+    "punkt": "Nachhaltigkeitserläuterungen als Punkt 9.",
+    "quelle": "Merkmalblatt 6b, Punkt 9"
+   },
+   {
+    "punkt": "Nachhaltigkeit des Konzepts aufzeigen.",
+    "quelle": "Konzept PA6, S. 12"
+   },
+   {
+    "punkt": "Folgen nachvollziehbar dargelegt und abgeschätzt, mit sozialen, ökonomischen und/oder ökologischen Ansätzen.",
+    "quelle": "Konzept PA6, S. 17 (Raster Nachhaltigkeit)"
+   },
+   {
+    "punkt": "Belege und Annahmen getrennt.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6b-9"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B10",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Massnahmen sind für die Zielgruppe nachhaltig und bringen einen hohen, sichtbaren Mehrwert für Umwelt und/oder Unternehmen. Folgen sind nachvollziehbar dargelegt."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Vorgängerkapitel",
+    "wo": "Team-App › Schreibplatz, Kapitel 6b-8",
+    "inhalt": "Die Massnahme, deren Folgen hier beurteilt werden."
+   },
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   }
+  ],
+  "nicht": [
+   "Allgemeine Aussagen über Nachhaltigkeit ohne Bezug zur Massnahme"
+  ],
+  "daten_ab": "nach geprüftem Massnahmenentwurf",
+  "fallen": [
+   "Nur Vorteile nennen",
+   "Annahmen als Tatsachen darstellen"
+  ],
+  "apa": [
+   "Nachhaltigkeitsmodelle und Kennzahlen mit Kurzbeleg und Jahr."
+  ]
+ },
+ "6b-10": {
+  "titel": "Budget- und Kostenplanung",
+  "teil": "6b",
+  "kurz": "Rechne die Kosten der Massnahme je Position nachvollziehbar und mit Quelle aus.",
+  "seiten": 2,
+  "fragen": [
+   "Welche Kostenpositionen hat die Massnahme?",
+   "Woher stammen die Preise?",
+   "Was kostet die Massnahme insgesamt, und wie kontrollieren wir die Kosten?"
+  ],
+  "muss": [
+   {
+    "punkt": "Budget- und Kostenplanung als Punkt 10.",
+    "quelle": "Merkmalblatt 6b, Punkt 10"
+   },
+   {
+    "punkt": "Kostenberechnung je Massnahme detailliert, korrekt, nachvollziehbar und praxisnah.",
+    "quelle": "Konzept PA6, S. 16–17 (Raster Budget)"
+   },
+   {
+    "punkt": "Je Position Menge, Einheit, Preis, Betrag und Quelle, Summe abgeglichen.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6b-10"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B9",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Kosten je Massnahme sind detailliert, absolut korrekt, nachvollziehbar und stark praxisorientiert berechnet."
+   },
+   {
+    "code": "B8",
+    "punkte": 10,
+    "volle_punkte_wenn": "Die Umsetzung ist in der Praxis erfolgreich realisierbar, die Erfolgskontrolle ist lückenlos geplant."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Plan Massnahme",
+    "wo": "Notion › PA6 › Projektmanagement › Plan Massnahme",
+    "inhalt": "Zeitplan der Massnahme für die Umsetzung bei Yuh."
+   },
+   {
+    "titel": "Controlling",
+    "wo": "Notion › PA6 › Projektmanagement › Controlling",
+    "inhalt": "Aufwand und Statusberichte. Zeigt, wo Plan und Ist auseinanderlagen."
+   },
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   }
+  ],
+  "nicht": [
+   "Aufwandstunden der Gruppe, diese gehören ins Projektcontrolling"
+  ],
+  "daten_ab": "nach geprüftem Massnahmenentwurf",
+  "fallen": [
+   "Preise ohne Quelle",
+   "Rechenfehler in der Summe",
+   "Kontrolle der Kosten fehlt"
+  ],
+  "apa": [
+   "Offerten und Preislisten als Quelle mit Organisation und Datum; Offerten in den Anhang und im Text verweisen.",
+   "Budgettabelle mit Nummer fett, Titel kursiv und Anmerkung zu den Quellen."
+  ]
+ },
+ "6b-11": {
+  "titel": "Fazit",
+  "teil": "6b",
+  "kurz": "Ziehe ein begründetes Gesamturteil, was das Konzept erreicht und wo seine Grenzen liegen.",
+  "seiten": 1,
+  "fragen": [
+   "Erreicht das Konzept die gesetzten Ziele, und warum?",
+   "Welchen Nutzen bringt es Yuh und der Kundschaft?",
+   "Wo liegen Grenzen und offene Punkte?"
+  ],
+  "muss": [
+   {
+    "punkt": "Fazit als eigener Punkt 11.",
+    "quelle": "Merkmalblatt 6b, Punkt 11"
+   },
+   {
+    "punkt": "Die Zielsetzung beantworten, Nutzen und Grenzen ohne unbewiesene Erfolgsaussagen nennen.",
+    "quelle": "Kapitelregister (Notion › PA6 › Kapitel), Fertig wenn 6b-11"
+   },
+   {
+    "punkt": "Auf den geprüften Kapiteln 2 bis 10 aufbauen.",
+    "quelle": "Kapitelplan Schreibwerk, Startbedingung 6b-11"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Geprüfte Kapitel 2 bis 10 der 6b",
+    "wo": "Team-App › Schreibplatz, Kapitel 6b-2 bis 6b-10",
+    "inhalt": "Daraus stammen alle Aussagen des Fazits."
+   },
+   {
+    "titel": "Entscheide",
+    "wo": "Notion › PA6 › Projektmanagement › Entscheide",
+    "inhalt": "Festgehaltene Gruppenentscheide. Prüfe hier, ob zu deinem Kapitel schon etwas entschieden ist."
+   },
+   {
+    "titel": "Kapitelregister",
+    "wo": "Notion › PA6 › Kapitel",
+    "inhalt": "Je Kapitel stehen dort Was, Warum, Fertig wenn und So geht's sowie Pate und Zweitlesung."
+   }
+  ],
+  "nicht": [
+   "Neue Massnahmen oder Zahlen, die in Kapitel 2 bis 10 nicht vorkommen",
+   "Erfolg als sicher darstellen"
+  ],
+  "daten_ab": "erst nach Prüfung der Kapitel 2 bis 10 der 6b",
+  "fallen": [
+   "Nur zusammenfassen statt urteilen",
+   "Grenzen fehlen",
+   "Versprechen, die das Konzept nicht belegt"
+  ],
+  "apa": [
+   "Fremde Aussagen auch im Fazit mit Kurzbeleg (Name, Jahr).",
+   "Mehrere Quellen in einer Klammer alphabetisch, mit Strichpunkt getrennt."
+  ]
+ },
+ "6b-12": {
+  "titel": "Reflexion",
+  "teil": "6b",
+  "kurz": "Blicke kritisch auf die Arbeit an der 6b zurück, mit konkreten Schwierigkeiten und Learnings.",
+  "seiten": 1,
+  "fragen": [
+   "Welche Schwierigkeiten hatten wir während der 6b, im Detail?",
+   "Was haben wir daraus gelernt?",
+   "Was würden wir beim nächsten Projekt anders machen?"
+  ],
+  "muss": [
+   {
+    "punkt": "Reflexion als Punkt 12.",
+    "quelle": "Merkmalblatt 6b, Punkt 12"
+   },
+   {
+    "punkt": "Gruppenreflexion.",
+    "quelle": "Konzept PA6, S. 12"
+   },
+   {
+    "punkt": "Kritisch, mit den Schwierigkeiten im Detail und dem jeweiligen Learning.",
+    "quelle": "Konzept PA6, S. 17 (Raster Reflexion der Arbeit)"
+   },
+   {
+    "punkt": "Nur echte, datierte Beiträge der Gruppenmitglieder, nichts erfinden.",
+    "quelle": "Kapitelplan Schreibwerk, Startbedingung 6b-12"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B11",
+    "punkte": 5,
+    "volle_punkte_wenn": "Die Reflexion ist kritisch, nennt die Schwierigkeiten im Detail und jeweils das Learning."
+   },
+   {
+    "code": "B12",
+    "punkte": 5,
+    "volle_punkte_wenn": "Sprachlich einwandfrei, Stil klar, verständlich und dem Zielpublikum angepasst."
+   }
+  ],
+  "gliederung": [],
+  "infos": [
+   {
+    "titel": "Reflexion",
+    "wo": "Notion › PA6 › Projektmanagement › Reflexion",
+    "inhalt": "Ort für die persönlichen Rückblicke der Gruppenmitglieder."
+   },
+   {
+    "titel": "Sitzungen",
+    "wo": "Notion › PA6 › Projektmanagement › Sitzungen",
+    "inhalt": "Protokolle der Gruppentreffen. Zeigen, was wann entschieden wurde."
+   },
+   {
+    "titel": "Controlling",
+    "wo": "Notion › PA6 › Projektmanagement › Controlling",
+    "inhalt": "Aufwand und Statusberichte. Zeigt, wo Plan und Ist auseinanderlagen."
+   },
+   {
+    "titel": "Risiken Projekt",
+    "wo": "Notion › PA6 › Projektmanagement › Risiken Projekt",
+    "inhalt": "Risiken unseres Gruppenprojekts und wie wir sie verfolgen."
+   }
+  ],
+  "nicht": [
+   "Die Reflexion der 6a wiederholen",
+   "Erfundene oder geschönte Erfahrungen"
+  ],
+  "daten_ab": null,
+  "fallen": [
+   "Schwierigkeiten nur allgemein genannt",
+   "Learning fehlt",
+   "Kein konkretes Beispiel aus dem Projektverlauf"
+  ],
+  "apa": [
+   "Aussagen aus Mails oder Gesprächen als persönliche Kommunikation kennzeichnen, nicht ins Literaturverzeichnis.",
+   "Gezeigte Protokolle oder Statusberichte in den Anhang und im Text darauf verweisen."
+  ]
+ },
+ "6a-6": {
+  "titel": "Literaturverzeichnis · Abbildungsverzeichnis · Tabellenverzeichnis · Anhang · Eigenständigkeitserkärung",
+  "teil": "6a",
+  "kurz": "Erstelle alle Verzeichnisse, ordne den Anhang und füge die Erklärung im vorgegebenen Wortlaut ein.",
+  "seiten": null,
+  "fragen": [
+   "Steht jede im Text zitierte Quelle im Literaturverzeichnis und umgekehrt?",
+   "Sind alle Abbildungen und Tabellen mit Nummer, Titel und Seite erfasst?",
+   "Ist jeder Anhang nummeriert und im Text erwähnt?",
+   "Haben alle Gruppenmitglieder die Erklärung mit echten Angaben unterschrieben?"
+  ],
+  "muss": [
+   {
+    "punkt": "Literaturverzeichnis vollständig und alphabetisch, nicht nach Quellenart unterteilt, Werktitel kursiv, ab der zweiten Zeile eingerückt, jeder Eintrag endet mit Punkt.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 5, S. 14"
+   },
+   {
+    "punkt": "Abbildungs- und Tabellenverzeichnis mit Nummer, Titel und Seite, ohne Quellen.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.2, S. 18–19"
+   },
+   {
+    "punkt": "Hilfsmittelverzeichnis mit Hilfsmittel, Verwendungszweck und betroffenen Stellen.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.1, S. 18"
+   },
+   {
+    "punkt": "Abkürzungsverzeichnis alphabetisch, für alle nicht allgemein gebräuchlichen Abkürzungen.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.3, S. 19"
+   },
+   {
+    "punkt": "Anhang nummeriert, jeder Anhang auf neuer Seite, jeder im Text mindestens einmal verwiesen.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.5, S. 20"
+   },
+   {
+    "punkt": "Der Fragebogen ist online oder in der Arbeit verfügbar; alle Antworten der Umfrage stehen im Anhang.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 4; Berichtsgrundlage 6a, WIAR (Block 3, Folie 8)"
+   },
+   {
+    "punkt": "Mit einem KI-Werkzeug erstellte Inhalte, die zitiert werden, mit vollständigem Chat im Anhang.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 3.10, S. 11"
+   },
+   {
+    "punkt": "Erklärung im vorgegebenen Wortlaut mit Ort, Datum, Name und Unterschrift.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 7, S. 21; Merkmalblatt 6a, Punkt 7"
+   }
+  ],
+  "raster": [
+   {
+    "code": "R8",
+    "punkte": 10,
+    "volle_punkte_wenn": "Schriftbild nach Vorgaben und sehr ansprechend, Grafiken und Abbildungen in sehr guter Qualität, nötige Quellen angegeben, Inhaltsverzeichnis und Layout einwandfrei."
+   }
+  ],
+  "gliederung": [
+   "Literaturverzeichnis",
+   "Abbildungsverzeichnis",
+   "Tabellenverzeichnis",
+   "Abkürzungsverzeichnis",
+   "Hilfsmittelverzeichnis",
+   "Anhang",
+   "Eigenständigkeitserkärung (Kapitel 7)"
+  ],
+  "infos": [
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   },
+   {
+    "titel": "Literaturverzeichnis",
+    "wo": "Notion › PA6 › Kapitel › Literaturverzeichnis",
+    "inhalt": "Kapitelkarte mit dem Auftrag, Kurzbelege mit dem Quellenregister abzugleichen."
+   },
+   {
+    "titel": "Arbeitspaket Layout und Verzeichnisse",
+    "wo": "Notion › PA6 › Projektmanagement › PSP › Layout, Verzeichnisse und Lektorat 6a (R8, R9)",
+    "inhalt": "Formale Schlussprüfung mit Abnahmekriterien."
+   }
+  ],
+  "nicht": [
+   "Quellen, die im Text nicht vorkommen",
+   "Quellenangaben im Abbildungs- oder Tabellenverzeichnis",
+   "Mails und Gespräche im Literaturverzeichnis",
+   "Rohdaten mit Personendaten im Anhang"
+  ],
+  "daten_ab": "Endstand erst nach Textschluss aller Kapitel; Unterschriften nach der Schlussprüfung",
+  "fallen": [
+   "Kurzbeleg im Text ohne Eintrag im Literaturverzeichnis oder umgekehrt",
+   "Wortlaut der Erklärung verändert",
+   "Position von Abbildungs- und Tabellenverzeichnis ist noch offen (Merkmalblatt unter 6, Formale Vorschriften direkt nach dem Inhaltsverzeichnis); Entscheid abwarten"
+  ],
+  "apa": [
+   "Buch nach dem Muster Nachname, Initiale. (Jahr). Titel kursiv (Auflage, wenn nicht die erste). Verlag.",
+   "Webseite einer Organisation nach dem Muster Organisation. (Jahr, Tag. Monat). Titel. URL. Ohne Datum steht «o. D.»; keine Hyperlinks.",
+   "Interne Yuh-Unterlagen nach dem Muster Organisation. (Jahr, Tag. Monat). Titel des Dokuments [Format]."
+  ]
+ },
+ "6b-13": {
+  "titel": "Alle nötigen Verzeichnisse · Eigenständigkeitserklärung",
+  "teil": "6b",
+  "kurz": "Erstelle alle Verzeichnisse der 6b und füge die Erklärung im vorgegebenen Wortlaut ein.",
+  "seiten": null,
+  "fragen": [
+   "Steht jede zitierte Quelle im Literaturverzeichnis und umgekehrt?",
+   "Sind alle Abbildungen, Tabellen, Abkürzungen und Hilfsmittel erfasst?",
+   "Ist jeder Anhang nummeriert und im Text erwähnt?",
+   "Haben alle Gruppenmitglieder die Erklärung mit echten Angaben unterschrieben?"
+  ],
+  "muss": [
+   {
+    "punkt": "Alle nötigen Verzeichnisse als Punkt 13 und die Eigenständigkeitserklärung als Punkt 14.",
+    "quelle": "Merkmalblatt 6b, Punkte 13 und 14"
+   },
+   {
+    "punkt": "Quellenverzeichnis vollständig und korrekt nach APA-Leitfaden.",
+    "quelle": "Konzept PA6, S. 18 (Raster Quellenarbeit)"
+   },
+   {
+    "punkt": "Literaturverzeichnis alphabetisch, nicht nach Quellenart unterteilt, Werktitel kursiv, ab der zweiten Zeile eingerückt.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 5, S. 14"
+   },
+   {
+    "punkt": "Abbildungs- und Tabellenverzeichnis mit Nummer, Titel und Seite, ohne Quellen.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.2, S. 18–19"
+   },
+   {
+    "punkt": "Hilfsmittelverzeichnis mit Hilfsmittel, Verwendungszweck und betroffenen Stellen.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.1, S. 18"
+   },
+   {
+    "punkt": "Anhang nummeriert, jeder auf neuer Seite und im Text verwiesen.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 6.5, S. 20"
+   },
+   {
+    "punkt": "Erklärung im vorgegebenen Wortlaut mit Ort, Datum, Name und Unterschrift.",
+    "quelle": "Formale Vorschriften HFW 2025, Kap. 7, S. 21"
+   }
+  ],
+  "raster": [
+   {
+    "code": "B13",
+    "punkte": 5,
+    "volle_punkte_wenn": "Zitate sind sinnvoll in den Text eingebaut, Nachweise korrekt nach APA, das Quellenverzeichnis ist vollständig nach APA-Leitfaden."
+   },
+   {
+    "code": "B14",
+    "punkte": 5,
+    "volle_punkte_wenn": "Schriftbild nach Vorgaben und sehr ansprechend, Grafiken und Abbildungen in sehr guter Qualität."
+   }
+  ],
+  "gliederung": [
+   "Alle nötigen Verzeichnisse (Punkt 13)",
+   "Eigenständigkeitserklärung (Punkt 14)"
+  ],
+  "infos": [
+   {
+    "titel": "Quellenregister",
+    "wo": "Notion › Archiv › Quellen",
+    "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
+   },
+   {
+    "titel": "Alle nötigen Verzeichnisse",
+    "wo": "Notion › PA6 › Kapitel › Alle nötigen Verzeichnisse",
+    "inhalt": "Kapitelkarte mit dem Abgleich von Bericht und Quellenregister."
+   }
+  ],
+  "nicht": [
+   "Quellen, die im Text nicht vorkommen",
+   "Mails und Gespräche im Literaturverzeichnis",
+   "Rohdaten mit Personendaten im Anhang"
+  ],
+  "daten_ab": "Endstand erst nach Textschluss aller Kapitel; Unterschriften nach der Schlussprüfung",
+  "fallen": [
+   "Kurzbeleg ohne Eintrag im Verzeichnis oder umgekehrt",
+   "Wortlaut der Erklärung verändert",
+   "Verzeichnis nach Quellenart unterteilt"
+  ],
+  "apa": [
+   "Online-Artikel nach dem Muster Nachname, Initiale. (Jahr, Tag. Monat). Titel. Name der Website. URL",
+   "Dokumente aus dem Studium nach dem Muster Nachname, Initiale. (Jahr, Tag. Monat). Titel kursiv [Format]. Plattform. URL.",
+   "Mehrere Werke desselben Autors im selben Jahr mit Kleinbuchstaben unterscheiden (2023 a, 2023 b)."
+  ]
+ }
+}

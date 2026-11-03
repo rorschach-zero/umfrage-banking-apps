@@ -1,0 +1,304 @@
+{
+ "stand": "2026-11-03",
+ "quellen": [
+  {
+   "kurz": "WIAR Block 1",
+   "datei": "PPP_WIAR_25_Block_1_B.pdf",
+   "titel": "Wissenschaftliches Arbeiten, Block 1 (Bornand)",
+   "pfad": "Lernsystem/10_faecher/WA/blocks/Unterrichtsmaterial/"
+  },
+  {
+   "kurz": "WIAR Block 2",
+   "datei": "WIAR_Block_2.pdf",
+   "titel": "Wissenschaftliches Arbeiten, Block 2 (Bornand)",
+   "pfad": "Lernsystem/10_faecher/WA/blocks/Unterrichtsmaterial/"
+  },
+  {
+   "kurz": "WIAR Block 3",
+   "datei": "WIAR_Block_3.pdf",
+   "titel": "Wissenschaftliches Arbeiten, Block 3 (Bornand)",
+   "pfad": "Lernsystem/10_faecher/WA/blocks/Unterrichtsmaterial/"
+  },
+  {
+   "kurz": "Formale Vorschriften",
+   "datei": "Formale_Vorschriften_APA7_HFW_2025.pdf",
+   "titel": "Formale Vorschriften für schriftliche Arbeiten an der HFW, Version 2025",
+   "pfad": "PA6/00_auftrag/original/"
+  },
+  {
+   "kurz": "Wissenschaftlich schreiben",
+   "datei": "Wissenschaftlich_schreiben.pdf",
+   "titel": "Wissenschaftliches Schreiben (Moodle, Abschnitt Verständlich schreiben)",
+   "pfad": "Lernsystem/10_faecher/WA/blocks/Verständlich_schreiben/"
+  },
+  {
+   "kurz": "Auftrag PA6",
+   "datei": "Auftrag_PA6.pdf",
+   "titel": "Auftrag PA6, Abschnitt Formal",
+   "pfad": "PA6/00_auftrag/original/"
+  }
+ ],
+ "regeln": [
+  {
+   "thema": "Fragestellung",
+   "regel": "Jede wissenschaftliche Arbeit beginnt mit einer Frage. Die Arbeit sucht die Antwort systematisch, aus bereits Bekanntem und aus eigenen Untersuchungen.",
+   "pruefen": "Steht unsere Fragestellung klar formuliert in der Einleitung?",
+   "quelle": "WIAR Block 1, Folie 7"
+  },
+  {
+   "thema": "Aufbau Einleitung",
+   "regel": "Die Einleitung enthält Motivation («Why»), Ausgangslage, Fragestellung, Zielsetzung und Vorgehen.",
+   "pruefen": "Sind in der Einleitung alle fünf Teile vorhanden?",
+   "quelle": "WIAR Block 3, Folie 15"
+  },
+  {
+   "thema": "Roter Faden",
+   "regel": "Jede Aussage ist ein Puzzlestein auf dem Weg zur Antwort auf die Fragestellung. Der rote Faden muss in der Gliederung, in den Gedanken und in der Sprache sichtbar sein.",
+   "pruefen": "Trägt jeder Absatz in meinem Kapitel etwas zur Antwort auf die Fragestellung bei?",
+   "quelle": "WIAR Block 3, Folien 14 und 15"
+  },
+  {
+   "thema": "Objektivität",
+   "regel": "Genau und nachvollziehbar vorgehen, nicht aus dem Bauch heraus argumentieren. Wissenschaftliche Texte sind objektiv, nachvollziehbar, vollständig, ehrlich, kritisch und präzise.",
+   "pruefen": "Kann eine fremde Person jede Behauptung in meinem Text anhand von Quelle oder eigenen Daten nachprüfen?",
+   "quelle": "WIAR Block 1, Folien 7 bis 9; WIAR Block 3, Folie 18 (Gebot 1)"
+  },
+  {
+   "thema": "Praxisbezug",
+   "regel": "Schriftliche Arbeiten an der KV Business School haben immer einen konkreten Bezug zur Praxis.",
+   "pruefen": "Zeigt mein Kapitel den Bezug zum Praxisfall (Yuh)?",
+   "quelle": "WIAR Block 3, Folie 19 (Gebot 2)"
+  },
+  {
+   "thema": "Quellenqualität",
+   "regel": "Nur seriöse, neutrale, wissenschaftliche und möglichst aktuelle Quellen verwenden und sich nicht auf die erstbeste Quelle verlassen. Internetquellen nur, wenn Autorin oder Institution klar erkennbar ist.",
+   "pruefen": "Ist bei jeder Quelle klar, wer sie verfasst hat, und ist sie seriös und aktuell?",
+   "quelle": "WIAR Block 1, Folie 20; WIAR Block 3, Folie 21 (Gebot 4); Formale Vorschriften, Kapitel 3.8"
+  },
+  {
+   "thema": "Erste Hand",
+   "regel": "Grundsätzlich aus dem Originalwerk zitieren. Nur wenn das nicht geht, aus zweiter Hand mit «zitiert nach»; ins Literaturverzeichnis kommt dann nur das Werk, aus dem man es hat. Unterrichtsunterlagen sind meist Sekundärquellen.",
+   "pruefen": "Habe ich, wo möglich, die Originalquelle statt einer Zusammenfassung zitiert?",
+   "quelle": "Formale Vorschriften, Kapitel 3.6 und 5.7"
+  },
+  {
+   "thema": "Plagiat",
+   "regel": "Jede Information, die schon in einer anderen Quelle steht, muss belegt werden, egal ob wörtlich oder sinngemäss übernommen. Fehlt der Beleg, ist es ein Plagiat und ein Verstoss gegen das Urheberrecht.",
+   "pruefen": "Hat jede übernommene Information einen Beleg?",
+   "quelle": "Formale Vorschriften, Kapitel 1"
+  },
+  {
+   "thema": "Zitieren",
+   "regel": "Jedes direkte und indirekte Zitat bekommt im Text einen Kurzbeleg (Nachname, Jahr, Seite wo vorhanden), z. B. (Rüegg-Stürm, 2023, S. 55). Der vollständige Langbeleg steht im Literaturverzeichnis.",
+   "pruefen": "Hat jedes Zitat einen Kurzbeleg mit Name und Jahr?",
+   "quelle": "WIAR Block 3, Folie 23 (Gebot 6); Formale Vorschriften, Kapitel 2 und 3.1"
+  },
+  {
+   "thema": "Paraphrasieren",
+   "regel": "Der Normalfall ist das sinngemässe Zitat: Gelesenes in eigenen Worten zusammenfassen. Dabei keine Sätze oder Teilsätze abschreiben, und trotzdem die Quelle angeben.",
+   "pruefen": "Ist meine Paraphrase wirklich in eigenen Worten und trotzdem belegt?",
+   "quelle": "WIAR Block 2, Folien 5 und 6; WIAR Block 3, Folie 22 (Gebot 5); Formale Vorschriften, Kapitel 2.2"
+  },
+  {
+   "thema": "Wörtliches Zitat",
+   "regel": "Wörtlich nur in Ausnahmefällen, wenn es auf den genauen Wortlaut ankommt. Unter 40 Wörtern in Anführungszeichen mit Seitenzahl, über 40 Wörter eingerückt, einzeilig, kleiner und ohne Anführungszeichen. Weglassungen mit drei Punkten, eigene Ergänzungen in eckigen Klammern.",
+   "pruefen": "Ist jedes wörtliche Zitat nötig, exakt übernommen und mit Seitenzahl belegt?",
+   "quelle": "WIAR Block 2, Folien 6, 9 und 10; WIAR Block 3, Folie 22 (Gebot 5); Formale Vorschriften, Kapitel 2.1"
+  },
+  {
+   "thema": "Literaturverzeichnis",
+   "regel": "Alles, was im Text zitiert ist, steht im Literaturverzeichnis und umgekehrt. Alphabetisch, nicht nach Quellenart unterteilt, Werktitel kursiv, jede Angabe endet mit einem Punkt.",
+   "pruefen": "Hat jeder Kurzbeleg in meinem Kapitel einen passenden Eintrag im Literaturverzeichnis?",
+   "quelle": "Formale Vorschriften, Kapitel 5"
+  },
+  {
+   "thema": "KI-Nutzung",
+   "regel": "KI darf zur Inspiration oder für sprachliche Arbeiten genutzt werden, aber nur, wenn man das Resultat selbst beurteilen kann. KI ist keine Quelle; für alle Aussagen ist man selbst verantwortlich.",
+   "pruefen": "Habe ich jedes KI-Ergebnis selbst geprüft und keine Aussage nur mit KI belegt?",
+   "quelle": "WIAR Block 3, Folie 26 (Gebot 9); WIAR Block 1, Folien 17 und 20"
+  },
+  {
+   "thema": "KI-Nachweis",
+   "regel": "Mit KI erstellte Inhalte werden wie persönliche Kommunikation zitiert, der Chat kommt vollständig in den Anhang (z. B. als Screenshot), und das Werkzeug steht im Hilfsmittelverzeichnis.",
+   "pruefen": "Ist jede KI-Nutzung in meinem Kapitel im Hilfsmittelverzeichnis eingetragen und der Chat gesichert?",
+   "quelle": "Formale Vorschriften, Kapitel 3.10, 6.1 und 6.5"
+  },
+  {
+   "thema": "Eigenleistung",
+   "regel": "Die Arbeit endet mit der ehrenwörtlichen Erklärung im vorgegebenen Wortlaut. Darin versichert man, alle Quellen und Hilfsmittel angegeben und alle KI-Werkzeuge mit Produktname und genutzten Funktionen vollständig aufgeführt zu haben.",
+   "pruefen": "Könnte ich die Erklärung für mein Kapitel ehrlich unterschreiben?",
+   "quelle": "Formale Vorschriften, Kapitel 7"
+  },
+  {
+   "thema": "Interviews und Gespräche",
+   "regel": "E-Mails, Telefonate und Interviews werden im Text als persönliche Kommunikation gekennzeichnet, aber nicht ins Literaturverzeichnis aufgenommen. Transkripte eigener Interviews kommen je nach Umfang in den Anhang.",
+   "pruefen": "Ist jedes Gespräch im Text als persönliche Kommunikation mit Datum gekennzeichnet?",
+   "quelle": "Formale Vorschriften, Kapitel 3.9"
+  },
+  {
+   "thema": "Betriebsinterne Quellen",
+   "regel": "Bei internen Unterlagen einer Firma nennt man die Firma und das Erstellungsdatum statt einer Person, Seitenzahl nur wo möglich, z. B. (Firma XY, 2023). Bei Intranetquellen zusätzlich eine Fussnote, dass sie nicht öffentlich ist.",
+   "pruefen": "Sind interne Unterlagen mit Firma und Datum belegt?",
+   "quelle": "Formale Vorschriften, Kapitel 3.11 und 5.6"
+  },
+  {
+   "thema": "Abbildungen und Tabellen",
+   "regel": "Nummer fett über der Darstellung, Titel kursiv darunter, Quelle als Anmerkung unter der Darstellung. Leicht verändert: «In Anlehnung an»; eigene Darstellung: kein Quellenhinweis.",
+   "pruefen": "Hat jede Abbildung und Tabelle Nummer, Titel und, wo nötig, eine Anmerkung mit Quelle?",
+   "quelle": "Formale Vorschriften, Kapitel 4.1 und 4.2"
+  },
+  {
+   "thema": "Verzeichnisse",
+   "regel": "Titel und Verzeichnisse werden automatisch erzeugt. Abbildungs- und Tabellenverzeichnis enthalten nur Nummer, Titel und Seite, keine Quellen.",
+   "pruefen": "Sind Überschriften und Beschriftungen als Formatvorlagen gesetzt, damit die Verzeichnisse automatisch entstehen?",
+   "quelle": "WIAR Block 3, Folie 24 (Gebot 7); WIAR Block 2, Folie 17; Formale Vorschriften, Kapitel 6.2"
+  },
+  {
+   "thema": "Abkürzungen",
+   "regel": "Nicht allgemein übliche Abkürzungen beim ersten Mal ausschreiben, die Abkürzung in Klammern dahinter, und ins Abkürzungsverzeichnis aufnehmen. Ohne Eintrag gehen nur gebräuchliche wie «z. B.» oder «usw.».",
+   "pruefen": "Ist jede Abkürzung beim ersten Vorkommen ausgeschrieben?",
+   "quelle": "Formale Vorschriften, Kapitel 6.3; WIAR Block 2, Folie 24"
+  },
+  {
+   "thema": "Sprache wissenschaftlich",
+   "regel": "Normale Standardsprache: nicht gestelzt, nicht umgangssprachlich. Immer dieselben Fachbegriffe verwenden und schwierige Begriffe beim ersten Mal erklären. Rechtschreibfehler und unverständliche Sätze beeinflussen die Bewertung der ganzen Arbeit.",
+   "pruefen": "Habe ich meinen Text auf Rechtschreibung geprüft und Fachbegriffe beim ersten Mal erklärt?",
+   "quelle": "Wissenschaftlich schreiben, Seite 1; WIAR Block 3, Folie 25 (Gebot 8)"
+  },
+  {
+   "thema": "Verständlich schreiben",
+   "regel": "Kurze, einfach gebaute Sätze statt Schachtelsätzen, aktive Sätze mit einfachen Verben («beeinflussen» statt «Einfluss haben auf»), keine Füllwörter wie «eigentlich» oder «ziemlich». Konnektoren wie «weil», «deshalb», «obwohl» verbinden die Sätze, sprechende Titel führen durch den Text.",
+   "pruefen": "Lässt sich jeder Satz beim ersten Lesen verstehen?",
+   "quelle": "WIAR Block 2, Folien 23 bis 32; Wissenschaftlich schreiben, Seiten 1 bis 3; WIAR Block 3, Folie 25 (Gebot 8)"
+  },
+  {
+   "thema": "Umfrage darstellen",
+   "regel": "Zu Beginn steht, was die Umfrage herausfinden soll, welche Art von Umfrage es ist und wer befragt wurde. Im Text nur die Ergebnisse, die für die Fragestellung wichtig sind; Fragebogen und alle Antworten in den Anhang.",
+   "pruefen": "Stehen Zweck, Art und Befragte am Anfang, und liegen Fragebogen und alle Antworten im Anhang?",
+   "quelle": "WIAR Block 3, Folie 8"
+  },
+  {
+   "thema": "Fazit",
+   "regel": "Im Fazit werden die Ergebnisse interpretiert und eine Schlussfolgerung gezogen, die die Fragestellung beantwortet.",
+   "pruefen": "Beantwortet das Fazit die Fragestellung aus der Einleitung?",
+   "quelle": "WIAR Block 3, Folien 8, 14 und 15"
+  },
+  {
+   "thema": "Management Summary",
+   "regel": "Höchstens eine Seite: Fragestellung, methodisches Vorgehen und Ergebnisse (im Präsens), ohne Details und ohne «sollte», «könnte», «ich glaube». Es wird zuletzt geschrieben, steht aber vor dem Inhaltsverzeichnis und ist nicht nummeriert.",
+   "pruefen": "Passt das Management Summary auf eine Seite und nennt Fragestellung, Vorgehen und Ergebnisse?",
+   "quelle": "WIAR Block 3, Folien 10 bis 12"
+  }
+ ],
+ "ki_nachweis": {
+  "was_verlangt": [
+   {
+    "punkt": "Jede KI-Nutzung im Hilfsmittelverzeichnis dokumentieren: welches Hilfsmittel, wofür, an welchen Stellen der Arbeit.",
+    "quelle": "Formale Vorschriften, Kapitel 3.10 und 6.1"
+   },
+   {
+    "punkt": "Mit KI-Tools erstellte Inhalte im Text als persönliche Kommunikation zitieren (wie E-Mails oder Telefonate); sie kommen nicht ins Literaturverzeichnis.",
+    "quelle": "Formale Vorschriften, Kapitel 3.10 mit Verweis auf 3.9"
+   },
+   {
+    "punkt": "Den Chat vollständig im Anhang abbilden, z. B. als Screenshot, weil ein Chat sich nicht über eine URL wieder aufrufen lässt.",
+    "quelle": "Formale Vorschriften, Kapitel 3.10; Anhang-Inhalt «Dokumentation von Chatverläufen mit KI-gestützten Hilfsmitteln» in Kapitel 6.5"
+   },
+   {
+    "punkt": "Jeder Anhang wird nummeriert, beginnt auf einer neuen Seite und wird im Text mindestens einmal erwähnt.",
+    "quelle": "Formale Vorschriften, Kapitel 6.5"
+   },
+   {
+    "punkt": "In der ehrenwörtlichen Erklärung versichern, dass alle verwendeten KI-Werkzeuge mit Produktname und einer Übersicht der genutzten Funktionen vollständig aufgeführt sind.",
+    "quelle": "Formale Vorschriften, Kapitel 7"
+   },
+   {
+    "punkt": "KI nur zur Inspiration oder für sprachliche Arbeiten einsetzen und nur, wenn man das Resultat selbst beurteilen kann; für alle Aussagen bleibt man selbst verantwortlich.",
+    "quelle": "WIAR Block 3, Folie 26 (Gebot 9)"
+   }
+  ],
+  "format": {
+   "hilfsmittelverzeichnis": "Tabelle mit drei Spalten: Hilfsmittel | Verwendungszweck | Betroffene Stellen. Die Vorlage nennt auch Nicht-KI-Hilfe (Lektorat).",
+   "spalten": [
+    "Hilfsmittel",
+    "Verwendungszweck",
+    "Betroffene Stellen"
+   ],
+   "beispiel_aus_vorlage": [
+    [
+     "Lektorat durch Arbeitskollegin",
+     "Sprachliche Korrekturen",
+     "Gesamte Arbeit"
+    ],
+    [
+     "DeepL Write",
+     "Überarbeitung einzelner Textstellen nach Feedback aus Lektorat",
+     "Kapitel 2, Absatz 3-5; Kapitel 3, Absatz 2; Kapitel 4, Absatz 2, 4-6; Kapitel 6, Absatz 3"
+    ],
+    [
+     "Create AI",
+     "Generierung des Bildes für die Titelseite",
+     "Titelblatt"
+    ],
+    [
+     "ChatGPT 4o",
+     "Hilfe beim Verfassen des Management Summarys",
+     "Management Summary"
+    ],
+    [
+     "Microsoft Copilot",
+     "Ideensammlung für SMARTe Zielformulierung",
+     "Kapitel 3"
+    ],
+    [
+     "Elicit",
+     "Recherche",
+     "Kapitel 4"
+    ],
+    [
+     "Perplexity",
+     "Recherche und Formulierungshilfe",
+     "Kapitel 4"
+    ],
+    [
+     "DeepL Translate",
+     "Übersetzung schwieriger englischer Textpassagen aus der Fachliteratur",
+     "Kapitel 4"
+    ],
+    [
+     "Scribbr",
+     "Hilfe beim Formen von Kurzbelegen nach APA",
+     "Gesamte Arbeit, hauptsächlich Kapitel 4"
+    ],
+    [
+     "Dream (by Wombo)",
+     "Erstellung diverser Grafiken",
+     "Kapitel 2, S. 8, Kapitel 4, S. 15, Kapitel 6, S. 32"
+    ]
+   ],
+   "kurzbeleg_im_text": "Als persönliche Kommunikation. Die Vorschriften geben kein eigenes KI-Beispiel; das Muster für persönliche Kommunikation lautet: «H. Lützelflüh betrachtet das duale Bildungssystem als Perle der schweizerischen Bildungslandschaft (persönliche Kommunikation, 12. Januar 2022, siehe Anhang x).»",
+   "anhang": "Chat vollständig, z. B. als Screenshot, als nummerierter Anhang auf eigener Seite, im Text verwiesen («siehe Anhang n»).",
+   "erklaerung_wortlaut": "Ich versichere, dass ich die vorliegende Diplomarbeit ohne fremde Hilfe und ohne Benutzung anderer als der angegebenen Quellen und Hilfsmittel angefertigt und die den benutzten Quellen wörtlich oder inhaltlich entnommenen Stellen als solche kenntlich gemacht habe.\nIch bin mir bewusst, dass der Einsatz von KI-Werkzeugen keine Garantie für die Qualität von Inhalten und Text darstellt. Ich versichere, dass ich von mir verwendete KI-Werkzeuge als Hilfsmittel angegeben und mit ihrem Produktnamen und einer Übersicht, der im Rahmen dieser Arbeit genutzten Funktionen vollständig aufgeführt habe.\nDiese Arbeit hat in gleicher oder ähnlicher Form noch keiner Prüfungsbehörde vorgelegen.\nOrt ...  Datum ...  (Name der/des Studierenden)  Unterschrift",
+   "quelle": "Formale Vorschriften, Kapitel 3.9, 3.10, 6.1, 6.5 und 7"
+  },
+  "verboten": [
+   {
+    "punkt": "KI als Quelle angeben oder eine Aussage nur mit einer KI-Antwort belegen: KI ist keine Quelle.",
+    "quelle": "WIAR Block 1, Folien 17 und 20; WIAR Block 3, Folie 26 (Gebot 9)"
+   },
+   {
+    "punkt": "Übernommene Inhalte ohne Kennzeichnung verwenden: das ist ein Plagiat und ein Verstoss gegen das Urheberrecht.",
+    "quelle": "Formale Vorschriften, Kapitel 1"
+   },
+   {
+    "punkt": "Eingesetzte KI-Werkzeuge verschweigen oder unvollständig aufführen: die ehrenwörtliche Erklärung versichert die vollständige Angabe mit Produktname und genutzten Funktionen.",
+    "quelle": "Formale Vorschriften, Kapitel 7"
+   },
+   {
+    "punkt": "Beim Paraphrasieren Sätze oder Teilsätze aus der Quelle abschreiben.",
+    "quelle": "WIAR Block 2, Folie 5"
+   }
+  ],
+  "quelle": "Formale Vorschriften, Kapitel 3.9, 3.10, 6.1, 6.5, 7; WIAR Block 3, Folie 26 (Gebot 9); WIAR Block 1, Folien 17 und 20"
+ }
+}
