@@ -1,0 +1,10 @@
+.pa-punkte{list-style:none;counter-reset:pa;padding:0;margin:24px 0;display:grid;gap:14px}
+.pa-punkte li{counter-increment:pa;background:#fff;border:1px solid #e3e8e4;border-radius:14px;padding:16px 18px 14px 56px;position:relative}
+.pa-punkte li::before{content:counter(pa);position:absolute;left:18px;top:16px;width:26px;height:26px;border-radius:50%;background:#e6f3f0;color:#17645f;font-weight:700;font-size:14px;display:grid;place-items:center}
+.pa-punkte h2{font-size:16px;margin:2px 0 6px}
+.pa-punkte p{margin:0;line-height:1.55}
+.pa-stand{margin:20px 0 12px}.pa-eigen{font-weight:700;margin:0 0 4px}
+.pa-aktion{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:8px 0 12px}
+.pa-einwand{display:grid;gap:8px;margin:8px 0 16px;max-width:560px}
+.pa-einwand textarea{font:inherit;padding:10px 12px;border:1px solid #c9d1cb;border-radius:10px;min-height:96px}
+main{max-width:720px}
