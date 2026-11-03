@@ -390,7 +390,7 @@ function workHeader(id){
   if(id==='c'){const c=(data.areas||[]).find(m=>m.id==='c'),pr=data.practice;
     const line=c&&c.state==='ready'&&Number.isFinite(c.done)&&c.total>0?c.done+' von '+c.total+' Bewertungen'+(Number.isFinite(c.expected)?' · Soll bis heute '+c.expected:' · Soll unbekannt'):Number.isFinite(pr?.done)&&pr?.total?pr.done+' von '+pr.total+' Übungen · eigene Fälle ab 03.11.':'Stand unbekannt';
     return el('section',{class:'work-tool area-c'},el('div',{},el('strong',{},'C · Bewertungen'),el('span',{},line)),el('a',{class:'button',href:'/team/c/'},'Bewertungen öffnen'));}
-  if(id==='writing')return el('section',{class:'work-tool area-writing'},el('div',{},el('strong',{},'Schreibwerk'),el('span',{},'Deine Kapitel und Gegenlesungen')),data.writingFolder?el('a',{class:'button secondary',href:data.writingFolder,target:'_blank',rel:'noopener'},'Schreibwerk öffnen ↗'):null);
+  if(id==='writing')return el('section',{class:'work-tool area-writing'},el('div',{},el('strong',{},'Schreibwerk'),el('span',{},'Deine Kapitel und Gegenlesungen')),el('a',{class:'button secondary',href:'/team/schreiben/'},'Schreibplatz öffnen'));
   return null;
 }
 function showTasks(){
@@ -429,7 +429,7 @@ function documentRow(row,chapter=false){
   const url=chapter?row.doc:row.url;
   const valid=chapter?/^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+(?:\/edit)?$/.test(url||''):/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view$/.test(url||'');
   return el('li',{class:'document-row'},el('div',{class:'document-copy'},el('h3',{},row.title),el('p',{},chapter?((row.owner===data.person?'Als Pate':row.reader===data.person?'Als Zweitleser:in':'Leitungsübersicht')+' · '+(row.ref||'')):'Wozu: '+row.purpose)),
-    el('div',{class:'document-actions'},valid?el('a',{class:'button secondary document-open',href:preview.active()&&chapter?url.replace(/(?:\/edit)?$/, '/preview'):url,target:'_blank',rel:'noopener noreferrer'},'Öffnen'):el('button',{class:'button secondary',disabled:true,title:'Datei oder Leselink noch nicht verfügbar'},'Öffnen'),piaLink({...row,'Pia-Frage':'Erklär mir das Wichtigste aus '+row.title+'.'})),
+    el('div',{class:'document-actions'},chapter&&!preview.active()&&row.ref?el('a',{class:'button secondary document-open',href:'/team/schreiben/?k='+encodeURIComponent(row.ref)},'Schreiben'):valid?el('a',{class:'button secondary document-open',href:preview.active()&&chapter?url.replace(/(?:\/edit)?$/, '/preview'):url,target:'_blank',rel:'noopener noreferrer'},'Öffnen'):el('button',{class:'button secondary',disabled:true,title:'Datei oder Leselink noch nicht verfügbar'},'Öffnen'),piaLink({...row,'Pia-Frage':'Erklär mir das Wichtigste aus '+row.title+'.'})),
     valid?null:el('p',{class:'quiet-note'},'Datei oder Leselink noch nicht verfügbar.'));
 }
 function showDocuments(){

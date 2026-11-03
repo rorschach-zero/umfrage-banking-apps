@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#f8f8f5">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://docs.google.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Schreibplatz · PA6</title>
+<link rel="stylesheet" href="schreiben.css?v=0fe788aa0643">
+<script src="../config.js" defer></script>
+<script src="schreiben.js?v=0576223b0799" defer></script>
+</head>
+<body>
+<a class="skip" href="#panel">Direkt zum Auftrag</a>
+<header class="bar">
+  <a class="back" href="/team/">← Unser Projekt</a>
+  <div class="bar-title"><span class="eyebrow" id="part">Schreibplatz</span><h1 id="title">Kapitel wird geladen …</h1></div>
+  <div class="bar-meta" id="meta"></div>
+  <label class="pick"><span class="sr">Kapitel wechseln</span><select id="picker" hidden></select></label>
+</header>
+<nav class="tabs" id="tabs" aria-label="Bereiche">
+  <button data-tab="auftrag" aria-selected="true">Auftrag</button>
+  <button data-tab="infos" aria-selected="false">Infos</button>
+  <button data-tab="regeln" aria-selected="false">APA &amp; Regeln</button>
+  <button data-tab="hilfe" aria-selected="false">Hilfe</button>
+  <button data-tab="doc" class="only-small" aria-selected="false">Doc</button>
+</nav>
+<div class="layout">
+  <main class="panel" id="panel" tabindex="-1">
+    <section id="tab-auftrag" class="tab"></section>
+    <section id="tab-infos" class="tab" hidden></section>
+    <section id="tab-regeln" class="tab" hidden></section>
+    <section id="tab-hilfe" class="tab" hidden></section>
+    <p class="self">Du schreibst selbst. Die Hilfe gibt Stichworte, keine fertigen Sätze.</p>
+  </main>
+  <section class="doc" id="doc" aria-label="Kapitel-Dokument"></section>
+</div>
+<div id="live" class="sr" role="status" aria-live="polite"></div>
+<noscript><p class="pad">Bitte JavaScript aktivieren.</p></noscript>
+</body>
+</html>
