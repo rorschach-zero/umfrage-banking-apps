@@ -18,6 +18,10 @@ function todayIso() {
 }
 function fmtHours(value) { return String(value).replace('.', ','); }
 function paketLabel(row) { return row.ref + (row.title ? ' · ' + row.title : ''); }
+function pruef(r) {
+  if (r && r.ok === false) throw Error('Nicht gespeichert: ' + (r.fehler || r.error || 'bitte nochmals versuchen') + '.');
+  return r || {};
+}
 function mount(container, opts) {
   opts = opts || {};
   if (!container || !opts.person || (typeof sende !== 'function' && typeof opts.save !== 'function')) return;
@@ -33,7 +37,8 @@ function mount(container, opts) {
     node('option', {value: ''}, 'Paket optional'),
     ...pakete.map(row => node('option', {value: row.ref}, paketLabel(row))),
     node('option', {value: 'anderes'}, 'anderes'));
-  if (opts.paket && [...paketSelect.options].some(o => o.value === opts.paket)) paketSelect.value = opts.paket;
+  if (opts.paket && ![...paketSelect.options].some(o => o.value === opts.paket)) paketSelect.insertBefore(node('option', {value: opts.paket}, opts.paket), paketSelect.lastChild);
+  if (opts.paket) paketSelect.value = opts.paket;
   meta.append(node('label', {}, 'Datum ', dateInput), node('label', {}, 'Tätigkeit ', taskInput), node('label', {}, 'Paket ', paketSelect));
   const hours = node('div', {class: 'zeit-hours', role: 'group', 'aria-label': 'Stunden wählen'});
   async function undo() {
@@ -41,7 +46,7 @@ function mount(container, opts) {
     busy = true; receipt.textContent = 'Wird zurückgenommen …';
     const send = typeof opts.save === 'function' ? opts.save : payload => sende(payload);
     try {
-      await send({typ: 'projekt_save', formular: 'arbeitszeit', id: last.id, felder: Object.assign({}, last.felder, {storniert: 'ja'})});
+      pruef(await send({typ: 'projekt_save', formular: 'arbeitszeit', id: last.id, felder: Object.assign({}, last.felder, {storniert: 'ja'})}));
       receipt.hidden = true; last = null; opts.onChange && opts.onChange();
     } catch (error) { receipt.textContent = error.message; }
     finally { busy = false; }
@@ -56,7 +61,7 @@ function mount(container, opts) {
     const felder = {datum: dateInput.value || todayIso(), person: opts.person, stunden: String(stunden), aufgabe, paket, storniert: ''};
     try {
       const send = typeof opts.save === 'function' ? opts.save : payload => sende(payload);
-      const r = await send({typ: 'projekt_save', formular: 'arbeitszeit', id, felder});
+      const r = pruef(await send({typ: 'projekt_save', formular: 'arbeitszeit', id, felder}));
       last = {id: r.id || id, felder};
       const paketText = paket || 'ohne Paket';
       receipt.replaceChildren(fmtHours(stunden) + ' h für ' + paketText + ' gespeichert · ', node('button', {type: 'button', class: 'chip', on: {click: undo}}, 'Rückgängig'));
@@ -83,14 +88,15 @@ function offer(container, opts) {
       if (busyOffer || window.PA6View?.active()) return;
       busyOffer = true;
       try {
-        await send({typ: 'projekt_save', formular: 'arbeitszeit', id: crypto.randomUUID(),
-          felder: {datum: opts.datum || todayIso(), person: opts.person, stunden: String(hours), aufgabe, paket, storniert: ''}});
+        pruef(await send({typ: 'projekt_save', formular: 'arbeitszeit', id: crypto.randomUUID(),
+          felder: {datum: opts.datum || todayIso(), person: opts.person, stunden: String(hours), aufgabe, paket, storniert: ''}}));
         box.replaceChildren(node('p', {}, fmtHours(hours) + ' h übernommen.'));
         opts.onSaved && opts.onSaved();
+        if (opts.onDone) setTimeout(opts.onDone, 900);
       } catch (error) { box.append(node('p', {class: 'leise'}, error.message)); }
       finally { busyOffer = false; }
     }}}, 'Übernehmen'),
-    node('button', {type: 'button', class: 'chip', on: {click: () => box.remove()}}, 'Später'));
+    node('button', {type: 'button', class: 'chip', on: {click: () => { box.remove(); opts.onDone && opts.onDone(); }}}, 'Später'));
   container.append(box);
 }
 function roundQuarterMinutes(minutes) {

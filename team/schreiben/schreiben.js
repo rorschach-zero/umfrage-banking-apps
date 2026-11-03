@@ -156,7 +156,7 @@ function renderAll() {
   const zeit = schreibZeitKontext(c);
   queueMicrotask(() => {
     if (!window.PA6Zeit || DEMO) return;
-    PA6Zeit.mount($('schreib-zeit'), Object.assign({person: state.person, compact: true, label: 'Zeit erfassen', save: body => post(Object.assign({k: state.key}, body))}, zeit));
+    PA6Zeit.mount($('schreib-zeit'), Object.assign({person: state.person, compact: true, label: 'Zeit erfassen', pakete: (state.tasks || []).filter(t => t.owner === state.person && /^AP-\d{3}$/.test(t.ref || '')).map(t => ({ref: t.ref, title: t.title})), save: body => post(Object.assign({k: state.key}, body))}, zeit));
   });
   const picker = $('picker');
   picker.replaceChildren(...state.chapters.filter(x => state.lead || state.person === 'SA' || x.owner === state.person || x.reader === state.person)

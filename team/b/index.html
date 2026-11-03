@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-g7ncytrzLab7eKyUNPqVm8Jad3Z8wTm5u8kQfz0EE9U='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ulTJiRmkjJ7oscFG7Tle1ZY3mTWyXBcHm1UmxQhz/9I='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 <link rel="stylesheet" href="../zeit.css?v=89af72ec7702">
@@ -15,7 +15,7 @@
 <script src="../team.js?v=91ca8ca4ac11"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
 <script src="../service.js?v=c08e4cdbb6a6"></script>
-<script src="../zeit.js?v=74423848b5a6"></script>
+<script src="../zeit.js?v=88cf8e4ad5e0"></script>
 <script>
 // Regeln aus 10_pa6a/beobachtung/Testprotokoll.md, Version 4. Die Maske schlaegt vor, die Person entscheidet.
 const SKRIPT = {
@@ -343,14 +343,16 @@ async function speichern(stand) {
       const start = payload.t_start ? String(payload.t_start).replace(" ", "T") : "";
       const end = payload.t_ende ? String(payload.t_ende).replace(" ", "T") : "";
       const mins = minuten(start, end);
-      if (mins > 0 && window.PA6Zeit && daten.person) {
+      let angeboten = false;
+      if (mins > 0 && mins <= 480 && window.PA6Zeit && daten.person) {
         const hours = PA6Zeit.roundQuarterMinutes(mins);
         const datum = (payload.datum || start.slice(0, 10) || heute());
         const host = document.getElementById("zeit-vorschlag") || (() => { const node = el("div", { id: "zeit-vorschlag" }); document.getElementById("main").prepend(node); return node; })();
         host.replaceChildren();
-        PA6Zeit.offer(host, {person: daten.person, stunden: hours, minuten: mins, datum, paket: PA6Zeit.servicePaket(datum), aufgabe: "Servicetest " + row.nr});
+        PA6Zeit.offer(host, {person: daten.person, stunden: hours, minuten: mins, datum, paket: PA6Zeit.servicePaket(datum), aufgabe: "Servicetest " + row.nr, onDone: liste});
+        angeboten = true;
       }
-      setTimeout(liste, 900);
+      if (!angeboten) setTimeout(liste, 900);
     }
   } catch (e) { row.erfasst = planRow.erfasst = previous; msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
   finally { savePending = false; }
