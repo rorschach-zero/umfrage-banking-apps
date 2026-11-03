@@ -367,32 +367,105 @@ function sourceTag(t) {
   return el('span', {class:'src-wrap'}, b, s);
 }
 
+// Schreibweg (Salah 03.11.2026): kein Informationsschwall, sondern ein geführter Weg zu vollen Punkten.
+// Immer ein Schritt offen, jeder ein- und ausklappbar, «Weiter» schliesst ab und öffnet den nächsten. Stand je Kapitel im Browser.
 function renderAuftrag(c, g) {
-  const checksKey = 'pa6-sp-muss:' + c.ref, done = store.get(checksKey, {});
-  const muss = (g.muss || []).map((m, i) => {
-    const id = 'm' + i, input = el('input', {type:'checkbox', id});
-    input.checked = !!done[i];
-    input.addEventListener('change', () => { done[i] = input.checked; store.set(checksKey, done); progress(); });
-    return el('li', {}, input, el('label', {for:id}, el('span', {class:'lt'}, m.punkt, sourceTag(m.quelle))));
-  });
-  const bar = el('span', {}), meter = el('div', {class:'meter'}, el('i', {}, bar), el('b', {}));
-  function progress() { const n = Object.values(done).filter(Boolean).length, all = muss.length; bar.style.width = (all ? n / all * 100 : 0) + '%'; meter.lastChild.textContent = all ? n + ' von ' + all + ' drin' : ''; meter.classList.toggle('full', !!all && n === all); }
-  const hasGuide = !!(g.kurz || (g.muss || []).length);
   const reading = c.reader === state.person && c.owner !== state.person;
-  fill($('tab-auftrag'),
-    el('section', {class:'card lead'},
-      el('p', {class:'big'}, hasGuide ? (g.kurz || c.Was || '') : c.Was && c.Was !== 'noch offen' ? c.Was : 'Der ausführliche Auftrag für dieses Kapitel wird gerade ergänzt.'),
-      g.daten_ab ? el('p', {class:'note'}, 'Daten liegen vor ab ' + g.daten_ab + '. Bis dahin Aufbau und Methode schreiben, keine Ergebnisse.') : null),
-    reading ? card('Beim Gegenlesen', 'soft-card', el('p', {}, 'Prüfe mit der Liste «Muss drin sein» und den Punkten unten. Schreib Kommentare ins Doc, ändere den Text nicht selbst.')) : null,
-    card('Diese Fragen beantwortet dein Text', '', (g.fragen || []).length ? el('ol', {class:'qs'}, g.fragen.map(q => el('li', {}, q))) : null),
-    card('Aufbau laut Vorgabe', '', (g.gliederung || []).length ? el('ol', {class:'steps'}, g.gliederung.map(x => el('li', {}, x))) : null),
-    muss.length ? el('section', {class:'card'}, el('div', {class:'row'}, el('h2', {class:'card-h'}, 'Muss drin sein'), meter), el('ul', {class:'checks'}, muss)) : null,
-    card('So gibt es volle Punkte', '', (g.raster || []).map(r => el('div', {class:'pts'}, el('span', {class:'pn'}, r.punkte + ' P.'), el('p', {}, r.volle_punkte_wenn)))),
-    (g.nicht || []).length || (g.fallen || []).length ? el('section', {class:'card'},
-      el('details', {class:'rule achten'}, el('summary', {}, 'Worauf du achten musst'), el('div', {},
-        (g.nicht || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Gehört nicht hierhin'), el('ul', {class:'plain'}, g.nicht.map(x => el('li', {}, x)))) : null,
-        (g.fallen || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Typische Fehler'), el('ul', {class:'plain'}, g.fallen.map(x => el('li', {}, x)))) : null))) : null);
-  progress();
+  const wegKey = 'pa6-sp-weg:' + c.ref, checksKey = 'pa6-sp-muss:' + c.ref, teileKey = 'pa6-sp-teile:' + c.ref;
+  const weg = store.get(wegKey, {done:{}, open:null}), done = store.get(checksKey, {}), teile = store.get(teileKey, {});
+  const fragen = g.fragen || [], glied = g.gliederung || [], muss = g.muss || [], raster = g.raster || [];
+  const maxPunkte = raster.reduce((a, r) => a + (+r.punkte || 0), 0);
+  const gegen = c.reader ? (NAMES[c.reader] || c.reader) : '';
+  const autor = c.owner ? (NAMES[c.owner] || c.owner) : '';
+  const auftrag = g.kurz || (c.Was && c.Was !== 'noch offen' ? c.Was : 'Der ausführliche Auftrag für dieses Kapitel wird gerade ergänzt.');
+  const zahl = (n, all) => el('span', {class:'w-count'}, n + ' von ' + all);
+  const check = (store_, key, i, text, quelle, onchange) => {
+    const id = key + i, input = el('input', {type:'checkbox', id});
+    input.checked = !!store_[i];
+    input.addEventListener('change', () => { store_[i] = input.checked; onchange(); });
+    return el('li', {}, input, el('label', {for:id}, el('span', {class:'lt'}, text, sourceTag(quelle))));
+  };
+  const rasterBlock = () => raster.length ? el('details', {class:'rule achten w-raster'}, el('summary', {}, maxPunkte ? 'So gibt es die vollen ' + maxPunkte + ' Punkte' : 'So gibt es volle Punkte'), el('div', {}, raster.map(r => el('div', {class:'pts'}, el('span', {class:'pn'}, r.punkte + ' P.'), el('p', {}, r.volle_punkte_wenn))))) : null;
+  const muster = (list, cls) => list.length ? el('ul', {class:'plain ' + (cls || '')}, list.map(x => el('li', {}, x))) : null;
+
+  // Schritte: id, Titel, Kurzsatz (eingeklappt sichtbar), Inhalt, Fortschritt
+  const steps = [];
+  steps.push({id:'ziel', t:'Ziel verstehen', s:maxPunkte ? 'Worum es geht und wofür es volle ' + maxPunkte + ' Punkte gibt' : 'Worum es geht', body:() => [
+    el('p', {class:'w-lead'}, auftrag),
+    fragen.length ? el('div', {class:'w-sub'}, el('h3', {}, reading ? 'Der Text muss diese Fragen beantworten' : 'Dein Text beantwortet diese Fragen'), el('ol', {class:'qs'}, fragen.map(q => el('li', {}, q)))) : null,
+    rasterBlock(),
+    g.daten_ab ? el('p', {class:'note'}, 'Daten liegen vor ab ' + g.daten_ab + '. Bis dahin Aufbau und Methode schreiben, keine Ergebnisse.') : null]});
+  if (!reading) {
+    steps.push({id:'material', t:'Material holen', s:'Quellen und Daten, bevor du schreibst', body:() => [
+      el('p', {}, 'Sammle zuerst, was du belegen kannst. Notiere Stichworte und Quellen im Doc unter «Notizen».'),
+      (g.infos || []).length ? el('ul', {class:'w-infos'}, g.infos.slice(0, 4).map(i => el('li', {}, el('b', {}, i.titel), el('span', {}, i.wo)))) : null,
+      el('button', {type:'button', class:'btn secondary', onclick:() => setTab('infos')}, 'Alle Unterlagen ansehen')]});
+    steps.push({id:'geruest', t:'Gerüst ins Doc', s:glied.length ? glied.length + ' Abschnitte laut Vorgabe' : 'Aufbau laut Vorgabe', body:() => [
+      el('p', {}, 'Übernimm den Aufbau als Zwischentitel ins Doc. Dann weisst du beim Schreiben immer, wo du bist.'),
+      glied.length ? el('ol', {class:'steps'}, glied.map(x => el('li', {}, x))) : el('p', {class:'quiet'}, 'Der Aufbau wird gerade ergänzt.'),
+      glied.length ? copyBtnWide(glied.join('\n'), 'Gliederung kopieren') : null]});
+    const teilListe = el('ul', {class:'checks'});
+    const teilZahl = el('span', {class:'w-count'});
+    const teilStand = () => { const n = glied.filter((_, i) => teile[i]).length; teilZahl.textContent = n + ' von ' + glied.length; store.set(teileKey, teile); kopf(); };
+    fill(teilListe, glied.map((x, i) => check(teile, 'teil', i, x, null, teilStand)));
+    steps.push({id:'schreiben', t:'Abschnitt für Abschnitt schreiben', s:'Hak jeden Abschnitt ab, sobald er steht', progress:() => glied.length ? [glied.filter((_, i) => teile[i]).length, glied.length] : null, body:() => [
+      el('p', {}, 'Ein Abschnitt nach dem anderen, in ganzen Sätzen. Jede fremde Aussage bekommt gleich ihren Beleg (Autor, Jahr).'),
+      glied.length ? el('div', {class:'w-sub'}, el('div', {class:'row'}, el('h3', {}, 'Geschrieben'), teilZahl), teilListe) : null,
+      el('button', {type:'button', class:'btn secondary', onclick:() => { setTab('hilfe'); state.askHilfe && state.askHilfe('Schlag mir eine Gliederung in Stichworten vor.'); }}, 'Stichworte von der Schreibhilfe')], after:teilStand});
+  }
+  const mussListe = el('ul', {class:'checks'}), mussZahl = el('span', {class:'w-count'});
+  const mussStand = () => { const n = muss.filter((_, i) => done[i]).length; mussZahl.textContent = n + ' von ' + muss.length; store.set(checksKey, done); kopf(); };
+  fill(mussListe, muss.map((m, i) => check(done, 'm', i, m.punkt, m.quelle, mussStand)));
+  steps.push({id:'pruefen', t:reading ? 'Gegenlesen mit der Liste' : 'Auf volle Punkte prüfen', s:muss.length ? muss.length + ' Pflichtpunkte abhaken' : 'Pflichtpunkte prüfen', progress:() => muss.length ? [muss.filter((_, i) => done[i]).length, muss.length] : null, body:() => [
+    el('p', {}, reading ? 'Geh Punkt für Punkt durch. Was fehlt, kommentierst du im Doc. Den Text änderst du nicht selbst.' : 'Hak nur ab, was wirklich im Text steht. Jeder fehlende Punkt kostet Punkte.'),
+    muss.length ? el('div', {class:'w-sub'}, el('div', {class:'row'}, el('h3', {}, 'Muss drin sein'), mussZahl), mussListe) : null,
+    rasterBlock(),
+    (g.nicht || []).length || (g.fallen || []).length ? el('details', {class:'rule achten'}, el('summary', {}, 'Typische Fehler und was nicht hierhin gehört'), el('div', {},
+      (g.fallen || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Typische Fehler'), muster(g.fallen)) : null,
+      (g.nicht || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Gehört nicht hierhin'), muster(g.nicht)) : null)) : null,
+    reading ? null : el('button', {type:'button', class:'btn secondary', onclick:() => { setTab('hilfe'); state.askHilfe && state.askHilfe('Was fehlt mir noch für volle Punkte?'); }}, 'Schreibhilfe fragen, was noch fehlt')], after:mussStand});
+  steps.push({id:'abgeben', t:reading ? 'Rückmeldung geben' : 'Übergeben', s:reading ? 'Kommentare im Doc, dann Bescheid geben' : gegen ? gegen + ' liest gegen' : 'Zum Gegenlesen weitergeben', body:() => [
+    el('p', {}, reading ? 'Wenn deine Kommentare im Doc stehen, sag ' + (autor || 'der Person') + ' Bescheid. Sie arbeitet sie ein.' : 'Wenn alle Pflichtpunkte drin sind, melde das Kapitel in der Team-App als erledigt. ' + (gegen ? gegen + ' bekommt es dann zum Gegenlesen.' : 'Dann geht es ans Gegenlesen.')),
+    el('a', {class:'btn secondary', href:'/team/'}, 'Zur Team-App')]});
+
+  const wrap = el('div', {class:'weg'}), bar = el('div', {class:'w-bar', 'aria-hidden':'true'}), stand = el('p', {class:'w-stand'});
+  function kopf() {
+    const n = steps.filter(s => weg.done[s.id]).length;
+    stand.textContent = n === steps.length ? 'Alle Schritte erledigt. Stark.' : 'Schritt ' + (Math.min(n + 1, steps.length)) + ' von ' + steps.length;
+    fill(bar, steps.map(s => el('i', {class:weg.done[s.id] ? 'on' : s.id === weg.open ? 'now' : ''})));
+    for (const s of steps) { const p = s.progress && s.progress(); if (s.countEl) s.countEl.textContent = p ? p[0] + '/' + p[1] : ''; }
+  }
+  function save() { store.set(wegKey, weg); }
+  function open(id, focus, toggle) {
+    weg.open = toggle && weg.open === id ? null : id; save(); apply();
+    const s = steps.find(x => x.id === weg.open);
+    if (s && focus) { s.head.focus({preventScroll:true}); s.node.scrollIntoView({block:'nearest', behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
+  }
+  function apply() {
+    for (const s of steps) { const on = s.id === weg.open; s.node.classList.toggle('open', on); s.head.setAttribute('aria-expanded', String(on)); s.panel.hidden = !on; }
+    kopf();
+  }
+  steps.forEach((s, i) => {
+    const next = steps[i + 1];
+    s.countEl = el('span', {class:'w-prog'});
+    s.head = el('button', {type:'button', class:'w-head', 'aria-expanded':'false', 'aria-controls':'w-' + s.id, onclick:() => open(s.id, false, true)},
+      el('span', {class:'w-num', 'aria-hidden':'true'}, String(i + 1)),
+      el('span', {class:'w-tt'}, el('span', {class:'w-t'}, s.t), el('span', {class:'w-s'}, s.s)),
+      s.countEl, el('span', {class:'chev', 'aria-hidden':'true'}));
+    const weiter = el('button', {type:'button', class:'btn', onclick:() => { weg.done[s.id] = true; save(); s.node.classList.add('done'); announce(s.t + ' erledigt'); if (next) open(next.id, true); else { weg.open = null; save(); apply(); } }}, next ? 'Weiter: ' + next.t : 'Fertig');
+    const zurueck = weg.done[s.id] ? el('button', {type:'button', class:'btn ghost', onclick:() => { delete weg.done[s.id]; save(); s.node.classList.remove('done'); kopf(); }}, 'Wieder öffnen') : null;
+    s.panel = el('div', {class:'w-body', id:'w-' + s.id, hidden:true}, s.body(), el('div', {class:'w-act'}, weiter, zurueck));
+    s.node = el('section', {class:'w-step' + (weg.done[s.id] ? ' done' : '')}, s.head, s.panel);
+    if (s.after) s.after();
+  });
+  fill(wrap, steps.map(s => s.node));
+  fill($('tab-auftrag'), el('div', {class:'w-top'}, stand, bar), wrap);
+  const first = steps.find(s => !weg.done[s.id]);
+  weg.open = weg.open && steps.some(s => s.id === weg.open) ? weg.open : first ? first.id : null;
+  apply();
+}
+function copyBtnWide(text, label) {
+  return el('button', {class:'btn secondary', type:'button', onclick:async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(text); b.textContent = 'Kopiert, jetzt im Doc einfügen'; announce('Gliederung kopiert'); setTimeout(() => { b.textContent = label; }, 2400); } catch { announce('Kopieren nicht möglich'); } }}, label);
 }
 function renderInfos(g) {
   const inApp = [
@@ -477,6 +550,7 @@ function renderHilfe(c, g) {
     drawSuggest();
     if (scroll && thread.lastElementChild) thread.lastElementChild.scrollIntoView({block:'nearest', behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
   };
+  state.askHilfe = t => ask(t);
   async function ask(text) {
     text = String(text || '').trim(); if (!text || state.busy) return;
     state.busy = true; send.disabled = true; input.value = '';
