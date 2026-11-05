@@ -11,6 +11,7 @@ function el(tag, attrs, ...kids) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
     if (v === null || v === undefined || v === false) continue;
+    if (k === 'on' && typeof v === 'object') { for (const [ev, fn] of Object.entries(v)) e.addEventListener(ev, fn); continue; }
     if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
     else if (k === 'class') e.className = v;
     else e.setAttribute(k, v === true ? '' : v);
@@ -390,20 +391,50 @@ function chapterFrom(status) {
   if (!s || s === 'Nicht begonnen' || s === 'Offen' || s === 'offen' || s === 'geplant') return 'offen';
   return s;
 }
+function newVorgang() {
+  try { if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+  return (Date.now().toString(16) + '00000000').slice(0, 32);
+}
 async function handover(c) {
   if (viewing() || DEMO) return;
   if (!c || !c.id || c.plan || c.owner !== state.person) { announce('Dieses Kapitel meldest du aus deinem eigenen Zugang.'); return; }
   const from = chapterFrom(c.status);
   if (from === 'in Prüfung' || from === 'fertig') { announce(from === 'fertig' ? 'Das Kapitel ist schon fertig.' : 'Das Kapitel ist schon in der Prüfung.'); return; }
   if (from !== 'offen' && from !== 'läuft') { announce('Der Stand lässt sich so nicht übergeben.'); return; }
+  if (!window.PA6Zeit) { announce('Die Zeiterfassung ist nicht geladen. Lade die Seite neu.'); return; }
+  const spot = document.getElementById('zeit-uebergabe') || el('div', {id:'zeit-uebergabe'});
+  const btn = [...document.querySelectorAll('button')].find(b => b.textContent === 'Zur Prüfung geben');
+  if (!spot.parentNode) (btn && btn.parentNode ? btn.parentNode : $('tab-auftrag')).append(spot);
   const lead = state.person === 'SA' && state.lead === true;
-  try {
-    const r = await post({typ:'status', k:state.key, leitung:lead, id:c.id, from, to:'in Prüfung'});
-    if (!r || r.ok === false || r.status !== 'in Prüfung') throw Error(r && r.fehler || 'Nicht gemeldet.');
-    c.status = 'in Prüfung';
-    announce('Zur Prüfung gemeldet. Salah schaut es sich an.');
-    renderAll();
-  } catch (e) { announce(e.message || 'Nicht gemeldet.'); }
+  const buchung = 'abschluss-' + String(c.id).replace(/[^a-zA-Z0-9_-]/g, '');
+  PA6Zeit.closureMount(spot, {
+    person: state.person,
+    aufgabe: (c.ref ? c.ref + ' · ' : '') + (c.title || 'Kapitel'),
+    paket: '',
+    id: /^[a-zA-Z0-9_-]{16,80}$/.test(buchung) ? buchung : '',
+    quelle: 'schreibplatz',
+    ref: c.ref || '',
+    save: async body => {
+      const saved = await post(body);
+      if (!saved || saved.ok === false) throw Error((saved && saved.fehler) || 'Nicht gespeichert.');
+      return saved;
+    },
+    onCancel: () => { spot.replaceChildren(); },
+    onDone: async info => {
+      try {
+        const r = await post({typ:'status', k:state.key, leitung:lead, id:c.id, from, to:'In Prüfung'});
+        if (!r || r.ok === false || (r.status !== 'In Prüfung' && r.status !== 'in Prüfung')) throw Error((r && r.fehler) || 'Nicht gemeldet.');
+        const weg = await post({typ:'auftragsweg', k:state.key, leitung:lead, id:c.id, ref:c.ref || '', quelle:'chapters', aktion:'fertig_gemeldet', wert:'', vorgang:newVorgang()});
+        if (!weg || weg.ok === false) throw Error((weg && weg.fehler) || 'Die Fertigmeldung wurde nicht gezählt.');
+        c.status = 'In Prüfung';
+        announce('Zur Prüfung gemeldet. Salah schaut es sich an.');
+        renderAll();
+      } catch (e) {
+        try { await post({typ:'projekt_save', formular:'arbeitszeit', id:info.id, felder:Object.assign({}, info.felder, {storniert:'ja'})}); } catch (ignore) {}
+        announce(e.message || 'Nicht gemeldet.');
+      }
+    }
+  });
 }
 // Schreibweg (Salah 03.11.2026): kein Informationsschwall, sondern ein geführter Weg zu vollen Punkten.
 // Immer ein Schritt offen, jeder ein- und ausklappbar, «Weiter» schliesst ab und öffnet den nächsten. Stand je Kapitel im Browser.

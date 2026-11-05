@@ -36,6 +36,22 @@ function codierungPaket(datum) {
 function taskPaket(row) {
   return /^AP-\d{3}$/.test(row?.ref || '') ? row.ref : '';
 }
+function closureId(opts) {
+  return opts && /^[a-zA-Z0-9_-]{16,80}$/.test(opts.id || '') ? opts.id : crypto.randomUUID();
+}
+function closureQuelle(opts) {
+  return ['abschluss', 'werkzeug_b', 'werkzeug_c', 'schreibplatz', 'hand'].includes(opts && opts.quelle) ? opts.quelle : 'abschluss';
+}
+function closureAufgabe(opts, typed, paket) {
+  let text = String(typed || opts.aufgabe || '').trim() || (opts.row && opts.row.title) || 'Auftrag';
+  if (!paket) {
+    const ref = String(opts.ref || '').trim();
+    if (ref && !text.includes(ref)) text = ref + ' · ' + text;
+    const auftrag = String(opts.auftrag || '').trim();
+    if (auftrag && !text.includes(auftrag)) text = text + ' · ' + auftrag;
+  }
+  return text.slice(0, 6000);
+}
 function closureMount(container, opts) {
   opts = opts || {};
   if (!container) return;
@@ -107,7 +123,7 @@ function closureMount(container, opts) {
     const mine = ++op;
     busy = true; held = ''; refresh();
     try {
-      let stunden, aufgabe = String(taskInput.value || opts.aufgabe || '').trim() || (opts.row && opts.row.title) || 'Auftrag';
+      let stunden, aufgabe = closureAufgabe(opts, taskInput.value, paket);
       if (choice === 'confirm') {
         stunden = '0';
         aufgabe = aufgabe + ' · bestätigt';
@@ -116,12 +132,11 @@ function closureMount(container, opts) {
         if (value === null || mine !== op) return;
         stunden = String(value);
       } else stunden = String(choice);
-      pruef(await send({
-        typ: 'projekt_save', formular: 'arbeitszeit', id: crypto.randomUUID(),
-        felder: {datum: dateInput.value || todayIso(), person: opts.person, stunden, aufgabe, paket, storniert: '', quelle: 'abschluss'}
-      }));
+      const id = closureId(opts);
+      const felder = {datum: dateInput.value || todayIso(), person: opts.person, stunden, aufgabe, paket, storniert: '', quelle: closureQuelle(opts)};
+      pruef(await send({typ: 'projekt_save', formular: 'arbeitszeit', id, felder}));
       if (mine !== op) return;
-      opts.onDone && opts.onDone({confirm: choice === 'confirm', hours: +stunden, paket});
+      if (opts.onDone) await opts.onDone({confirm: choice === 'confirm', hours: +stunden, paket, id, felder});
     } catch (error) {
       if (mine !== op) return;
       held = error.message || 'Nicht gespeichert.';

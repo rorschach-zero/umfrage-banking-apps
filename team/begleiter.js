@@ -10,11 +10,9 @@
   if (viewAs) return;   // lesende Ansicht: kein Begleiter, er gehört zum eigenen Arbeitsfluss
   const accessMark = k => { let h = 0; for (const ch of String(k || '')) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h.toString(36); };
   let access = ''; try { access = localStorage.getItem('pa6k') || ''; } catch {}
-  if (s.who || s.mark) {
-    if (!/^[A-Z]{2}$/.test(s.who || '') || s.mark !== accessMark(access)) {
-      try { localStorage.removeItem(K); } catch {}
-      return;
-    }
+  if (!/^[A-Z]{2}$/.test(s.who || '') || s.mark !== accessMark(access)) {
+    try { localStorage.removeItem(K); } catch {}
+    return;
   }
   const path = h => { try { const u = new URL(h, location.origin); return u.pathname.replace(/index\.html$/, '') + (u.pathname === '/team/' ? u.search : ''); } catch { return ''; } };
   const here = location.pathname.replace(/index\.html$/, '') + (location.pathname === '/team/' ? location.search : '');

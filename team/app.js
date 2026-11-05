@@ -624,10 +624,17 @@ function newVorgang(){
   return (Date.now().toString(16)+vorgangN.toString(16)).slice(0,32);
 }
 function trackAuftrag(row,aktion,wert,vorgang){
-  if(config.demo||preview.active()||!key||(leadership&&row.owner!==data.person))return;
+  if(config.demo||preview.active()||!key)return;
+  const fremd=!!(leadership&&row.owner&&row.owner!==data.person);
+  if(fremd&&aktion!=='fertig_gemeldet')return;
   const body={typ:'auftragsweg',k:key,id:String(row.id||''),ref:String(row.ref||''),quelle:String(row.source||''),aktion,wert:wert==null?'':String(wert)};
   if(vorgang)body.vorgang=String(vorgang);
+  if(leadership&&data.person==='SA')body.leitung=true;
   try{fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body),referrerPolicy:'no-referrer'}).catch(()=>{});}catch{}
+}
+function abschlussBuchung(row){
+  const id='abschluss-'+String(row&&row.id||'').replace(/[^a-zA-Z0-9_-]/g,'');
+  return /^[a-zA-Z0-9_-]{16,80}$/.test(id)?id:'';
 }
 function accessMark(k){let h=0;for(const ch of String(k||''))h=(h*31+ch.charCodeAt(0))>>>0;return h.toString(36);}
 function dropCompanion(){try{localStorage.removeItem('pa6-begleiter');}catch{}}
@@ -791,10 +798,22 @@ function proceedReport(row,target='in Prüfung',opts){
   const access=key,lead=leadership,identity=data.person;
   const before=structuredClone(data), serverRow={...row};
   ++generation;if(activeRequest)activeRequest.abort();refreshing=false;
-  const operation={id:row.id,timer:null,vorgang:newVorgang()};pending=operation;
+  const operation={id:row.id,timer:null,vorgang:newVorgang(),zeit:opts&&opts.zeit||null};pending=operation;
   setLocalStatus(row.id,target);
   const returning=serverRow.status==='in Prüfung'&&target==='läuft';
-  const undo=button('Rückgängig',()=>{if(pending!==operation)return;clearTimeout(operation.timer);data=before;row.status=serverRow.status;pending=null;toast('Meldung zurückgenommen.');render();},'toast-undo');
+  const undo=button('Rückgängig',()=>{
+    if(pending!==operation)return;
+    clearTimeout(operation.timer);
+    data=before;row.status=serverRow.status;
+    const buchung=operation.zeit;
+    if(!buchung||!buchung.id){pending=null;toast('Meldung zurückgenommen.');render();return;}
+    toast('Buchung wird zurückgenommen …');
+    projektSaveRequest({typ:'projekt_save',formular:'arbeitszeit',id:buchung.id,felder:Object.assign({},buchung.felder,{storniert:'ja'})}).then(()=>{
+      if(pending!==operation)return;pending=null;toast('Meldung zurückgenommen.');render();
+    }).catch(error=>{
+      if(pending!==operation)return;pending=null;toast(error.message||'Die Buchung konnte nicht zurückgenommen werden.');render();
+    });
+  },'toast-undo');
   toast(note+(returning?'Zurückgeben':target==='läuft'?'Start':target==='fertig'?'Abnahme':'Fertigmeldung')+' wird in 5 Sekunden gespeichert.',undo);$('detail').close();render();
   operation.timer=setTimeout(async()=>{
     if(pending!==operation)return;
@@ -831,8 +850,8 @@ function report(row,target='in Prüfung'){
     const bisher=paket&&data.zeit?.pakete?.[paket]?+data.zeit.pakete[paket]:0;
     const host=el('div',{id:'zeit-closure-host'});
     modal('Arbeitszeit zum Auftrag',el('p',{class:'quiet-note'},'Ohne Zeitangabe kannst du den Auftrag nicht abschliessen.'),host);
-    PA6Zeit.closureMount(host,{row,person:data.person,paket,bisher,vorwahl:measuredHours(row),aufgabe:shortTitle(row),save:projektSaveRequest,
-      onDone:()=>{$('detail').close();proceedReport(row,target);},
+    PA6Zeit.closureMount(host,{row,person:data.person,paket,bisher,vorwahl:measuredHours(row),aufgabe:shortTitle(row),id:abschlussBuchung(row)||undefined,ref:paket?'':(row.ref||''),auftrag:paket?'':(row.id||''),save:projektSaveRequest,
+      onDone:info=>{$('detail').close();proceedReport(row,target,{zeit:info});},
       onCancel:()=>{$('detail').close();details(row);}});
     return;
   }
