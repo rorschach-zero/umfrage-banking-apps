@@ -534,7 +534,7 @@ body.kapitel .rail .rl-k{display:none}
 .w-link:hover{text-decoration-color:currentColor}
 .w-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--c-line)}
 .w-act .btn{min-height:46px;border-radius:12px;padding:10px 18px;font-size:15px}
-.w-act .w-go{flex:1 1 auto}
+.w-act .w-go{flex:1 1 auto;min-width:0;max-width:100%;white-space:normal;text-align:center;line-height:1.25}
 .w-act #zeit-uebergabe{flex-basis:100%}
 .btn.ghost{background:none;border-color:transparent;color:var(--c-sub);font-weight:600}
 .btn.ghost:hover{color:var(--c-text);background:none}
