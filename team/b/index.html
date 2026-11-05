@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-foZsFMX6iULGBPQX2OZC7C3qrBuus2a4jsX9JTK5eLc='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-Q1XUDhU6P163AjCkTH3jbB9tab+0v+Oim5QY9SB79LI='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 <link rel="stylesheet" href="../zeit.css?v=89af72ec7702">
-<link rel="stylesheet" href="../service.css?v=b927e49ab3c0">
+<link rel="stylesheet" href="../service.css?v=529c67a5b6bf">
 <link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=f0c645b33957" defer></script>
 </head>
 <body class="b-page">
@@ -210,7 +210,7 @@ function bFehltScreen(i, j) { const sc = bScreens(i)[j]; return sc ? fehlt().fil
 function bErsteLuecke(i) { const n = bScreens(i).length; for (let j = 0; j < n; j++) if (bFehltScreen(i, j).length) return j; return 0; }
 function focusStep() {
   document.querySelector(".b-form-title").focus({preventScroll:true});
-  const top = document.querySelector(".b-stepper").getBoundingClientRect().top + scrollY;
+  const top = (document.querySelector(".b-back") || document.querySelector(".b-stepper")).getBoundingClientRect().top + scrollY; // ganzer Kopf sichtbar, nicht halb unter dem klebenden Kopf
   scrollTo(0, Math.max(0, top - document.querySelector("header").getBoundingClientRect().bottom - 12));
 }
 function showStep(index, sub) { clearTimeout(bAutoTimer); if (index > bStep && !bFehltIn(bStep).length) bEben = bStep; bStep = index; bSub = Math.min(sub || 0, bScreens(index).length - 1); formular(); focusStep(); }

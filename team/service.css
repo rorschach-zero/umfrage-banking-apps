@@ -386,3 +386,8 @@
 @media (prefers-reduced-motion:reduce){.b-page *::before,.b-page *::after{animation:none!important;transition:none!important}}
 @media (max-width:620px){.b-row-nr{display:none}.b-new{margin-left:6px}}
 .b-confirm-n{font-weight:800}
+/* Hover nur mit Maus und leise; Fokus nur per Tastatur und klar anders als die Auswahl */
+.b-page .chip:hover:not(:disabled){border-color:#D6DED9}
+@media (hover:hover){.b-page .chip:hover:not(:disabled):not([aria-pressed="true"]){background:#F6F8F6}}
+.b-page .chip:focus{outline:none}
+.b-page .chip:focus-visible{outline:2px solid #6E64B8;outline-offset:3px}
