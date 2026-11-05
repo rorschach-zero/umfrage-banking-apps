@@ -45,7 +45,10 @@
   const chip = (text, cls = '') => `<span class="chip ${cls}">${esc(text)}</span>`;
   const bars = (pairs, max, fmt = v => num(v)) => pairs.length ? '<div class="bars">' + pairs.map(([label, n]) => `<div class="bar"><div class="bar-label"><span>${esc(label)}</span><b>${fmt(n)}</b></div><div class="track"><i style="width:${Math.min(100, (n || 0) / Math.max(1, max) * 100)}%"></i></div></div>`).join('') + '</div>' : empty('Noch keine Werte.');
   // A card: eyebrow, one statement (h2), body, and the explanation one tap away.
-  function card({id, eyebrow, title, body, how, source, span = 'span6', tone = ''}) {
+  function card({id, eyebrow, title, body, how, source, span = 'span6', tone = '', fold = false}) {
+    // Eingeklappt: Kopfzeile mit Kennzahl, Inhalt einen Tipp entfernt.
+    if (fold) return `<details class="card fold ${span}" id="karte-${id}" data-key="fold-${id}"><summary>${eyebrow ? `<p class="eyebrow">${esc(eyebrow)}</p>` : ''}<h2 id="titel-${id}">${title}</h2></summary><div class="fold-body">${body}
+      ${how ? `<details class="how" data-key="${id}"><summary>So gemessen</summary><div class="how-body">${how}${source ? `<p class="src">Quelle: ${esc(source)} · Stand ${esc(standText)}</p>` : ''}</div></details>` : ''}</div></details>`;
     return `<section class="card ${span} ${tone}" id="karte-${id}" aria-labelledby="titel-${id}">
       ${eyebrow ? `<p class="eyebrow">${esc(eyebrow)}</p>` : ''}<h2 id="titel-${id}">${title}</h2>${body}
       ${how ? `<details class="how" data-key="${id}"><summary>So gemessen</summary><div class="how-body">${how}${source ? `<p class="src">Quelle: ${esc(source)} · Stand ${esc(standText)}</p>` : ''}</div></details>` : ''}</section>`;
@@ -305,7 +308,7 @@
     const c = pm.completeness;
     if (!c) return card({id: 'psp', eyebrow: 'PSP vollständig', title: 'PSP-Stand derzeit unbekannt.', body: unknown()});
     const labels = {plan: 'ohne Plan-Stunden', owner: 'ohne Verantwortung', done_when: 'ohne «Fertig wenn»', risk: 'ohne verknüpftes Risiko'};
-    return card({id: 'psp', eyebrow: 'PSP vollständig', title: c.complete == null ? 'Vollständigkeit offen: Die Risiko-Verknüpfung ist nicht lesbar.' : `${num(c.complete)} von ${num(c.n)} Arbeitspaketen sind vollständig beschrieben.`,
+    return card({id: 'psp', eyebrow: 'PSP vollständig', fold: true, title: c.complete == null ? 'Vollständigkeit offen: Risiko-Verknüpfung nicht lesbar' : `${num(c.complete)} von ${num(c.n)} Paketen vollständig`,
       body: `${c.complete == null ? '' : big(num(c.complete), '/ ' + num(c.n))}<div class="list">${Object.keys(labels).map(k => `<div class="row"><span>${labels[k]}</span><b>${k === 'risk' && !c.risk_known ? 'unbekannt' : num(c.missing[k])}</b></div>`).join('')}</div>`,
       how: '<p>Vollständig ist ein Arbeitspaket mit Plan-Stunden, verantwortlicher Person, «Fertig wenn» und mindestens einem verknüpften Risiko (Raster C2).</p>', source: 'Notion PSP'});
   }
@@ -314,7 +317,7 @@
     if (!ready(r)) return card({id: 'risiken', eyebrow: 'Risiken', title: 'Risikoregister derzeit unbekannt.', body: unknown()});
     const open = r.items.filter(x => !/erledigt|geschlossen/i.test(x.status || '')).length;
     const list = items => items.map(x => `<div class="row"><span>${esc(x.title)}</span><b>${chip(x.status || 'Status unbekannt')}</b></div>`).join('');
-    return card({id: 'risiken', eyebrow: 'Risiken', title: `${num(open)} von ${num(r.n)} Risiken sind offen.`,
+    return card({id: 'risiken', eyebrow: 'Risiken', fold: true, title: `${num(open)} von ${num(r.n)} offen`,
       body: `<div class="list">${list(r.items.slice(0, 6))}</div>${r.items.length > 6 ? `<details class="more" data-key="risiken-alle"><summary>Alle ${num(r.n)} Risiken</summary><div class="list">${list(r.items.slice(6))}</div></details>` : ''}`,
       how: '<p>Einträge des Risikoregisters mit ihrem Status. Bewertung, Massnahme und Review-Takt folgen, sobald sie im Register geführt werden.</p>', source: 'Notion Risikoregister'});
   }
@@ -330,13 +333,13 @@
     const ch = pm.chapters_6b && pm.chapters_6b.state === 'ready' ? pm.chapters_6b.items : null;
     const due = ids => { const d = ids.map(id => ch && ch[id] && ch[id].due).filter(Boolean).sort(); return d.length ? dateShort(d[0]) : 'offen'; };
     const status = ids => { const s = ids.map(id => ch && ch[id] && ch[id].status).filter(Boolean); return s.length ? Array.from(new Set(s)).join(', ') : 'nicht begonnen'; };
-    return card({id: 'pa6b', eyebrow: 'PA6b · Planung Marketing', span: 'span12', title: '0 von 10 Rasterkriterien mit Beleg erfüllt.',
+    return card({id: 'pa6b', eyebrow: 'PA6b · Planung Marketing', span: 'span12', fold: true, title: '0 von 10 Rasterkriterien mit Beleg erfüllt',
       body: empty('Die Erfüllungsliste je Rasterkriterium fehlt noch; sie entsteht ab der Auftragserteilung. Bis dahin zeigt die Liste nur Kapitel, Status und Frist aus Notion.') +
         `<ol class="klist">${K.map(([k, text, raster, ids]) => `<li><span class="k">${k}</span><span class="ktext">${esc(text)}<small>Raster ${esc(raster)} · Kapitel ${esc(ids.join(', '))} · ${esc(status(ids))}</small></span><span class="kmeta">${chip('offen')}<small>Frist ${esc(due(ids))}</small></span></li>`).join('')}</ol>`,
       how: '<p>Jedes Kriterium wird nur als offen, Entwurf, geprüft oder erfüllt mit Beleg geführt; Wirkungs- oder Budgetwerte werden nicht vorweggenommen. Feldvollständigkeit allein gilt nicht als Erfüllung: K5 und K7 brauchen einen belegten Gruppenentscheid.</p>', source: 'Raster 6b; Notion Kapitel'});
   }
   function transferCard(project) {
-    return card({id: 'uebertrag', eyebrow: 'Projekt-Übertrag', span: 'span12', title: project.enabled ? 'Der Abgleich mit Notion läuft stündlich.' : 'Der automatische Übertrag ist ausgeschaltet.',
+    return card({id: 'uebertrag', eyebrow: 'Projekt-Übertrag', span: 'span12', fold: true, title: project.enabled ? 'Abgleich mit Notion läuft stündlich' : 'Automatischer Übertrag aus',
       body: `<div class="list">${project.forms.map(row => { const warning = project.enabled && (row.stale || !['gleich', 'ungeprüft'].includes(row.status)), status = project.enabled ? (row.stale ? 'ausstehend oder veraltet' : row.status) : 'Übertrag aus'; return `<div class="row"><span>${esc(({stakeholder: 'Stakeholder', coaching: 'Coaching', risiko: 'Risiken', arbeitszeit: 'Arbeitszeit', beitrag: '6b-Beiträge'})[row.formular] || row.formular)}<small>${row.blatt_anzahl !== undefined && row.blatt_anzahl !== '' ? 'Blatt ' + num(row.blatt_anzahl) + ' · Notion ' + num(row.notion_anzahl) : 'Noch keine Zählung'}</small></span><b>${chip(status, warning ? 'warn' : '')}</b></div>`; }).join('')}</div>`,
       how: '<p>Anzahl Einträge im Projektblatt gegen Notion, mit Prüfsumme je Formular.</p>', source: 'Projektblätter, Notion-Abgleich'});
   }
@@ -344,9 +347,10 @@
     const pm = data.pm || {state: 'unknown'}, cards = [];
     if (pm.state !== 'ready') cards.push(card({id: 'psp-quelle', eyebrow: 'Projektplan', title: 'Der Projektplan ist gerade nicht erreichbar.', body: unknown(), span: 'span12'}));
     else cards.push(safeCard('fortschritt', () => progressCard(pm)), safeCard('erledigt', () => dueCard(pm)), safeCard('termintreue', () => punctualCard(pm)), safeCard('fristen', () => deadlinesCard(pm)), safeCard('meilensteine', () => milestonesCard(pm)));
-    cards.push(safeCard('aufwand', () => effortCard(pm)), safeCard('projektauftrag', () => confirmCard(pm)));
+    // Offene Karten paarweise, eingeklappte Karten gesammelt am Schluss.
+    cards.push(safeCard('aufwand', () => effortCard(pm)), safeCard('projektauftrag', () => confirmCard(pm)), safeCard('abwesenheiten', () => absenceCard()));
     if (pm.state === 'ready') cards.push(safeCard('psp', () => completenessCard(pm)));
-    cards.push(safeCard('risiken', () => risksCard(pm)), safeCard('abwesenheiten', () => absenceCard()), safeCard('pa6b', () => planningCard(pm)));
+    cards.push(safeCard('risiken', () => risksCard(pm)), safeCard('pa6b', () => planningCard(pm)));
     if (data.project && Array.isArray(data.project.forms)) cards.push(safeCard('uebertrag', () => transferCard(data.project)));
     return cards.join('');
   }
@@ -369,8 +373,8 @@
     const banner = data.released ? '<aside class="banner"><b>Auswertung freigegeben.</b> Anteile immer mit Fallzahl n; die Stichprobe ist geeignet für die Fragestellung.</aside>'
       : `<aside class="banner"><b>Feldsteuerung bis zur Freigabe.</b> Ergebnisse erscheinen frühestens am ${esc(releaseDay(data.release_at))}; bis dahin zeigt der Tab Marketing nur den Stand der Erhebung.</aside>`;
     const tabs = `<div class="tabs" role="tablist" aria-label="Bereiche">${TABS.map(([id, label]) => `<button role="tab" id="tab-${id}" aria-controls="panel-${id}" aria-selected="${tab === id}" tabindex="${tab === id ? 0 : -1}">${label}</button>`).join('')}</div>`;
-    const panel = (id, html) => `<div class="tabpanel" role="tabpanel" id="panel-${id}" aria-labelledby="tab-${id}" ${tab === id ? '' : 'hidden'}><div class="grid">${html}</div></div>`;
-    root.innerHTML = intro + tabs + banner + panel('marketing', marketingPanel(data)) + panel('pm', pmPanel(data));
+    const panel = (id, html) => `<div class="tabpanel" role="tabpanel" id="panel-${id}" aria-labelledby="tab-${id}" ${tab === id ? '' : 'hidden'}>${html}</div>`;
+    root.innerHTML = intro + tabs + panel('marketing', banner + '<div class="grid">' + marketingPanel(data) + '</div>') + panel('pm', '<div class="grid">' + pmPanel(data) + '</div>');
     root.querySelectorAll('details[data-key]').forEach(d => { if (open.has(d.dataset.key) || (first && d.hasAttribute('data-default-open'))) d.open = true; });
   }
   function selectTab(id, focus) {

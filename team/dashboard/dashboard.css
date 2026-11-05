@@ -101,6 +101,16 @@ details>summary::-webkit-details-marker{display:none}
 .more>summary:after,.pair>summary:after{content:"";flex:none;margin-left:auto;width:8px;height:8px;border-right:1.5px solid var(--sub);border-bottom:1.5px solid var(--sub);transform:rotate(45deg);transition:transform .18s var(--ease)}
 .more[open]>summary:after,.pair[open]>summary:after{transform:rotate(-135deg)}
 
+/* Eingeklappte Karten: Kopfzeile mit Kennzahl, Aufklappen per Tipp */
+.card.fold{display:block;padding-top:0;padding-bottom:0}
+.fold>summary{position:relative;padding:18px 32px 16px 0;min-height:44px}
+.fold>summary h2{margin:0}
+.fold>summary:after{content:"";position:absolute;right:4px;top:50%;width:9px;height:9px;margin-top:-6px;border-right:1.5px solid var(--sub);border-bottom:1.5px solid var(--sub);transform:rotate(-45deg);transition:transform .18s var(--ease)}
+.fold[open]>summary:after{transform:rotate(45deg)}
+.fold>summary:hover h2{color:var(--acc-h)}
+.fold-body{padding-bottom:14px}
+.fold-body>.how{margin-top:16px}
+.fold:not([open]){align-self:start}
 /* Quotentabelle */
 .quota-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:32px;align-items:start}
 .quota-lead .big span{font-size:64px}
