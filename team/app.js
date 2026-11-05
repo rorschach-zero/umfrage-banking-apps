@@ -135,6 +135,12 @@ function steps(row,readOnly=false) {
   }));
 }
 // 05.11.2026 (Salah): ein Arbeitspaket, das nur auf ein Kapitel zeigt, das dieselbe Person schreibt, erscheint nicht doppelt.
+// «Zum Auftrag» aus dem Begleiter: /team/?view=tasks&auftrag=<id> öffnet den Auftrag direkt (einmal).
+function openRequestedTask(){
+  const id=new URLSearchParams(location.search).get('auftrag');if(!id)return;
+  const url=new URL(location.href);url.searchParams.delete('auftrag');history.replaceState(history.state,'',url.pathname+url.search+url.hash);
+  setTimeout(()=>{const row=allTasks().find(r=>String(r.id)===id);if(row)details(row);},0);
+}
 function dedupeChapterTasks(){
   if(!data||!Array.isArray(data.tasks)||!Array.isArray(data.chapters))return;
   // Nur echte Doppelungen: gleiches Kapitel, gleiche Person UND gleiche Frist. Ein zweiter Auftrag zum Kapitel mit eigener Frist bleibt sichtbar (Befund Astro t46).
@@ -622,6 +628,18 @@ function stepOverview(row,values,onJump){
   return moreBlock('Alle Schritte ansehen',el('ol',{class:'path-all'},values.map((v,i)=>el('li',{class:stepDone(row,v)?'done':''},
     onJump?el('button',{type:'button',onclick:()=>onJump(i)},stepText(v,stepDest(row,v))):stepText(v,stepDest(row,v))))));
 }
+// Begleiter (begleiter.js): beim Sprung ins Werkzeug den Auftrag mitgeben, damit dort der Schritt sichtbar bleibt.
+function keepCompanion(row,values,cur){
+  if(preview.active())return;
+  const steps=values.map(v=>{const d=stepDest(row,v);return{text:stepText(v,d),key:stepKey(row,v),href:d?d.href:'',label:d?d.label:''};});
+  try{localStorage.setItem('pa6-begleiter',JSON.stringify({v:1,id:String(row.id||''),ref:String(row.ref||''),source:row.source,title:shortTitle(row),steps,cur,from:'/team/?view=tasks&auftrag='+encodeURIComponent(row.id||''),until:Date.now()+12*3600*1000}));}catch{}
+}
+// «Los geht's» setzt den Auftrag still auf «läuft» (Messung für die Projektleitung bleibt), ohne den Pfad zu unterbrechen.
+async function startQuietly(row){
+  if(preview.active()||config.demo||row.status!=='offen'||!canReport(row))return;
+  try{await postStatus(row,'offen','läuft',key,leadership);setLocalStatus(row.id,'läuft');clearResponses(cacheNamespace);}
+  catch(error){toast('Start nicht gespeichert. '+(error.name==='AbortError'?'Verbindung unterbrochen.':error.message));}
+}
 function taskPath(row,readOnly){
   const values=cardText(row,"So geht's")==='noch offen'?[]:stepValues(row),n=values.length,chapter=row.source==='chapters';
   const was=cardText(row,'Was'),warum=cardText(row,'Warum'),ziel=cardText(row,'Fertig wenn');
@@ -640,7 +658,7 @@ function taskPath(row,readOnly){
   function startView(){
     const live=liveLine(row);
     const primary=chapter?el('a',{class:'button primary-action',href:chapterHref(row)},'Im Schreibwerk öffnen'):
-      readOnly||done||!n?null:el('button',{type:'button',class:'button primary-action',onclick:()=>{setPhase('weg');trackAuftrag(row,'gestartet');stepView(true);}},firstOpen()>0?'Weiter bei Schritt '+(Math.min(firstOpen(),n-1)+1):'Los geht’s');
+      readOnly||done||!n?null:el('button',{type:'button',class:'button primary-action',onclick:()=>{setPhase('weg');trackAuftrag(row,'gestartet');startQuietly(row);stepView(true);}},firstOpen()>0?'Weiter bei Schritt '+(Math.min(firstOpen(),n-1)+1):'Los geht’s');
     footer=readOnly?foot(el('p',{class:'footer-state'},'Diese Ansicht ist nur zum Lesen.')):done?taskFooter(row,false):primary?foot(primary):taskFooter(row,false);
     show([was!=='noch offen'?el('p',{class:'path-lead'},was):null,live,
       done?el('p',{class:'path-state'},row.status==='in Prüfung'?'Gemeldet. Salah schaut es sich an.':'Erledigt. Danke!'):n?el('p',{class:'path-meta'},n+(n===1?' Schritt':' Schritte')+(firstOpen()>0&&firstOpen()<n?' · '+firstOpen()+' erledigt':'')):null,
@@ -654,7 +672,7 @@ function taskPath(row,readOnly){
     footer=foot(el('button',{type:'button',class:'text-button',onclick:()=>cur>0?go(cur-1):(setPhase('start'),startView())},'Zurück'),el('button',{type:'button',class:'text-button path-skip',onclick:()=>go(n)},'Schon fertig?'));
     show([el('div',{class:'path-progress'},el('span',{class:'path-k'},'Schritt '+(cur+1)+' von '+n),dots()),
       el('p',{class:'path-step',tabindex:'-1','data-focus':''},text),
-      el('div',{class:'path-actions'},dest?el('a',{class:'button primary-action path-go',href:dest.href},dest.label,el('span',{'aria-hidden':'true'},' →')):null,
+      el('div',{class:'path-actions'},dest?el('a',{class:'button primary-action path-go',href:dest.href,onclick:()=>keepCompanion(row,values,cur)},dest.label,el('span',{'aria-hidden':'true'},' →')):null,
         isDone?el('button',{type:'button',class:'button secondary',onclick:()=>{mark(v,false);trackAuftrag(row,'schritt_offen',cur+1);stepView(true);}},'Wieder offen'):doneBtn),
       stepHelp(row,cur,text),stepOverview(row,values,go),why],focus);
   }
@@ -946,7 +964,7 @@ async function load(reset=false) {
     if(result?.code==='unauthorized'||result?.code==='forbidden'){clearResponses(cacheNamespace||snapshotPrefix);data=null;state=result.code==='unauthorized'?'unauthorized':'error';errorMessage=result.fehler||'Personenansicht nicht freigegeben.';leadership=false;preview.clear();render();return;}
     if(preview.active() && (result.readOnly!==true || result.viewer!=='SA' || result.person!==preview.target() || result.role!=='mitglied'))throw Error(result.fehler||'Personenansicht nicht freigegeben.');
     if(!validResponse(result))throw Error('Die Antwort ist unvollständig. Der aktuelle Stand bleibt unbekannt.');
-    data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();saveResponse(result);dedupeChapterTasks();
+    data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();saveResponse(result);dedupeChapterTasks();openRequestedTask();
     if (result.role === 'leitung' && result.person === 'SA' && !preview.active()) void prefetchPeople(key, cacheNamespace);
   }catch(error){if(ticket!==generation)return;data=previous;state=previous?'stale':'error';errorMessage=error.name==='AbortError'?'Die Verbindung dauert zu lange. Bitte versuche es erneut.':error.message;}
   finally{clearTimeout(timeout);if(ticket===generation){refreshing=false;activeRequest=null;render();}}
