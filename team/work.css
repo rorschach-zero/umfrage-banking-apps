@@ -37,3 +37,40 @@ dialog.task-detail{padding:0;overflow:hidden;height:100dvh;max-height:100dvh}dia
 @media(max-width:760px){.sidebar>a[href="/team/dashboard/"]{display:none}}
 .future-list{border-top:1px solid var(--line)}.future-list summary{min-height:48px;padding:14px 0;cursor:pointer;font-size:14px;font-weight:650}
 .role-button[aria-pressed=true]{background:transparent;color:var(--muted)}.role-button .selected{background:#e4eddc;color:#284b32;padding:4px 6px;border-radius:8px}
+
+/* Auftragsweg (05.11.2026): geführt wie Typeform, ruhig wie Linear/Ramp, Bricks-Werte. Ein Schritt im Fokus, die Liste darunter zum Springen. */
+.task-intro{margin:4px 0 18px}
+.task-what{font-size:17px;line-height:1.5;font-weight:700;color:var(--ink);margin:0 0 6px;letter-spacing:-.01em}
+.task-why{font-size:14px;line-height:1.6;color:#687276;margin:0}
+.task-detail .acceptance{border-left:0;background:#E6F3F0;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.6;margin:0 0 22px}
+.task-detail .acceptance strong{color:#17645F}
+.guide{margin:0 0 20px}
+.guide-top{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.guide-top h3{margin:0;font-size:15px;font-weight:800;flex:none}
+.guide-count{flex:none;font-size:12px;font-weight:700;color:#687276;font-variant-numeric:tabular-nums}
+.guide-bar{flex:1;display:flex;gap:4px}
+.guide-bar i{flex:1;height:4px;border-radius:4px;background:#E3E8E4;transition:background-color .2s cubic-bezier(.2,.7,.2,1)}
+.guide-bar i.on{background:#237E79}
+.guide-bar i.now{background:#BEB8EA}
+.guide-card{background:#fff;border:1px solid #D6DED9;border-radius:16px;padding:18px 18px 16px;box-shadow:0 4px 18px rgba(25,36,38,.045);animation:guideIn .22s cubic-bezier(.2,.7,.2,1);outline:none}
+.guide-card:focus-visible{box-shadow:0 0 0 3px #E6F3F0,0 4px 18px rgba(25,36,38,.045)}
+.guide-k{margin:0 0 6px;font-size:12px;font-weight:700;color:#687276;font-variant-numeric:tabular-nums}
+.guide-text{margin:0;font-size:16px;line-height:1.55;font-weight:650;color:var(--ink)}
+.guide-hint{margin:10px 0 0;font-size:13px;color:#687276}
+.guide-end{background:#F6FAF8}
+.guide-act{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+.guide-act .button{min-height:44px;border-radius:12px;padding:10px 18px;font-size:14px;background:#237E79}
+.guide-act .button:hover{background:#17645F}
+.guide-act .button.secondary{background:transparent;border:1px solid #CDD5D0;color:var(--ink)}
+.guide-act .text-button{color:#687276;font-size:13px}
+.guide-list{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.guide-list button{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;width:100%;min-height:40px;padding:8px 10px;border:0;border-radius:10px;background:none;text-align:left;font-size:13px;line-height:1.45;color:#687276;transition:background-color .14s}
+.guide-list button:hover{background:#F1F3F0}
+.guide-list li.cur button{background:#F1F3F0;color:var(--ink);font-weight:650}
+.gl-n{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:#F1F3F0;font-size:11px;font-weight:700;color:#687276;position:relative}
+.guide-list li.cur .gl-n{background:#BEB8EA;color:#2B2550}
+.guide-list li.done .gl-n{background:#237E79;color:transparent}
+.guide-list li.done .gl-n::after{content:"";position:absolute;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.guide-list li.done .gl-t{text-decoration:none;color:#8A9397}
+@keyframes guideIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.guide-card{animation:none}.guide-bar i{transition:none}}

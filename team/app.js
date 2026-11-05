@@ -134,6 +134,13 @@ function steps(row,readOnly=false) {
     return el('li',{},el('label',{},input,el('span',{},plainLabel(value))));
   }));
 }
+// 05.11.2026 (Salah): ein Arbeitspaket, das nur auf ein Kapitel zeigt, das dieselbe Person schreibt, erscheint nicht doppelt.
+function dedupeChapterTasks(){
+  if(!data||!Array.isArray(data.tasks)||!Array.isArray(data.chapters))return;
+  // Nur echte Doppelungen: gleiches Kapitel, gleiche Person UND gleiche Frist. Ein zweiter Auftrag zum Kapitel mit eigener Frist bleibt sichtbar (Befund Astro t46).
+  const day=v=>String(v||'').slice(0,10),own=new Set(data.chapters.map(c=>(c.ref||'')+'|'+(c.owner||'')+'|'+day(c.due)));
+  data.tasks=data.tasks.filter(t=>{const m=/schreiben\/\?k=([\w.-]+)/.exec(String(t.Wo||''));return !(m&&day(t.due)&&own.has(m[1]+'|'+(t.owner||'')+'|'+day(t.due)));});
+}
 function allTasks(){return [...(data.tasks||[]),...(data.assignments||[]),...(data.chapters||[])];}
 function relativeDue(row){
   if(!row.due)return 'Frist noch offen';
@@ -369,7 +376,7 @@ function workPart(row){
   if(row.part&&/6[ab]/i.test(row.part))return String(row.part).match(/6[ab]/i)[0].toLowerCase();
   const m=/^pa(6[ab])/i.exec(String(row.deliverable||''));return m?m[1].toLowerCase():null;
 }
-function workRoleOf(row){if(leadership)return row.source==='chapters'?'Pate':null;return row.owner===data.person?(row.source==='chapters'?'Pate':null):row.reader===data.person?'Zweitleser':null;}
+function workRoleOf(row){if(leadership)return row.source==='chapters'?'schreibt':null;return row.owner===data.person?(row.source==='chapters'?'Du schreibst':null):row.reader===data.person?'Du liest gegen':null;}
 function workRows(){
   if(leadership)return allTasks();
   return personalRows().filter(r=>workRole==='read'?r.reader===data.person:r.owner===data.person);
@@ -396,7 +403,7 @@ function workRow(row){
     part?el('span',{class:'work-tag'},part):null,
     role?el('span',{class:'work-tag role'},role):null,
     leadership&&row.owner?el('span',{class:'work-tag who','data-owner':row.owner},names[row.owner]):null,
-    leadership&&row.source==='chapters'&&row.reader?el('span',{class:'work-tag role'},'Zweitleser · '+names[row.reader]):null);
+    leadership&&row.source==='chapters'&&row.reader?el('span',{class:'work-tag role'},'liest gegen · '+names[row.reader]):null);
   if(tags.childNodes.length)name.append(tags);
   const due=item.querySelector('.due-chip');if(due&&row.due)due.textContent=overdue(row)?whenWord(row.due):date(row.due);
   if(/^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+(?:\/edit)?$/.test(row.doc||''))item.insertBefore(el('a',{class:'work-doc',href:preview.active()?row.doc.replace(/(?:\/edit)?$/, '/preview'):row.doc,target:'_blank',rel:'noopener','aria-label':'Doc öffnen: '+shortTitle(row),title:'Doc öffnen'},'Doc ↗'),item.querySelector('.status-dot'));
@@ -448,7 +455,7 @@ function writingFolderLink(){
 function documentRow(row,chapter=false){
   const url=chapter?row.doc:row.url;
   const valid=chapter?/^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+(?:\/edit)?$/.test(url||''):/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view$/.test(url||'');
-  return el('li',{class:'document-row'},el('div',{class:'document-copy'},el('h3',{},row.title),el('p',{},chapter?((row.owner===data.person?'Als Pate':row.reader===data.person?'Als Zweitleser:in':'Leitungsübersicht')+' · '+(row.ref||'')):'Wozu: '+row.purpose)),
+  return el('li',{class:'document-row'},el('div',{class:'document-copy'},el('h3',{},row.title),el('p',{},chapter?((row.owner===data.person?'Du schreibst':row.reader===data.person?'Du liest gegen':'Leitungsübersicht')+' · '+(row.ref||'')):'Wozu: '+row.purpose)),
     el('div',{class:'document-actions'},chapter&&valid&&!preview.active()&&row.ref?el('a',{class:'button secondary document-open',href:'/team/schreiben/?k='+encodeURIComponent(row.ref)},'Schreiben'):valid?el('a',{class:'button secondary document-open',href:preview.active()&&chapter?url.replace(/(?:\/edit)?$/, '/preview'):url,target:'_blank',rel:'noopener noreferrer'},'Öffnen'):el('button',{class:'button secondary',disabled:true,title:'Datei oder Leselink noch nicht verfügbar'},'Öffnen'),piaLink({...row,'Pia-Frage':'Erklär mir das Wichtigste aus '+row.title+'.'})),
     valid?null:el('p',{class:'quiet-note'},'Datei oder Leselink noch nicht verfügbar.'));
 }
@@ -459,11 +466,11 @@ function showDocuments(){
     el('section',{class:'document-group'},el('h2',{},'Zusammenarbeit'),el('ul',{class:'document-list'},el('li',{class:'document-row'},el('div',{class:'document-copy'},el('h3',{},'Unsere Spielregeln'),el('p',{},'Eine Seite zu Rollen, Hilfe und unseren Teamabmachungen.')),el('div',{class:'document-actions'},el('a',{class:'button secondary document-open',href:'/team/spielregeln.html',target:'_blank',rel:'noopener noreferrer'},'Öffnen →'))))),
     ...groups.map(group=>el('section',{class:'document-group'},el('h2',{},group),el('ul',{class:'document-list'},documents.filter(row=>row.group===group).map(row=>documentRow(row))))),
     !groups.length?unknown('Die Unterlagen sind noch nicht verbunden.'):null,
-    el('section',{class:'document-group'},el('h2',{},'Meine Kapitel-Docs'),el('p',{class:'quiet-note'},leadership?'Alle Kapitel der Gruppe.':'Deine Kapitel als Pate oder Zweitleser:in.'),writingFolderLink(),
+    el('section',{class:'document-group'},el('h2',{},'Meine Kapitel-Docs'),el('p',{class:'quiet-note'},leadership?'Alle Kapitel der Gruppe.':'Kapitel, die du schreibst oder gegenliest.'),writingFolderLink(),
       chapters===null||chapters===undefined?unknown('Die Kapitel konnten nicht geladen werden.'):chapters.length?el('ul',{class:'document-list'},[...chapters].sort((a,b)=>(a.ref||'').localeCompare(b.ref||'','de',{numeric:true})).map(row=>documentRow(row,true))):empty('Noch keine Kapitel zugeteilt.','Sobald deine Zuteilung hinterlegt ist, findest du hier deine Docs.'))];
 }
 function profileAgreements(){
-  const people={"SA": {"name": "Salah", "role": "Projektleitung und Yuh", "sentence": "Du hältst Entscheide, Verteilung und den Kontakt zu Schule und Yuh zusammen.", "work": ["Du hältst Entscheide mit Datum in Notion fest.", "Du verteilst offene Arbeit nach bestätigten Angaben neu.", "Ungeprüfte Zugänge oder Resultate als bestätigt behandeln."]}, "ES": {"name": "Ernes", "role": "Lead Servicebeobachtung B", "sentence": "Du koordinierst die Übung, Kontakte und Nachläufe; alle fünf erheben mit.", "work": ["Du prüfst im Feld täglich Kontakte und Nachläufe.", "Du sammelst unklare Felder und holst Hilfe bei Salah.", "Bei einer Stoppregel weitere Kontakte starten."]}, "MG": {"name": "Melisa", "role": "Lead Bewertungen C", "sentence": "Du leitest die Übung und klärst Unterschiede nach den unabhängigen Erstcodes.", "work": ["Du hältst Erstcodes und Konsens getrennt fest.", "Du klärst Grenzfälle gemeinsam am Codebuch.", "Erstcodes angleichen oder durch Konsens ersetzen."]}, "AM": {"name": "Arber", "role": "Lead Umfrage A und Reichweite", "sentence": "Du koordinierst die Verteilung und hilfst der Gruppe bei Lücken in der Reichweite.", "work": ["Du schaust sonntags auf Kanäle und Zwischenziele.", "Du schlägst bei Lücken neue Verteilorte vor.", "Echte Umfrageantworten selbst ausfüllen oder lenken."]}, "LB": {"name": "Leonie", "role": "Lead Qualität und Formales", "sentence": "Du koordinierst Quellen, Zweitlesungen und die vollständige Abgabe.", "work": ["Du führst die Lesungsliste mit Pate und Zweitlesung.", "Du gibst fehlende Belege an die zuständige Person zurück.", "Quellen erfinden oder für andere unterschreiben."]}};
+  const people={"SA": {"name": "Salah", "role": "Projektleitung und Yuh", "sentence": "Du hältst Entscheide, Verteilung und den Kontakt zu Schule und Yuh zusammen.", "work": ["Du hältst Entscheide mit Datum in Notion fest.", "Du verteilst offene Arbeit nach bestätigten Angaben neu.", "Ungeprüfte Zugänge oder Resultate als bestätigt behandeln."]}, "ES": {"name": "Ernes", "role": "Lead Servicebeobachtung B", "sentence": "Du koordinierst die Übung, Kontakte und Nachläufe; alle fünf erheben mit.", "work": ["Du prüfst im Feld täglich Kontakte und Nachläufe.", "Du sammelst unklare Felder und holst Hilfe bei Salah.", "Bei einer Stoppregel weitere Kontakte starten."]}, "MG": {"name": "Melisa", "role": "Lead Bewertungen C", "sentence": "Du leitest die Übung und klärst Unterschiede nach den unabhängigen Erstcodes.", "work": ["Du hältst Erstcodes und Konsens getrennt fest.", "Du klärst Grenzfälle gemeinsam am Codebuch.", "Erstcodes angleichen oder durch Konsens ersetzen."]}, "AM": {"name": "Arber", "role": "Lead Umfrage A und Reichweite", "sentence": "Du koordinierst die Verteilung und hilfst der Gruppe bei Lücken in der Reichweite.", "work": ["Du schaust sonntags auf Kanäle und Zwischenziele.", "Du schlägst bei Lücken neue Verteilorte vor.", "Echte Umfrageantworten selbst ausfüllen oder lenken."]}, "LB": {"name": "Leonie", "role": "Lead Qualität und Formales", "sentence": "Du koordinierst Quellen, Zweitlesungen und die vollständige Abgabe.", "work": ["Du führst die Liste, wer welches Kapitel schreibt und wer es gegenliest.", "Du gibst fehlende Belege an die zuständige Person zurück.", "Quellen erfinden oder für andere unterschreiben."]}};
   const current=people[data.person];
   if(!current)return [];
   const fold=(label,...children)=>el('details',{class:'team-agreement'},el('summary',{},label),el('div',{class:'agreement-content'},...children));
@@ -483,7 +490,7 @@ function showProfile(){
     ...profileAgreements(),
     piaLink({'Pia-Frage':'Erklär mir meine Rolle und meinen Lead-Bereich. Wofür bin ich verantwortlich?'},'Pia erklärt dir deine Rolle'),
     button('Unterlagen öffnen',()=>navigate('documents'),'button secondary'),button('Umfrage teilen',()=>navigate('sharing'),'button secondary'),
-    section('Kapitel als Pate',chapters.filter(r=>r.owner===data.person)),section('Kapitel als Zweitleser:in',chapters.filter(r=>r.reader===data.person)),
+    section('Kapitel, die du schreibst',chapters.filter(r=>r.owner===data.person)),section('Kapitel, die du gegenliest',chapters.filter(r=>r.reader===data.person)),
     section('Deine Erhebungsaufträge',(data.assignments||[]).filter(r=>r.owner===data.person)),section('Deine nächsten drei Fristen',sortRows(own.filter(r=>!completed(r)&&r.due)).slice(0,3))];
 }
 const schoolDates = [
@@ -581,6 +588,50 @@ function proposalNotes(row) {
   const notes=(data.deadlineProposals||[]).filter(n=>n.id===row.id);
   return notes.length?el('section',{class:'proposal-notes'},el('h3',{},'Vorschläge an Salah'),notes.map(n=>el('p',{},'Vorgeschlagen: '+date(n.date)+' · '+n.text,el('small',{},'Von '+(names[n.person]||'Teammitglied')+' · '+date(n.created&&String(n.created).replace(' ','T'),true)+' · Frist unverändert')))):null;
 }
+// Auftragsweg (05.11.2026, Salah): ein Auftrag führt Schritt für Schritt, wie Typeform. Jede Aktion geht ins Blatt «Auftragsweg».
+const guideAt=new Map();
+function trackAuftrag(row,aktion,wert){
+  if(config.demo||preview.active()||!key||(leadership&&row.owner!==data.person))return;
+  try{fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'auftragsweg',k:key,id:String(row.id||''),ref:String(row.ref||''),quelle:String(row.source||''),aktion,wert:wert==null?'':String(wert)}),referrerPolicy:'no-referrer'}).catch(()=>{});}catch{}
+}
+function taskIntro(row){
+  const was=cardText(row,'Was'),warum=cardText(row,'Warum');
+  if(was==='noch offen'&&warum==='noch offen')return null;
+  return el('section',{class:'task-intro'},was!=='noch offen'?el('p',{class:'task-what'},was):null,warum!=='noch offen'?el('p',{class:'task-why'},warum):null);
+}
+function guidedSteps(row,readOnly){
+  if(cardText(row,"So geht's")==='noch offen')return el('p',{class:'field-open'},'Die Schritte sind noch nicht hinterlegt. Pia hilft dir weiter.');
+  const values=stepValues(row);if(!values.length)return null;
+  const n=values.length,firstOpen=()=>{const i=values.findIndex(v=>!stepDone(row,v));return i<0?n:i;};
+  let cur=guideAt.has(row.id)?Math.min(guideAt.get(row.id),n):firstOpen();
+  const box=el('section',{class:'guide','aria-label':'Schritte zum Auftrag'});
+  const mark=(v,on)=>{try{localStorage.setItem(stepKey(row,v),on?'1':'0');}catch{announce('Der Schritt kann in diesem Browser nicht gespeichert werden.');}};
+  const go=i=>{cur=i;guideAt.set(row.id,cur);draw(true);};
+  function draw(focus){
+    const done=values.filter(v=>stepDone(row,v)).length;
+    const bar=el('div',{class:'guide-bar','aria-hidden':'true'},values.map((v,i)=>el('i',{class:stepDone(row,v)?'on':i===cur?'now':''})));
+    let card;
+    if(cur>=n){
+      card=el('div',{class:'guide-card guide-end',tabindex:'-1'},el('p',{class:'guide-k'},'Alle Schritte erledigt'),
+        el('p',{class:'guide-text'},'Prüf zum Schluss: '+cardText(row,'Fertig wenn')),
+        readOnly?null:el('p',{class:'guide-hint'},'Passt alles? Dann melde den Auftrag unten als erledigt.'),
+        el('div',{class:'guide-act'},el('button',{type:'button',class:'text-button',onclick:()=>go(n-1)},'Zurück zum letzten Schritt')));
+    }else{
+      const v=values[cur],isDone=stepDone(row,v);
+      card=el('div',{class:'guide-card',tabindex:'-1'},el('p',{class:'guide-k'},'Schritt '+(cur+1)+' von '+n),el('p',{class:'guide-text'},plainLabel(v)),
+        el('div',{class:'guide-act'},
+          readOnly?null:isDone?el('button',{type:'button',class:'button secondary',onclick:()=>{mark(v,false);trackAuftrag(row,'schritt_offen',cur+1);draw(true);}},'Wieder offen'):
+            el('button',{type:'button',class:'button',onclick:()=>{mark(v,true);trackAuftrag(row,'schritt_erledigt',cur+1);const next=values.findIndex((w,i)=>i>cur&&!stepDone(row,w));go(next<0?firstOpen():next);}},cur+1<n?'Erledigt, weiter':'Erledigt'),
+          readOnly&&cur+1<n?el('button',{type:'button',class:'button secondary',onclick:()=>go(cur+1)},'Nächster Schritt'):null,
+          cur>0?el('button',{type:'button',class:'text-button',onclick:()=>go(cur-1)},'Zurück'):null));
+    }
+    const list=el('ol',{class:'guide-list'},values.map((v,i)=>el('li',{class:(stepDone(row,v)?'done':'')+(i===cur?' cur':'')},
+      el('button',{type:'button','aria-current':i===cur?'step':null,onclick:()=>go(i)},el('span',{class:'gl-n','aria-hidden':'true'},String(i+1)),el('span',{class:'gl-t'},plainLabel(v)),stepDone(row,v)?el('span',{class:'sr-only'},' erledigt'):null))));
+    box.replaceChildren(el('div',{class:'guide-top'},el('h3',{},'So gehst du vor'),el('span',{class:'guide-count'},done+' von '+n),bar),card,list);
+    if(focus)box.querySelector('.guide-card')?.focus({preventScroll:true});
+  }
+  draw(false);return box;
+}
 function details(row,origin='Projektplanung',takeover=false){
   if(pending){announce('Die Meldung wird gespeichert. Du kannst noch Rückgängig wählen.');return;}
   $('detail').dataset.owner=row.owner||data.person;
@@ -588,11 +639,12 @@ function details(row,origin='Projektplanung',takeover=false){
   const late=overdue(row)&&row.status!=='in Prüfung'?el('section',{class:'late-note'},el('strong',{},'Frist überschritten'),el('p',{},relativeDue(row)),canReport(row)&&!takeover?button('Jetzt fertig melden',()=>report(row),'text-button'):null,canReport(row)&&!takeover?button('Neue Frist vorschlagen',()=>deadlineProposal(row),'text-button'):null):null;
   const scroll=el('div',{class:'detail-scroll'},statusSteps(row),el('h2',{id:'detail-title'},shortTitle(row)),el('p',{class:'detail-due'},relativeDue(row)),late,
     row.waitingOn?el('p',{class:'quiet-note dependency-wait'},'Startet nach: '+row.waitingOn):null,
+    taskIntro(row),
     el('p',{class:'acceptance'},el('strong',{},'Fertig, wenn … '),cardText(row,'Fertig wenn')),
-    el('h3',{},'So geht’s'),steps(row,takeover),el('p',{class:'local-note'},preview.active()||takeover?'Diese Ansicht ist nur zum Lesen.':'Deine Schritte bleiben auf diesem Gerät gespeichert.'),
+    guidedSteps(row,preview.active()||takeover),preview.active()||takeover?el('p',{class:'local-note'},'Diese Ansicht ist nur zum Lesen.'):null,
     el('div',{class:'task-actions'},workLink(row),piaLink(row)),proposalNotes(row),
     el('details',{class:'more'},el('summary',{},'Auftrag und Quellen'),el('h3',{},'Auftrag im Wortlaut'),el('p',{},cardText(row,'Was')),el('h3',{},'Warum'),el('p',{},cardText(row,'Warum')),el('p',{class:'source'},cardText(row,'Auftragsquelle')),el('p',{class:'source'},cardText(row,'Herkunft')),el('p',{class:'source'},origin+' · '+(row.ref||'')),notion));
-  $('detail').classList.add('task-detail');$('detail-body').replaceChildren(scroll,taskFooter(row,takeover));if(!$('detail').open)$('detail').showModal();scroll.scrollTop=0;
+  $('detail').classList.add('task-detail');$('detail-body').replaceChildren(scroll,taskFooter(row,takeover));if(!takeover)trackAuftrag(row,'geoeffnet');if(!$('detail').open)$('detail').showModal();scroll.scrollTop=0;
   $('detail').querySelector('.primary-action:not(:disabled)')?.focus({preventScroll:true});
 }
 function proposalInbox() {
@@ -856,7 +908,7 @@ async function load(reset=false) {
     if(result?.code==='unauthorized'||result?.code==='forbidden'){clearResponses(cacheNamespace||snapshotPrefix);data=null;state=result.code==='unauthorized'?'unauthorized':'error';errorMessage=result.fehler||'Personenansicht nicht freigegeben.';leadership=false;preview.clear();render();return;}
     if(preview.active() && (result.readOnly!==true || result.viewer!=='SA' || result.person!==preview.target() || result.role!=='mitglied'))throw Error(result.fehler||'Personenansicht nicht freigegeben.');
     if(!validResponse(result))throw Error('Die Antwort ist unvollständig. Der aktuelle Stand bleibt unbekannt.');
-    data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();saveResponse(result);
+    data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();saveResponse(result);dedupeChapterTasks();
     if (result.role === 'leitung' && result.person === 'SA' && !preview.active()) void prefetchPeople(key, cacheNamespace);
   }catch(error){if(ticket!==generation)return;data=previous;state=previous?'stale':'error';errorMessage=error.name==='AbortError'?'Die Verbindung dauert zu lange. Bitte versuche es erneut.':error.message;}
   finally{clearTimeout(timeout);if(ticket===generation){refreshing=false;activeRequest=null;render();}}
