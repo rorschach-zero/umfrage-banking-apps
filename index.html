@@ -331,7 +331,7 @@ header:has(+ * .schirm.start), body:has(.schirm.start) header { max-width: 1180p
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "6 bis 8 Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.34";                   // Stand des Fragebogens, wird mitgespeichert. 3.34 (05.11.2026): Kennung kann das Kürzel der teilenden Gruppenperson tragen (WA-ES-…), Fragen und Antworten unverändert
+const VERSION = "3.35";                   // Stand des Fragebogens, wird mitgespeichert. 3.34 (05.11.2026): Kennung kann das Kürzel der teilenden Gruppenperson tragen (WA-ES-…). 3.35 (05.11.2026): Startmessung (geoeffnet/begonnen, Blatt «Starts»). Fragen und Antworten unverändert
 const KONTAKT = "umfrage@hydeout.ch";    // Kontakt der Studierendengruppe fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
@@ -416,6 +416,18 @@ if (wiederherstellen) {
   if (!SPRACHE && Object.hasOwn(SPRACHEN_LISTE, String(A.sprache))) SPRACHE = A.sprache;
 }
 if (!SPRACHE) SPRACHE = "de"; A.sprache = SPRACHE;
+// Start measurement (3.35): "geoeffnet" when the page shows the survey with a valid id, "begonnen" on the start button.
+// Once per id and tab session. Sends only id, event, language, device, version; the receiver adds time and channel.
+// Fire-and-forget: sendBeacon, else fetch keepalive; every error is swallowed, the survey never waits for it.
+function startEreignis(ereignis) {
+  try {
+    if (!ENDPUNKT || beendet() || merk("ereignis_" + ereignis) === A.id) return;
+    merk("ereignis_" + ereignis, A.id);
+    const body = JSON.stringify({typ:"start", id:A.id, ereignis:ereignis, sprache:SPRACHE, geraet:A.geraet, version:VERSION});
+    if (navigator.sendBeacon && navigator.sendBeacon(ENDPUNKT, new Blob([body], {type:"text/plain"}))) return;
+    fetch(ENDPUNKT, {method:"POST", headers:{"Content-Type":"text/plain"}, body:body, keepalive:true}).catch(() => {});
+  } catch (e) {}
+}
 function sichern() { try { merk("stand", JSON.stringify({v: VERSION, A: A, i: i, start: start})); } catch (e) {} }
 let verlaufGemeldet = -1;
 // Wo steigen Leute aus? Beim Verlassen des Tabs geht die Nummer des aktuellen Schirms an den Empfaenger (Blatt «Verlauf»), ohne Antworten.
@@ -572,6 +584,7 @@ function weiter(s) {
   if (s.id==="t1") { if (A.t1.length===1) { A.t2 = A.t1[0]; A._t2auto = true; } else { if (A._t2auto) { delete A.t2; delete A._t2auto; } if (A.t2 && !A.t1.includes(A.t2)) delete A.t2; } }
   if (s.id==="t1" || s.id==="t2") hauptappGewechselt();
   if (s.id==="t6") kontaktGewechselt();
+  if (s.id === "start") startEreignis("begonnen");
   i++; sichern(); render();
 }
 function endeHtml() { return `<div class="ende"><div id="vorher"><div class="kicker">${t("Fast geschafft")}</div><h2 id="frage-titel" style="margin-bottom:12px">${t("Bevor du deine Antworten sendest")}</h2><p>${t("Diese Umfrage entsteht mit dem Praxispartner Yuh. Yuh erhält nur ausgewertete Ergebnisse, keine einzelnen Antworten.")}</p><p class="hinweis">${t("Mit «Antworten senden» werden deine Antworten gespeichert. Ohne Senden werden keine Antworten gespeichert, nur die Stelle, an der du aufgehört hast.")}</p><div style="margin-top:16px"><button type="button" class="knopf" id="absenden">${t("Antworten senden")}</button></div><details><summary>${t("Was mit deinen Antworten passiert")}</summary><p>${t("Die Rohdaten bleiben bei der Studierendengruppe und werden nach der Notenpublikation gelöscht.")} <a href="${dsLink()}" target="_blank" rel="noopener">${t("Datenschutz zur Umfrage")}</a></p></details></div><p class="status" id="sendestatus" role="status"></p><div id="nachher" hidden><div class="gross">${t("Danke")}</div><div class="karte gewinn-karte"><div class="gk-kopf" aria-hidden="true"><span class="gk-betrag">CHF 100.–</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div><b>${t("Gutschein gewinnen und Ergebnisse erhalten")}</b><label class="feld sr" for="mail">${t("Mailadresse")}</label><input class="text" id="mail" type="email" maxlength="120" placeholder="${t("deine@adresse.ch")}" aria-describedby="mailstatus"><div style="margin-top:10px"><button type="button" class="knopf" id="mailsenden">${t("Mitmachen")}</button></div><div class="fehler" id="mailstatus" role="alert"></div><details><summary>${t("Wie die Verlosung läuft")}</summary><p>${t("Hinterlasse eine Mailadresse. Damit nimmst du an der Verlosung des Galaxus-Gutscheins im Wert von 100 Franken teil und erhältst die Ergebnisse. Die Adresse wird getrennt von den Antworten gespeichert, nur mit dem Monat, und nach der Zustellung des Gutscheins und dem Versand der Ergebnisse gelöscht, spätestens nach der Notenpublikation.")} <a href="${tbLink()}" target="_blank" rel="noopener">${t("Teilnahmebedingungen")}</a></p></details></div><div class="karte teilen-karte"><b>${t("Hilf uns, mehr Antworten zu bekommen")}</b><p class="karte-text">${t("Teile die Umfrage mit drei Personen, die auch eine Banking-App nutzen.")}</p><div class="teilen"><a class="knopf" id="teilen-wa" href="#" rel="noopener" target="_blank">${t("Per WhatsApp teilen")}</a><div class="teilen-zweit"><button type="button" class="knopf leise" id="teilen-kopie">${t("Link kopieren")}</button><button type="button" class="knopf leise" id="teilen-nativ" hidden>${t("Teilen")}</button></div></div><p class="hinweis klein" id="teilstatus" role="status">${t("Freiwillig, ohne Einfluss auf deine Gewinnchance.")}</p></div><details class="kennung-box"><summary>${t("Deine Kennung")}</summary><p>${t("Deine Kennung, falls du deine Antworten später löschen lassen willst:")} <strong id="kennung" style="white-space:nowrap"></strong></p></details></div></div>`; }
@@ -664,7 +677,7 @@ document.addEventListener("keydown", e => {
   }
 });
 if (beendet()) { main.innerHTML = `<section class="schirm"><div class="ende"><div class="gross">${t("Danke")}</div><p style="margin-top:16px">${t("Die Umfrage ist seit dem 1. Dezember 2026 beendet. Danke für dein Interesse.")}</p></div></section>`; }
-else if (A.abbruch) { i = S.length - 1; renderEnde(true); } else if (A._gesendet) { i = liste().length - 1; renderEnde(false); zeigeGesendet(); } else render();
+else if (A.abbruch) { i = S.length - 1; renderEnde(true); } else if (A._gesendet) { i = liste().length - 1; renderEnde(false); zeigeGesendet(); } else { render(); startEreignis("geoeffnet"); }
 </script>
 </body>
 </html>
