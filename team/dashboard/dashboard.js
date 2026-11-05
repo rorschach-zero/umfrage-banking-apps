@@ -180,7 +180,7 @@
     const rest = f.rest || {};
     return card({id: 'codierung', eyebrow: 'Methode C · Bewertungen', title: f.planned ? `${num(f.n)} von ${num(f.planned)} Bewertungen codiert.` : 'Noch keine Bewertungen zugeteilt.',
       body: `${big(num(f.n), '/ ' + num(f.planned))}${meter(f.n, f.planned, num(f.n) + ' von ' + num(f.planned) + ' codiert')}
-        <div class="stats">${stat(num(f.double) + ' / ' + num(f.double_target), 'doppelt codiert / Soll')}${stat(num(f.consensus_open), 'Konsens offen', f.consensus_open ? 'attention' : '')}${stat(rest.n ? pct(rest.share) : '–', `Restkategorie, n = ${num(rest.n)}`, rest.alarm ? 'attention' : '')}</div>
+        <div class="stats">${stat(num(f.double) + ' / ' + num(f.double_target), 'doppelt codiert / Soll')}${stat(num(f.consensus_open), f.consensus_open == null ? 'Konsens unbekannt' : 'Konsens offen', f.consensus_open ? 'attention' : '')}${stat(rest.n ? pct(rest.share) : '–', f.rest ? `Restkategorie, n = ${num(rest.n)}` : 'Restkategorie unbekannt', rest.alarm ? 'attention' : '')}</div>${f.consensus_state === 'unknown' ? '<p class="note">Das Konsensblatt ist gerade nicht erreichbar: offene Konsensfälle und Restkategorie sind unbekannt. Die Übereinstimmung beruht auf den Erstcodierungen und bleibt sichtbar.</p>' : ''}
         <details class="more" data-key="c-zellen"><summary>Abgleich je Zelle (${num(f.cells.length)})</summary><div class="list">${f.cells.map(c => `<div class="row"><span>${esc(c.cell.join(' · '))}<small>n = ${num(c.n)} · ${pct(c.double_share)} doppelt · ${num(c.consensus_open)} Konsens offen</small></span><b>${num(c.double)} / ${num(c.double_target)}</b></div>`).join('')}</div></details>`,
       how: '<p>Doppelcodierung: mindestens aufgerundet 20 % je Anbieter, Quelle, Zeitfenster und Schicht. Konsens offen: Abweichung in einem der acht Vergleichsfelder ohne Entscheid.</p><p>Restkategorie (10 Sonstiges): Alarm über 15 % ab n = 20. Probefälle zählen nirgends.</p>',
       source: 'Team-Blatt, Zuordnung, Bewertungen, Doppelcodierung, Konsens'});
@@ -266,10 +266,10 @@
   function punctualCard(pm) {
     const t = pm.punctual;
     if (!t) return card({id: 'termintreue', eyebrow: 'Termintreue', title: 'Termintreue derzeit unbekannt.', body: unknown()});
-    const body = t.n ? `${big(num(t.x), '/ ' + num(t.n) + ' termintreu')}${meter(t.x, t.n, num(t.x) + ' von ' + num(t.n))}` : empty(t.without_actual_end ? `Noch nicht messbar: Bei ${num(t.without_actual_end)} erledigten Paketen fehlt das Ist-Ende in Notion.` : 'Noch nicht messbar: Bis heute ist kein Paket fällig.');
-    return card({id: 'termintreue', eyebrow: 'Termintreue', title: t.n ? `${num(t.x)} von ${num(t.n)} fälligen Paketen wurden rechtzeitig fertig.` : 'Termintreue noch nicht messbar.',
-      body: body + (t.n && t.without_actual_end ? `<p class="note">${num(t.without_actual_end)} erledigte Pakete ohne Ist-Ende sind nicht beurteilbar und nicht im Nenner.</p>` : ''),
-      how: '<p>Termintreu ist ein fälliges Paket, wenn das Ist-Ende auf oder vor dem Plan-Ende liegt. Verspätet erledigte Pakete zählen nicht als termintreu, noch offene fällige Pakete ebenfalls nicht.</p>', source: 'Notion PSP, Ist-Ende und Plan-Ende'});
+    const body = t.n ? `${big(num(t.x), '/ ' + num(t.n) + ' fällig')}${meter(t.x, t.n, num(t.x) + ' von ' + num(t.n))}` : empty('Noch nicht messbar: Bis heute ist kein Paket fällig.');
+    return card({id: 'termintreue', eyebrow: 'Termintreue', title: t.n ? `${num(t.x)} von ${num(t.n)} fälligen Paketen nachweislich rechtzeitig fertig.` : 'Termintreue noch nicht messbar.',
+      body: body + (t.n && t.without_actual_end ? `<p class="note">${num(t.without_actual_end)} erledigte Pakete ohne Ist-Ende in Notion sind nicht beurteilbar; sie bleiben im Nenner und zählen nicht als rechtzeitig.</p>` : ''),
+      how: '<p>Nenner sind alle fälligen Arbeitspakete (Plan-Ende bis heute). Rechtzeitig ist ein Paket, wenn das Ist-Ende auf oder vor dem Plan-Ende liegt. Verspätet erledigte, noch offene und erledigte Pakete ohne Ist-Ende zählen nicht als rechtzeitig; die Pakete ohne Ist-Ende stehen separat.</p>', source: 'Notion PSP, Ist-Ende und Plan-Ende'});
   }
   function deadlinesCard(pm) {
     const d = pm.deadline_buckets;
@@ -290,7 +290,7 @@
     const plan = pm.plan_by_person || {}, reserve = pm.reserve_by_person || {}, h = pm.hours || {state: 'unknown'};
     const actual = c => h.state === 'ready' ? num(h.per_person[c] || 0) + '&nbsp;h' : '–';
     const table = `<div class="table-wrap"><table class="effort"><thead><tr><th scope="col">Person</th><th scope="col">PSP-Plan</th><th scope="col">Reserve</th><th scope="col">Ist</th><th scope="col">Massstab</th></tr></thead><tbody>${PEOPLE.map(c => `<tr><th scope="row">${esc(NAMES[c])}</th><td>${pm.plan_by_person ? num(plan[c] || 0) + '&nbsp;h' : '–'}</td><td>${reserve[c] ? num(reserve[c]) + '&nbsp;h' : '–'}</td><td>${actual(c)}</td><td>37&nbsp;h</td></tr>`).join('')}</tbody></table></div>`;
-    const note = h.state === 'leer' ? empty('Noch keine Arbeitszeit erfasst. Sobald Stunden in der Team-App eingetragen sind, erscheinen sie hier je Person.') : h.state !== 'ready' ? empty('Arbeitszeit derzeit unbekannt: Das Zeitblatt ist nicht erreichbar.') : '';
+    const note = h.state === 'leer' ? empty('Noch keine Arbeitszeit erfasst. Die Zeit wird beim Abschliessen eines Auftrags automatisch gemessen.') : h.state !== 'ready' ? empty('Arbeitszeit derzeit unbekannt: Das Zeitblatt ist nicht erreichbar.') : '';
     return card({id: 'aufwand', eyebrow: 'Aufwand', span: 'span12', title: 'Plan je Person, gemessen am Gruppenmassstab von 37 Stunden.',
       body: table + note + '<p class="note">Schätzung der Schule: ca. 12 h für 6a und geschätzt 25 h für 6b je Person, zusammen rund 37 h. Unverbindlich.</p>',
       how: '<p>Drei Grössen bleiben getrennt: der <b>PSP-Plan</b> je Person aus Notion (Arbeitspakete, Reserve separat), der <b>Gruppenmassstab</b> von 37 Stunden je Person (Entscheid der Gruppe) und die <b>Schätzung der Schule</b> («zusätzlich ca. 12 Stunden» für 6a, «geschätzter Aufwand 25 Stunden» für 6b).</p><p>Ist-Stunden kommen aus der Zeiterfassung der Team-App; stornierte Einträge zählen nicht. Ein leeres Zeitblatt heisst «noch nichts erfasst», nicht null Stunden.</p>',
@@ -321,10 +321,13 @@
       body: `<div class="list">${list(r.items.slice(0, 6))}</div>${r.items.length > 6 ? `<details class="more" data-key="risiken-alle"><summary>Alle ${num(r.n)} Risiken</summary><div class="list">${list(r.items.slice(6))}</div></details>` : ''}`,
       how: '<p>Einträge des Risikoregisters mit ihrem Status. Bewertung, Massnahme und Review-Takt folgen, sobald sie im Register geführt werden.</p>', source: 'Notion Risikoregister'});
   }
-  function absenceCard() {
-    return card({id: 'abwesenheiten', eyebrow: 'Abwesenheiten', title: 'Abwesenheiten werden noch nicht erfasst.',
-      body: empty('Es fehlt die Eingabe «Ich bin weg von … bis …» in der Team-App. Sobald sie steht, erscheinen die Abwesenheiten hier und im Gantt.'),
-      how: '<p>Der Gantt verlangt Abwesenheiten (Raster C3). Die Gruppe hat entschieden, sie in der Team-App zu erfassen und nach Notion zu übertragen.</p>'});
+  function absenceCard(pm) {
+    const a = pm.absences || {state: 'unknown'}, how = '<p>Der Gantt verlangt Abwesenheiten (Raster C3). Jede Person trägt sie unter «Heute» mit «Ich bin weg von … bis …» ein; gezeigt werden laufende und kommende Zeiträume. Den Grund sieht nur die Leitung.</p>';
+    if (a.state === 'unknown') return card({id: 'abwesenheiten', eyebrow: 'Abwesenheiten', title: 'Abwesenheiten derzeit unbekannt.', body: unknown(), how, source: 'Team-Blatt, Abwesenheiten'});
+    if (a.state !== 'ready') return card({id: 'abwesenheiten', eyebrow: 'Abwesenheiten', title: 'Noch keine Abwesenheit eingetragen.', body: empty('Das Blatt für Abwesenheiten ist noch nicht angelegt. Es entsteht mit dem ersten Eintrag unter «Heute».'), how, source: 'Team-Blatt, Abwesenheiten'});
+    return card({id: 'abwesenheiten', eyebrow: 'Abwesenheiten', title: a.n ? (a.now ? `${num(a.now)} ${a.now === 1 ? 'Person ist' : 'Personen sind'} gerade weg.` : `${num(a.n)} ${a.n === 1 ? 'Abwesenheit steht' : 'Abwesenheiten stehen'} an.`) : 'Niemand hat eine Abwesenheit eingetragen.',
+      body: a.n ? `<div class="list">${a.items.map(x => `<div class="row"><span>${esc(name(x.person))}${x.grund ? `<small>${esc(x.grund)}</small>` : ''}</span><b>${esc(dateShort(x.von))}–${esc(dateShort(x.bis))} ${x.now ? chip('jetzt', 'warn') : ''}</b></div>`).join('')}</div>` : empty('Keine laufende oder kommende Abwesenheit.'),
+      how, source: 'Team-Blatt, Abwesenheiten'});
   }
   const K = [['K1', 'Fazit der Analyse 6a korrekt übernommen', 'B1', ['6b-2']], ['K2', 'Ökonomische Ziele nach SMART mit 6 W', 'B2', ['6b-3']], ['K3', 'Vorökonomische Ziele nach SMART mit 6 W', 'B3', ['6b-3']], ['K4', 'Strategieansatz mit Definition und Begründung', 'B4', ['6b-7']],
     ['K5', 'Eine Massnahme im Marketing-Mix 7 P, mit belegtem Entscheid zu Kreativität, Erfolgspotenzial und Umsetzbarkeit', 'B5, B6', ['6b-8']], ['K6', 'Terminplan der Massnahme mit eingerechneter Reserve', 'B7', ['6b-8']], ['K7', 'Umsetzbarkeit und lückenlose Erfolgskontrolle je Ziel', 'B8', ['6b-8', '6b-10']],
@@ -348,7 +351,7 @@
     if (pm.state !== 'ready') cards.push(card({id: 'psp-quelle', eyebrow: 'Projektplan', title: 'Der Projektplan ist gerade nicht erreichbar.', body: unknown(), span: 'span12'}));
     else cards.push(safeCard('fortschritt', () => progressCard(pm)), safeCard('erledigt', () => dueCard(pm)), safeCard('termintreue', () => punctualCard(pm)), safeCard('fristen', () => deadlinesCard(pm)), safeCard('meilensteine', () => milestonesCard(pm)));
     // Offene Karten paarweise, eingeklappte Karten gesammelt am Schluss.
-    cards.push(safeCard('aufwand', () => effortCard(pm)), safeCard('projektauftrag', () => confirmCard(pm)), safeCard('abwesenheiten', () => absenceCard()));
+    cards.push(safeCard('aufwand', () => effortCard(pm)), safeCard('projektauftrag', () => confirmCard(pm)), safeCard('abwesenheiten', () => absenceCard(pm)));
     if (pm.state === 'ready') cards.push(safeCard('psp', () => completenessCard(pm)));
     cards.push(safeCard('risiken', () => risksCard(pm)), safeCard('pa6b', () => planningCard(pm)));
     if (data.project && Array.isArray(data.project.forms)) cards.push(safeCard('uebertrag', () => transferCard(data.project)));
