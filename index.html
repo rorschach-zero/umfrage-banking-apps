@@ -331,7 +331,7 @@ header:has(+ * .schirm.start), body:has(.schirm.start) header { max-width: 1180p
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "6 bis 8 Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.33";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.34";                   // Stand des Fragebogens, wird mitgespeichert. 3.34 (05.11.2026): Kennung kann das Kürzel der teilenden Gruppenperson tragen (WA-ES-…), Fragen und Antworten unverändert
 const KONTAKT = "umfrage@hydeout.ch";    // Kontakt der Studierendengruppe fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
@@ -382,12 +382,17 @@ function rejectSurveyLink() {
   document.body.innerHTML='<main><h1>'+text[SPRACHE||"de"]+'</h1></main>';
   throw Error("Ungültige Kennung; keine Teilnahme gestartet.");
 }
+// Group members who share the link (initials only, never respondents). Second slot after the channel: WA-ES-x7k2m9.
+const SHARER_CODES=["SA","ES","MG","AM","LB"];
+function sharerPrefix(value){const m=/^([A-Z]{2,5})-([A-Z]{2})-$/.exec(value);return !!m&&m[1]!=="HS"&&m[1]!=="OR"&&SHARER_CODES.includes(m[2]);}
 const linkParams=new URLSearchParams(location.search);
 let idAusAdresse=linkParams.get("id")||"";
 if(linkParams.has("id")) {
-  const prefix=/^(?:[A-Z]{2,5}-|(?:HS|OR)-[A-Za-z0-9_]{1,12}-)$/.test(idAusAdresse)&&idAusAdresse!=="HS-"&&idAusAdresse!=="OR-";
+  const prefix=(/^(?:[A-Z]{2,5}-|(?:HS|OR)-[A-Za-z0-9_]{1,12}-)$/.test(idAusAdresse)&&idAusAdresse!=="HS-"&&idAusAdresse!=="OR-")||sharerPrefix(idAusAdresse);
   if(!(prefix&&idAusAdresse.length<=16)&&!validSurveyId(idAusAdresse))rejectSurveyLink();
 }
+// Channel paths forward ?p=<initials> from the team app; an unknown or missing code keeps the plain channel prefix.
+{const p=linkParams.get("p")||"";if(/^[A-Z]{2,5}-$/.test(idAusAdresse)&&idAusAdresse!=="HS-"&&idAusAdresse!=="OR-"&&sharerPrefix(idAusAdresse+p+"-"))idAusAdresse+=p+"-";}
 // Channel prefixes retain their full code and get a separate random suffix per session.
 if (idAusAdresse.endsWith("-")) {
   let fruehere=null;try {const g=JSON.parse(merk("stand")||"null");if(g&&g.A&&validSurveyId(g.A.id)&&g.A.id.startsWith(idAusAdresse))fruehere=g.A.id;}catch(e){}
