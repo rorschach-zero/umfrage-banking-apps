@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-RjcxdJG4YK1ed6Yuuj4KWMysw3VwfyRmMKcg5wNEskM='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-bEXTeiOXp5Ls1hFhsWe8Wc0qgmvSaXKr5m8k5Bt/wm4='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 <link rel="stylesheet" href="../zeit.css?v=0547fa549500">
@@ -196,7 +196,7 @@ let bStep = 0, bSub = 0, bBesucht = new Set(), bEben = -1, bAutoTimer = 0, bFert
 function bFehltIn(i) { return fehlt().filter(x => B_FELDER[i].some(k => x === k || x.startsWith(k + " "))); }
 function bScreens(i) {
   const quelle = () => ["richtig", "teils", "falsch"].includes(z.richtig) || !!z.quelle_url || !!z.quelle_datum;
-  const L = [[{ k: "frage", felder: [] }, { k: "angebot", felder: ["Gibt es diesen Kontaktweg"] }, { k: "konto", felder: [] }],
+  const L = [[{ k: "frage", felder: [] }, { k: "angebot", felder: ["Gibt es diesen Kontaktweg"] }],
     [{ k: "start", felder: ["Start"] }],
     [{ k: "auto", felder: [] }, { k: "mensch", felder: [] }, { k: "wer", felder: ["Wer hat geantwortet"] }],
     [{ k: "antwort", felder: ["Vollständige Antwort liegt vor der ersten Antwort einer Person"] }, { k: "teile", felder: [] }, { k: "vollst", felder: ["Ist die Antwort vollständig"] }, { k: "verwiesen", felder: [] }, { k: "fcr", felder: ["Beim ersten Kontakt beantwortet"] }],
@@ -363,6 +363,7 @@ function formular() {
       kanal ? el("div", { class: "kanal-hinweis" }, el("b", {}, "So erreichst du " + r.anbieter + " "), el("span", {}, kanal.text), " ", el("a", { href: kanal.quelle, target: "_blank", rel: "noopener", "data-read-navigation": true }, "Quelle", bIcon("ext"))) : null,
       el("div", { class: "b-question" }, el("p", { class: "b-question-text" }, "«" + s.frage + "»"),
         el("button", { type: "button", class: "chip", on: { click: async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(s.frage); b.textContent = "Kopiert"; } catch (x) {} } } }, "Frage kopieren")),
+      probe ? null : bMehr("Mehr Angaben (freiwillig)", el("p", { class: "b-hint" }, "Hilft beim Vergleichen, zum Beispiel ob neue Kundinnen und Kunden anders behandelt werden."), el("div", { class: "gitter" }, text("konto_aktiv_seit", "Konto aktiv seit", "Monat und Jahr"), text("app_version", "App-Version", "aus den Einstellungen"))),
       bMehr("Regeln fürs Gespräch", el("ul", { class: "b-rules" }, ["Stell nur diese Frage, möglichst wörtlich.", "Beantworte Rückfragen wahrheitsgemäss.", "Bedank dich und beende, sobald deine Frage vollständig beantwortet ist.", "Fragt die Bank «Ist das ein Test?», antworte ehrlich.", "Lass nie etwas sperren, nachforschen oder ändern."].map(t => el("li", {}, t))))]],
     angebot: () => ["Gibt es diesen Kontaktweg?", [
       wahl("kanal_angeboten", "", ["ja", "nein", "nicht erreichbar"], "", "", { auto: true, texte: { ja: "Ja, erreichbar", nein: "Gibt es nicht", "nicht erreichbar": "Gibt es, klappt aber nicht" } }),
