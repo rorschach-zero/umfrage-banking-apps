@@ -535,6 +535,24 @@
     "titel": "Forschungsdesign",
     "wo": "Notion › PA6 › Marketing 6a › 2 · Forschungsdesign",
     "inhalt": "Arbeitspaket zu Forschungsfragen, Methoden und Stichprobe."
+   },
+   {
+    "titel": "Fragebogen der Umfrage",
+    "wo": "Gruppenordner «PA6 Yuh» in der Drive › 10_pa6a › umfrage › Fragebogen",
+    "link": "https://drive.google.com/drive/folders/1NYQseXrQ5kZ0ACW3YPKpf_Vgf5_s6f-4",
+    "inhalt": "Alle Fragen und Antwortmöglichkeiten der Online-Befragung (Methode A)."
+   },
+   {
+    "titel": "Testprotokoll Servicetest",
+    "wo": "Gruppenordner «PA6 Yuh» in der Drive › 10_pa6a › beobachtung › Testprotokoll",
+    "link": "https://drive.google.com/drive/folders/1NYQseXrQ5kZ0ACW3YPKpf_Vgf5_s6f-4",
+    "inhalt": "Ablauf und Messregeln der standardisierten Servicebeobachtung (Methode B)."
+   },
+   {
+    "titel": "Codebuch Bewertungen",
+    "wo": "Gruppenordner «PA6 Yuh» in der Drive › 10_pa6a › bewertungen › Codebuch",
+    "link": "https://drive.google.com/drive/folders/1NYQseXrQ5kZ0ACW3YPKpf_Vgf5_s6f-4",
+    "inhalt": "Wie die öffentlichen Bewertungen gelesen und codiert werden (Methode C)."
    }
   ],
   "nicht": [
@@ -766,7 +784,7 @@
    {
     "code": "R3",
     "punkte": 5,
-    "volle_punkte_wenn": "Die Stichprobe ist systematisch geplant und passt zur Fragestellung. Alle relevanten Angaben zur Stichprobe sind dargestellt."
+    "volle_punkte_wenn": "Die Stichprobe ist systematisch geplant, vollständig geeignet und repräsentativ in Bezug auf die Beantwortung der Fragestellung und liefert zuverlässige Aussagen. Die Präsentation der Stichprobe enthält alle relevanten Daten."
    },
    {
     "code": "R9",
@@ -2004,7 +2022,7 @@
    {
     "code": "C7",
     "punkte": 5,
-    "volle_punkte_wenn": "Stakeholder-Map mit sinnvoller Bewertung und Massnahmen, alle relevanten Stakeholder vollständig aufgezählt und gut analysiert."
+    "volle_punkte_wenn": "Stakeholder-Map mit sinnvoller Bewertung und Massnahmen."
    },
    {
     "code": "B8",

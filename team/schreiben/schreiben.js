@@ -451,7 +451,9 @@ const RASTER = {R1:'Ausgangslage, Formulierung Marktforschungsauftrag und Forsch
   B1:'Analyse', B2:'Ziele ökonomisch', B3:'Ziele vorökonomisch', B4:'Strategieansatz', B5:'Massnahme', B6:'Massnahmen Kreativität', B7:'Terminplan (fachlich)',
   B8:'Umsetzbarkeit und Kontrolle', B9:'Budget', B10:'Nachhaltigkeit', B11:'Reflexion der Arbeit', B12:'Sprachliche Richtigkeit', B13:'Quellenarbeit', B14:'Grafische Gestaltung',
   C7:'Stakeholder Analyse', C8:'Initiale Risiko Map'};
-function firstSentence(t) { const m = /^(.+?[.!?])(\s|$)/.exec(String(t || '')); return m ? m[1] : String(t || ''); }
+// Seite der Kriterien im Konzept PA6 (Bewertungsraster), für den Hinweis auf den Wortlaut im Original.
+const RASTER_SEITE = {R1:5, R2:6, R3:6, R4:6, R5:7, R6:7, R7:7, R8:8, R9:9, B1:14, B2:14, B3:15, B4:15, B5:15, B6:16, B7:16, B8:16, B9:17, B10:17, B11:17, B12:18, B13:18, B14:19, C7:22, C8:22};
+const RASTER_TEIL = code => code[0] === 'R' ? 'PA6a Marketing' : code[0] === 'B' ? 'PA6b Marketing' : 'PA6b Projektmanagement';
 function more(label, ...kids) { const body = kids.flat().filter(Boolean); return body.length ? el('details', {class:'w-more'}, el('summary', {}, label), el('div', {}, body)) : null; }
 function renderAuftrag(c, g) {
   const reading = c.reader === state.person && c.owner !== state.person;
@@ -463,8 +465,7 @@ function renderAuftrag(c, g) {
   const form = (g.apa || []).map(x => ({punkt:x, quelle:null, form:true}))
     .concat(wiarBild && wiarBild.pruefen ? [{punkt:wiarBild.pruefen, quelle:(state.wiar.quelle ? state.wiar.quelle + ', ' : '') + (wiarBild.seite ? 'S. ' + wiarBild.seite : wiarBild.quelle || ''), form:true}] : []);
   const muss = (g.muss || []).concat(form);
-  const maxPunkte = raster.reduce((a, r) => a + (+r.punkte || 0), 0);
-  const gegen = c.reader ? (NAMES[c.reader] || c.reader) : '';
+    const gegen = c.reader ? (NAMES[c.reader] || c.reader) : '';
   const autor = c.owner ? (NAMES[c.owner] || c.owner) : '';
   const auftrag = g.kurz || (c.Was && c.Was !== 'noch offen' ? c.Was : 'Der genaue Auftrag für dieses Kapitel wird gerade ergänzt.');
   const umfang = g.seiten ? 'rund ' + String(g.seiten).replace('.', ',') + (g.seiten === 1 ? ' Seite' : ' Seiten') : '';
@@ -475,16 +476,20 @@ function renderAuftrag(c, g) {
     return el('li', {}, input, el('label', {for:id}, el('span', {class:'lt'}, text, sourceTag(quelle))));
   };
   const linkBtn = (text, onclick) => el('button', {type:'button', class:'w-link', onclick}, text, el('span', {'aria-hidden':'true'}, ' ›'));
-  // Volle Punkte: je Rasterkriterium Name, Punkte und der erste Satz der Höchststufe im Wortlaut; der ganze Wortlaut unter «Quelle».
+  // Rasterkriterien der ganzen Arbeit, die dieses Kapitel betreffen: Name, Teil, Höchstpunkte, eine als Zusammenfassung gekennzeichnete Höchststufe.
+  // Keine Kapitelsumme: die Punkte gelten für die ganze Arbeit. Der Wortlaut steht im Original, die Quelle nennt die Seite.
   const punkte = list => el('ul', {class:'w-pts'}, list.map(r => el('li', {},
-    el('span', {class:'w-pts-k'}, el('b', {}, RASTER[r.code] || r.code), el('span', {class:'w-pts-n'}, r.punkte + ' P.')),
-    el('span', {class:'w-pts-t'}, firstSentence(r.volle_punkte_wenn)),
-    sourceTag('Konzept PA6, Bewertungsraster, ' + r.code + ', Höchststufe: «' + r.volle_punkte_wenn + '»'))));
+    el('span', {class:'w-pts-k'}, el('b', {}, RASTER[r.code] || r.code), el('span', {class:'w-pts-n'}, 'max. ' + r.punkte + ' P.')),
+    el('span', {class:'w-pts-p'}, RASTER_TEIL(r.code)),
+    el('span', {class:'w-pts-t'}, el('span', {class:'w-pts-z'}, 'Zusammenfassung: '), r.volle_punkte_wenn),
+    sourceTag('Wortlaut im Original: Konzept PA6, Bewertungsraster' + (RASTER_SEITE[r.code] ? ', S. ' + RASTER_SEITE[r.code] : '') + ', Kriterium «' + (RASTER[r.code] || r.code) + '», höchste Stufe'))));
 
   const steps = [];
-  steps.push({id:'ziel', t:'Ziel verstehen', s:maxPunkte ? 'Worum es geht und wofür es ' + maxPunkte + ' Punkte gibt' : 'Worum es geht', body:() => [
+  steps.push({id:'ziel', t:'Ziel verstehen', s:raster.length ? 'Worum es geht und worauf das Raster achtet' : 'Worum es geht', body:() => [
     el('p', {class:'w-lead'}, auftrag),
-    raster.length ? el('div', {class:'w-sub'}, el('h3', {}, maxPunkte ? 'Volle ' + maxPunkte + ' Punkte gibt es, wenn' : 'Volle Punkte gibt es, wenn'), punkte(raster.slice(0, 3)),
+    raster.length ? el('div', {class:'w-sub'}, el('h3', {}, 'Darauf achtet das Raster'),
+      el('p', {class:'w-pts-note'}, 'Die Punkte gelten für die ganze Arbeit, nicht nur für dieses Kapitel. Welche Kriterien hierher gehören, ist eine Arbeitshilfe der Gruppe.'),
+      punkte(raster.slice(0, 3)),
       raster.length > 3 ? more('Noch ' + (raster.length - 3) + (raster.length - 3 === 1 ? ' Kriterium' : ' Kriterien'), punkte(raster.slice(3))) : null) : null,
     fragen.length ? more((reading ? 'Diese Fragen muss der Text beantworten' : 'Diese Fragen beantwortet dein Text') + ' (' + fragen.length + ')', el('ol', {class:'qs'}, fragen.map(q => el('li', {}, q)))) : null,
     g.daten_ab ? el('p', {class:'note'}, 'Die Daten kommen ab ' + g.daten_ab + '. Bis dahin schreibst du Aufbau und Methode, noch keine Ergebnisse.') : null]});
@@ -495,11 +500,11 @@ function renderAuftrag(c, g) {
     const schule = [...new Set((g.muss || []).flatMap(m => String(m.quelle || '').split(';')).map(x => x.trim())
       .filter(x => /^(Konzept PA6|Merkmalblatt 6[ab]|Yuh-Praxisauftrag|Praxisauftrag|Auftrag PA6|Formale Vorschriften)/.test(x)))];
     const material = (g.infos || []).filter(i => !intern(i.wo) || state.person === 'SA')
-      .map(i => ({titel:i.titel, inhalt:i.inhalt, quelle:intern(i.wo) ? null : i.wo}))
+      .map(i => ({titel:i.titel, inhalt:i.inhalt, quelle:intern(i.wo) ? null : i.wo, link:i.link}))
       .concat(schule.length ? [{titel:'Vorgaben der Schule', inhalt:'Diese Stellen gelten für dein Kapitel. Lies sie im Original nach.', quelle:schule.join(' · ')}] : []);
     steps.push({id:'material', t:'Material holen', s:'Was du für dieses Kapitel brauchst', body:() => [
       el('p', {}, 'Leg dir das bereit, bevor du schreibst. Zahlen nur aus Quellen, die du angeben kannst.'),
-      material.length ? el('ul', {class:'w-infos'}, material.map(i => el('li', {}, el('b', {}, i.titel), i.inhalt ? el('span', {class:'w-infos-t'}, i.inhalt) : null, sourceTag(i.quelle)))) : el('p', {class:'quiet'}, 'Für dieses Kapitel ist noch kein Material eingetragen.'),
+      material.length ? el('ul', {class:'w-infos'}, material.map(i => el('li', {}, el('b', {}, i.titel), i.inhalt ? el('span', {class:'w-infos-t'}, i.inhalt) : null, el('span', {class:'w-infos-a'}, safeLink(i.link), sourceTag(i.quelle))))) : el('p', {class:'quiet'}, 'Für dieses Kapitel ist noch kein Material eingetragen.'),
       g.daten_ab ? el('p', {class:'note'}, 'Die eigenen Daten kommen ab ' + g.daten_ab + '.') : null]});
     steps.push({id:'geruest', t:'Gerüst ins Doc', s:glied.length ? glied.length + ' Zwischentitel laut Vorgabe' : 'Aufbau laut Vorgabe', body:() => [
       el('p', {}, 'Kopier die Zwischentitel ins Doc. So weisst du beim Schreiben immer, wo du bist.'),
@@ -517,7 +522,7 @@ function renderAuftrag(c, g) {
   }
   const mussListe = el('ul', {class:'checks'}), mussZahl = el('span', {class:'w-count'});
   const mussStand = () => { const n = muss.filter((_, i) => done[i]).length; mussZahl.textContent = n + ' von ' + muss.length; store.set(checksKey, done); kopf(); };
-  fill(mussListe, muss.map((m, i) => [m.form && !(muss[i - 1] || {}).form && i > 0 ? el('li', {class:'checks-h', 'aria-hidden':'true'}, 'Form') : null, check(done, 'm', i, m.punkt, m.quelle, mussStand)]));
+  fill(mussListe, muss.flatMap((m, i) => [m.form && i > 0 && !muss[i - 1].form ? el('li', {class:'checks-h', 'aria-hidden':'true'}, 'Form') : null, check(done, 'm', i, m.punkt, m.quelle, mussStand)]));
   steps.push({id:'pruefen', t:reading ? 'Gegenlesen mit der Liste' : 'Auf volle Punkte prüfen', s:muss.length ? 'Fertig, wenn alle ' + muss.length + ' Häkchen sitzen' : 'Pflichtpunkte prüfen', progress:() => muss.length ? [muss.filter((_, i) => done[i]).length, muss.length] : null, body:() => [
     el('p', {}, reading ? 'Geh Punkt für Punkt durch. Was fehlt, kommentierst du im Doc. Den Text änderst du nicht selbst.' : 'Hak nur ab, was wirklich im Text steht. Jeder fehlende Punkt kostet Punkte.'),
     muss.length ? el('div', {class:'w-sub'}, el('div', {class:'row'}, el('h3', {}, 'Fertig, wenn …'), mussZahl), mussListe) : null,
@@ -574,6 +579,11 @@ function renderAuftrag(c, g) {
   weg.open = weg.open && steps.some(s => s.id === weg.open) ? weg.open : first ? first.id : null;
   apply();
 }
+// Nur Links auf den Gruppenordner in der Drive, im neuen Fenster.
+function safeLink(href) {
+  if (!/^https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]+$/.test(href || '')) return null;
+  return el('a', {class:'doc-ext', href, target:'_blank', rel:'noopener noreferrer'}, 'Gruppenordner öffnen', el('span', {class:'ext', 'aria-hidden':'true'}, '↗'));
+}
 function copyBtnWide(text, label) {
   return el('button', {class:'btn secondary', type:'button', disabled:viewing() ? true : null, onclick:async e => { if (viewing()) return; const b = e.currentTarget; try { await navigator.clipboard.writeText(text); b.textContent = 'Kopiert, jetzt im Doc einfügen'; announce('Gliederung kopiert'); track('kopiert', 'geruest'); setTimeout(() => { b.textContent = label; }, 2400); } catch { announce('Kopieren nicht möglich'); } }}, label);
 }
@@ -584,7 +594,7 @@ function renderInfos(g) {
     {titel:'Dashboard', wo:'Team-App', href:'/team/dashboard/', inhalt:'Rücklauf und Stand der Erhebung.'},
     {titel:'Pia fragen', wo:'Team-App', href:'/team/frag/', inhalt:'Fragen zu Regeln, Terminen und Unterlagen.'}];
   fill($('tab-infos'), 
-    block('Hier findest du, was du brauchst', (g.infos || []).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), (state.person === 'SA' || !/notion/i.test(i.wo || '')) ? el('p', {class:'where'}, i.wo) : null))),
+    block('Hier findest du, was du brauchst', (g.infos || []).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), !/notion/i.test(i.wo || '') ? el('p', {class:'where'}, i.wo) : null, safeLink(i.link) ? el('p', {}, safeLink(i.link)) : null))),
     block('Direkt in der Team-App', el('div', {class:'links'}, inApp.map(i => el('a', {class:'lnk', href:i.href}, el('b', {}, i.titel), el('span', {}, i.inhalt), el('i', {class:'go', 'aria-hidden':'true'}, '›'))))));
 }
 function copyBtn(text) {
