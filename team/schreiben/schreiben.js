@@ -462,6 +462,17 @@ function fachregeln(text) {
   String(text).replace(/\([^)]*\)/g, '').replace(/\b([RAGX])(\d+)(?: bis [RAGX](\d+))?/g, (_, a, b, c) => { for (let i = +b; i <= (c ? +c : +b); i += 1) codes.push(a + i); return ''; });
   return codes.map(c => FACHREGEL[c]).filter(Boolean);
 }
+// Fundorte sachlich benennen, ohne Ablageketten: interne Ablagen gar nicht, der Gruppenordner nur mit Namen.
+function publicPlace(wo) {
+  const w = String(wo || '').trim();
+  if (!w || /notion/i.test(w)) return null;
+  if (/^Gruppenordner/.test(w)) return 'Gruppenordner «PA6 Yuh»';
+  const parts = w.split(/\s*›\s*/);
+  if (parts.length === 1) return w;
+  if (parts[0] === 'Moodle') return 'Moodle, Kurs ' + parts[1] + (parts[2] ? ', Bereich «' + parts.slice(2).join(' ') + '»' : '');
+  if (parts[0] === 'Team-App') return 'Team-App, ' + parts.slice(1).join(', ');
+  return parts.join(', ');
+}
 function publicSource(q) {
   if (!q) return null;
   const out = [];
@@ -525,7 +536,7 @@ function renderAuftrag(c, g) {
     const schule = [...new Set((g.muss || []).flatMap(m => String(m.quelle || '').split(';')).map(x => x.trim())
       .filter(x => /^(Konzept PA6|Merkmalblatt 6[ab]|Yuh-Praxisauftrag|Praxisauftrag|Auftrag PA6|Formale Vorschriften)/.test(x)))];
     const material = (g.infos || []).filter(i => !intern(i.wo))
-      .map(i => ({titel:i.titel, inhalt:i.inhalt, quelle:intern(i.wo) ? null : i.wo, link:i.link}))
+      .map(i => ({titel:i.titel, inhalt:i.inhalt, quelle:publicPlace(i.wo), link:i.link}))
       .concat(schule.length ? [{titel:'Vorgaben der Schule', inhalt:'Diese Stellen gelten für dein Kapitel. Lies sie im Original nach.', quelle:schule.join(' · ')}] : []);
     steps.push({id:'material', t:'Material holen', s:'Was du für dieses Kapitel brauchst', body:() => [
       el('p', {}, 'Leg dir das bereit, bevor du schreibst. Zahlen nur aus Quellen, die du angeben kannst.'),
@@ -619,7 +630,7 @@ function renderInfos(g) {
     {titel:'Dashboard', wo:'Team-App', href:'/team/dashboard/', inhalt:'Rücklauf und Stand der Erhebung.'},
     {titel:'Pia fragen', wo:'Team-App', href:'/team/frag/', inhalt:'Fragen zu Regeln, Terminen und Unterlagen.'}];
   fill($('tab-infos'), 
-    block('Hier findest du, was du brauchst', (g.infos || []).filter(i => !/notion/i.test(i.wo || '')).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), !/notion/i.test(i.wo || '') ? el('p', {class:'where'}, i.wo) : null, safeLink(i.link) ? el('p', {}, safeLink(i.link)) : null))),
+    block('Hier findest du, was du brauchst', (g.infos || []).filter(i => !/notion/i.test(i.wo || '')).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), publicPlace(i.wo) ? el('p', {class:'where'}, publicPlace(i.wo)) : null, safeLink(i.link) ? el('p', {}, safeLink(i.link)) : null))),
     block('Direkt in der Team-App', el('div', {class:'links'}, inApp.map(i => el('a', {class:'lnk', href:i.href}, el('b', {}, i.titel), el('span', {}, i.inhalt), el('i', {class:'go', 'aria-hidden':'true'}, '›'))))));
 }
 function copyBtn(text) {
