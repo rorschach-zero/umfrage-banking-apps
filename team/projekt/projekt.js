@@ -163,7 +163,7 @@ async function save(retry=false){
  if(saving||!loaded||window.PA6View.active()||(!retry&&(draft.uncertain||missing().length)))return;
  const current=draft,type=active,payload={...current.values};
  if(type==='coaching')payload.folgeaufgaben=JSON.stringify(current.none?[]:current.tasks);
- if(type==='arbeitszeit'){const hours=normalizeHours(payload.stunden);if(!hours)return;payload.stunden=hours;if(payload.paket==='anderes')payload.paket='';}
+ if(type==='arbeitszeit'){const hours=normalizeHours(payload.stunden);if(!hours)return;payload.stunden=hours;if(payload.paket==='anderes')payload.paket='';payload.quelle='hand';payload.storniert='';}
  saving=true;renderForm();$('project-form').querySelectorAll('input,textarea,select,button').forEach(n=>n.disabled=true);$('project-message').textContent='Dein Eintrag wird gespeichert …';
  try{
   const r=await sende({typ:'projekt_save',formular:type,id:current.id,felder:payload});

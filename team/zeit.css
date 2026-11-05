@@ -13,3 +13,10 @@
 .zeit-offer p{margin:0;flex:1 1 12rem;font-size:14px}
 .zeit-hours button{min-width:2.8rem}
 .zeit-wrap *{box-sizing:border-box}
+.zeit-closure{display:flex;flex-direction:column;gap:10px;margin:0 0 8px}
+.zeit-closure h3{margin:0;font-size:1.05rem}
+.zeit-closure-hint{font-size:13px;margin:0;color:var(--muted,#555);min-height:1.2em}
+.zeit-closure-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.zeit-closure-actions .knopf[disabled]{opacity:.55;cursor:not-allowed}
+.zeit-hours button.chip.is-on{border-color:var(--accent,#151a21);background:var(--panel,#f5f5f2)}
+.zeit-details{margin-top:4px}

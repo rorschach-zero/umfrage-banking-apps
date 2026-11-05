@@ -14,7 +14,7 @@
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss b-fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung" role="status" aria-live="polite"></div><div class="b-fuss-top"><p id="b-step-status"></p><button type="button" class="b-quiet" id="zwischen">Zwischenstand speichern</button></div><div class="b-fuss-nav"><span id="b-nav-back"></span><span id="b-nav-next"></span><button class="knopf b-finish" id="fertig" hidden>Speichern und abschliessen</button></div></div></div>
 <script src="../view-as.js?v=41cc5d81f7cc"></script>
-<script src="../team.js?v=d75ca30a4cc4"></script>
+<script src="../team.js?v=126f6cd983b5"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
 <script src="../service.js?v=afd3336e94b4"></script>
 <script src="../zeit.js?v=88cf8e4ad5e0"></script>
@@ -441,26 +441,27 @@ async function speichern(stand) {
   savePending = true; row.erfasst = planRow.erfasst = payload;
   msg.textContent = "Speichert …";
   try {
-    await sende({ typ: "beobachtung", maske: "b4", simulation: aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: payload, start_korrektur: payload.start_korrektur === true });
+    const result = await sende({ typ: "beobachtung", maske: "b4", simulation: aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: payload, start_korrektur: payload.start_korrektur === true });
     delete z.start_korrektur;
     window.dispatchEvent(new Event("workspace-saved"));
     row.erfasst = planRow.erfasst = payload; try { localStorage.removeItem("b-" + row.nr); } catch (e) {}
     fieldValue = daten; fieldPersist();
     hole("plan").then(neu => { if (nummer !== bSpeicherNr || neu.person !== daten.person) return; neu.fetchedAt ||= new Date().toISOString(); daten = neu; belastung = neu.belastung || {}; fieldValue = neu; fieldPersist(); }).catch(() => { if (nummer === bSpeicherNr) fieldNotice('Gespeichert · Abgleich ausstehend'); });
     msg.className = "meldung ok"; msg.textContent = stand === "abgeschlossen" ? "Abgeschlossen und gespeichert." : "Zwischenstand gespeichert. Komm zurück, wenn die Antwort da ist.";
-    if (stand === "abgeschlossen") {
-      const start = payload.t_start ? String(payload.t_start).replace(" ", "T") : "";
-      const end = payload.t_ende ? String(payload.t_ende).replace(" ", "T") : "";
-      const mins = minuten(start, end);
-      if (mins > 0 && mins <= 480 && window.PA6Zeit && daten.person) {
-        const hours = PA6Zeit.roundQuarterMinutes(mins);
-        const datum = (payload.datum || start.slice(0, 10) || heute());
-        const host = document.getElementById("zeit-vorschlag") || (() => { const node = el("div", { id: "zeit-vorschlag" }); const main = document.getElementById("main"); main.parentNode.insertBefore(node, main); return node; })();
-        host.replaceChildren();
-        PA6Zeit.offer(host, {person: daten.person, stunden: hours, minuten: mins, datum, paket: PA6Zeit.servicePaket(datum), aufgabe: "Servicetest " + row.nr});
-      }
+    if (stand === "abgeschlossen" && result && result.arbeitszeit && window.PA6Zeit) {
+      const host = document.getElementById("zeit-vorschlag") || (() => { const node = el("div", { id: "zeit-vorschlag" }); const main = document.getElementById("main"); main.parentNode.insertBefore(node, main); return node; })();
+      host.replaceChildren();
+      const auto = result.arbeitszeit;
+      const receipt = el("p", { class: "zeit-receipt", role: "status" });
+      receipt.replaceChildren(PA6Zeit.fmtHours(auto.stunden) + " h automatisch erfasst · ", el("button", { type: "button", class: "chip", on: { click: async () => {
+        try {
+          await sende({ typ: "projekt_save", formular: "arbeitszeit", id: auto.id, felder: { datum: payload.datum || heute(), person: daten.person, stunden: String(auto.stunden), aufgabe: "Servicetest " + row.nr, paket: auto.paket, storniert: "ja", quelle: "werkzeug_b" } });
+          receipt.textContent = "Automatische Buchung zurückgenommen.";
+        } catch (error) { receipt.textContent = error.message; }
+      } } }, "Rückgängig"));
+      host.append(receipt);
       setTimeout(liste, 900);
-    }
+    } else if (stand === "abgeschlossen") setTimeout(liste, 900);
   } catch (e) { row.erfasst = planRow.erfasst = previous; msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
   finally { savePending = false; }
 }

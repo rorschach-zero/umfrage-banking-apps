@@ -11,6 +11,7 @@ function el(tag, attrs, ...kids) {
   const e = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
     if (v === null || v === undefined || v === false) continue;
+    if (k === 'on' && typeof v === 'object') { for (const [ev, fn] of Object.entries(v)) e.addEventListener(ev, fn); continue; }
     if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
     else if (k === 'class') e.className = v;
     else e.setAttribute(k, v === true ? '' : v);
@@ -20,16 +21,24 @@ function el(tag, attrs, ...kids) {
 }
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  set(k, v) { if (viewing() && /^pa6-sp-(weg|muss|teile|chat):/.test(k)) return; try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
 function fill(node, ...kids) { node.replaceChildren(...kids.flat().filter(k => k !== null && k !== undefined && k !== false)); }
 function announce(t) { $('live').textContent = t; }
+function viewing() { return !!(window.PA6View && typeof PA6View.active === 'function' && PA6View.active()); }
 function readKey() {
   const hash = new URLSearchParams(location.hash.slice(1)).get('k');
-  if (hash) { try { localStorage.setItem('pa6k', hash); } catch {} history.replaceState(null, '', location.pathname + location.search); return hash; }
+  if (hash) {
+    try { if ((localStorage.getItem('pa6k') || '') !== hash) localStorage.removeItem('pa6-begleiter'); localStorage.setItem('pa6k', hash); } catch {}
+    history.replaceState(null, '', location.pathname + location.search); return hash;
+  }
   try { return localStorage.getItem('pa6k') || ''; } catch { return ''; }
 }
 async function post(body, ms = 60000) {
+  if (viewing()) {
+    if (!['team', 'lesen'].includes(body.typ)) throw Error('Diese Personenansicht ist nur zum Lesen.');
+    body = PA6View.request(body);
+  }
   if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(ENDPOINT)) throw Error('Der Projektzugang ist nicht verbunden.');
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), ms);
   try {
@@ -126,7 +135,7 @@ const PARTS = [
   {key:'6a', name:'PA6a', title:'Analyse und Marktforschung', due:'2026-12-12'},
   {key:'6b', name:'PA6b', title:'Marketingkonzept', due:'2027-02-27'}];
 const PEOPLE = ['SA', 'ES', 'MG', 'AM', 'LB'];
-const STAND = {'Entwurf':'draft', 'In Prüfung':'review', 'fertig':'done'};
+const STAND = {'Entwurf':'draft', 'In Prüfung':'review', 'in Prüfung':'review', 'läuft':'draft', 'fertig':'done'};
 function planMerge() {
   // Kapitel, die der Empfänger nicht liefert, aus dem Kapitelplan ergänzen (nur lesen, ohne Stand und Doc).
   const have = new Set(state.chapters.map(c => c.ref));
@@ -369,8 +378,63 @@ function sourceTag(t) {
 
 // Messung (03.11.2026): jede Aktion im Schreibweg geht als Ereignis ins Blatt «Schreibweg». Nie blockierend, nie im Demo.
 function track(aktion, schritt, wert) {
-  if (DEMO || !state.key || !state.chapter || (window.PA6View && PA6View.active && PA6View.active())) return;
-  post({typ:'schreibweg', k:state.key, kapitel:state.chapter.ref, schritt, aktion, wert}, 15000).catch(() => {});
+  if (DEMO || viewing() || !state.key || !state.chapter) return;
+  post({typ:'schreibweg', k:state.key, kapitel:state.chapter.ref, schritt, aktion, wert}, 15000).then(r => {
+    if (r && r.ok === false) track.still = (track.still || []).concat([{kapitel:state.chapter.ref, aktion, fehler:String(r.fehler || 'abgelehnt')}]);
+  }).catch(() => {});
+}
+function chapterFrom(status) {
+  const s = status || '';
+  if (s === 'Abgezeichnet' || s === 'fertig' || s === 'erledigt') return 'fertig';
+  if (s === 'In Prüfung' || s === 'in Prüfung') return 'in Prüfung';
+  if (s === 'Entwurf' || s === 'läuft') return 'läuft';
+  if (!s || s === 'Nicht begonnen' || s === 'Offen' || s === 'offen' || s === 'geplant') return 'offen';
+  return s;
+}
+function newVorgang() {
+  try { if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+  return (Date.now().toString(16) + '00000000').slice(0, 32);
+}
+async function handover(c) {
+  if (viewing() || DEMO) return;
+  if (!c || !c.id || c.plan || c.owner !== state.person) { announce('Dieses Kapitel meldest du aus deinem eigenen Zugang.'); return; }
+  const from = chapterFrom(c.status);
+  if (from === 'in Prüfung' || from === 'fertig') { announce(from === 'fertig' ? 'Das Kapitel ist schon fertig.' : 'Das Kapitel ist schon in der Prüfung.'); return; }
+  if (from !== 'offen' && from !== 'läuft') { announce('Der Stand lässt sich so nicht übergeben.'); return; }
+  if (!window.PA6Zeit) { announce('Die Zeiterfassung ist nicht geladen. Lade die Seite neu.'); return; }
+  const spot = document.getElementById('zeit-uebergabe') || el('div', {id:'zeit-uebergabe'});
+  const btn = [...document.querySelectorAll('button')].find(b => b.textContent === 'Zur Prüfung geben');
+  if (!spot.parentNode) (btn && btn.parentNode ? btn.parentNode : $('tab-auftrag')).append(spot);
+  const lead = state.person === 'SA' && state.lead === true;
+  const buchung = 'abschluss-' + String(c.id).replace(/[^a-zA-Z0-9_-]/g, '');
+  PA6Zeit.closureMount(spot, {
+    person: state.person,
+    aufgabe: (c.ref ? c.ref + ' · ' : '') + (c.title || 'Kapitel'),
+    paket: '',
+    id: /^[a-zA-Z0-9_-]{16,80}$/.test(buchung) ? buchung : '',
+    quelle: 'schreibplatz',
+    ref: c.ref || '',
+    save: async body => {
+      const saved = await post(body);
+      if (!saved || saved.ok === false) throw Error((saved && saved.fehler) || 'Nicht gespeichert.');
+      return saved;
+    },
+    onCancel: () => { spot.replaceChildren(); },
+    onDone: async info => {
+      try {
+        const r = await post({typ:'status', k:state.key, leitung:lead, id:c.id, from, to:'In Prüfung'});
+        if (!r || r.ok === false || (r.status !== 'In Prüfung' && r.status !== 'in Prüfung')) throw Error((r && r.fehler) || 'Nicht gemeldet.');
+        const weg = await post({typ:'auftragsweg', k:state.key, leitung:lead, id:c.id, ref:c.ref || '', quelle:'chapters', aktion:'fertig_gemeldet', wert:'', vorgang:newVorgang()});
+        if (!weg || weg.ok === false) throw Error((weg && weg.fehler) || 'Die Fertigmeldung wurde nicht gezählt.');
+        c.status = 'In Prüfung';
+        announce('Zur Prüfung gemeldet. Salah schaut es sich an.');
+        renderAll();
+      } catch (e) {
+        try { await post({typ:'projekt_save', formular:'arbeitszeit', id:info.id, felder:Object.assign({}, info.felder, {storniert:'ja'})}); } catch (ignore) {}
+        announce(e.message || 'Nicht gemeldet.');
+      }
+    }
+  });
 }
 // Schreibweg (Salah 03.11.2026): kein Informationsschwall, sondern ein geführter Weg zu vollen Punkten.
 // Immer ein Schritt offen, jeder ein- und ausklappbar, «Weiter» schliesst ab und öffnet den nächsten. Stand je Kapitel im Browser.
@@ -385,9 +449,9 @@ function renderAuftrag(c, g) {
   const auftrag = g.kurz || (c.Was && c.Was !== 'noch offen' ? c.Was : 'Der ausführliche Auftrag für dieses Kapitel wird gerade ergänzt.');
   const zahl = (n, all) => el('span', {class:'w-count'}, n + ' von ' + all);
   const check = (store_, key, i, text, quelle, onchange) => {
-    const id = key + i, input = el('input', {type:'checkbox', id});
+    const id = key + i, input = el('input', {type:'checkbox', id, disabled:viewing() ? true : null});
     input.checked = !!store_[i];
-    input.addEventListener('change', () => { store_[i] = input.checked; onchange(); track(input.checked ? 'haken' : 'haken_weg', key === 'teil' ? 'schreiben' : 'pruefen', key + i); });
+    input.addEventListener('change', () => { if (viewing()) { input.checked = !!store_[i]; return; } store_[i] = input.checked; onchange(); track(input.checked ? 'haken' : 'haken_weg', key === 'teil' ? 'schreiben' : 'pruefen', key + i); });
     return el('li', {}, input, el('label', {for:id}, el('span', {class:'lt'}, text, sourceTag(quelle))));
   };
   const rasterBlock = () => raster.length ? el('details', {class:'rule achten w-raster'}, el('summary', {}, maxPunkte ? 'So gibt es die vollen ' + maxPunkte + ' Punkte' : 'So gibt es volle Punkte'), el('div', {}, raster.map(r => el('div', {class:'pts'}, el('span', {class:'pn'}, r.punkte + ' P.'), el('p', {}, r.volle_punkte_wenn))))) : null;
@@ -430,8 +494,8 @@ function renderAuftrag(c, g) {
       (g.nicht || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Gehört nicht hierhin'), muster(g.nicht)) : null)) : null,
     reading ? null : el('button', {type:'button', class:'btn secondary', onclick:() => { track('hilfe', 'pruefen'); setTab('hilfe'); state.askHilfe && state.askHilfe('Was fehlt mir noch für volle Punkte?'); }}, 'Schreibhilfe fragen, was noch fehlt')], after:mussStand});
   steps.push({id:'abgeben', t:reading ? 'Rückmeldung geben' : 'Übergeben', s:reading ? 'Kommentare im Doc, dann Bescheid geben' : gegen ? gegen + ' liest gegen' : 'Zum Gegenlesen weitergeben', body:() => [
-    el('p', {}, reading ? 'Wenn deine Kommentare im Doc stehen, sag ' + (autor || 'der Person') + ' Bescheid. Sie arbeitet sie ein.' : 'Wenn alle Pflichtpunkte drin sind, melde das Kapitel in der Team-App als erledigt. ' + (gegen ? gegen + ' bekommt es dann zum Gegenlesen.' : 'Dann geht es ans Gegenlesen.')),
-    el('a', {class:'btn secondary', href:'/team/'}, 'Zur Team-App')]});
+    el('p', {}, reading ? 'Wenn deine Kommentare im Doc stehen, sag ' + (autor || 'der Person') + ' Bescheid. Sie arbeitet sie ein.' : 'Wenn alle Pflichtpunkte drin sind, gib das Kapitel zur Prüfung. Salah schaut es sich an.' + (gegen ? ' ' + gegen + ' liest gegen.' : '')),
+    reading ? null : el('button', {type:'button', class:'btn', disabled:viewing() || !c.id || c.plan ? true : null, onclick:() => handover(c)}, 'Zur Prüfung geben')]});
 
   const wrap = el('div', {class:'weg'}), bar = el('div', {class:'w-bar', 'aria-hidden':'true'}), stand = el('p', {class:'w-stand'});
   function kopf() {
@@ -457,20 +521,20 @@ function renderAuftrag(c, g) {
       el('span', {class:'w-num', 'aria-hidden':'true'}, String(i + 1)),
       el('span', {class:'w-tt'}, el('span', {class:'w-t'}, s.t), el('span', {class:'w-s'}, s.s)),
       s.countEl, el('span', {class:'chev', 'aria-hidden':'true'}));
-    const weiter = el('button', {type:'button', class:'btn', onclick:() => { weg.done[s.id] = true; save(); track('erledigt', s.id); s.node.classList.add('done'); announce(s.t + ' erledigt'); if (next) open(next.id, true); else { weg.open = null; save(); apply(); } }}, next ? 'Weiter: ' + next.t : 'Fertig');
-    const zurueck = weg.done[s.id] ? el('button', {type:'button', class:'btn ghost', onclick:() => { delete weg.done[s.id]; save(); track('wieder_offen', s.id); s.node.classList.remove('done'); kopf(); }}, 'Wieder öffnen') : null;
+    const weiter = el('button', {type:'button', class:'btn', disabled:viewing() ? true : null, onclick:() => { if (viewing()) return; weg.done[s.id] = true; save(); track('erledigt', s.id); s.node.classList.add('done'); announce(s.t + ' erledigt'); if (next) open(next.id, true); else { weg.open = null; save(); apply(); } }}, next ? 'Weiter: ' + next.t : 'Fertig');
+    const zurueck = weg.done[s.id] ? el('button', {type:'button', class:'btn ghost', disabled:viewing() ? true : null, onclick:() => { if (viewing()) return; delete weg.done[s.id]; save(); track('wieder_offen', s.id); s.node.classList.remove('done'); kopf(); }}, 'Wieder öffnen') : null;
     s.panel = el('div', {class:'w-body', id:'w-' + s.id, hidden:true}, s.body(), el('div', {class:'w-act'}, weiter, zurueck));
     s.node = el('section', {class:'w-step' + (weg.done[s.id] ? ' done' : '')}, s.head, s.panel);
     if (s.after) s.after();
   });
   fill(wrap, steps.map(s => s.node));
-  fill($('tab-auftrag'), el('div', {class:'w-top'}, stand, bar), wrap);
+  fill($('tab-auftrag'), viewing() ? el('p', {class:'note'}, 'Diese Ansicht ist nur zum Lesen.') : null, el('div', {class:'w-top'}, stand, bar), wrap);
   const first = steps.find(s => !weg.done[s.id]);
   weg.open = weg.open && steps.some(s => s.id === weg.open) ? weg.open : first ? first.id : null;
   apply();
 }
 function copyBtnWide(text, label) {
-  return el('button', {class:'btn secondary', type:'button', onclick:async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(text); b.textContent = 'Kopiert, jetzt im Doc einfügen'; announce('Gliederung kopiert'); track('kopiert', 'geruest'); setTimeout(() => { b.textContent = label; }, 2400); } catch { announce('Kopieren nicht möglich'); } }}, label);
+  return el('button', {class:'btn secondary', type:'button', disabled:viewing() ? true : null, onclick:async e => { if (viewing()) return; const b = e.currentTarget; try { await navigator.clipboard.writeText(text); b.textContent = 'Kopiert, jetzt im Doc einfügen'; announce('Gliederung kopiert'); track('kopiert', 'geruest'); setTimeout(() => { b.textContent = label; }, 2400); } catch { announce('Kopieren nicht möglich'); } }}, label);
 }
 function renderInfos(g) {
   const inApp = [
@@ -557,6 +621,7 @@ function renderHilfe(c, g) {
   };
   state.askHilfe = t => ask(t);
   async function ask(text) {
+    if (viewing()) { announce('Diese Ansicht ist nur zum Lesen.'); return; }
     text = String(text || '').trim(); if (!text || state.busy) return;
     state.busy = true; send.disabled = true; input.value = '';
     state.chat.push({r:'du', t:text}); draw(true);
@@ -580,6 +645,7 @@ function renderHilfe(c, g) {
     thread, composer);
   composer.append(form);
   draw(false);
+  if (viewing()) { send.disabled = true; input.disabled = true; suggest.querySelectorAll('button').forEach(b => { b.disabled = true; }); }
 }
 
 // ---------- Doc ----------
@@ -588,11 +654,12 @@ function renderDoc(c) {
   const empty = (title, text, action) => fill($('doc'), el('div', {class:'doc-card doc-empty'}, el('span', {class:'doc-ico', 'aria-hidden':'true'}), el('p', {class:'big-note'}, title), el('p', {class:'quiet'}, text), action || null));
   if (!url && c.plan) return empty('Das Doc dieses Kapitels sehen Pate und Gegenleser.', 'Den Auftrag kannst du hier lesen.');
   if (!url) return empty('Für dieses Kapitel ist noch kein Doc verknüpft.', 'Salah legt es an.');
-  const open = (cls, text) => el('a', {class:'btn ' + cls, href:url + '/edit', target:'_blank', rel:'noopener noreferrer'}, text, el('span', {class:'ext', 'aria-hidden':'true'}, '↗'));
+  const docMode = viewing() ? '/preview' : '/edit';
+  const open = (cls, text) => el('a', {class:'btn ' + cls, href:url + docMode, target:'_blank', rel:'noopener noreferrer'}, text, el('span', {class:'ext', 'aria-hidden':'true'}, '↗'));
   // Safari und iOS sperren Drittanbieter-Cookies: dort ist man im eingebetteten Doc nicht angemeldet und kann nicht schreiben.
   const ua = navigator.userAgent, safari = /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS/.test(ua);
   if (safari) return empty('In Safari öffnet sich dein Doc im eigenen Fenster.', 'Safari erlaubt das Schreiben im eingebetteten Doc nicht. Stell die Fenster nebeneinander, dann hast du den Auftrag immer daneben.', open('primary', 'Doc öffnen'));
-  const frame = el('iframe', {src:url + '/edit?usp=sharing', title:'Google Doc ' + c.ref, allow:'clipboard-read; clipboard-write', referrerpolicy:'no-referrer'});
+  const frame = el('iframe', {src:url + docMode + '?usp=sharing', title:'Google Doc ' + c.ref, allow:'clipboard-read; clipboard-write', referrerpolicy:'no-referrer'});
   fill($('doc'),
     el('div', {class:'doc-card'},
       el('div', {class:'doc-bar'},

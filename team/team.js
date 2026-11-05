@@ -5,7 +5,7 @@ const ENDPUNKT = "https://script.google.com/macros/s/AKfycbwKYjD-T2hJvIi84_RlplT
 const TEAM = { SA: "Salah", ES: "Ernes", MG: "Melisa", AM: "Arber", LB: "Leonie" };
 function schluessel() {
   const h = new URLSearchParams(location.hash.slice(1)).get("k");
-  if (h) { try { localStorage.setItem("pa6k", h); } catch (e) {} history.replaceState(null, "", location.pathname); return h; }
+  if (h) { try { if ((localStorage.getItem("pa6k") || "") !== h) localStorage.removeItem("pa6-begleiter"); localStorage.setItem("pa6k", h); } catch (e) {} history.replaceState(null, "", location.pathname); return h; }
   try { return localStorage.getItem("pa6k") || ""; } catch (e) { return ""; }
 }
 // Gelesen wird per POST: der Schluessel steht nur im Inhalt der Anfrage, nie in einer Adresse.
@@ -46,7 +46,7 @@ function fuelle(ziel, ...kinder) { ziel.replaceChildren(...kinder.flat(Infinity)
 
 // A new personal link must replace the displayed queue before any further save.
 window.addEventListener("hashchange", () => { if (new URLSearchParams(location.hash.slice(1)).has("k")) location.reload(); });
-window.addEventListener("storage", event => { if (event.key === "pa6k") location.reload(); });
+window.addEventListener("storage", event => { if (event.key === "pa6k") { try { localStorage.removeItem("pa6-begleiter"); } catch (e) {} location.reload(); } });
 
 // Responses only: access is hashed for isolation, never stored in a snapshot.
 let fieldPending = false, fieldSlot = '', fieldValue = null, fieldGeneration = 0;
