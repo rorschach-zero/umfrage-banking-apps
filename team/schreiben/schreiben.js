@@ -454,6 +454,31 @@ const RASTER = {R1:'Ausgangslage, Formulierung Marktforschungsauftrag und Forsch
 // Seite der Kriterien im Konzept PA6 (Bewertungsraster), für den Hinweis auf den Wortlaut im Original.
 const RASTER_SEITE = {R1:5, R2:6, R3:6, R4:6, R5:7, R6:7, R7:7, R8:8, R9:9, B1:14, B2:14, B3:15, B4:15, B5:15, B6:16, B7:16, B8:16, B9:17, B10:17, B11:17, B12:18, B13:18, B14:19, C7:22, C8:22};
 const RASTER_TEIL = code => code[0] === 'R' ? 'PA6a Marketing' : code[0] === 'B' ? 'PA6b Marketing' : 'PA6b Projektmanagement';
+// Quellen öffentlich zeigen (05.11.2026): nur Schulunterlagen, Unterricht und veröffentlichte Standards.
+// Interne Arbeitspapiere der Gruppe erscheinen nicht; Verweise auf die Fachregeln werden zur Fundstelle im Unterricht.
+const FACHREGEL = {"A1": "Marketing-Unterricht, Deck 2 Analyse, Folie 3", "A2": "Marketing-Unterricht, Deck 2 Analyse, Folie 4", "A3": "Marketing-Unterricht, Deck 2 Analyse, Folie 5", "A4": "Marketing-Unterricht, Deck 2 Analyse, Folien 6, 7, 12 bis 15", "A5": "Marketing-Unterricht, Deck 2 Analyse, Folie 10", "A6": "Marketing-Unterricht, Deck 2 Analyse, Folie 16", "A7": "Marketing-Unterricht, Deck 2 Analyse, Folien 18 bis 23", "A8": "Marketing-Unterricht, Deck 2 Analyse, Folien 24, 25", "A9": "Marketing-Unterricht, Deck 2 Analyse, Folien 26, 27", "A10": "Marketing-Unterricht, Deck 2 Analyse, Folie 28", "A11": "Marketing-Unterricht, Deck 2 Analyse, Folien 29 bis 31", "A12": "Marketing-Unterricht, Deck 2 Analyse, Folie 32", "A13": "Marketing-Unterricht, Deck 2 Analyse, Folie 33", "A14": "Marketing-Unterricht, Deck 2 Analyse, Folie 35", "A15": "Marketing-Unterricht, Deck 2 Analyse, Folie 36", "A16": "Marketing-Unterricht, Deck 2 Analyse, Folie 37", "A17": "Marketing-Unterricht, Deck 2 Analyse, Folie 38", "G2": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 24", "G4": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 27", "G6": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 31", "G7": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 20", "G9": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folien 16, 39, 40", "G10": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 44", "G11": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folien 41 bis 50", "G12": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 17", "G13": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 19", "G14": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folien 34, 36", "G15": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 14", "R1": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 4", "R2": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 12", "R3": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 13, 19", "R5": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 15, 22", "R7": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 23", "R8": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 24, 25", "R9": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 17", "R10": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 38, 39", "R11": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 26, 27, 28", "R13": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 30", "R14": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 35", "R15": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 36, 37", "R16": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 41", "R18": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 43", "R19": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 44", "R22": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 47", "R23": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 5", "X1": "MRS Mystery Shopping Research Guidelines, Oktober 2011 (Datei 2013), Regel B44", "X2": "MRS 2011, Teil B Guidelines 1 und 2; ESOMAR Mystery Shopping Studies 2005, Abschnitte d und e", "X3": "MRS 2011, Teil B Guideline 3", "X4": "MRS 2011, Teil B Guidelines 4 und 5; ESOMAR 2005 Abschnitte f und g", "X5": "MRS 2011, Regel B46", "X6": "ESOMAR/GRBN Guideline for Online Research 2015, Abschnitte 3.2 bis 3.4", "X7": "MSPA EA Guidelines 2023, Abschnitte 4.1 und 4.2", "X8": "Blick, 28.04.2026", "X9": "Trustpilot, Terms of Use for Consumers, Version 8.0, gültig ab 01.10.2026, Abschnitte 4 und 6", "X10": "ESOMAR Guideline on Social Media Research, Juli 2011, Abschnitte 2.2, 2.3, 2.4", "X11": "Cohen, J. (1960). A coefficient of agreement for nominal scales. Educational and Psychological Measurement, 20(1), 37 bis 46; Landis, J. R. und Koch, G. G. (1977). The measurement of observer agreement for categorical data. Biometrics, 33(1), 159 bis 174", "X12": "Apple, Nutzungsbedingungen der Apple Media Services, Schweiz, Stand 14.09.2026, Abschnitt F", "X13": "Google, Nutzungsbedingungen, wirksam ab 30.07.2026, Abschnitte «Sie missbrauchen unsere Dienste nicht», «Andere Inhalte»"};
+function fachregeln(text) {
+  const codes = [];
+  String(text).replace(/\([^)]*\)/g, '').replace(/\b([RAGX])(\d+)(?: bis [RAGX](\d+))?/g, (_, a, b, c) => { for (let i = +b; i <= (c ? +c : +b); i += 1) codes.push(a + i); return ''; });
+  return codes.map(c => FACHREGEL[c]).filter(Boolean);
+}
+function publicSource(q) {
+  if (!q) return null;
+  const out = [];
+  for (const raw of String(q).split(';')) {
+    const part = raw.trim();
+    if (!part) continue;
+    if (/^(Konzept PA6|Merkmalblatt 6[ab]|Formale Vorschriften|Yuh-Praxisauftrag|Praxisauftrag|Auftrag PA6|WIAR Block|Wissenschaftlich schreiben)/.test(part)) out.push(part);
+    else if (/^Kap\. \d/.test(part) && out.length && /^Formale Vorschriften/.test(out[out.length - 1])) out.push('Formale Vorschriften HFW 2025, ' + part);
+    else if (/^Fachregel/.test(part)) out.push(...fachregeln(part.replace(/^Fachregeln?/, '')));
+    else if (/Fachregel [RAGX]\d/.test(part)) out.push(...fachregeln(part.split(/Fachregel/)[1]));
+    else if (/WIAR \(Block (\d+), Folie (\d+)\)/.test(part)) out.push(part.replace(/^.*WIAR \(Block (\d+), Folie (\d+)\).*$/, 'WIAR Block $1, Folie $2'));
+    else if (/^Raster Terminplan/.test(part)) out.push('Konzept PA6, S. 16 (Raster Terminplan (fachlich))');
+    else if (/^Raster-Checkliste A5/.test(part)) out.push('Vorlage SWOT aus dem Marketing-Unterricht');
+  }
+  const uniq = [...new Set(out)];
+  return uniq.length ? uniq.join(' · ') : 'Arbeitsgrundlage der Gruppe, abgeleitet aus dem Auftrag';
+}
 function more(label, ...kids) { const body = kids.flat().filter(Boolean); return body.length ? el('details', {class:'w-more'}, el('summary', {}, label), el('div', {}, body)) : null; }
 function renderAuftrag(c, g) {
   const reading = c.reader === state.person && c.owner !== state.person;
@@ -495,11 +520,11 @@ function renderAuftrag(c, g) {
     g.daten_ab ? el('p', {class:'note'}, 'Die Daten kommen ab ' + g.daten_ab + '. Bis dahin schreibst du Aufbau und Methode, noch keine Ergebnisse.') : null]});
   if (!reading) {
     // Material: nur was dieses Kapitel braucht, je mit «Quelle». Interne Ablagen bleiben weg.
-    // Interne Ablagen sieht nur Salah, und auch er ohne Pfad. Dazu die Stellen aus den Vorgaben der Schule, die für dieses Kapitel gelten.
+    // Interne Ablagen erscheinen nicht. Dazu die Stellen aus den Vorgaben der Schule, die für dieses Kapitel gelten.
     const intern = wo => /notion/i.test(wo || '');
     const schule = [...new Set((g.muss || []).flatMap(m => String(m.quelle || '').split(';')).map(x => x.trim())
       .filter(x => /^(Konzept PA6|Merkmalblatt 6[ab]|Yuh-Praxisauftrag|Praxisauftrag|Auftrag PA6|Formale Vorschriften)/.test(x)))];
-    const material = (g.infos || []).filter(i => !intern(i.wo) || state.person === 'SA')
+    const material = (g.infos || []).filter(i => !intern(i.wo))
       .map(i => ({titel:i.titel, inhalt:i.inhalt, quelle:intern(i.wo) ? null : i.wo, link:i.link}))
       .concat(schule.length ? [{titel:'Vorgaben der Schule', inhalt:'Diese Stellen gelten für dein Kapitel. Lies sie im Original nach.', quelle:schule.join(' · ')}] : []);
     steps.push({id:'material', t:'Material holen', s:'Was du für dieses Kapitel brauchst', body:() => [
@@ -522,7 +547,7 @@ function renderAuftrag(c, g) {
   }
   const mussListe = el('ul', {class:'checks'}), mussZahl = el('span', {class:'w-count'});
   const mussStand = () => { const n = muss.filter((_, i) => done[i]).length; mussZahl.textContent = n + ' von ' + muss.length; store.set(checksKey, done); kopf(); };
-  fill(mussListe, muss.flatMap((m, i) => [m.form && i > 0 && !muss[i - 1].form ? el('li', {class:'checks-h', 'aria-hidden':'true'}, 'Form') : null, check(done, 'm', i, m.punkt, m.quelle, mussStand)]));
+  fill(mussListe, muss.flatMap((m, i) => [m.form && i > 0 && !muss[i - 1].form ? el('li', {class:'checks-h', 'aria-hidden':'true'}, 'Form') : null, check(done, 'm', i, m.punkt, publicSource(m.quelle), mussStand)]));
   steps.push({id:'pruefen', t:reading ? 'Gegenlesen mit der Liste' : 'Auf volle Punkte prüfen', s:muss.length ? 'Fertig, wenn alle ' + muss.length + ' Häkchen sitzen' : 'Pflichtpunkte prüfen', progress:() => muss.length ? [muss.filter((_, i) => done[i]).length, muss.length] : null, body:() => [
     el('p', {}, reading ? 'Geh Punkt für Punkt durch. Was fehlt, kommentierst du im Doc. Den Text änderst du nicht selbst.' : 'Hak nur ab, was wirklich im Text steht. Jeder fehlende Punkt kostet Punkte.'),
     muss.length ? el('div', {class:'w-sub'}, el('div', {class:'row'}, el('h3', {}, 'Fertig, wenn …'), mussZahl), mussListe) : null,
@@ -594,7 +619,7 @@ function renderInfos(g) {
     {titel:'Dashboard', wo:'Team-App', href:'/team/dashboard/', inhalt:'Rücklauf und Stand der Erhebung.'},
     {titel:'Pia fragen', wo:'Team-App', href:'/team/frag/', inhalt:'Fragen zu Regeln, Terminen und Unterlagen.'}];
   fill($('tab-infos'), 
-    block('Hier findest du, was du brauchst', (g.infos || []).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), !/notion/i.test(i.wo || '') ? el('p', {class:'where'}, i.wo) : null, safeLink(i.link) ? el('p', {}, safeLink(i.link)) : null))),
+    block('Hier findest du, was du brauchst', (g.infos || []).filter(i => !/notion/i.test(i.wo || '')).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), !/notion/i.test(i.wo || '') ? el('p', {class:'where'}, i.wo) : null, safeLink(i.link) ? el('p', {}, safeLink(i.link)) : null))),
     block('Direkt in der Team-App', el('div', {class:'links'}, inApp.map(i => el('a', {class:'lnk', href:i.href}, el('b', {}, i.titel), el('span', {}, i.inhalt), el('i', {class:'go', 'aria-hidden':'true'}, '›'))))));
 }
 function copyBtn(text) {
