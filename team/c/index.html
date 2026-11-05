@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-0/K5AFo0cyl7EuDNuzRoHKWddjuf6tprGlXoHUVIZDk='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-zggRbN8OTadMD2JV+1fptETwrMebMsVZ0rH0NtwOWh4='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>C Bewertungen</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
-<link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=f0c645b33957" defer></script>
+<link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=fd9ffa4a8790" defer></script>
 </head>
 <body>
 <header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=c">← Meine Arbeit</a><div class="titel"><small>C · Bewertungen</small>Bewertungen einordnen</div><div class="zeile"><span id="fort" class="pille">…</span><span id="wer" class="pille">…</span></div></div></header>
@@ -12,8 +12,9 @@
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zurueck" title="Pfeil links">‹ Zurück</button><button class="knopf" id="speichern" title="Enter">Speichern und weiter</button></div></div></div>
 <script src="../view-as.js?v=41cc5d81f7cc"></script>
-<script src="../team.js?v=d75ca30a4cc4"></script>
+<script src="../team.js?v=126f6cd983b5"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
+<script src="../zeit.js?v=003b1037e20f"></script>
 <script>
 // Regeln aus 10_pa6a/bewertungen/Codebuch.md, Version 10. Die zweite Person (Rolle B) sieht nie die Codes der ersten.
 const KAT = [
@@ -40,7 +41,15 @@ const AUSSCHLUSS = ["Sprache", "kein Text", "nicht Zak", "Duplikat", "nicht im Z
 // Gespeichert wird weiter der linke Wert, angezeigt der rechte. «nicht Zak» entsteht nur über die Zak-Frage (Entscheid 03.11.).
 const AUSSCHLUSS_TEXT = { "Sprache": "Andere Sprache", "kein Text": "Nur Sterne, kein Text", "nicht Zak": "Nicht über die Zak-App", "Duplikat": "Doppelt erfasst", "nicht im Zeitraum": "Datum passt nicht" };
 function ausschlussText(w) { return AUSSCHLUSS_TEXT[w] || w; }
-let q = [], i = 0, wer = "", c = null, savePending = false;
+let q = [], i = 0, wer = "", c = null, savePending = false, caseOpenedAt = 0, lastActiveAt = 0;
+function bindCaseTimer() { caseOpenedAt = Date.now(); lastActiveAt = caseOpenedAt; }
+function sessionMinutes() {
+  if (!caseOpenedAt) return 0;
+  const elapsed = (Date.now() - caseOpenedAt) / 60000, idle = (Date.now() - lastActiveAt) / 60000;
+  return Math.max(0, elapsed - Math.max(0, idle - 10));
+}
+document.addEventListener("input", () => { lastActiveAt = Date.now(); }, true);
+document.addEventListener("click", () => { lastActiveAt = Date.now(); }, true);
 
 async function start() {
   if (!schluessel()) { document.getElementById("main").replaceChildren(el("h1", {}, "Persönlicher Link fehlt"), el("p", {}, "Öffne die Seite über den Link, den du von Salah bekommen hast.")); return; }
@@ -66,6 +75,7 @@ function renderExtraCases() {
 function fortschritt() { renderExtraCases(); const n = q.filter(x => x.eigen).length; document.getElementById("fort").textContent = `${q.every(x => x.probe) ? "Übung · " : ""}${n} von ${q.length}`; }
 function draftKey(x) { return "c-" + wer + ":" + x.rolle + ":" + x.nr; }
 function zeige() {
+  bindCaseTimer();
   const x = q[i]; c = lokal(draftKey(x)) || (x.eigen ? aus(x.eigen) : leer(x)); fortschritt(); bild();
 }
 function merke() { lokal(draftKey(q[i]), c); bild(); }
@@ -159,13 +169,14 @@ async function speichern() {
   const x = q[i], z = { nr: x.nr, ausschluss: c.ausschluss, kundendienst_kontakt: c.ausschluss ? "" : c.kundendienst_kontakt, anker: c.anker.trim(), bemerkung: c.bemerkung.trim(), zak_bezug: c.zak_bezug, sprache: c.sprache };
   c.kats.forEach((n, r) => { z["kat_" + (r + 1)] = String(n); z["val_" + (r + 1)] = c.vals[n]; });
   const previous = x.eigen, previousIndex = i;
+  const zeitMin = x.probe ? 0 : sessionMinutes();
   savePending = true;
   x.eigen = Object.assign({codiert_von:wer}, z);
   const next = q.findIndex((row, index) => index > i && !row.eigen);
   i = next >= 0 ? next : Math.min(i + 1, q.length - 1); zeige();
   msg.className = "meldung"; msg.textContent = "Speichert …";
   try {
-    await sende({ typ: "codierung", rolle: x.rolle, maske: "c2", zeile: z });
+    await sende({ typ: "codierung", rolle: x.rolle, maske: "c2", zeile: z, zeit_min: zeitMin });
     window.dispatchEvent(new Event("workspace-saved"));
     x.eigen = Object.assign({ codiert_von: wer }, z); try { localStorage.removeItem(draftKey(x)); } catch (e) {}
     fieldValue.queue = q; fieldPersist();

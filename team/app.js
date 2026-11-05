@@ -141,11 +141,19 @@ function openRequestedTask(){
   const url=new URL(location.href);url.searchParams.delete('auftrag');history.replaceState(history.state,'',url.pathname+url.search+url.hash);
   setTimeout(()=>{const row=allTasks().find(r=>String(r.id)===id);if(row)details(row);},0);
 }
-function dedupeChapterTasks(){
-  if(!data||!Array.isArray(data.tasks)||!Array.isArray(data.chapters))return;
-  // Nur echte Doppelungen: gleiches Kapitel, gleiche Person UND gleiche Frist. Ein zweiter Auftrag zum Kapitel mit eigener Frist bleibt sichtbar (Befund Astro t46).
-  const day=v=>String(v||'').slice(0,10),own=new Set(data.chapters.map(c=>(c.ref||'')+'|'+(c.owner||'')+'|'+day(c.due)));
-  data.tasks=data.tasks.filter(t=>{const m=/schreiben\/\?k=([\w.-]+)/.exec(String(t.Wo||''));return !(m&&day(t.due)&&own.has(m[1]+'|'+(t.owner||'')+'|'+day(t.due)));});
+function chapterDupKey(row){
+  const due=String(row?.due||'').slice(0,10);
+  const src=row.source||(row.src==='tasks'?'psp':row.src)||'';
+  const ref=src==='chapters'?row.ref:(/schreiben\/\?k=([\w.-]+)/.exec(String(row.Wo||''))||[])[1];
+  if(!ref||!due)return '';
+  return ref+'|'+(row.owner||'')+'|'+due;
+}
+// Nur die Darstellung: gleiches Kapitel, gleiche Person und gleiche Frist ergeben eine Karte.
+// Das PSP-Paket bleibt in data.tasks, in der Suche und in der Paketauswahl der Zeiterfassung.
+function dedupeChapterTasks(rows){
+  const list=Array.isArray(rows)?rows:[];
+  const pkgs=new Set(list.filter(t=>t.source==='psp'||t.src==='tasks').map(chapterDupKey).filter(Boolean));
+  return list.filter(t=>!((t.source==='chapters'||t.src==='chapters')&&pkgs.has(chapterDupKey(t))));
 }
 function allTasks(){return [...(data.tasks||[]),...(data.assignments||[]),...(data.chapters||[])];}
 function relativeDue(row){
@@ -153,7 +161,8 @@ function relativeDue(row){
   const diff=Math.round((Date.parse(day(row.due)+'T12:00:00Z')-Date.parse(today()+'T12:00:00Z'))/86400000);
   return (row.status==='in Prüfung'?'In Prüfung':completed(row)?'Erledigt':diff<0?'Überfällig':diff===0?'Heute':diff===1?'Morgen':'in '+diff+' Tagen')+' · '+date(row.due,true);
 }
-function canReport(row){return !preview.active() && state==='ready' && ['psp','assignments'].includes(row.source) && ['offen','läuft'].includes(row.status) && (row.owner===data.person||leadership);}
+function mayReport(row){return !preview.active() && ['psp','assignments'].includes(row.source) && ['offen','läuft'].includes(row.status) && (row.owner===data.person||leadership);}
+function canReport(row){return state==='ready' && mayReport(row);}
 function taskRow(row){
   const waiting=pending?.id===row.id;
   const check=button(completed(row)?'✓':row.status==='in Prüfung'?'·':'',()=>report(row),'task-check'+(waiting?' is-pending':'')+(completed(row)?' is-done':''));
@@ -335,15 +344,14 @@ function personPakete(tasks,person){
     .sort((a,b)=>(open(a.status)?0:1)-(open(b.status)?0:1)||String(a.ref).localeCompare(b.ref))
     .map(row=>({ref:row.ref,title:row.title,status:row.status||''}));
 }
-function zeitBar(){
-  if(!data?.person||leadership||preview.active()||!window.PA6Zeit)return null;
-  const host=el('div',{id:'zeit-heute'});
-  queueMicrotask(()=>PA6Zeit.mount(host,{person:data.person,pakete:personPakete(allTasks(),data.person),label:'Zeit erfassen',compact:true,save:projektSaveRequest}));
-  return host;
+function weekZeitNote(){
+  const w=data?.zeit?.woche;
+  if(w==null||w===undefined||Number.isNaN(+w))return null;
+  return el('p',{class:'quiet-note zeit-week'},+w>0?'Diese Woche erfasst: '+String(w).replace('.',',')+' h':'Noch keine Zeit diese Woche erfasst.');
 }
 function showToday(){
   if(leadership && data.person==='SA')return showLeadership();
-  const rows=personalRows(),sunday=sundayIso(),open=rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'),late=open.filter(overdue).length+fixedSteps.filter(s=>stepOpen(s)&&s.when&&daysUntil(s.when)<0).length;
+  const rows=dedupeChapterTasks(personalRows()),sunday=sundayIso(),open=rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'),late=open.filter(overdue).length+fixedSteps.filter(s=>stepOpen(s)&&s.when&&daysUntil(s.when)<0).length;
   const due=open.filter(r=>r.due&&day(r.due)<=sunday).length+fixedSteps.filter(s=>s.when&&s.when<=sunday&&stepOpen(s)).length;
   const known=todayKnown();
   const parts=[due?el('b',{},due+(due===1?' Sache':' Dinge')+' bis Sonntag'):el('span',{},known?'Bis Sonntag nichts offen':'Stand unbekannt'),
@@ -351,7 +359,7 @@ function showToday(){
     nextMeeting()?el('span',{},nextMeeting()):null,!known&&due?el('span',{},'Stand teilweise unbekannt'):null].filter(Boolean);
   const summary=el('p',{class:'today-summary'});parts.forEach((p,i)=>{if(i)summary.append(el('span',{class:'sep','aria-hidden':'true'},' · '));summary.append(p);});
   const head=el('div',{class:'heading today-head'},el('div',{},el('h1',{},greeting()+', '+names[data.person]),summary),el('span',{class:'date-label'},date(today())));
-  return [head,zeitBar(),focusSection(nowItem(rows)),threadsSection(),weekSection(rows),
+  return [head,weekZeitNote(),focusSection(nowItem(rows)),threadsSection(),weekSection(rows),
     el('p',{class:'group-line'},data.group&&data.group.done!==null?'Gemeinsam · '+data.group.done+' von '+data.group.total+' Aufgaben erledigt':'Gruppenstand unbekannt')].filter(Boolean);
 }
 function groupedTasks(rows,compact=false){
@@ -384,8 +392,8 @@ function workPart(row){
 }
 function workRoleOf(row){if(leadership)return row.source==='chapters'?'schreibt':null;return row.owner===data.person?(row.source==='chapters'?'Du schreibst':null):row.reader===data.person?'Du liest gegen':null;}
 function workRows(){
-  if(leadership)return allTasks();
-  return personalRows().filter(r=>workRole==='read'?r.reader===data.person:r.owner===data.person);
+  const rows=leadership?allTasks():personalRows().filter(r=>workRole==='read'?r.reader===data.person:r.owner===data.person);
+  return dedupeChapterTasks(rows);
 }
 function workGroups(rows){
   const sunday=sundayIso(),two=new Date(sunday+'T12:00:00Z');two.setUTCDate(two.getUTCDate()+14);const twoIso=two.toISOString().slice(0,10);
@@ -490,15 +498,27 @@ function profileAgreements(){
     el('a',{class:'button secondary',href:'/team/spielregeln.html',target:'_blank',rel:'noopener noreferrer'},'Unsere Spielregeln →')
   ];
 }
+function fmtHoursNum(v){return v==null||!Number.isFinite(+v)?'—':String(+v).replace('.',',');}
+function aufwandCard(){
+  const leadView=data.person==='LB'||(data.person==='SA'&&leadership);
+  const week=weekZeitNote();
+  if(!leadView||!data.aufwand?.ok)return week?el('section',{class:'card'},week):null;
+  const rows=(data.aufwand.pakete||[]).filter(p=>p.plan||p.ist).slice(0,10);
+  return el('section',{class:'card'},el('h2',{},'Aufwand Plan gegen Ist'),week||null,
+    rows.length?el('table',{class:'aufwand-table'},el('thead',{},el('tr',{},el('th',{},'Paket'),el('th',{},'Plan'),el('th',{},'Ist'),el('th',{},'Woche'))),
+      el('tbody',{},rows.map(p=>el('tr',{},el('td',{},p.ref),el('td',{},fmtHoursNum(p.plan)),el('td',{},fmtHoursNum(p.ist)),el('td',{},fmtHoursNum(p.woche)))))):el('p',{class:'quiet-note'},'Noch keine Paketwerte.'),
+    el('p',{class:'quiet-note'},'Ausnahmen manuell unter Projekt › Arbeitszeit.'));
+}
 function showProfile(){
   const profile=data.profile||{},chapters=data.chapters||[],own=allTasks().filter(r=>r.owner===data.person||r.reader===data.person);
   const section=(label,rows)=>el('section',{class:'profile-section'},el('h2',{},label),rows.length?taskList(rows):el('p',{class:'quiet-note'},'Noch keine Zuteilung hinterlegt.'));
   return [heading('Dein Profil','Deine Rolle im gemeinsamen Projekt.'),el('section',{class:'profile-intro'},el('span',{class:'avatar-large'},names[data.person].slice(0,1)),el('div',{},el('h2',{},profile.role||'Rolle noch offen'),el('p',{},profile.text||'Dein Lead-Blatt ist noch nicht erreichbar.'),el('small',{class:'source'},profile.source||'Lead-Blatt'))),
+    aufwandCard(),
     ...profileAgreements(),
     piaLink({'Pia-Frage':'Erklär mir meine Rolle und meinen Lead-Bereich. Wofür bin ich verantwortlich?'},'Pia erklärt dir deine Rolle'),
     button('Unterlagen öffnen',()=>navigate('documents'),'button secondary'),button('Umfrage teilen',()=>navigate('sharing'),'button secondary'),
     section('Kapitel, die du schreibst',chapters.filter(r=>r.owner===data.person)),section('Kapitel, die du gegenliest',chapters.filter(r=>r.reader===data.person)),
-    section('Deine Erhebungsaufträge',(data.assignments||[]).filter(r=>r.owner===data.person)),section('Deine nächsten drei Fristen',sortRows(own.filter(r=>!completed(r)&&r.due)).slice(0,3))];
+    section('Deine Erhebungsaufträge',(data.assignments||[]).filter(r=>r.owner===data.person)),section('Deine nächsten drei Fristen',sortRows(dedupeChapterTasks(own.filter(r=>!completed(r)&&r.due))).slice(0,3))];
 }
 const schoolDates = [
  {id:'school-a',ref:'Moodle-Kalender',title:'Abgabe PA6a','Pia-Frage':'Was gilt für die Abgabe PA6a und wo steht die Frist?',due:'2026-12-12T23:59:00+01:00'},
@@ -524,7 +544,7 @@ function deadlineDetails(row){
 function deadlineRows(){
   const tag=(list,src)=>(list||[]).map(r=>({...r,src}));
   const rows=[...tag(data.meetings,'meetings'),...tag(data.milestones,'milestones'),...tag(data.reserves,'reserves'),...tag((data.tasks||[]).filter(r=>!completed(r)),'tasks'),...tag(data.assignments,'assignments'),...tag(data.chapters,'chapters'),...schoolDates.map(r=>({...r,kind:'school',src:'school'}))];
-  return rows.filter(r=>deadlineFilter==='all'?true:deadlineFilter==='mine'?(r.owner===data.person||r.reader===data.person||r.src==='meetings'||r.src==='school'):r.src==='school'||r.src==='milestones');
+  return dedupeChapterTasks(rows.filter(r=>deadlineFilter==='all'?true:deadlineFilter==='mine'?(r.owner===data.person||r.reader===data.person||r.src==='meetings'||r.src==='school'):r.src==='school'||r.src==='milestones'));
 }
 function deadlineRow(row){
   const [kind,cls]=deadlineKind(row),d=row.due?new Date(day(row.due)+'T12:00:00Z'):null,time=deadlineTime(row),mine=row.reader===data.person&&row.owner!==data.person?'Gegenlesen':row.owner&&row.owner!==data.person?names[row.owner]:null;
@@ -581,7 +601,7 @@ function statusSteps(row) {
   const states=['offen','läuft','in Prüfung','fertig'],index=completed(row)?3:states.indexOf(row.status);
   return el('ol',{class:'status-steps','aria-label':'Aufgabenstatus'},['Offen','Läuft','In Prüfung','Fertig'].map((label,i)=>el('li',{class:i===index?'current':i<index?'passed':'','aria-current':i===index?'step':null},el('span',{'aria-hidden':'true'},i<index?'✓':String(i+1)),label)));
 }
-function canReview(row) {return !preview.active()&&state==='ready'&&leadership&&row.status==='in Prüfung'&&['psp','assignments'].includes(row.source);}
+function canReview(row) {return !preview.active()&&state==='ready'&&leadership&&row.status==='in Prüfung'&&['psp','assignments','chapters'].includes(row.source);}
 function taskFooter(row,takeover) {
   const footer=el('footer',{class:'task-footer'});let primary;
   if(preview.active()||takeover)primary=el('p',{class:'footer-state'},'Diese Ansicht ist nur zum Lesen.');
@@ -597,9 +617,30 @@ function proposalNotes(row) {
 }
 // Auftragsweg (05.11.2026, Salah): ein Auftrag führt Schritt für Schritt, wie Typeform. Jede Aktion geht ins Blatt «Auftragsweg».
 const guideAt=new Map();
-function trackAuftrag(row,aktion,wert){
+let vorgangN=0;
+function newVorgang(){
+  vorgangN+=1;
+  try{if(typeof crypto!=='undefined'&&crypto.randomUUID)return crypto.randomUUID();}catch{}
+  return (Date.now().toString(16)+vorgangN.toString(16)).slice(0,32);
+}
+function trackAuftrag(row,aktion,wert,vorgang){
   if(config.demo||preview.active()||!key||(leadership&&row.owner!==data.person))return;
-  try{fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'auftragsweg',k:key,id:String(row.id||''),ref:String(row.ref||''),quelle:String(row.source||''),aktion,wert:wert==null?'':String(wert)}),referrerPolicy:'no-referrer'}).catch(()=>{});}catch{}
+  const body={typ:'auftragsweg',k:key,id:String(row.id||''),ref:String(row.ref||''),quelle:String(row.source||''),aktion,wert:wert==null?'':String(wert)};
+  if(vorgang)body.vorgang=String(vorgang);
+  try{fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body),referrerPolicy:'no-referrer'}).catch(()=>{});}catch{}
+}
+function accessMark(k){let h=0;for(const ch of String(k||''))h=(h*31+ch.charCodeAt(0))>>>0;return h.toString(36);}
+function dropCompanion(){try{localStorage.removeItem('pa6-begleiter');}catch{}}
+function rememberStart(row){
+  const slot='pa6-aktiv:'+data.person+':'+row.id;
+  try{if(!localStorage.getItem(slot))localStorage.setItem(slot,String(Date.now()));}catch{}
+}
+function measuredHours(row){
+  if(!window.PA6Zeit)return null;
+  let started=0;try{started=+localStorage.getItem('pa6-aktiv:'+data.person+':'+row.id)||0;}catch{}
+  if(!started)return null;
+  const minutes=Math.min(480,Math.max(0,(Date.now()-started)/60000));
+  return Math.min(8,PA6Zeit.roundQuarterMinutes(minutes));
 }
 // Auftragspfad (05.11.2026, Salah: «kein Textwall»): Start → ein Schritt nach dem anderen → Abschluss.
 // Sichtbar ist immer nur, was man jetzt braucht. Warum, Massstab und Plan sind einen Tipp entfernt.
@@ -632,7 +673,7 @@ function stepOverview(row,values,onJump){
 function keepCompanion(row,values,cur){
   if(preview.active())return;
   const steps=values.map(v=>{const d=stepDest(row,v);return{text:stepText(v,d),key:stepKey(row,v),href:d?d.href:'',label:d?d.label:''};});
-  try{localStorage.setItem('pa6-begleiter',JSON.stringify({v:1,id:String(row.id||''),ref:String(row.ref||''),source:row.source,title:shortTitle(row),steps,cur,from:'/team/?view=tasks&auftrag='+encodeURIComponent(row.id||''),until:Date.now()+12*3600*1000}));}catch{}
+  try{localStorage.setItem('pa6-begleiter',JSON.stringify({v:1,who:data.person,mark:accessMark(key),id:String(row.id||''),ref:String(row.ref||''),source:row.source,title:shortTitle(row),steps,cur,from:'/team/?view=tasks&auftrag='+encodeURIComponent(row.id||''),until:Date.now()+12*3600*1000}));}catch{}
 }
 // «Los geht's» setzt den Auftrag still auf «läuft» (Messung für die Projektleitung bleibt), ohne den Pfad zu unterbrechen.
 async function startQuietly(row){
@@ -658,8 +699,9 @@ function taskPath(row,readOnly){
   function startView(){
     const live=liveLine(row);
     const primary=chapter?el('a',{class:'button primary-action',href:chapterHref(row)},'Im Schreibwerk öffnen'):
-      readOnly||done||!n?null:el('button',{type:'button',class:'button primary-action',onclick:()=>{setPhase('weg');trackAuftrag(row,'gestartet');startQuietly(row);stepView(true);}},firstOpen()>0?'Weiter bei Schritt '+(Math.min(firstOpen(),n-1)+1):'Los geht’s');
-    footer=readOnly?foot(el('p',{class:'footer-state'},'Diese Ansicht ist nur zum Lesen.')):done?taskFooter(row,false):primary?foot(primary):taskFooter(row,false);
+      readOnly||done||!n?null:el('button',{type:'button',class:'button primary-action',onclick:()=>{setPhase('weg');rememberStart(row);trackAuftrag(row,'gestartet');startQuietly(row);stepView(true);}},firstOpen()>0?'Weiter bei Schritt '+(Math.min(firstOpen(),n-1)+1):'Los geht’s');
+    const finishNow=canReport(row)&&row.status==='läuft'&&!readOnly&&!done?el('button',{type:'button',class:'text-button',onclick:()=>report(row,'in Prüfung')},'Fertig melden'):null;
+    footer=readOnly?foot(el('p',{class:'footer-state'},'Diese Ansicht ist nur zum Lesen.')):done?taskFooter(row,false):primary?foot(primary,finishNow):taskFooter(row,false);
     show([was!=='noch offen'?el('p',{class:'path-lead'},was):null,live,
       done?el('p',{class:'path-state'},row.status==='in Prüfung'?'Gemeldet. Salah schaut es sich an.':'Erledigt. Danke!'):n?el('p',{class:'path-meta'},n+(n===1?' Schritt':' Schritte')+(firstOpen()>0&&firstOpen()<n?' · '+firstOpen()+' erledigt':'')):null,
       why,n?stepOverview(row,values,null):null]);
@@ -678,7 +720,7 @@ function taskPath(row,readOnly){
   }
   function endView(focus){
     const ok=el('input',{type:'checkbox',id:'path-ok'});
-    const send=el('button',{type:'button',class:'button primary-action',disabled:true,onclick:()=>{setPhase('start');trackAuftrag(row,'fertig_gemeldet');report(row,'in Prüfung');}},'Fertig melden');
+    const send=el('button',{type:'button',class:'button primary-action',disabled:true,onclick:()=>{setPhase('start');report(row,'in Prüfung');}},'Fertig melden');
     ok.addEventListener('change',()=>{send.disabled=!ok.checked||!canReport(row)||!!pending;});
     footer=foot(el('button',{type:'button',class:'text-button',onclick:()=>{cur=Math.max(0,n-1);guideAt.set(row.id,cur);stepView(true);}},'Zurück'),send);
     show([el('div',{class:'path-progress'},el('span',{class:'path-k'},'Fast geschafft'),dots()),
@@ -736,17 +778,24 @@ async function postStatus(row,from,to,access,lead){
     row.status=to;return result;
   }finally{clearTimeout(timer);}
 }
-function report(row,target='in Prüfung'){
-  if(preview.active()||pending||noteSaving||state!=='ready'||(!canReport(row)&&!(canReview(row)&&['fertig','läuft'].includes(target))))return;
+function needsClosureZeit(row,target){
+  return canReport(row)&&target==='in Prüfung'&&['psp','assignments'].includes(row.source);
+}
+function proceedReport(row,target='in Prüfung',opts){
+  const relaxed=!!(opts&&opts.relaxed),note=opts&&opts.note||'';
+  if(preview.active()||pending||noteSaving||!data||state==='unauthorized'||state==='loading')return;
+  if(!relaxed&&state!=='ready')return;
+  if(relaxed&&!['ready','stale','cached','error'].includes(state))return;
+  if(!mayReport(row)&&!(state==='ready'&&canReview(row)&&['fertig','läuft'].includes(target)))return;
   if(config.demo){toast('In der Vorschau wird kein Status gespeichert.');return;}
   const access=key,lead=leadership,identity=data.person;
   const before=structuredClone(data), serverRow={...row};
   ++generation;if(activeRequest)activeRequest.abort();refreshing=false;
-  const operation={id:row.id,timer:null};pending=operation;
+  const operation={id:row.id,timer:null,vorgang:newVorgang()};pending=operation;
   setLocalStatus(row.id,target);
   const returning=serverRow.status==='in Prüfung'&&target==='läuft';
-  const undo=button('Rückgängig',()=>{if(pending!==operation)return;clearTimeout(operation.timer);data=before;pending=null;toast('Meldung zurückgenommen.');render();},'toast-undo');
-  toast((returning?'Zurückgeben':target==='läuft'?'Start':target==='fertig'?'Abnahme':'Fertigmeldung')+' wird in 5 Sekunden gespeichert.',undo);$('detail').close();render();
+  const undo=button('Rückgängig',()=>{if(pending!==operation)return;clearTimeout(operation.timer);data=before;row.status=serverRow.status;pending=null;toast('Meldung zurückgenommen.');render();},'toast-undo');
+  toast(note+(returning?'Zurückgeben':target==='läuft'?'Start':target==='fertig'?'Abnahme':'Fertigmeldung')+' wird in 5 Sekunden gespeichert.',undo);$('detail').close();render();
   operation.timer=setTimeout(async()=>{
     if(pending!==operation)return;
     if(key!==access||data?.person!==identity){pending=null;toast('Zugang geändert. Meldung zurückgenommen.');return;}
@@ -757,10 +806,37 @@ function report(row,target='in Prüfung'){
       await postStatus(serverRow,serverRow.status,target,access,lead);
       if(pending!==operation||key!==access||data?.person!==identity)return;
       clearResponses(cacheNamespace);setLocalStatus(row.id,target);
+      if(target==='in Prüfung')trackAuftrag(serverRow,'fertig_gemeldet','',operation.vorgang);
       toast(target==='fertig'?'✓ Prüfung abgeschlossen.':returning?'✓ Zur Bearbeitung zurückgegeben.':target==='läuft'?'✓ Bearbeitung gestartet.':'✓ Zur Prüfung gemeldet. Gut gemacht.');$('toast').classList.add('success');
-    }catch(error){if(pending===operation&&key===access&&data?.person===identity){data=before;setLocalStatus(row.id,serverRow.status);clearResponses(cacheNamespace);toast((error.name==='AbortError'?'Verbindung unterbrochen. Bitte Stand prüfen.':error.message));}}
+    }catch(error){if(pending===operation&&key===access&&data?.person===identity){
+      row.status=serverRow.status;data=before;setLocalStatus(row.id,serverRow.status);clearResponses(cacheNamespace);
+      const retry=button('Erneut versuchen',()=>{if(key!==access||data?.person!==identity||pending)return;proceedReport(row,target,{relaxed:true,note:note});},'toast-undo');
+      toast(error.name==='AbortError'?'Verbindung unterbrochen. Bitte Stand prüfen.':error.message,retry);
+    }}
     finally{if(pending===operation){pending=null;await load();setTimeout(()=>$('toast').classList.remove('success'),700);}}
   },5000);
+}
+function report(row,target='in Prüfung'){
+  if(preview.active()||pending||noteSaving||state!=='ready'||(!canReport(row)&&!(canReview(row)&&['fertig','läuft'].includes(target))))return;
+  if(needsClosureZeit(row,target)&&!config.demo){
+    if(leadership&&row.owner&&row.owner!==data.person){
+      proceedReport(row,target,{note:'Die Arbeitszeit erfasst '+(names[row.owner]||'die ausführende Person')+' selbst. '});
+      return;
+    }
+    if(!window.PA6Zeit){
+      toast('Die Zeiterfassung ist nicht geladen. Lade die Seite neu, bevor du den Auftrag abschliesst.');
+      return;
+    }
+    const paket=PA6Zeit.taskPaket(row);
+    const bisher=paket&&data.zeit?.pakete?.[paket]?+data.zeit.pakete[paket]:0;
+    const host=el('div',{id:'zeit-closure-host'});
+    modal('Arbeitszeit zum Auftrag',el('p',{class:'quiet-note'},'Ohne Zeitangabe kannst du den Auftrag nicht abschliessen.'),host);
+    PA6Zeit.closureMount(host,{row,person:data.person,paket,bisher,vorwahl:measuredHours(row),aufgabe:shortTitle(row),save:projektSaveRequest,
+      onDone:()=>{$('detail').close();proceedReport(row,target);},
+      onCancel:()=>{$('detail').close();details(row);}});
+    return;
+  }
+  proceedReport(row,target);
 }
 
 const shareChannels={w:'WhatsApp',i:'Instagram',f:'Facebook',l:'LinkedIn',r:'Reddit',g:'Arbeit / Geschäft',c:'Verein / Club',j:'Jodel und andere',k:'Klasse',s:'Schulhaus',a:'Anzeigen',d:'Dozierende und Sekretariat',h:'Andere Schulen',o:'Organisationen',t:'Test'};
@@ -819,7 +895,7 @@ function showSharing(){
 function privacy() {
   modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten über Google und Notion. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Der letzte Projektstand bleibt für deine Person und Ansicht auf diesem Gerät gespeichert, damit er beim Wiederöffnen sofort erscheint. Beim Abmelden werden diese gespeicherten Projektstände gelöscht. Nutze dafür ein persönliches Gerät. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden an Notion gesendet und protokolliert. Der Server speichert Antworten höchstens 600 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Beim Teilen speichert das Verteilungsprotokoll deine Person, den Kanal, das Datum und eine freiwillige Reichweitenschätzung. Es verknüpft keine Umfrageantwort mit dir. QR-Codes werden auf deinem Gerät erzeugt.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
 }
-function logout() {try{for(const name of Object.keys(localStorage))if(name.startsWith('pa6-field-v1:'))localStorage.removeItem(name);}catch{}if(pending){clearTimeout(pending.timer);pending=null;}$('toast').hidden=true;clearResponses();cacheNamespace='';refreshing=false;if(activeRequest)activeRequest.abort();preview.clear();try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
+function logout() {try{for(const name of Object.keys(localStorage))if(name.startsWith('pa6-field-v1:'))localStorage.removeItem(name);}catch{}if(pending){clearTimeout(pending.timer);pending=null;}$('toast').hidden=true;clearResponses();cacheNamespace='';refreshing=false;if(activeRequest)activeRequest.abort();preview.clear();dropCompanion();try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
 function renderViewSelector() {
   let slot = $('view-as-selector');
   if (!slot) { slot = el('div',{id:'view-as-selector',class:'view-as-selector'});document.querySelector('.topbar').after(slot); }
@@ -861,7 +937,7 @@ function readKey() {
   const fragment=new URLSearchParams(location.hash.slice(1)), incoming=fragment.get('k');
   if(location.hash){const url=new URL(location.href);url.hash='';history.replaceState({},'',url);}
   if(config.demo)return '';
-  if(incoming){preview.clear();try{if(localStorage.getItem('pa6k')!==incoming)clearResponses();localStorage.setItem('pa6k',incoming);}catch{}return incoming;}
+  if(incoming){preview.clear();try{if(localStorage.getItem('pa6k')!==incoming){dropCompanion();clearResponses();}localStorage.setItem('pa6k',incoming);}catch{}return incoming;}
   try{return localStorage.getItem('pa6k')||key||'';}catch{return key||'';}
 }
 function validResponse(result) {
@@ -964,7 +1040,7 @@ async function load(reset=false) {
     if(result?.code==='unauthorized'||result?.code==='forbidden'){clearResponses(cacheNamespace||snapshotPrefix);data=null;state=result.code==='unauthorized'?'unauthorized':'error';errorMessage=result.fehler||'Personenansicht nicht freigegeben.';leadership=false;preview.clear();render();return;}
     if(preview.active() && (result.readOnly!==true || result.viewer!=='SA' || result.person!==preview.target() || result.role!=='mitglied'))throw Error(result.fehler||'Personenansicht nicht freigegeben.');
     if(!validResponse(result))throw Error('Die Antwort ist unvollständig. Der aktuelle Stand bleibt unbekannt.');
-    data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();saveResponse(result);dedupeChapterTasks();openRequestedTask();
+    data=result;person=result.person;leadership=result.role==='leitung';state='ready';lastLoaded=Date.now();saveResponse(result);openRequestedTask();
     if (result.role === 'leitung' && result.person === 'SA' && !preview.active()) void prefetchPeople(key, cacheNamespace);
   }catch(error){if(ticket!==generation)return;data=previous;state=previous?'stale':'error';errorMessage=error.name==='AbortError'?'Die Verbindung dauert zu lange. Bitte versuche es erneut.':error.message;}
   finally{clearTimeout(timeout);if(ticket===generation){refreshing=false;activeRequest=null;render();}}
@@ -1005,7 +1081,7 @@ $('demo-state').addEventListener('change',()=>{data=null;load(true);});
 $('privacy-button').addEventListener('click',privacy);$('tool-sharing')?.addEventListener('click',event=>{event.preventDefault();navigate('sharing');});$('privacy-footer').addEventListener('click',privacy);
 window.addEventListener('popstate',()=>{area=new URLSearchParams(location.search).get('area')||'';navigate(new URLSearchParams(location.search).get('view'),false);});
 window.addEventListener('hashchange',()=>load(true));
-window.addEventListener('storage',event=>{if(event.key==='pa6k'){clearResponses();cacheNamespace='';key='';data=null;leadership=false;load(true);}});
+window.addEventListener('storage',event=>{if(event.key==='pa6k'){dropCompanion();clearResponses();cacheNamespace='';key='';data=null;leadership=false;load(true);}});
 document.addEventListener('click',event=>{
   const link=event.target.closest('a[href]');
   if(pending&&link&&new URL(link.href).pathname!==location.pathname){event.preventDefault();announce('Die Meldung wird noch gespeichert. Warte kurz oder wähle Rückgängig.');}

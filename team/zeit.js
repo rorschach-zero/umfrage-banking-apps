@@ -12,15 +12,153 @@ function node(tag, attr, ...kids) {
   for (const k of kids.flat()) if (k !== null && k !== undefined && k !== false) e.append(k.nodeType ? k : document.createTextNode(String(k)));
   return e;
 }
-const HOURS = [0.25, 0.5, 1, 1.5, 2];
+const QUICK = [0.25, 0.5, 1, 2, 3];
 function todayIso() {
   return new Intl.DateTimeFormat('sv-SE', {timeZone: 'Europe/Zurich', year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date());
 }
 function fmtHours(value) { return String(value).replace('.', ','); }
-function paketLabel(row) { return row.ref + (row.title ? ' · ' + row.title : ''); }
 function pruef(r) {
   if (r && r.ok === false) throw Error('Nicht gespeichert: ' + (r.fehler || r.error || 'bitte nochmals versuchen') + '.');
   return r || {};
+}
+function roundQuarterMinutes(minutes) {
+  if (!Number.isFinite(minutes) || minutes <= 0) return 0.25;
+  return Math.max(0.25, Math.ceil(minutes / 15) * 0.25);
+}
+function servicePaket(datum) {
+  const tag = String(datum || todayIso()).slice(0, 10);
+  return tag <= '2026-11-18' ? 'AP-002' : 'AP-035';
+}
+function codierungPaket(datum) {
+  const tag = String(datum || todayIso()).slice(0, 10);
+  return tag <= '2026-11-18' ? 'AP-003' : 'AP-036';
+}
+function taskPaket(row) {
+  return /^AP-\d{3}$/.test(row?.ref || '') ? row.ref : '';
+}
+function closureMount(container, opts) {
+  opts = opts || {};
+  if (!container) return;
+  let busy = false, choice = null, op = 0, held = '';
+  const bisher = +opts.bisher || 0;
+  const paket = opts.paket || taskPaket(opts.row) || '';
+  const send = typeof opts.save === 'function' ? opts.save : payload => sende(payload);
+  const hint = node('p', {class: 'zeit-closure-hint', role: 'status'});
+  const finish = node('button', {type: 'button', class: 'knopf', disabled: true}, 'Abschliessen');
+  const dateInput = node('input', {type: 'date', value: todayIso(), 'aria-label': 'Datum'});
+  const taskInput = node('input', {type: 'text', value: opts.aufgabe || '', maxlength: 6000, 'aria-label': 'Tätigkeit', placeholder: 'Tätigkeit'});
+  const customHours = node('input', {type: 'text', inputMode: 'decimal', maxlength: 8, placeholder: 'z. B. 1,5', 'aria-label': 'Andere Stunden'});
+  const customWrap = node('label', {class: 'zeit-meta zeit-custom'}, 'Stunden ', customHours);
+  customWrap.hidden = true;
+  const vorwahl = Number(opts.vorwahl);
+  const quickHit = QUICK.find(value => Math.abs(value - vorwahl) < 0.001);
+  if (quickHit) choice = quickHit;
+  else if (Number.isFinite(vorwahl) && vorwahl > 0 && vorwahl <= 24) {
+    choice = 'custom';
+    customHours.value = fmtHours(vorwahl);
+    customWrap.hidden = false;
+  }
+  function parseCustom() {
+    const text = String(customHours.value || '').trim().replace(',', '.');
+    if (!/^\d{1,2}(\.\d{1,2})?$/.test(text)) return null;
+    const value = +text;
+    return value > 0 && value <= 24 ? value : null;
+  }
+  function ready() {
+    if (choice === 'confirm') return true;
+    if (choice === 'custom') return parseCustom() !== null;
+    return typeof choice === 'number' && choice > 0;
+  }
+  function refresh() {
+    finish.disabled = busy || !ready() || window.PA6View?.active();
+    customWrap.hidden = choice !== 'custom';
+    if (held) hint.textContent = held;
+    else if (busy) hint.textContent = 'Speichert …';
+    else if (choice === 'custom' && !ready()) hint.textContent = 'Trag die Stunden ein, zum Beispiel 1,5.';
+    else hint.textContent = ready() ? '' : 'Wähle eine Zeit oder bestätige die bisher erfasste Arbeitszeit.';
+  }
+  function pick(next) { choice = next; held = ''; refresh(); }
+  const hours = node('div', {class: 'zeit-hours', role: 'group', 'aria-label': 'Stunden wählen'});
+  QUICK.forEach(value => hours.append(node('button', {
+    type: 'button', class: 'chip' + (choice === value ? ' is-on' : ''), on: {click: () => pick(value)}
+  }, fmtHours(value) + ' h')));
+  hours.append(node('button', {
+    type: 'button', class: 'chip' + (choice === 'custom' ? ' is-on' : ''), on: {click: () => pick('custom')}
+  }, 'andere Zeit'));
+  if (bisher > 0) {
+    hours.append(node('button', {
+      type: 'button', class: 'chip' + (choice === 'confirm' ? ' is-on' : ''), on: {click: () => pick('confirm')}
+    }, 'Bisher erfasst ' + fmtHours(bisher) + ' h bestätigen'));
+  }
+  const details = node('details', {class: 'zeit-details'},
+    node('summary', {}, 'Details'),
+    node('div', {class: 'zeit-meta'},
+      node('label', {}, 'Datum ', dateInput),
+      node('label', {}, 'Tätigkeit ', taskInput)));
+  customHours.addEventListener('input', () => { held = ''; refresh(); });
+  const back = node('button', {type: 'button', class: 'chip'}, 'Zurück');
+  back.addEventListener('click', () => {
+    op += 1;
+    busy = false;
+    if (opts.onCancel) opts.onCancel();
+  });
+  async function submit() {
+    if (busy || !ready() || window.PA6View?.active()) return;
+    const mine = ++op;
+    busy = true; held = ''; refresh();
+    try {
+      let stunden, aufgabe = String(taskInput.value || opts.aufgabe || '').trim() || (opts.row && opts.row.title) || 'Auftrag';
+      if (choice === 'confirm') {
+        stunden = '0';
+        aufgabe = aufgabe + ' · bestätigt';
+      } else if (choice === 'custom') {
+        const value = parseCustom();
+        if (value === null || mine !== op) return;
+        stunden = String(value);
+      } else stunden = String(choice);
+      pruef(await send({
+        typ: 'projekt_save', formular: 'arbeitszeit', id: crypto.randomUUID(),
+        felder: {datum: dateInput.value || todayIso(), person: opts.person, stunden, aufgabe, paket, storniert: '', quelle: 'abschluss'}
+      }));
+      if (mine !== op) return;
+      opts.onDone && opts.onDone({confirm: choice === 'confirm', hours: +stunden, paket});
+    } catch (error) {
+      if (mine !== op) return;
+      held = error.message || 'Nicht gespeichert.';
+    } finally { if (mine === op) { busy = false; refresh(); } }
+  }
+  finish.addEventListener('click', submit);
+  container.replaceChildren(
+    node('div', {class: 'zeit-closure'},
+      node('h3', {}, 'Wie lange hast du daran gearbeitet?'),
+      Number.isFinite(vorwahl) && vorwahl > 0 ? node('p', {class: 'leise'}, 'Seit dem Start gemessen: ' + fmtHours(vorwahl) + ' h, gerundet auf 15 Minuten.') : null,
+      bisher > 0 ? node('p', {class: 'leise'}, 'Bisher erfasst ' + fmtHours(bisher) + ' h zu ' + (paket || 'diesem Auftrag') + '.') : null,
+      hours, customWrap, details, hint,
+      node('div', {class: 'zeit-closure-actions'}, finish, back)));
+  refresh();
+}
+async function autoBook(opts) {
+  opts = opts || {};
+  const send = typeof opts.save === 'function' ? opts.save : payload => sende(payload);
+  const id = 'auto-wb-' + String(opts.stornoKey || '').replace(/[^a-zA-Z0-9_-]/g, '-');
+  const felder = {
+    datum: opts.datum || todayIso(), person: opts.person, stunden: String(opts.stunden || 0.25),
+    aufgabe: opts.aufgabe || 'Servicetest', paket: opts.paket || servicePaket(opts.datum), storniert: '', quelle: 'werkzeug_b'
+  };
+  const receipt = node('p', {class: 'zeit-receipt', role: 'status'});
+  async function undo() {
+    try {
+      pruef(await send({typ: 'projekt_save', formular: 'arbeitszeit', id, felder: Object.assign({}, felder, {storniert: 'ja'})}));
+      receipt.textContent = 'Automatische Buchung zurückgenommen.';
+      opts.onUndone && opts.onUndone();
+    } catch (error) { receipt.textContent = error.message; }
+  }
+  try {
+    pruef(await send({typ: 'projekt_save', formular: 'arbeitszeit', id, felder}));
+    receipt.replaceChildren(fmtHours(felder.stunden) + ' h automatisch erfasst · ', node('button', {type: 'button', class: 'chip', on: {click: undo}}, 'Rückgängig'));
+    opts.onSaved && opts.onSaved();
+  } catch (error) { receipt.textContent = error.message; }
+  return receipt;
 }
 function mount(container, opts) {
   opts = opts || {};
@@ -35,7 +173,7 @@ function mount(container, opts) {
   const taskInput = node('input', {type: 'text', value: opts.aufgabe || '', maxlength: 6000, 'aria-label': 'Tätigkeit', placeholder: 'Tätigkeit'});
   const paketSelect = node('select', {'aria-label': 'Arbeitspaket'},
     node('option', {value: ''}, 'Paket optional'),
-    ...pakete.map(row => node('option', {value: row.ref}, paketLabel(row))),
+    ...pakete.map(row => node('option', {value: row.ref}, row.ref + (row.title ? ' · ' + row.title : ''))),
     node('option', {value: 'anderes'}, 'anderes'));
   if (opts.paket && ![...paketSelect.options].some(o => o.value === opts.paket)) paketSelect.insertBefore(node('option', {value: opts.paket}, opts.paket), paketSelect.lastChild);
   if (opts.paket) paketSelect.value = opts.paket;
@@ -55,57 +193,22 @@ function mount(container, opts) {
     if (busy || window.PA6View?.active()) return;
     const aufgabe = String(taskInput.value || '').trim();
     if (!aufgabe) { receipt.hidden = false; receipt.textContent = 'Bitte kurz die Tätigkeit nennen.'; return; }
-    let paket = paketSelect.value === 'anderes' ? '' : String(paketSelect.value || '').trim();
+    const paket = paketSelect.value === 'anderes' ? '' : String(paketSelect.value || '').trim();
     busy = true; receipt.hidden = false; receipt.textContent = 'Speichert …';
     const id = crypto.randomUUID();
-    const felder = {datum: dateInput.value || todayIso(), person: opts.person, stunden: String(stunden), aufgabe, paket, storniert: ''};
+    const felder = {datum: dateInput.value || todayIso(), person: opts.person, stunden: String(stunden), aufgabe, paket, storniert: '', quelle: 'hand'};
     try {
       const send = typeof opts.save === 'function' ? opts.save : payload => sende(payload);
       const r = pruef(await send({typ: 'projekt_save', formular: 'arbeitszeit', id, felder}));
       last = {id: r.id || id, felder};
-      const paketText = paket || 'ohne Paket';
-      receipt.replaceChildren(fmtHours(stunden) + ' h für ' + paketText + ' gespeichert · ', node('button', {type: 'button', class: 'chip', on: {click: undo}}, 'Rückgängig'));
+      receipt.replaceChildren(fmtHours(stunden) + ' h für ' + (paket || 'ohne Paket') + ' gespeichert · ', node('button', {type: 'button', class: 'chip', on: {click: undo}}, 'Rückgängig'));
       opts.onSaved && opts.onSaved(r);
     } catch (error) { receipt.textContent = error.message; last = null; }
     finally { busy = false; }
   }
-  HOURS.forEach(value => hours.append(node('button', {type: 'button', class: 'chip', on: {click: () => save(value)}}, fmtHours(value) + ' h')));
+  QUICK.forEach(value => hours.append(node('button', {type: 'button', class: 'chip', on: {click: () => save(value)}}, fmtHours(value) + ' h')));
   wrap.append(hours, meta, receipt);
   container.replaceChildren(wrap);
 }
-function offer(container, opts) {
-  opts = opts || {};
-  if (!container) return;
-  let busyOffer = false;
-  const hours = opts.stunden || 0.25;
-  const paket = opts.paket || '';
-  const aufgabe = opts.aufgabe || 'Servicetest Kontakt';
-  const mins = opts.minuten != null ? Math.round(opts.minuten) : Math.round(hours * 60);
-  const send = typeof opts.save === 'function' ? opts.save : payload => sende(payload);
-  const box = node('div', {class: 'zeit-offer', role: 'status'},
-    node('p', {}, mins + ' Min übernehmen? · ' + fmtHours(hours) + ' h · ' + (paket || 'ohne Paket')),
-    node('button', {type: 'button', class: 'knopf', on: {click: async () => {
-      if (busyOffer || window.PA6View?.active()) return;
-      busyOffer = true;
-      try {
-        pruef(await send({typ: 'projekt_save', formular: 'arbeitszeit', id: crypto.randomUUID(),
-          felder: {datum: opts.datum || todayIso(), person: opts.person, stunden: String(hours), aufgabe, paket, storniert: ''}}));
-        box.replaceChildren(node('p', {}, fmtHours(hours) + ' h übernommen.'));
-        opts.onSaved && opts.onSaved();
-        if (opts.onDone) setTimeout(opts.onDone, 900);
-      } catch (error) { box.append(node('p', {class: 'leise'}, error.message)); }
-      finally { busyOffer = false; }
-    }}}, 'Übernehmen'),
-    node('button', {type: 'button', class: 'chip', on: {click: () => { box.remove(); opts.onDone && opts.onDone(); }}}, 'Später'));
-  container.append(box);
-}
-function roundQuarterMinutes(minutes) {
-  if (!Number.isFinite(minutes) || minutes <= 0) return 0.25;
-  return Math.max(0.25, Math.ceil(minutes / 15) * 0.25);
-}
-function servicePaket(datum) {
-  const tag = String(datum || todayIso()).slice(0, 10);
-  return tag <= '2026-11-18' ? 'AP-002' : 'AP-035';
-}
-window.PA6Zeit = {mount, offer, roundQuarterMinutes, servicePaket, todayIso};
+window.PA6Zeit = {mount, closureMount, autoBook, roundQuarterMinutes, servicePaket, codierungPaket, taskPaket, todayIso, fmtHours};
 })();

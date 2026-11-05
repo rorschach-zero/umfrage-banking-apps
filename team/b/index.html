@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JkSnfnV0UrDyQb5s2MBrAQkzIC/hoBRny4D6uymHvBI='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-zKjaLCeBM8KHSc+sVVOdkoAOk/ReOf0iD/PaiL3mEm0='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
-<link rel="stylesheet" href="../zeit.css?v=89af72ec7702">
-<link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=f0c645b33957" defer></script>
+<link rel="stylesheet" href="../zeit.css?v=0547fa549500">
+<link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=fd9ffa4a8790" defer></script>
 </head>
 <body>
 <header><div class="innen"><a class="project-return" href="../?view=tasks&amp;area=b">← Meine Arbeit</a><div class="titel">Servicetest</div><div id="wer" class="pille">…</div></div></header>
@@ -13,10 +13,10 @@
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zwischen">Zwischenstand speichern</button><button class="knopf" id="fertig">Speichern und abschliessen</button></div></div></div>
 <script src="../view-as.js?v=41cc5d81f7cc"></script>
-<script src="../team.js?v=d75ca30a4cc4"></script>
+<script src="../team.js?v=126f6cd983b5"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
 <script src="../service.js?v=e7f46ab8c5e4"></script>
-<script src="../zeit.js?v=88cf8e4ad5e0"></script>
+<script src="../zeit.js?v=003b1037e20f"></script>
 <script>
 // Regeln aus 10_pa6a/beobachtung/Testprotokoll.md, Version 4. Die Maske schlaegt vor, die Person entscheidet.
 const SKRIPT = {
@@ -342,26 +342,27 @@ async function speichern(stand) {
   savePending = true; row.erfasst = planRow.erfasst = payload;
   msg.textContent = "Speichert …";
   try {
-    await sende({ typ: "beobachtung", maske: "b4", simulation: aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: payload, start_korrektur: payload.start_korrektur === true });
+    const result = await sende({ typ: "beobachtung", maske: "b4", simulation: aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: payload, start_korrektur: payload.start_korrektur === true });
     delete z.start_korrektur;
     window.dispatchEvent(new Event("workspace-saved"));
     row.erfasst = planRow.erfasst = payload; try { localStorage.removeItem("b-" + row.nr); } catch (e) {}
     fieldValue = daten; fieldPersist();
     hole("plan").then(neu => { if (nummer !== bSpeicherNr || neu.person !== daten.person) return; neu.fetchedAt ||= new Date().toISOString(); daten = neu; belastung = neu.belastung || {}; fieldValue = neu; fieldPersist(); }).catch(() => { if (nummer === bSpeicherNr) fieldNotice('Gespeichert · Abgleich ausstehend'); });
     msg.className = "meldung ok"; msg.textContent = stand === "abgeschlossen" ? "Abgeschlossen und gespeichert." : "Zwischenstand gespeichert. Komm zurück, wenn die Antwort da ist.";
-    if (stand === "abgeschlossen") {
-      const start = payload.t_start ? String(payload.t_start).replace(" ", "T") : "";
-      const end = payload.t_ende ? String(payload.t_ende).replace(" ", "T") : "";
-      const mins = minuten(start, end);
-      if (mins > 0 && mins <= 480 && window.PA6Zeit && daten.person) {
-        const hours = PA6Zeit.roundQuarterMinutes(mins);
-        const datum = (payload.datum || start.slice(0, 10) || heute());
-        const host = document.getElementById("zeit-vorschlag") || (() => { const node = el("div", { id: "zeit-vorschlag" }); const main = document.getElementById("main"); main.parentNode.insertBefore(node, main); return node; })();
-        host.replaceChildren();
-        PA6Zeit.offer(host, {person: daten.person, stunden: hours, minuten: mins, datum, paket: PA6Zeit.servicePaket(datum), aufgabe: "Servicetest " + row.nr});
-      }
+    if (stand === "abgeschlossen" && result && result.arbeitszeit && window.PA6Zeit) {
+      const host = document.getElementById("zeit-vorschlag") || (() => { const node = el("div", { id: "zeit-vorschlag" }); const main = document.getElementById("main"); main.parentNode.insertBefore(node, main); return node; })();
+      host.replaceChildren();
+      const auto = result.arbeitszeit;
+      const receipt = el("p", { class: "zeit-receipt", role: "status" });
+      receipt.replaceChildren(PA6Zeit.fmtHours(auto.stunden) + " h automatisch erfasst · ", el("button", { type: "button", class: "chip", on: { click: async () => {
+        try {
+          await sende({ typ: "projekt_save", formular: "arbeitszeit", id: auto.id, felder: { datum: payload.datum || heute(), person: daten.person, stunden: String(auto.stunden), aufgabe: "Servicetest " + row.nr, paket: auto.paket, storniert: "ja", quelle: "werkzeug_b" } });
+          receipt.textContent = "Automatische Buchung zurückgenommen.";
+        } catch (error) { receipt.textContent = error.message; }
+      } } }, "Rückgängig"));
+      host.append(receipt);
       setTimeout(liste, 900);
-    }
+    } else if (stand === "abgeschlossen") setTimeout(liste, 900);
   } catch (e) { row.erfasst = planRow.erfasst = previous; msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
   finally { savePending = false; }
 }
