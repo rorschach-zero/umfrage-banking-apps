@@ -611,7 +611,7 @@ function stepDest(row,text){for(const[re,href,label]of DEST){const m=re.exec(tex
 function stepText(text,dest){let t=plainLabel(text);if(dest){const rest=t.replace(/^Öffne\s[^.]*\.\s*/,'');if(rest.trim())t=rest;}return t.replace(/Team-App\s*›\s*/g,'').trim();}
 function chapterHref(row){return row.ref?'/team/schreiben/?k='+encodeURIComponent(row.ref):'/team/schreiben/';}
 function liveLine(row){
-  const area=row.area||'';
+  const area=row.source==='assignments'?(row.area||''):'';   // nur eigene Erhebungsaufträge; Leitungsaufträge betreffen die ganze Gruppe
   if(area==='c'){const c=(data.areas||[]).find(m=>m.id==='c');if(c&&c.state==='ready'&&c.total>0){const rest=Number.isFinite(c.expected)?Math.max(0,c.expected-c.done):null;
     return el('div',{class:'path-live'},el('strong',{},c.done+' von '+c.total),el('span',{},' Bewertungen eingeordnet'),rest===null?null:el('span',{class:rest>0?'path-today':'path-ok'},rest>0?'Heute dran: '+rest:'Du bist im Plan'));}}
   if(area==='b'){const s=data.service;if(s&&!s.error&&Number.isFinite(s.done)&&s.config?.target)return el('div',{class:'path-live'},el('strong',{},s.done+' von '+s.config.target),el('span',{},' Kontakten gemacht'));}

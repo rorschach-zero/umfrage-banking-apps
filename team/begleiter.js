@@ -37,8 +37,8 @@
         el('span', {class:'bg-kicker'}, finished ? 'Alle Schritte erledigt' : 'Schritt ' + (s.cur + 1) + ' von ' + n), dots(),
         s.open ? null : el('span', {class:'bg-peek'}, finished ? s.title : step.text), el('span', {class:'bg-chev', 'aria-hidden':'true'})),
       el('button', {type:'button', class:'bg-close', 'aria-label':'Begleiter ausblenden', onclick:close}, '×'));
-    if (!s.open) { root.className = 'begleiter is-closed'; root.replaceChildren(head); return; }
-    root.className = 'begleiter';
+    root.classList.toggle('is-closed', !s.open);   // nur diesen Zustand ändern, «is-docked» bleibt
+    if (!s.open) { root.replaceChildren(head); return; }
     let body;
     if (finished) body = [el('p', {class:'bg-step'}, 'Super, alles erledigt.'), el('p', {class:'bg-sub'}, 'Melde den Auftrag jetzt als fertig.'), el('div', {class:'bg-act'}, el('a', {class:'bg-btn', href:s.from}, 'Zum Auftrag'))];
     else if (!on(s.cur)) body = [note ? el('p', {class:'bg-note'}, note) : null, el('p', {class:'bg-sub'}, 'Nächster Schritt'), el('p', {class:'bg-step'}, step.text),
