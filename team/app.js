@@ -406,7 +406,8 @@ function workRow(row){
     leadership&&row.source==='chapters'&&row.reader?el('span',{class:'work-tag role'},'liest gegen · '+names[row.reader]):null);
   if(tags.childNodes.length)name.append(tags);
   const due=item.querySelector('.due-chip');if(due&&row.due)due.textContent=overdue(row)?whenWord(row.due):date(row.due);
-  if(/^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+(?:\/edit)?$/.test(row.doc||''))item.insertBefore(el('a',{class:'work-doc',href:preview.active()?row.doc.replace(/(?:\/edit)?$/, '/preview'):row.doc,target:'_blank',rel:'noopener','aria-label':'Doc öffnen: '+shortTitle(row),title:'Doc öffnen'},'Doc ↗'),item.querySelector('.status-dot'));
+  // 05.11.2026 (Salah): führt zum Kapitel im Schreibwerk, nicht direkt zu Google. Dort warten Schreibweg und Doc nebeneinander.
+  if(row.source==='chapters'&&row.ref)item.insertBefore(el('a',{class:'work-doc',href:chapterHref(row),'aria-label':'Kapitel im Schreibwerk öffnen: '+shortTitle(row),title:'Im Schreibwerk öffnen'},'Schreiben →'),item.querySelector('.status-dot'));
   return item;
 }
 function workHeader(id){
@@ -594,57 +595,94 @@ function trackAuftrag(row,aktion,wert){
   if(config.demo||preview.active()||!key||(leadership&&row.owner!==data.person))return;
   try{fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'auftragsweg',k:key,id:String(row.id||''),ref:String(row.ref||''),quelle:String(row.source||''),aktion,wert:wert==null?'':String(wert)}),referrerPolicy:'no-referrer'}).catch(()=>{});}catch{}
 }
-function taskIntro(row){
-  const was=cardText(row,'Was'),warum=cardText(row,'Warum');
-  if(was==='noch offen'&&warum==='noch offen')return null;
-  return el('section',{class:'task-intro'},was!=='noch offen'?el('p',{class:'task-what'},was):null,warum!=='noch offen'?el('p',{class:'task-why'},warum):null);
+// Auftragspfad (05.11.2026, Salah: «kein Textwall»): Start → ein Schritt nach dem anderen → Abschluss.
+// Sichtbar ist immer nur, was man jetzt braucht. Warum, Massstab und Plan sind einen Tipp entfernt.
+const DEST=[[/Team-App\s*›\s*Bewertungen/,()=>'/team/c/','Bewertungen öffnen'],[/Team-App\s*›\s*Servicetest/,()=>'/team/b/','Servicetest öffnen'],
+  [/Team-App\s*›\s*Umfrage teilen/,()=>'/team/?view=sharing','Umfrage teilen öffnen'],[/Team-App\s*›\s*Dashboard|im Dashboard/,()=>'/team/dashboard/','Dashboard öffnen'],
+  [/Schreibplatz\s*›\s*Kapitel\s*([\w.-]+)/,(m)=>'/team/schreiben/?k='+encodeURIComponent(m[1]),'Kapitel öffnen'],
+  [/Schreibplatz|Kapitel-Doc/,(m,row)=>row.source==='chapters'&&row.ref?'/team/schreiben/?k='+encodeURIComponent(row.ref):'/team/schreiben/','Kapitel öffnen']];
+function stepDest(row,text){for(const[re,href,label]of DEST){const m=re.exec(text);if(m)return{href:href(m,row),label};}return null;}
+function stepText(text,dest){let t=plainLabel(text);if(dest){const rest=t.replace(/^Öffne\s[^.]*\.\s*/,'');if(rest.trim())t=rest;}return t.replace(/Team-App\s*›\s*/g,'').trim();}
+function chapterHref(row){return row.ref?'/team/schreiben/?k='+encodeURIComponent(row.ref):'/team/schreiben/';}
+function liveLine(row){
+  const area=row.area||'';
+  if(area==='c'){const c=(data.areas||[]).find(m=>m.id==='c');if(c&&c.state==='ready'&&c.total>0){const rest=Number.isFinite(c.expected)?Math.max(0,c.expected-c.done):null;
+    return el('div',{class:'path-live'},el('strong',{},c.done+' von '+c.total),el('span',{},' Bewertungen eingeordnet'),rest===null?null:el('span',{class:rest>0?'path-today':'path-ok'},rest>0?'Heute dran: '+rest:'Du bist im Plan'));}}
+  if(area==='b'){const s=data.service;if(s&&!s.error&&Number.isFinite(s.done)&&s.config?.target)return el('div',{class:'path-live'},el('strong',{},s.done+' von '+s.config.target),el('span',{},' Kontakten gemacht'));}
+  return null;
 }
-function guidedSteps(row,readOnly){
-  if(cardText(row,"So geht's")==='noch offen')return el('p',{class:'field-open'},'Die Schritte sind noch nicht hinterlegt. Pia hilft dir weiter.');
-  const values=stepValues(row);if(!values.length)return null;
-  const n=values.length,firstOpen=()=>{const i=values.findIndex(v=>!stepDone(row,v));return i<0?n:i;};
-  let cur=guideAt.has(row.id)?Math.min(guideAt.get(row.id),n):firstOpen();
-  const box=el('section',{class:'guide','aria-label':'Schritte zum Auftrag'});
+function stepHelp(row,i,text){
+  const url=new URL(config.piaPath,location.origin);
+  url.searchParams.set('q',safeQuestion('Ich bin beim Auftrag «'+shortTitle(row)+'», Schritt '+(i+1)+': «'+text+'». Wie mache ich das genau?'));
+  if(/^(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(row.id||''))url.searchParams.set('ctx',row.id);
+  return el('a',{class:'text-button path-help',href:url.pathname+url.search,referrerpolicy:'no-referrer',onClick:rememberPiaRole},'Hilfe zu diesem Schritt');
+}
+function moreBlock(label,...kids){return el('details',{class:'path-more'},el('summary',{},label),el('div',{},...kids));}
+function stepOverview(row,values,onJump){
+  return moreBlock('Alle Schritte ansehen',el('ol',{class:'path-all'},values.map((v,i)=>el('li',{class:stepDone(row,v)?'done':''},
+    onJump?el('button',{type:'button',onclick:()=>onJump(i)},stepText(v,stepDest(row,v))):stepText(v,stepDest(row,v))))));
+}
+function taskPath(row,readOnly){
+  const values=cardText(row,"So geht's")==='noch offen'?[]:stepValues(row),n=values.length,chapter=row.source==='chapters';
+  const was=cardText(row,'Was'),warum=cardText(row,'Warum'),ziel=cardText(row,'Fertig wenn');
+  const why=moreBlock('Warum und woran du merkst, dass du fertig bist',warum!=='noch offen'?el('p',{},warum):null,ziel!=='noch offen'?el('p',{class:'path-goal-line'},el('strong',{},'Fertig, wenn '),ziel):null);
+  const firstOpen=()=>{const i=values.findIndex(v=>!stepDone(row,v));return i<0?n:i;};
+  const box=el('div',{class:'path'});let footer=null;
+  const phaseKey='pa6-path:'+data.person+':'+row.id;
+  const getPhase=()=>{try{return localStorage.getItem(phaseKey)||'start';}catch{return 'start';}};
+  const setPhase=v=>{try{localStorage.setItem(phaseKey,v);}catch{}};
   const mark=(v,on)=>{try{localStorage.setItem(stepKey(row,v),on?'1':'0');}catch{announce('Der Schritt kann in diesem Browser nicht gespeichert werden.');}};
-  const go=i=>{cur=i;guideAt.set(row.id,cur);draw(true);};
-  function draw(focus){
-    const done=values.filter(v=>stepDone(row,v)).length;
-    const bar=el('div',{class:'guide-bar','aria-hidden':'true'},values.map((v,i)=>el('i',{class:stepDone(row,v)?'on':i===cur?'now':''})));
-    let card;
-    if(cur>=n){
-      card=el('div',{class:'guide-card guide-end',tabindex:'-1'},el('p',{class:'guide-k'},'Alle Schritte erledigt'),
-        el('p',{class:'guide-text'},'Prüf zum Schluss: '+cardText(row,'Fertig wenn')),
-        readOnly?null:el('p',{class:'guide-hint'},'Passt alles? Dann melde den Auftrag unten als erledigt.'),
-        el('div',{class:'guide-act'},el('button',{type:'button',class:'text-button',onclick:()=>go(n-1)},'Zurück zum letzten Schritt')));
-    }else{
-      const v=values[cur],isDone=stepDone(row,v);
-      card=el('div',{class:'guide-card',tabindex:'-1'},el('p',{class:'guide-k'},'Schritt '+(cur+1)+' von '+n),el('p',{class:'guide-text'},plainLabel(v)),
-        el('div',{class:'guide-act'},
-          readOnly?null:isDone?el('button',{type:'button',class:'button secondary',onclick:()=>{mark(v,false);trackAuftrag(row,'schritt_offen',cur+1);draw(true);}},'Wieder offen'):
-            el('button',{type:'button',class:'button',onclick:()=>{mark(v,true);trackAuftrag(row,'schritt_erledigt',cur+1);const next=values.findIndex((w,i)=>i>cur&&!stepDone(row,w));go(next<0?firstOpen():next);}},cur+1<n?'Erledigt, weiter':'Erledigt'),
-          readOnly&&cur+1<n?el('button',{type:'button',class:'button secondary',onclick:()=>go(cur+1)},'Nächster Schritt'):null,
-          cur>0?el('button',{type:'button',class:'text-button',onclick:()=>go(cur-1)},'Zurück'):null));
-    }
-    const list=el('ol',{class:'guide-list'},values.map((v,i)=>el('li',{class:(stepDone(row,v)?'done':'')+(i===cur?' cur':'')},
-      el('button',{type:'button','aria-current':i===cur?'step':null,onclick:()=>go(i)},el('span',{class:'gl-n','aria-hidden':'true'},String(i+1)),el('span',{class:'gl-t'},plainLabel(v)),stepDone(row,v)?el('span',{class:'sr-only'},' erledigt'):null))));
-    box.replaceChildren(el('div',{class:'guide-top'},el('h3',{},'So gehst du vor'),el('span',{class:'guide-count'},done+' von '+n),bar),card,list);
-    if(focus)box.querySelector('.guide-card')?.focus({preventScroll:true});
+  const done=completed(row)||row.status==='in Prüfung';
+  let cur=guideAt.has(row.id)?Math.min(guideAt.get(row.id),n):firstOpen();
+  const dots=()=>el('div',{class:'path-dots','aria-hidden':'true'},values.map((v,i)=>el('i',{class:stepDone(row,v)?'on':i===cur?'now':''})));
+  const foot=(...kids)=>el('footer',{class:'task-footer path-footer'},...kids);
+  function show(view,focus){box.replaceChildren(...view.filter(Boolean));const f=$('detail-body')?.querySelector('.task-footer');if(f&&footer)f.replaceWith(footer);if(focus)box.querySelector('[data-focus]')?.focus({preventScroll:true});}
+  function startView(){
+    const live=liveLine(row);
+    const primary=chapter?el('a',{class:'button primary-action',href:chapterHref(row)},'Im Schreibwerk öffnen'):
+      readOnly||done||!n?null:el('button',{type:'button',class:'button primary-action',onclick:()=>{setPhase('weg');trackAuftrag(row,'gestartet');stepView(true);}},firstOpen()>0?'Weiter bei Schritt '+(Math.min(firstOpen(),n-1)+1):'Los geht’s');
+    footer=readOnly?foot(el('p',{class:'footer-state'},'Diese Ansicht ist nur zum Lesen.')):done?taskFooter(row,false):primary?foot(primary):taskFooter(row,false);
+    show([was!=='noch offen'?el('p',{class:'path-lead'},was):null,live,
+      done?el('p',{class:'path-state'},row.status==='in Prüfung'?'Gemeldet. Salah schaut es sich an.':'Erledigt. Danke!'):n?el('p',{class:'path-meta'},n+(n===1?' Schritt':' Schritte')+(firstOpen()>0&&firstOpen()<n?' · '+firstOpen()+' erledigt':'')):null,
+      why,n?stepOverview(row,values,null):null]);
   }
-  draw(false);return box;
+  function stepView(focus){
+    if(cur>=n)return endView(focus);
+    const v=values[cur],dest=stepDest(row,v),text=stepText(v,dest),isDone=stepDone(row,v);
+    const go=i=>{cur=Math.max(0,Math.min(i,n));guideAt.set(row.id,cur);stepView(true);};
+    const doneBtn=el('button',{type:'button',class:'button '+(dest?'secondary':'primary-action'),onclick:()=>{mark(v,true);trackAuftrag(row,'schritt_erledigt',cur+1);const next=values.findIndex((w,i)=>i>cur&&!stepDone(row,w));go(next<0?firstOpen():next);}},'Erledigt');
+    footer=foot(el('button',{type:'button',class:'text-button',onclick:()=>cur>0?go(cur-1):(setPhase('start'),startView())},'Zurück'),el('button',{type:'button',class:'text-button path-skip',onclick:()=>go(n)},'Schon fertig?'));
+    show([el('div',{class:'path-progress'},el('span',{class:'path-k'},'Schritt '+(cur+1)+' von '+n),dots()),
+      el('p',{class:'path-step',tabindex:'-1','data-focus':''},text),
+      el('div',{class:'path-actions'},dest?el('a',{class:'button primary-action path-go',href:dest.href},dest.label,el('span',{'aria-hidden':'true'},' →')):null,
+        isDone?el('button',{type:'button',class:'button secondary',onclick:()=>{mark(v,false);trackAuftrag(row,'schritt_offen',cur+1);stepView(true);}},'Wieder offen'):doneBtn),
+      stepHelp(row,cur,text),stepOverview(row,values,go),why],focus);
+  }
+  function endView(focus){
+    const ok=el('input',{type:'checkbox',id:'path-ok'});
+    const send=el('button',{type:'button',class:'button primary-action',disabled:true,onclick:()=>{setPhase('start');trackAuftrag(row,'fertig_gemeldet');report(row,'in Prüfung');}},'Fertig melden');
+    ok.addEventListener('change',()=>{send.disabled=!ok.checked||!canReport(row)||!!pending;});
+    footer=foot(el('button',{type:'button',class:'text-button',onclick:()=>{cur=Math.max(0,n-1);guideAt.set(row.id,cur);stepView(true);}},'Zurück'),send);
+    show([el('div',{class:'path-progress'},el('span',{class:'path-k'},'Fast geschafft'),dots()),
+      el('p',{class:'path-step',tabindex:'-1','data-focus':''},'Stimmt das?'),
+      el('label',{class:'path-check',for:'path-ok'},ok,el('span',{},ziel!=='noch offen'?ziel:'Alles aus diesem Auftrag ist erledigt.')),
+      el('p',{class:'path-meta'},'Danach schaut Salah es sich an.')],focus);
+  }
+  if(chapter||readOnly||done||!n||getPhase()==='start')startView();else stepView(false);
+  return {box,footer:()=>footer};
 }
 function details(row,origin='Projektplanung',takeover=false){
   if(pending){announce('Die Meldung wird gespeichert. Du kannst noch Rückgängig wählen.');return;}
   $('detail').dataset.owner=row.owner||data.person;
   const notion=leadership&&/^[a-f0-9-]{32,36}$/i.test(row.id||'')?el('a',{class:'source notion-link',href:'https://www.notion.so/'+row.id.replace(/-/g,''),rel:'noopener noreferrer'},'In Notion öffnen'):null;
   const late=overdue(row)&&row.status!=='in Prüfung'?el('section',{class:'late-note'},el('strong',{},'Frist überschritten'),el('p',{},relativeDue(row)),canReport(row)&&!takeover?button('Jetzt fertig melden',()=>report(row),'text-button'):null,canReport(row)&&!takeover?button('Neue Frist vorschlagen',()=>deadlineProposal(row),'text-button'):null):null;
-  const scroll=el('div',{class:'detail-scroll'},statusSteps(row),el('h2',{id:'detail-title'},shortTitle(row)),el('p',{class:'detail-due'},relativeDue(row)),late,
+  const path=taskPath(row,preview.active()||takeover||!canReport(row)&&row.source!=='chapters');
+  const scroll=el('div',{class:'detail-scroll'},el('h2',{id:'detail-title'},shortTitle(row)),el('p',{class:'detail-due'},relativeDue(row)),late,
     row.waitingOn?el('p',{class:'quiet-note dependency-wait'},'Startet nach: '+row.waitingOn):null,
-    taskIntro(row),
-    el('p',{class:'acceptance'},el('strong',{},'Fertig, wenn … '),cardText(row,'Fertig wenn')),
-    guidedSteps(row,preview.active()||takeover),preview.active()||takeover?el('p',{class:'local-note'},'Diese Ansicht ist nur zum Lesen.'):null,
-    el('div',{class:'task-actions'},workLink(row),piaLink(row)),proposalNotes(row),
-    el('details',{class:'more'},el('summary',{},'Auftrag und Quellen'),el('h3',{},'Auftrag im Wortlaut'),el('p',{},cardText(row,'Was')),el('h3',{},'Warum'),el('p',{},cardText(row,'Warum')),el('p',{class:'source'},cardText(row,'Auftragsquelle')),el('p',{class:'source'},cardText(row,'Herkunft')),el('p',{class:'source'},origin+' · '+(row.ref||'')),notion));
-  $('detail').classList.add('task-detail');$('detail-body').replaceChildren(scroll,taskFooter(row,takeover));if(!takeover)trackAuftrag(row,'geoeffnet');if(!$('detail').open)$('detail').showModal();scroll.scrollTop=0;
+    path.box,
+    proposalNotes(row),
+    leadership?el('p',{class:'source path-source'},cardText(row,'Auftragsquelle')+' · '+origin+' · '+(row.ref||''),notion?' · ':null,notion):null);
+  $('detail').classList.add('task-detail');$('detail-body').replaceChildren(scroll,canReview(row)?taskFooter(row,takeover):path.footer()||taskFooter(row,takeover));if(!takeover)trackAuftrag(row,'geoeffnet');if(!$('detail').open)$('detail').showModal();scroll.scrollTop=0;
   $('detail').querySelector('.primary-action:not(:disabled)')?.focus({preventScroll:true});
 }
 function proposalInbox() {

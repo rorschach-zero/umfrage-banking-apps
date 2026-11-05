@@ -74,3 +74,50 @@ dialog.task-detail{padding:0;overflow:hidden;height:100dvh;max-height:100dvh}dia
 .guide-list li.done .gl-t{text-decoration:none;color:#8A9397}
 @keyframes guideIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.guide-card{animation:none}.guide-bar i{transition:none}}
+/* Auftragspfad (05.11.2026): ein Gedanke pro Bildschirm. Gross, was jetzt zu tun ist; alles andere einen Tipp entfernt. Bricks-Werte. */
+.path{margin:6px 0 8px}
+.path-lead{font-size:18px;line-height:1.5;font-weight:650;letter-spacing:-.01em;color:var(--ink);margin:0 0 16px}
+.path-live{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;background:#F6FAF8;border:1px solid #DCE9E4;border-radius:14px;padding:12px 14px;margin:0 0 16px;font-size:14px;color:#3B4548}
+.path-live strong{font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.path-today,.path-ok{margin-left:auto;font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px}
+.path-today{background:#BEB8EA;color:#2B2550}
+.path-ok{background:#E6F3F0;color:#17645F}
+.path-meta{font-size:13px;color:#687276;margin:0 0 14px}
+.path-state{font-size:15px;font-weight:650;color:#17645F;background:#E6F3F0;border-radius:12px;padding:12px 14px;margin:0 0 14px}
+.path-progress{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
+.path-k{flex:none;font-size:13px;font-weight:700;color:#687276;font-variant-numeric:tabular-nums}
+.path-dots{display:flex;gap:6px}
+.path-dots i{width:8px;height:8px;border-radius:50%;background:#E3E8E4;transition:background-color .2s cubic-bezier(.2,.7,.2,1),transform .2s cubic-bezier(.2,.7,.2,1)}
+.path-dots i.on{background:#237E79}
+.path-dots i.now{background:#BEB8EA;transform:scale(1.25)}
+.path-step{font-size:22px;line-height:1.4;font-weight:750;letter-spacing:-.015em;color:var(--ink);margin:0 0 22px;outline:none;animation:pathIn .22s cubic-bezier(.2,.7,.2,1)}
+.path-actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 6px}
+.path-actions .button,.path-footer .button{min-height:48px;border-radius:12px;padding:12px 20px;font-size:15px;font-weight:750}
+.task-detail .primary-action,.path-go{background:#237E79;color:#fff;border:0}
+.task-detail .primary-action:hover,.path-go:hover{background:#17645F}
+.path-actions .button.secondary{background:#fff;border:1px solid #CDD5D0;color:var(--ink)}
+.path-help{display:inline-block;margin:6px 0 18px;color:#687276;font-size:13px;font-weight:650;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#C9D2CD}
+.path-more{border-top:1px solid #E3E8E4}
+.path-more:last-child{border-bottom:1px solid #E3E8E4}
+.path-more summary{list-style:none;cursor:pointer;min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;font-weight:650;color:#3B4548}
+.path-more summary::-webkit-details-marker{display:none}
+.path-more summary::after{content:"";flex:none;width:7px;height:7px;border-right:2px solid #687276;border-bottom:2px solid #687276;transform:rotate(45deg);transition:transform .18s cubic-bezier(.2,.7,.2,1)}
+.path-more[open] summary::after{transform:rotate(-135deg)}
+.path-more>div{padding:0 0 14px;font-size:14px;line-height:1.6;color:#3B4548}
+.path-more p{margin:0 0 8px}
+.path-goal-line strong{color:#17645F}
+.path-all{margin:0;padding-left:22px}
+.path-all li{margin:0 0 6px}
+.path-all li.done{color:#8A9397}
+.path-all button{all:unset;cursor:pointer;display:block;padding:4px 0}
+.path-all button:hover{color:#17645F}
+.path-all button:focus-visible{outline:2px solid #237E79;outline-offset:2px;border-radius:4px}
+.path-check{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid #D6DED9;border-radius:14px;padding:14px 16px;margin:0 0 12px;font-size:15px;line-height:1.55;cursor:pointer;box-shadow:0 4px 18px rgba(25,36,38,.045)}
+.path-check input{width:22px;height:22px;flex:none;margin:1px 0 0;accent-color:#237E79}
+.path-footer{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.path-footer .primary-action{flex:1 1 auto;max-width:360px;margin-left:auto}
+.path-skip{color:#687276}
+.path-source{margin-top:14px}
+@keyframes pathIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.path-step{animation:none}.path-dots i{transition:none}}
+@media (max-width:700px){.path-step{font-size:20px}.path-footer .primary-action{max-width:none}}
