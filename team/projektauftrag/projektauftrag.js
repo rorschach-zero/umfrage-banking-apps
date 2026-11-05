@@ -1,5 +1,5 @@
 'use strict';
-// Bestaetigung des Projektauftrags (Claudette 03.11.2026). Liest den eigenen Stand, speichert «ja» oder einen Einwand.
+// Bestaetigung des Projektauftrags. Liest den eigenen Stand, speichert «ja» oder einen Einwand.
 // Inhalt: Notion-Projektauftrag PA-V1, in Alltagssprache zusammengefasst. Gespeichert wird im Blatt «Bestaetigungen».
 const DOK = 'projektauftrag';
 const PUNKTE = [

@@ -122,7 +122,7 @@ footer { text-align:center; color: var(--grey); font-size: 13px; padding: 16px 2
 .sr { position:absolute; left:-9999px; }
 @media (max-width: 520px) { header .marke span { display:none; } .skala .opt { padding: 12px 2px; font-size: 14px; } .skala.worte { grid-template-columns: 1fr; } .skala.worte .opt { justify-content:flex-start; text-align:left; padding: 12px 16px; font-size: 16px; } .nav { flex-direction: column-reverse; align-items: stretch; } .knopf { width:100%; } }
 
-/* Typeform-Gefühl, neutral (Claudette 03.11.2026, Impeccable): nur Gestaltung, Instrument unverändert. */
+/* Typeform-Gefühl, neutral: nur Gestaltung, Instrument unverändert. */
 :root { --akzent-text:#d4431f; }
 ::selection { background: #ffd9cf; color: var(--ink); }
 html { caret-color: var(--orange); scrollbar-color: #c9cbcf transparent; }
@@ -165,7 +165,7 @@ p.hinweis { font-size: 16px; max-width: 62ch; }
 main a, footer a { color: var(--ink); text-decoration-color: var(--orange); text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
 main a:hover { text-decoration-thickness: 2.5px; }
 
-/* Neutrale Welt (Claudette 03.11.2026): keine Bankfarben. Anker ist das Schul-Navy des Absenders (#001B35), sonst Papierweiss und Tinte. */
+/* Neutrale Welt: keine Bankfarben. Anker ist das Schul-Navy des Absenders (#001B35), sonst Papierweiss und Tinte. */
 :root { --orange:#001B35; --akzent-text:#001B35; --ink:#14171c; --grey:#5d636b; --line:#d6d9de; --surface:#f1f2f4;
   --lavender:#9aa6b8; --lilac:#e3e6eb; --lilac-light:#f3f4f6; --lilac-faint:#f6f7f8; --papier:#fbfbfa; --tint:#eef1f5; }
 html, body { background: var(--papier); }
@@ -312,7 +312,7 @@ header:has(+ * .schirm.start), body:has(.schirm.start) header { max-width: 1180p
 .abbruch-details { margin-top: 8px; }
 .abbruch-details .hinweis { font-size: 0.875rem; }
 
-/* Astro t32: auf der Navy-Karte helle Bestätigung und weisser Fokusring */
+/* auf der Navy-Karte helle Bestätigung und weisser Fokusring */
 .gewinn-karte .status.ok, .gewinn-karte #mailstatus.status.ok { color: #b9f0cf; }
 .gewinn-karte a:focus-visible, .gewinn-karte summary:focus-visible, .gewinn-karte .text:focus { outline-color: #fff; }
 </style>
@@ -348,7 +348,7 @@ const tf = (s, app) => t(s).replace("{app}", () => app);
 const tbLink = () => (!SPRACHE || SPRACHE === "de") ? "teilnahmebedingungen.html" : "teilnahmebedingungen_" + SPRACHE + ".html";
 const teilLink = () => "https://umfrage.hydeout.ch/?id=TEIL-" + ((SPRACHE && SPRACHE !== "de") ? "&lang=" + SPRACHE : "");
 const dsLink = () => (!SPRACHE || SPRACHE === "de") ? "datenschutz.html" : "datenschutz_" + SPRACHE + ".html";
-// Fusszeile traegt die Kennung auf jeder Seite, damit auch jemand, der vor dem Ende aufhoert, seine Verlaufszeile loeschen lassen kann (Astro m17).
+// Fusszeile traegt die Kennung auf jeder Seite, damit auch jemand, der vor dem Ende aufhoert, seine Verlaufszeile loeschen lassen kann.
 function spracheAnwenden() { document.documentElement.lang = (SPRACHE || "de") + (SPRACHE === "de" || !SPRACHE ? "-CH" : ""); document.title = t("Umfrage Kundendienst von Banking-Apps"); const kz = document.getElementById("kopfzeile"); if (kz) kz.textContent = t("Praxisarbeit HFW"); const f = document.querySelector("footer"); if (f) f.textContent = t("Praxisarbeit HFW von Studierenden der KV Business School Zürich, Klasse 601/H25-B · ohne Namen und Kontodaten · Daten nur für diese Arbeit") + " · " + t("Deine Kennung") + " " + A.id; }
 
 const APPS_FEST = ["Yuh","Neon","Zak","Revolut"];
@@ -641,7 +641,7 @@ const _render = render; render = function(){ const L = liste(); if (L[i] && L[i]
 // Nach einem Ausschluss im Screening bleibt es beim Ausschluss, auch nach Neuladen (der Empfaenger verwirft die doppelte Kennung).
 spracheAnwenden();
 if (!beendet()) setInterval(() => { if (beendet()) location.reload(); }, 60000);
-// Tastatur wie Typeform (Claudette 03.11.2026): nur Bedienung, löst dieselben Klicks aus, Daten unverändert.
+// Tastatur wie Typeform: nur Bedienung, löst dieselben Klicks aus, Daten unverändert.
 document.addEventListener("keydown", e => {
   if (e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return;
   const ziel = e.target, tag = ziel && ziel.tagName;
