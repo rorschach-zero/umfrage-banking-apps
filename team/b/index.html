@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ggvr9+XxhUAMAtY1satHADJIdSfpVIpd2kovf08a2zQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-hHa0OGqwun/0L8xs8L6VikIOa4Pi1ZD4v8FvamWAJV8='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 <link rel="stylesheet" href="../zeit.css?v=89af72ec7702">
@@ -385,7 +385,7 @@ function formular() {
         el("label", { class: "b-checkline" }, el("input", { type: "checkbox", checked: z.auto_selbst || null, on: { change: e => setze("auto_selbst", e.target.checked) } }), el("span", {}, "Die Antwort sagt selbst, dass sie ein Bot oder automatisch ist (Bot-Name, Kennzeichnung)"))) : el("p", { class: "b-hint" }, "Am Telefon zählt nur der Moment, in dem eine Person spricht."),
       bBeispiel("Mensch.")]],
     antwort: () => ["Ist deine Frage ganz beantwortet?", [
-      live ? bEventButton("t_antwort", "Antwort ist vollständig", "Kommt nichts mehr innert Frist, tipp auf Weiter.") : null,
+      live ? bEventButton("t_antwort", "Antwort ist vollständig", probe ? null : "Kommt nichts mehr innert Frist, tipp auf Weiter.") : null,
       hand(zeitfeld("t_antwort", "Vollständige Antwort erhalten", "wann alles da war, was die Frage verlangt; leer lassen, wenn sie nicht kam")),
       bBeispiel("Ja, um 09:08. Tippe den Knopf."), frist]],
     teile: () => ["Welche Teile der Antwort kamen?", [
