@@ -304,3 +304,85 @@
   .b-page header .project-return{order:0;flex-basis:auto}
   .b-page header .titel{flex:1;text-align:center;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 }
+
+/* Distill (05.11. abends): ein Bildschirm, eine Sache. */
+.b-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 18px}
+.b-top h1{margin:0}
+.b-top-count{font-size:14px;font-weight:750;color:var(--bk-sub);font-variant-numeric:tabular-nums}
+.b-page #field-updated{display:none}
+.b-page #field-updated.is-alarm{display:block;margin:8px auto 0!important;max-width:720px!important;padding:0 20px!important;font-size:13px;font-weight:700;color:var(--bk-warn)}
+.b-page .purpose-slot:empty{display:none}
+.b-card{background:var(--bk-surface);border:1px solid var(--bk-line);border-radius:18px;box-shadow:var(--bk-shadow);padding:22px;display:grid;gap:14px;margin:0 0 14px;animation:bIn .22s var(--bk-ease)}
+.b-card>h2{font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.b-card.b-now>h2{font-size:15px;color:var(--bk-acc-h);letter-spacing:0}
+.b-card .b-path-k{margin:0}
+.b-card-text{margin:0;font-size:16px;line-height:1.5;color:#3B4548}
+.b-card .b-go{width:100%;max-width:360px}
+.b-card .b-today-what{margin:0}
+.b-today-meta{margin:-6px 0 0;font-size:15px;color:#3B4548}
+.b-after{margin:0;font-size:13.5px;color:var(--bk-sub)}
+.b-confirm{margin:0;display:flex;gap:8px;align-items:flex-start;font-size:14.5px;line-height:1.5;color:var(--bk-acc-h);font-weight:650}
+.b-confirm .b-ico{margin-top:2px;flex:none}
+.b-confirm.is-soll,.b-confirm.is-leer,.b-confirm.is-stopp{display:block;color:#5A3D0E;font-weight:550}
+.b-confirm.is-stopp{color:#7A2E14}
+.b-confirm b{font-weight:800}
+.b-page .b-card .bank-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;border:0;padding:0;margin:0}
+.b-page .b-card .bank-options legend{font-size:14px;font-weight:750;margin:0 0 8px;padding:0}
+.b-page .b-card .bank-options label{min-height:52px;border:1px solid #D6DED9;border-radius:12px;padding:12px 14px;font-weight:750;display:flex;gap:10px;align-items:center;cursor:pointer;background:var(--bk-surface);transition:border-color .14s var(--bk-ease),background-color .14s var(--bk-ease)}
+.b-page .b-card .bank-options label:has(input:checked){border-color:var(--bk-acc);background:var(--bk-tint)}
+.b-day-pick>summary{list-style:none;cursor:pointer;font-size:14px;font-weight:650;color:var(--bk-sub);min-height:32px;display:flex;align-items:center;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#C9D2CD}
+.b-day-pick>summary::-webkit-details-marker{display:none}
+.b-day-pick>div{display:grid;gap:6px;padding-top:6px}
+.b-more-links{display:flex;flex-wrap:wrap;gap:4px 18px;margin:0 2px 18px}
+.b-link .b-ico{width:14px;height:14px;margin-left:2px}
+.channel-quick{display:grid;gap:10px}
+.channel-quick-text{margin:0;font-size:15px;line-height:1.5}
+.channel-quick-text a{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--bk-acc-h)}
+.channel-quick-text a .b-ico{width:14px;height:14px}
+.b-channel-more>div{padding-top:8px}
+/* Liste als ein Tipp entfernt */
+.b-page .b-list{background:var(--bk-surface);border:1px solid var(--bk-line);border-radius:14px;margin:0 0 14px;padding:0 16px}
+.b-page .b-list>summary{list-style:none;cursor:pointer;min-height:54px;display:flex;align-items:center;gap:10px;font-size:15px;font-weight:750}
+.b-page .b-list>summary::-webkit-details-marker{display:none}
+.b-page .b-list>summary .b-count{margin-left:auto;font-weight:650}
+.b-page .b-list>summary .b-ico{color:var(--bk-sub);transition:transform .18s var(--bk-ease)}
+.b-page .b-list[open]>summary .b-ico{transform:rotate(90deg)}
+.b-page .b-list>div{padding:0 0 14px}
+.b-dash{display:inline-flex;margin:0 2px 14px}
+.b-page main>.purpose-card{background:none;border:0;margin:6px 0 0}
+.b-page main>.purpose-card>summary{padding:0 2px;min-height:40px;display:inline-flex;align-items:center;font-size:13.5px;font-weight:700;color:var(--bk-acc-h);list-style:none}
+.b-page main>.purpose-card>summary::-webkit-details-marker{display:none}
+.b-page main>.purpose-card>summary::marker{content:""}
+.b-page main>.purpose-card>summary::after{content:" ›"}
+.b-page main>.purpose-card .purpose-body{padding:0 2px 12px}
+/* Erfassung: eine Frage */
+.b-form-open .b-form-title{font-size:26px;line-height:1.25;margin:20px 0 4px;text-wrap:balance}
+.b-progress-k{font-variant-numeric:tabular-nums}
+.b-page .chips.b-stack{display:grid;grid-template-columns:1fr;gap:8px}
+.b-page .chips.b-stack .chip{min-height:52px;text-align:left;padding:12px 16px;font-size:16px;border-radius:12px}
+.b-page .chip.is-suggested{border-style:dashed;border-color:var(--bk-acc);background:#F6FBFA}
+.b-suggest{margin:0;font-size:13.5px;color:var(--bk-acc-h)}
+.b-suggest.is-other{color:var(--bk-sub)}
+.b-scale-row{display:flex;gap:8px}
+.b-page .b-scale-row .chip{flex:1;min-height:56px;font-size:18px;font-weight:800;padding:0;justify-content:center;border-radius:12px}
+.b-scale-text{margin:0;font-size:14px;color:var(--bk-sub)}
+.b-page .b-stepper-item.just-done::before{animation:bSnap .22s var(--bk-ease)}
+@keyframes bSnap{from{transform:scaleX(.2);transform-origin:left}to{transform:none}}
+/* Abschluss: Ring, ein Satz, nächster Knopf */
+.b-done{justify-items:center;text-align:center;padding:30px 22px 26px}
+.b-ring{width:96px;height:96px;transform:rotate(-90deg)}
+.b-ring circle{fill:none;stroke-width:7}
+.b-ring-bg{stroke:var(--bk-line)}
+.b-ring-fg{stroke:var(--bk-acc);stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.2,.7,.2,1)}
+.b-ring-ok{fill:none;stroke:var(--bk-acc);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;transform:rotate(90deg);transform-origin:40px 40px;stroke-dasharray:40;stroke-dashoffset:40;animation:bOk .24s .35s var(--bk-ease) forwards}
+@keyframes bOk{to{stroke-dashoffset:0}}
+.b-done>h2{font-size:24px;outline:none}
+.b-done .b-go{max-width:340px}
+@media (prefers-reduced-motion:reduce){.b-ring-fg{transition:none!important}.b-ring-ok{animation:none!important;stroke-dashoffset:0}}
+@media (max-width:620px){.b-card{padding:18px 16px}.b-card>h2{font-size:22px}.b-card .b-go{max-width:none}.b-form-open .b-form-title{font-size:22px}}
+.b-page header .titel{display:none}
+.b-page main>.purpose-card>summary::after{content:"›";padding-left:6px}
+#b-step-status{white-space:normal}
+@media (prefers-reduced-motion:reduce){.b-page *::before,.b-page *::after{animation:none!important;transition:none!important}}
+@media (max-width:620px){.b-row-nr{display:none}.b-new{margin-left:6px}}
+.b-confirm-n{font-weight:800}

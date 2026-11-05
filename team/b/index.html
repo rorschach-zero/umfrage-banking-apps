@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-D3xlZvNGjIptgdhkqwTCSWVqKz83z7pnws6+d7IbkYU='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-foZsFMX6iULGBPQX2OZC7C3qrBuus2a4jsX9JTK5eLc='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 <link rel="stylesheet" href="../zeit.css?v=89af72ec7702">
-<link rel="stylesheet" href="../service.css?v=0e8c983262d5">
+<link rel="stylesheet" href="../service.css?v=b927e49ab3c0">
 <link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=f0c645b33957" defer></script>
 </head>
 <body class="b-page">
@@ -16,7 +16,7 @@
 <script src="../view-as.js?v=41cc5d81f7cc"></script>
 <script src="../team.js?v=d75ca30a4cc4"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
-<script src="../service.js?v=fd6415134c14"></script>
+<script src="../service.js?v=afd3336e94b4"></script>
 <script src="../zeit.js?v=88cf8e4ad5e0"></script>
 <script>
 // Regeln aus 10_pa6a/beobachtung/Testprotokoll.md, Version 4. Die Maske schlaegt vor, die Person entscheidet.
@@ -51,16 +51,13 @@ async function start() {
 }
 function statusVon(r) { const e = r.erfasst; return !e ? "offen" : e.stand === "abgeschlossen" ? "abgeschlossen" : "laufend"; }
 function liste() {
+  const fertigRow = bFertigNr && aktiv?.nr === bFertigNr && aktiv.erfasst?.stand === "abgeschlossen" ? aktiv : null;
   if (aktiv?.erfasst?.stand === "abgeschlossen") bOffen = null;
   aktiv = null; document.getElementById("fuss").hidden = true; document.body.classList.remove("b-form-open");
-  const m = document.getElementById("main"), stand = document.getElementById("field-updated"); fuelle(m, );
-  const p = bEchte();
-  const fertig = p.filter(r => statusVon(r) === "abgeschlossen").length;
-  const ziel = daten.service && daten.service.config ? daten.service.config.target : p.length;
-  m.append(el("h1", {}, "Servicetest"),
-    el("div", { class: "b-sub" }, el("p", {}, p.length ? el("b", {}, `${fertig} von ${p.length}`) : `Ziel ${ziel} Kontakte`, p.length ? " Kontakten erledigt" : " · so startest du"),
-      p.length ? el("div", { class: "b-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(p.length), "aria-valuenow": String(fertig), "aria-label": "Kontakte erledigt" }, el("i", { style: "width:" + Math.round(100 * fertig / p.length) + "%" })) : null));
-  if (stand) m.querySelector(".b-sub").append(stand);
+  const m = document.getElementById("main"); fuelle(m, );
+  const p = bEchte(), fertig = p.filter(r => statusVon(r) === "abgeschlossen").length;
+  m.append(el("div", { class: "b-top" }, el("h1", {}, "Servicetest"), p.length ? el("span", { class: "b-top-count", "aria-label": fertig + " von " + p.length + " Kontakten erledigt" }, fertig + " von " + p.length) : null));
+  if (fertigRow) { bFertigBild(m, fertigRow); return; }
   renderBSetup(m);
 }
 function gesperrt() { const l = belastung[aktiv.anbieter] || { nachrichten: 0, minuten: 0 }; return !aktiv.erfasst && (l.nachrichten >= STOPP.nachrichten || l.minuten >= STOPP.minuten); }
@@ -76,6 +73,7 @@ function openForm(r) {
   ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].forEach(k => { if (z[k]) z[k] = String(z[k]).replace(" ", "T").slice(0, 16); });
   bBesucht = new Set(); bStep = 0; for (let i = 0; i < B_SCHRITTE.length; i++) { if (bFehltIn(i).length) { bStep = i; break; } }
   if (!z.t_start && r.status !== "nicht angeboten") bStep = 0;
+  bSub = bStep ? bErsteLuecke(bStep) : 0; bFertigNr = ""; bMehrOffen.clear();
   formular(); document.getElementById("fuss").hidden = false; document.getElementById("meldung").textContent = ""; focusStep();
   bUpdateReadiness();
 }
@@ -167,17 +165,25 @@ const ANZEIGE = {
   weiterverlauf: { "Schritt erklaert": "Schritt erklärt", Verweis: "Nur weiterverwiesen", nichts: "Nichts gesagt" }
 };
 function anzeige(k, w) { return (ANZEIGE[k] || {})[w] || w; }
-function wahl(k, titel, werte, hilfe, vorschlag) {
-  return el("div", { class: "b-q" }, el("label", { class: "f" }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")),
-    chips(werte.map(w => [w, anzeige(k, w)]), z[k] || "", w => setze(k, w), { abwaehlbar: true }),
-    vorschlag && vorschlag !== z[k] ? el("div", { class: "vorschlag" }, "Die App schlägt vor · ", el("b", {}, anzeige(k, vorschlag)), " ", el("button", { type: "button", class: "chip", on: { click: () => setze(k, vorschlag) } }, "Vorschlag übernehmen")) : null,
-    !z[k] && vorschlag ? el("div", { class: "leise" }, "Noch nicht gewählt. Der Vorschlag gilt erst, wenn du ihn übernimmst.") : null);
+// Antworten als Knöpfe, höchstens vier sichtbar. Der App-Vorschlag ist vorausgewählt markiert, gilt aber erst nach einem Tipp (nie still übernommen).
+function wahl(k, titel, werte, hilfe, vorschlag, opt) {
+  opt = opt || {};
+  const zeig = w => (opt.texte || {})[w] || anzeige(k, w);
+  const knopf = w => el("button", { type: "button", class: "chip" + (vorschlag === w && !z[k] ? " is-suggested" : ""), "aria-pressed": String((z[k] || "") === w), on: { click: () => { const neu = (z[k] || "") === w ? "" : w; setze(k, neu); if (neu && opt.auto) bAuto(); } } }, zeig(w));
+  const haupt = werte.slice(0, 4), rest = werte.slice(4);
+  const mehr = rest.length ? el("details", { class: "b-more b-more-choices" }, el("summary", {}, "Andere Antwort"), el("div", { class: "chips b-stack", role: "group" }, rest.map(knopf))) : null;
+  if (mehr && (rest.includes(z[k]) || rest.includes(vorschlag))) mehr.open = true;
+  return el("div", { class: "b-q" }, titel ? el("label", { class: "f" }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")) : null,
+    el("div", { class: "chips b-stack", role: "group", "data-keys": "" }, haupt.map(knopf)), mehr,
+    vorschlag && !z[k] ? el("p", { class: "b-suggest" }, "Die App schlägt «" + zeig(vorschlag) + "» vor. Tipp darauf, wenn es stimmt.") : null,
+    vorschlag && z[k] && vorschlag !== z[k] ? el("p", { class: "b-suggest is-other" }, "Die App hätte «" + zeig(vorschlag) + "» vorgeschlagen.") : null);
 }
 function text(k, titel, hilfe, mehr) {
   const a = { id: "f-" + k, class: "t", value: z[k] || "", on: { input: e => { z[k] = e.target.value; lokal("b-" + aktiv.nr, z); bUpdateReadiness(); } } };
   return el("div", { class: "b-q" }, el("label", { class: "f", for: "f-" + k }, titel, " ", el("span", { class: "hilfe" }, hilfe || "")), mehr ? el("textarea", a, z[k] || "") : el("input", a));
 }
-// Gleiche Felder und Prüfregeln wie bisher, jetzt in acht kurzen Schritten: pro Bildschirm eine Sache, am Schluss eine kurze Prüfung.
+// Gleiche Felder und Prüfregeln wie bisher. Acht Schritte, jeder Schritt in kurze Bildschirme geteilt: pro Bildschirm eine Frage.
+// Eine eindeutige Auswahl führt nach 250 ms weiter; gespeichert wird nur, was die Person selbst gewählt hat.
 const B_SCHRITTE = ["Vorbereiten", "Kontakt starten", "Erste Antwort", "Ist alles beantwortet?", "Stimmt die Antwort?", "Wie war das Gespräch?", "Kontakt beenden", "Kurz prüfen"];
 const B_FELDER = [["Gibt es diesen Kontaktweg"], ["Start"], ["Wer hat geantwortet"],
   ["Ist die Antwort vollständig", "Beim ersten Kontakt beantwortet", "Vollständige Antwort liegt vor der ersten Antwort einer Person"],
@@ -186,35 +192,62 @@ const B_FELDER = [["Gibt es diesen Kontaktweg"], ["Start"], ["Wer hat geantworte
   ["Ende", "Ende liegt vor dem Start", "Zeiten in falscher Reihenfolge", "Wie der Kontakt lief", "Grund", "Gesprächsminuten", "Nachrichten der Bank", "Anzahl als ganze Zahl von 0 bis 500", "Notizen ohne Nummern, Mailadressen und Links"],
   ["Häkchen «Übung durchgespielt»"]];
 const B_PRUEFFRAGEN = ["Kontaktweg geklärt?", "Start erfasst?", "Erste Antwort erfasst?", "Antwort eingeordnet?", "Richtigkeit beurteilt?", "Gespräch beschrieben?", "Ende und Notizen erfasst?"];
-let bStep = 0, bBesucht = new Set();
+let bStep = 0, bSub = 0, bBesucht = new Set(), bEben = -1, bAutoTimer = 0, bFertigNr = "";
 function bFehltIn(i) { return fehlt().filter(x => B_FELDER[i].some(k => x === k || x.startsWith(k + " "))); }
+function bScreens(i) {
+  const quelle = () => ["richtig", "teils", "falsch"].includes(z.richtig) || !!z.quelle_url || !!z.quelle_datum;
+  const L = [[{ k: "frage", felder: [] }, { k: "angebot", felder: ["Gibt es diesen Kontaktweg"] }, { k: "konto", felder: [] }],
+    [{ k: "start", felder: ["Start"] }],
+    [{ k: "auto", felder: [] }, { k: "mensch", felder: [] }, { k: "wer", felder: ["Wer hat geantwortet"] }],
+    [{ k: "antwort", felder: ["Vollständige Antwort liegt vor der ersten Antwort einer Person"] }, { k: "teile", felder: [] }, { k: "vollst", felder: ["Ist die Antwort vollständig"] }, { k: "verwiesen", felder: [] }, { k: "fcr", felder: ["Beim ersten Kontakt beantwortet"] }],
+    [{ k: "richtig", felder: ["Stimmt die Antwort"] }, { k: "quelle", felder: ["Link zur Hilfeseite (https) und Datum"], show: quelle }],
+    [{ k: "rueck", felder: ["Rückfragen der Bank"] }, { k: "sprache", felder: ["Blieb die Bank bei Deutsch"] }, { k: "standort", felder: ["Standort genannt"] }, { k: "weiter", felder: ["wie geht es weiter"] }, { k: "hoeflich", felder: ["Höflichkeit"] }],
+    [{ k: "ende", felder: ["Ende", "Ende liegt vor dem Start", "Zeiten in falscher Reihenfolge"] }, { k: "code", felder: ["Wie der Kontakt lief", "Grund"] }, { k: "menge", felder: ["Gesprächsminuten", "Nachrichten der Bank", "Anzahl als ganze Zahl von 0 bis 500"] }, { k: "abbruch", felder: [] }, { k: "notiz", felder: ["Notizen ohne Nummern, Mailadressen und Links"] }],
+    [{ k: "pruefen", felder: ["Häkchen «Übung durchgespielt»"] }]];
+  return L[i].filter(x => !x.show || x.show());
+}
+function bFehltScreen(i, j) { const sc = bScreens(i)[j]; return sc ? fehlt().filter(x => sc.felder.some(k => x === k || x.startsWith(k + " "))) : []; }
+function bErsteLuecke(i) { const n = bScreens(i).length; for (let j = 0; j < n; j++) if (bFehltScreen(i, j).length) return j; return 0; }
 function focusStep() {
   document.querySelector(".b-form-title").focus({preventScroll:true});
   const top = document.querySelector(".b-stepper").getBoundingClientRect().top + scrollY;
   scrollTo(0, Math.max(0, top - document.querySelector("header").getBoundingClientRect().bottom - 12));
 }
-function showStep(index) { bStep = index; formular(); focusStep(); }
+function showStep(index, sub) { clearTimeout(bAutoTimer); if (index > bStep && !bFehltIn(bStep).length) bEben = bStep; bStep = index; bSub = Math.min(sub || 0, bScreens(index).length - 1); formular(); focusStep(); }
+function bWeiter() {
+  if (!window.PA6View.active() && bFehltScreen(bStep, bSub).length) return;
+  if (bSub < bScreens(bStep).length - 1) { clearTimeout(bAutoTimer); bSub++; formular(); focusStep(); }
+  else if (bStep < B_SCHRITTE.length - 1) showStep(bStep + 1, 0);
+}
+function bZurueck() { if (bSub > 0) { clearTimeout(bAutoTimer); bSub--; formular(); focusStep(); } else if (bStep > 0) showStep(bStep - 1, bScreens(bStep - 1).length - 1); }
+// Auto-Weiter nur nach einer eigenen, eindeutigen Auswahl und nur wenn der Bildschirm danach vollständig ist.
+function bAuto() {
+  if (window.PA6View.active()) return;
+  clearTimeout(bAutoTimer); const at = bStep + ":" + bSub;
+  bAutoTimer = setTimeout(() => { if (aktiv && at === bStep + ":" + bSub && !bFehltScreen(bStep, bSub).length && bStep < B_SCHRITTE.length - 1) bWeiter(); }, 250);
+}
 function bStepper() {
-  const lesen = window.PA6View.active();
-  return el("div", { class: "b-progress" }, el("p", { class: "b-progress-k" }, "Schritt " + (bStep + 1) + " von " + B_SCHRITTE.length),
+  const lesen = window.PA6View.active(), n = bScreens(bStep).length;
+  return el("div", { class: "b-progress" }, el("p", { class: "b-progress-k" }, "Schritt " + (bStep + 1) + " von " + B_SCHRITTE.length + " · " + B_SCHRITTE[bStep] + (n > 1 ? " · " + (bSub + 1) + "/" + n : "")),
     el("nav", { class: "b-stepper", "aria-label": "Schritte" }, B_SCHRITTE.map((name, i) => {
       const ok = !bFehltIn(i).length && (i < bStep || bBesucht.has(i));
-      return el("button", { type: "button", class: "b-stepper-item" + (i === bStep ? " is-now" : "") + (ok ? " is-ok" : ""), "aria-label": (i + 1) + " · " + name, title: name, "aria-current": i === bStep ? "step" : null, "data-read-navigation": true, on: { click: () => { if (!lesen) for (let j = 0; j < i; j++) if (bFehltIn(j).length) return; showStep(i); } } });
+      return el("button", { type: "button", class: "b-stepper-item" + (i === bStep ? " is-now" : "") + (ok ? " is-ok" : "") + (ok && i === bEben ? " just-done" : ""), "aria-label": (i + 1) + " · " + name, title: name, "aria-current": i === bStep ? "step" : null, "data-read-navigation": true, on: { click: () => { if (!lesen) for (let j = 0; j < i; j++) if (bFehltIn(j).length) return; showStep(i, 0); } } });
     })));
 }
 function bStepNav() {
-  const letzter = bStep === B_SCHRITTE.length - 1;
-  fuelle(document.getElementById("b-nav-back"), bStep > 0 ? el("button", { type: "button", class: "knopf hell b-prev", "data-read-navigation": true, on: { click: () => showStep(bStep - 1) } }, bIcon("back"), "Zurück") : null);
-  fuelle(document.getElementById("b-nav-next"), !letzter ? el("button", { type: "button", class: "knopf b-next-step", "data-read-navigation": true, on: { click: () => { if (window.PA6View.active() || !bFehltIn(bStep).length) showStep(bStep + 1); } } }, "Weiter") : null);
+  const letzter = bStep === B_SCHRITTE.length - 1, erster = bStep === 0 && bSub === 0;
+  fuelle(document.getElementById("b-nav-back"), !erster ? el("button", { type: "button", class: "knopf hell b-prev", "data-read-navigation": true, on: { click: bZurueck } }, bIcon("back"), "Zurück") : null);
+  fuelle(document.getElementById("b-nav-next"), !letzter ? el("button", { type: "button", class: "knopf b-next-step", "data-read-navigation": true, on: { click: bWeiter } }, "Weiter") : null);
   document.getElementById("fertig").hidden = !letzter;
 }
 function bUpdateReadiness() {
   if(!aktiv)return;
-  const lesen=window.PA6View.active(),current=bFehltIn(bStep),all=fehlt(),status=document.getElementById("b-step-status"),next=document.querySelector(".b-next-step"),letzter=bStep===B_SCHRITTE.length-1;
-  if(next)next.disabled=fieldPending||(!lesen&&(gesperrt()||current.length>0));
+  const lesen=window.PA6View.active(),current=bFehltIn(bStep),screen=bFehltScreen(bStep,bSub),all=fehlt(),status=document.getElementById("b-step-status"),next=document.querySelector(".b-next-step"),letzter=bStep===B_SCHRITTE.length-1;
+  if(next)next.disabled=fieldPending||(!lesen&&(gesperrt()||screen.length>0));
   if(status){
-    status.className=lesen?"":current.length||(letzter&&all.length)?"b-stepnav-missing":"b-stepnav-ok";
-    status.textContent=lesen?"Nur lesen":current.length?"Noch offen: "+current.join(", "):letzter?(all.length?"Noch offen in einem Schritt oben":"Alles ausgefüllt"):"Alles da. Weiter geht's.";
+    const miss=letzter?all:screen;
+    status.className=lesen?"":miss.length?"b-stepnav-missing":"";
+    status.textContent=lesen?"Nur lesen":miss.length?"Noch offen: "+miss.join(", "):"";
   }
   document.getElementById("zwischen").disabled=window.PA6View.active()||fieldPending||gesperrt()||current.length>0;
   document.getElementById("fertig").disabled=window.PA6View.active()||fieldPending||gesperrt()||all.length>0;
@@ -222,108 +255,143 @@ function bUpdateReadiness() {
 function bUhr(value) { const m = /[T ](\d{2}:\d{2})/.exec(String(value || "")); return m ? m[1] : ""; }
 function bEventButton(key,label,hilfe) {
   const value=z[key];
-  return el("div",{class:"b-event-row"},el("button",{type:"button",class:"b-event"+(value?" is-set":""),on:{click:()=>setze(key,jetztLokal())}},
+  return el("div",{class:"b-event-row"},el("button",{type:"button",class:"b-event"+(value?" is-set":""),on:{click:()=>{setze(key,jetztLokal());bAuto();}}},
     el("span",{class:"b-event-label"},label),el("span",{class:"b-event-time"},value?bIcon("check"):null,value?bUhr(value)+" Uhr":"Tippen, sobald es passiert")),
     hilfe?el("p",{class:"b-hint"},hilfe):null);
 }
-function bTu(text) { return el("p", { class: "b-do" }, text); }
 function bBeispiel(text) { return aktiv.nr.startsWith("PROBE-B-") ? el("p", { class: "b-example" }, el("b", {}, "In der Übung "), text) : null; }
-function bMehr(label, ...kinder) { return el("details", { class: "b-more" }, el("summary", {}, label), el("div", {}, ...kinder)); }
-function bFrage(titel, hilfe, ...kinder) { return el("div", { class: "b-q" }, el("p", { class: "b-q-h" }, titel), hilfe ? el("p", { class: "b-hint" }, hilfe) : null, ...kinder); }
+const bMehrOffen = new Set(); // aufgeklappte Bereiche bleiben beim Neuzeichnen offen
+function bMehr(label, ...kinder) { const d = el("details", { class: "b-more" }, el("summary", {}, label), el("div", {}, ...kinder)); if (bMehrOffen.has(label)) d.open = true; d.addEventListener("toggle", () => { d.open ? bMehrOffen.add(label) : bMehrOffen.delete(label); }); return d; }
+function bJaNein(k, auto) { // Ja/Nein für ein Kontrollkästchen-Feld; «Nein» setzt false, gesendet wird das Feld ohnehin nicht (zeile löscht es).
+  return el("div", { class: "chips", role: "group", "data-keys": "" }, [[true, "Ja"], [false, "Nein"]].map(([w, t]) => el("button", { type: "button", class: "chip", "aria-pressed": String(z[k] === w), on: { click: () => { setze(k, w); if (auto) bAuto(); } } }, t)));
+}
+// Fertig-Bildschirm nach dem Abschliessen über den Knopf: Fortschritt, ein Satz, klarer nächster Schritt.
+const B_SAETZE = ["Sauber erfasst.", "Gut gemacht, das zählt.", "Wieder ein Stück Daten mehr.", "Läuft bei dir.", "Genau so.", "Danke, das hilft der Gruppe."];
+function bFertigBild(m, row) {
+  const probe = row.nr.startsWith("PROBE-B-"), echte = bEchte(), fertig = echte.filter(r => statusVon(r) === "abgeschlossen").length, total = echte.length || (daten.service?.config?.target || 10);
+  const naechster = echte.find(r => statusVon(r) === "laufend") || echte.find(r => statusVon(r) === "offen");
+  const ring = (wert, vorher) => { const ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), c = 2 * Math.PI * 34;
+    svg.setAttribute("viewBox", "0 0 80 80"); svg.setAttribute("class", "b-ring"); svg.setAttribute("aria-hidden", "true");
+    for (const [cls, frac] of [["b-ring-bg", 1], ["b-ring-fg", wert]]) { const k = document.createElementNS(ns, "circle"); k.setAttribute("cx", "40"); k.setAttribute("cy", "40"); k.setAttribute("r", "34"); k.setAttribute("class", cls);
+      k.style.strokeDasharray = c; k.style.strokeDashoffset = cls === "b-ring-fg" ? c * (1 - vorher) : 0; if (cls === "b-ring-fg") requestAnimationFrame(() => requestAnimationFrame(() => { k.style.strokeDashoffset = c * (1 - frac); })); svg.append(k); }
+    const ok = document.createElementNS(ns, "path"); ok.setAttribute("d", "M28 41l8 8 16-17"); ok.setAttribute("class", "b-ring-ok"); svg.append(ok); return svg; };
+  let titel, satz, knopf;
+  if (probe) {
+    titel = "Bereit für echte Kontakte"; satz = "Du weisst jetzt, wo du was tippst.";
+    const st = daten.service || {}, weiter = !(st.selected && st.selected.length >= 2 && st.assigned > 0) ? "Weiter: Banken wählen" : bFehlendeKanaele(st).length ? "Weiter: Kontaktwege prüfen" : "Zum ersten Kontakt";
+    knopf = el("button", { type: "button", class: "knopf b-go", "data-read-navigation": true, on: { click: () => { bFertigNr = ""; bOffen = null; liste(); } } }, weiter);
+  } else if (fertig >= total) {
+    titel = "Alle " + total + " Kontakte erledigt"; satz = "Das ist dein ganzer Teil. Danke!";
+    knopf = el("button", { type: "button", class: "knopf b-go", "data-read-navigation": true, on: { click: () => { bFertigNr = ""; bOffen = 0; liste(); } } }, "Zur Übersicht");
+  } else {
+    titel = "Kontakt " + fertig + " von " + total + " erledigt"; satz = B_SAETZE[fertig % B_SAETZE.length];
+    const jetzt = naechster && (!naechster.tag || naechster.tag <= heute());
+    knopf = jetzt ? el("button", { type: "button", class: "knopf b-go", "data-read-navigation": true, on: { click: () => { bFertigNr = ""; oeffne(naechster); } } }, "Nächster Kontakt: " + naechster.anbieter)
+      : el("button", { type: "button", class: "knopf b-go", "data-read-navigation": true, on: { click: () => { bFertigNr = ""; bOffen = 0; liste(); } } }, "Fertig für heute");
+    if (!jetzt && naechster) satz += " Nächster Kontakt " + bTag(naechster.tag, true) + ", " + bZeit(naechster.block) + ". Er steht dann oben unter «Jetzt dran».";
+  }
+  const wert = probe ? 1 : Math.min(1, fertig / total), vorher = probe ? 0 : Math.max(0, (fertig - 1) / total);
+  m.append(el("section", { class: "b-card b-done", "aria-labelledby": "b-done-h" }, ring(wert, vorher), el("h2", { id: "b-done-h", tabindex: "-1" }, titel), el("p", { class: "b-card-text" }, satz), knopf));
+  m.querySelector("#b-done-h").focus({ preventScroll: true });
+}
 function formular() {
   const r = aktiv, s = SKRIPT[r.anliegen] || { frage: "", elemente: [] }, f = FRIST[r.kanal] || FRIST.chat, v = vorschlaege(), m = document.getElementById("main");
   const probe = r.nr.startsWith("PROBE-B-"), live = ["telefon", "chat"].includes(r.kanal), tel = r.kanal === "telefon";
   const lauf = minuten(z.t_start, jetztLokal()), kanal = !probe && kanalInfo(r.anbieter, r.kanal);
+  const screens = bScreens(bStep); if (bSub >= screens.length) bSub = screens.length - 1;
   document.body.classList.add("b-form-open");
   const kopf = [
-    el("button", { type: "button", class: "b-back", "data-read-navigation": true, on: { click: liste } }, bIcon("back"), "Alle meine Kontakte"),
+    el("button", { type: "button", class: "b-back", "data-read-navigation": true, on: { click: () => { bFertigNr = ""; liste(); } } }, bIcon("back"), "Alle meine Kontakte"),
     el("h1", { class: "b-form-h" }, probe ? "Übung · " + (B_ANLIEGEN[r.anliegen] || r.anliegen) : bWas(r)),
-    el("p", { class: "b-form-meta" }, [B_KANAL[r.kanal] || r.kanal, r.block === "A" ? "Vormittag 09–12" : "Nachmittag 13–17", r.wiederholung + ". Durchgang", probe ? "" : "Kontakt " + r.nr].filter(Boolean).join(" · "),
+    el("p", { class: "b-form-meta" }, [B_KANAL[r.kanal] || r.kanal, r.block === "A" ? "09–12" : "13–17", r.wiederholung + ". Durchgang", probe ? "" : r.nr].filter(Boolean).join(" · "),
       lauf !== null && !z.t_ende ? el("span", { class: "b-running" }, `läuft seit ${lauf} min`) : null),
     gesperrt() ? el("div", { class: "b-alert", role: "alert" }, bIcon("alert"), el("div", {}, `${r.anbieter} wurde schon genug kontaktiert. Diesen Kontakt nicht starten, bitte Salah melden.`)) : null,
     v.inFrist === false && z.t_antwort ? el("p", { class: "b-note-warn" }, "Die vollständige Antwort kam zu spät. Sie zählt als «nicht in der Frist».") : null,
   ];
   const hand = (...felder) => live ? bMehr("Uhrzeit von Hand eintragen", ...felder) : felder;
-  const start = startBlock(r); start[0].className = "b-do";
-  const teile = [[
-    bTu("Lies die Frage. Du stellst sie nachher möglichst wörtlich."),
-    probe ? simulationNotice() : null,
-    kanal ? el("div", { class: "kanal-hinweis" }, el("b", {}, "So erreichst du " + r.anbieter + " "), el("span", {}, kanal.text), " ", el("a", { href: kanal.quelle, target: "_blank", rel: "noopener", "data-read-navigation": true }, "Quelle", bIcon("ext"))) : null,
-    el("div", { class: "b-question" }, el("p", { class: "b-question-text" }, "«" + s.frage + "»"),
-      el("button", { type: "button", class: "chip", on: { click: async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(s.frage); b.textContent = "Kopiert"; } catch (x) {} } } }, "Frage kopieren")),
-    bMehr("Regeln fürs Gespräch", el("ul", { class: "b-rules" }, ["Stell nur diese Frage.", "Beantworte Rückfragen wahrheitsgemäss.", "Bedank dich und beende, sobald deine Frage vollständig beantwortet ist.", "Fragt die Bank «Ist das ein Test?», antworte ehrlich.", "Lass nie etwas sperren, nachforschen oder ändern."].map(t => el("li", {}, t)))),
-    bFrage("Gibt es diesen Kontaktweg?", "«Gibt es nicht» nur laut Seite der Bank. «Klappt nicht», wenn er existiert, aber nicht funktioniert.",
-      chips([["ja", "Ja, erreichbar"], ["nein", "Gibt es nicht"], ["nicht erreichbar", "Gibt es, klappt aber nicht"]], z.kanal_angeboten || "", w => setze("kanal_angeboten", w))),
-    z.kanal_angeboten === "nein" ? el("div", { class: "b-skip" }, el("p", {}, "Dann gibt es kein Gespräch. Du hältst nur noch fest, was passiert ist."), el("button", { type: "button", class: "knopf hell", "data-read-navigation": true, on: { click: () => showStep(6) } }, "Direkt zum Abschluss")) : null,
-    bFrage("Dein Konto", "", el("div", { class: "gitter" }, text("konto_aktiv_seit", "Konto aktiv seit", "Monat und Jahr"), text("app_version", "App-Version", "aus den Einstellungen")))
-  ], [
-    ...start,
-    bBeispiel("Tippe auf «Jetzt starte ich». Die echte Uhrzeit spielt in der Übung keine Rolle."),
-    el("p", { class: "b-hint" }, "Frist · " + f.text),
-    el("p", { class: "b-hint" }, "Stell nur die Frage. Lass nie etwas sperren oder ändern.")
-  ], [
-    bTu(tel ? "Tippe, sobald eine Person spricht. Ansage und Menü zählen nicht." : "Tippe bei jeder Antwort auf den passenden Knopf."),
-    bBeispiel("Erst kommt eine automatische Antwort, dann schreibt eine Person. Tippe beide Knöpfe. Hinweise musst du keine antippen. Wer hat geantwortet? Mensch."),
-    live ? el("div", { class: "b-events" }, bEventButton("t_auto", tel ? "Ansage oder Menü" : "Automatische Antwort", "Bot, Autoreply oder Ansage. Kam keine, lass es leer."), bEventButton("t_mensch", tel ? "Eine Person spricht" : "Eine Person antwortet")) : null,
-    hand(zeitfeld("t_auto", "Erste automatische Reaktion", "Bot, Autoreply, Ansage; leer lassen, wenn keine"),
-      zeitfeld("t_mensch", "Erste menschliche Antwort", tel ? "eine Person spricht, nicht Ansage oder Menü" : "erste Antwort mit Hinweisen auf eine Person")),
-    !tel ? bFrage("Woran erkennst du eine Person?", "Zwei oder mehr Hinweise heisst «wahrscheinlich Mensch».",
-      el("div", { class: "chips" }, HINWEISE.map(([h, t]) => el("button", { type: "button", class: "chip", "aria-pressed": String((z.hinweise || []).includes(h)), on: { click: () => { const a = new Set(z.hinweise || []); a.has(h) ? a.delete(h) : a.add(h); setze("hinweise", [...a]); } } }, t))),
-      el("label", { class: "b-checkline" }, el("input", { type: "checkbox", checked: z.auto_selbst || null, on: { change: e => setze("auto_selbst", e.target.checked) } }), el("span", {}, "Die Antwort sagt selbst, dass sie ein Bot oder automatisch ist (Bot-Name, Kennzeichnung)"))) : el("p", { class: "b-hint" }, "Am Telefon zählt nur der Moment, in dem eine Person spricht."),
-    wahl("mensch_status", "Wer hat geantwortet?", ["Mensch", "wahrscheinlich Mensch", "unklar", "Automat"], "", v.mensch_status)
-  ], [
-    bTu("Warte, bis die Antwort vollständig ist oder klar nicht kommt."),
-    bBeispiel("Beide Teile kamen. Also vollständig und beim ersten Kontakt beantwortet."),
-    live ? el("div", { class: "b-events" }, bEventButton("t_antwort", "Antwort ist vollständig")) : null,
-    hand(zeitfeld("t_antwort", "Vollständige Antwort erhalten", "wann alles da war, was die Frage verlangt; leer lassen, wenn sie nicht kam")),
-    bFrage("Welche Teile der Antwort kamen?", "", el("div", { class: "chips" }, s.elemente.map(x => el("button", { type: "button", class: "chip", "aria-pressed": String((z.elemente || []).includes(x)), on: { click: () => { const a = new Set(z.elemente || []); a.has(x) ? a.delete(x) : a.add(x); setze("elemente", [...a]); } } }, x)))),
-    wahl("vollstaendig", "Ist die Antwort vollständig?", ["vorhanden", "teilweise", "fehlt"], "unabhängig von der Richtigkeit", v.vollstaendig),
-    el("label", { class: "b-checkline" }, el("input", { type: "checkbox", checked: z.anderer_kanal || null, on: { change: e => setze("anderer_kanal", e.target.checked) } }), el("span", {}, "Rückruf angekündigt, auf anderen Kanal verwiesen oder vertröstet")),
-    wahl("fcr", "Beim ersten Kontakt beantwortet?", ["ja", "nein", "unklar"], "gleicher Anruf, Chatverlauf oder Mailfaden", v.fcr)
-  ], [
-    bTu("Vergleiche die Antwort mit der Hilfeseite der Bank."),
-    bBeispiel("Es gibt keine Seite zum Vergleichen. Wähle «Keine Seite zum Vergleichen»."),
-    wahl("richtig", "Stimmt die Antwort?", ["richtig", "teils", "falsch", "nicht pruefbar", "offen"], "Vergleiche mit der Hilfeseite der Bank"),
-    ["richtig", "teils", "falsch"].includes(z.richtig) || z.quelle_url || z.quelle_datum ? bFrage("Wo hast du verglichen?", "Pflicht, wenn du richtig, teilweise oder falsch wählst.",
-      el("div", { class: "gitter" }, text("quelle_url", "Link zur Hilfeseite der Bank", "beginnt mit https://"),
-        el("div", { class: "b-q" }, el("label", { class: "f", for: "quelle-datum" }, "Hilfeseite angeschaut am"), el("input", { id: "quelle-datum", class: "t", type: "date", max: heute(), value: z.quelle_datum || "", on: { input: e => { z.quelle_datum = e.target.value; lokal("b-" + aktiv.nr, z); bUpdateReadiness(); } } })))) : null
-  ], [
-    bTu("Halte fest, wie die Bank mit dir umgegangen ist."),
-    bBeispiel("Keine Rückfragen, Deutsch, kein Standort, Schritt erklärt, Höflichkeit 4."),
-    bFrage("Wie oft hat die Bank inhaltlich nachgefragt?", "Fragen zur Identität nicht mitzählen.", chips(["0", "1", "2", "3", "4+"], String(z.rueckfragen ?? ""), w => setze("rueckfragen", w))),
-    el("div", { class: "gitter" }, text("sprache_antwort", "Sprache der Antwort"), wahl("beibehalten", "Blieb die Bank bei Deutsch?", ["ja", "nein"])),
-    wahl("standort", "Hat die Bank gesagt, von wo sie antwortet?", ["Schweiz", "Ausland", "nicht genannt"], "nur, wenn die Bank es selbst sagt"),
-    wahl("weiterverlauf", "Wie geht es weiter?", ["Schritt erklaert", "Verweis", "nichts"], "nur «Schritt erklärt» zählt als erfüllt"),
-    bFrage("Wie höflich war die Bank?", "Nur der Umgangston, passend zum Kanal.",
-      el("div", { class: "b-scale", role: "group", "aria-label": "Höflichkeit" }, HOEFLICH.map(([n, t]) => el("button", { type: "button", class: "chip b-scale-item", title: t, "aria-pressed": String(String(z.hoeflichkeit) === String(n)), on: { click: () => setze("hoeflichkeit", String(n)) } }, el("b", {}, String(n)), el("span", {}, t)))))
-  ], [
-    bTu("Beende den Kontakt und halte den letzten Moment fest."),
-    bBeispiel("Tippe «Kontakt beendet». Nachrichten der Bank 0. Wie lief es? Hat stattgefunden."),
-    live ? el("div", { class: "b-events" }, bEventButton("t_ende", "Kontakt beendet")) : null,
-    hand(zeitfeld("t_ende", "Ende", "Antwort erhalten, Abbruch oder Frist abgelaufen")),
-    z.t_start ? el("p", { class: "b-durations" }, `Bis zur ersten Person ${minuten(z.t_start, z.t_mensch) ?? "–"} min · bis zur vollständigen Antwort ${minuten(z.t_start, z.t_antwort) ?? "–"} min`) : null,
-    wahl("code", "Wie lief der Kontakt?", ["durchgefuehrt", "nicht angeboten", "nicht zugaenglich", "erfolglos", "ausgefallen"], "", v.code),
-    z.code && z.code !== "durchgefuehrt" ? text("ausfall_grund", "Grund", "z. B. Warteschleife 20 min, Kanal fehlt laut Website") : null,
-    el("div", { class: "gitter" }, tel ? text("minuten_anbieter", "Gesprächsminuten mit einer Person", "Zahl") : text("nachrichten_anbieter", "Wie viele Nachrichten hat die Bank geschickt?", "Zahl")),
-    text("abbruch_grund", "Abgebrochen? Warum", "leer lassen, wenn nicht abgebrochen. Zum Beispiel Wartezeit überschritten, Kanal nicht erreichbar, Bank verlangt Kontoänderung, du brichst ab"),
-    text("verlauf", "Verlauf in Stichworten", "Uhrzeit, Schritt, Antwort sinngemäss; keine Namen, keine Zitate", true),
-    text("bemerkung", "Bemerkung", "ein Satz")
-  ], [
-    bTu("Prüf kurz. Stimmt alles, speicherst du ab."),
-    el("ul", { class: "b-review" }, B_PRUEFFRAGEN.map((frage, i) => { const miss = bFehltIn(i); return el("li", { class: miss.length ? "is-open" : "is-ok" },
-      el("span", { class: "b-yn" }, miss.length ? "Nein" : "Ja"), el("span", { class: "b-yn-text" }, frage, miss.length ? el("small", {}, "Fehlt: " + miss.join(", ")) : null),
-      el("button", { type: "button", class: "b-link", "data-read-navigation": true, on: { click: () => showStep(i) } }, "Ändern")); })),
-    el("dl", { class: "b-facts" }, el("div", {}, el("dt", {}, "Ergebnis"), el("dd", {}, z.code ? anzeige("code", z.code) : "–")),
-      el("div", {}, el("dt", {}, "Start bis Person"), el("dd", {}, (minuten(z.t_start, z.t_mensch) ?? "–") + " min")),
-      el("div", {}, el("dt", {}, "Start bis Antwort"), el("dd", {}, (minuten(z.t_start, z.t_antwort) ?? "–") + " min"))),
-    probe ? simulationCheck() : null
-  ]];
+  const frist = el("p", { class: "b-hint b-frist" }, "Frist · " + f.text);
+  const R = {
+    frage: () => ["Diese Frage stellst du", [
+      probe ? simulationNotice() : null,
+      kanal ? el("div", { class: "kanal-hinweis" }, el("b", {}, "So erreichst du " + r.anbieter + " "), el("span", {}, kanal.text), " ", el("a", { href: kanal.quelle, target: "_blank", rel: "noopener", "data-read-navigation": true }, "Quelle", bIcon("ext"))) : null,
+      el("div", { class: "b-question" }, el("p", { class: "b-question-text" }, "«" + s.frage + "»"),
+        el("button", { type: "button", class: "chip", on: { click: async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(s.frage); b.textContent = "Kopiert"; } catch (x) {} } } }, "Frage kopieren")),
+      bMehr("Regeln fürs Gespräch", el("ul", { class: "b-rules" }, ["Stell nur diese Frage, möglichst wörtlich.", "Beantworte Rückfragen wahrheitsgemäss.", "Bedank dich und beende, sobald deine Frage vollständig beantwortet ist.", "Fragt die Bank «Ist das ein Test?», antworte ehrlich.", "Lass nie etwas sperren, nachforschen oder ändern."].map(t => el("li", {}, t))))]],
+    angebot: () => ["Gibt es diesen Kontaktweg?", [
+      wahl("kanal_angeboten", "", ["ja", "nein", "nicht erreichbar"], "", "", { auto: true, texte: { ja: "Ja, erreichbar", nein: "Gibt es nicht", "nicht erreichbar": "Gibt es, klappt aber nicht" } }),
+      el("p", { class: "b-hint" }, "«Gibt es nicht» nur laut Seite der Bank."),
+      z.kanal_angeboten === "nein" ? el("div", { class: "b-skip" }, el("p", {}, "Dann gibt es kein Gespräch. Du hältst nur noch fest, was passiert ist."), el("button", { type: "button", class: "knopf hell", "data-read-navigation": true, on: { click: () => showStep(6, 1) } }, "Direkt zum Abschluss")) : null]],
+    konto: () => ["Dein Konto", [el("p", { class: "b-hint" }, "Freiwillig. Hilft beim Vergleichen."), el("div", { class: "gitter" }, text("konto_aktiv_seit", "Konto aktiv seit", "Monat und Jahr"), text("app_version", "App-Version", "aus den Einstellungen"))]],
+    start: () => { const st = startBlock(r); st[0].className = "b-do"; return [z.t_start ? "Gestartet" : "Kontakt starten", [...st, bBeispiel("Tippe auf «Jetzt starte ich». Die echte Uhrzeit spielt in der Übung keine Rolle."), frist]]; },
+    auto: () => [tel ? "Kam eine Ansage oder ein Menü?" : "Kam eine automatische Antwort?", [
+      live ? bEventButton("t_auto", tel ? "Ansage oder Menü" : "Automatische Antwort", "Kam keine, tipp einfach auf Weiter.") : null,
+      hand(zeitfeld("t_auto", "Erste automatische Reaktion", "Bot, Autoreply, Ansage; leer lassen, wenn keine")),
+      bBeispiel("Ja, um 09:01. Tippe den Knopf."), frist]],
+    mensch: () => [tel ? "Spricht eine Person?" : "Antwortet eine Person?", [
+      live ? bEventButton("t_mensch", tel ? "Eine Person spricht" : "Eine Person antwortet", tel ? "Ansage und Menü zählen nicht." : "Die erste Antwort, die nach einem Menschen aussieht.") : null,
+      hand(zeitfeld("t_mensch", "Erste menschliche Antwort", tel ? "eine Person spricht, nicht Ansage oder Menü" : "erste Antwort mit Hinweisen auf eine Person")),
+      bBeispiel("Ja, um 09:05. Tippe den Knopf."), frist]],
+    wer: () => ["Wer hat geantwortet?", [
+      wahl("mensch_status", "", ["Mensch", "wahrscheinlich Mensch", "unklar", "Automat"], "", v.mensch_status, { auto: true }),
+      !tel ? bMehr("Woran erkenne ich das?", el("p", { class: "b-hint" }, "Zwei oder mehr Hinweise heisst «wahrscheinlich Mensch»."),
+        el("div", { class: "chips" }, HINWEISE.map(([h, t]) => el("button", { type: "button", class: "chip", "aria-pressed": String((z.hinweise || []).includes(h)), on: { click: () => { const a = new Set(z.hinweise || []); a.has(h) ? a.delete(h) : a.add(h); setze("hinweise", [...a]); } } }, t))),
+        el("label", { class: "b-checkline" }, el("input", { type: "checkbox", checked: z.auto_selbst || null, on: { change: e => setze("auto_selbst", e.target.checked) } }), el("span", {}, "Die Antwort sagt selbst, dass sie ein Bot oder automatisch ist (Bot-Name, Kennzeichnung)"))) : el("p", { class: "b-hint" }, "Am Telefon zählt nur der Moment, in dem eine Person spricht."),
+      bBeispiel("Mensch.")]],
+    antwort: () => ["Ist deine Frage ganz beantwortet?", [
+      live ? bEventButton("t_antwort", "Antwort ist vollständig", "Kommt nichts mehr innert Frist, tipp auf Weiter.") : null,
+      hand(zeitfeld("t_antwort", "Vollständige Antwort erhalten", "wann alles da war, was die Frage verlangt; leer lassen, wenn sie nicht kam")),
+      bBeispiel("Ja, um 09:08. Tippe den Knopf."), frist]],
+    teile: () => ["Welche Teile der Antwort kamen?", [
+      el("div", { class: "chips b-stack" }, s.elemente.map(x => el("button", { type: "button", class: "chip", "aria-pressed": String((z.elemente || []).includes(x)), on: { click: () => { const a = new Set(z.elemente || []); a.has(x) ? a.delete(x) : a.add(x); setze("elemente", [...a]); } } }, x))),
+      el("p", { class: "b-hint" }, "Alles antippen, was kam. Kam nichts, tipp auf Weiter."), bBeispiel("Beide Teile kamen.")]],
+    vollst: () => ["Ist die Antwort vollständig?", [wahl("vollstaendig", "", ["vorhanden", "teilweise", "fehlt"], "", v.vollstaendig, { auto: true }), el("p", { class: "b-hint" }, "Unabhängig davon, ob sie stimmt.")]],
+    verwiesen: () => ["Wurdest du vertröstet oder weitergeschickt?", [bJaNein("anderer_kanal", true), el("p", { class: "b-hint" }, "Zum Beispiel Rückruf angekündigt oder auf einen anderen Kanal verwiesen."), bBeispiel("Nein.")]],
+    fcr: () => ["Beim ersten Kontakt beantwortet?", [wahl("fcr", "", ["ja", "nein", "unklar"], "", v.fcr, { auto: true }), el("p", { class: "b-hint" }, "Im gleichen Anruf, Chatverlauf oder Mailfaden."), bBeispiel("Ja.")]],
+    richtig: () => ["Stimmt die Antwort?", [wahl("richtig", "", ["richtig", "teils", "falsch", "nicht pruefbar", "offen"], "", "", { auto: true }), el("p", { class: "b-hint" }, "Vergleiche mit der Hilfeseite der Bank."), bBeispiel("Keine Seite zum Vergleichen.")]],
+    quelle: () => ["Wo hast du verglichen?", [text("quelle_url", "Link zur Hilfeseite der Bank", "beginnt mit https://"),
+      el("div", { class: "b-q" }, el("label", { class: "f", for: "quelle-datum" }, "Hilfeseite angeschaut am"), el("input", { id: "quelle-datum", class: "t", type: "date", max: heute(), value: z.quelle_datum || "", on: { input: e => { z.quelle_datum = e.target.value; lokal("b-" + aktiv.nr, z); bUpdateReadiness(); } } }))]],
+    rueck: () => ["Wie oft hat die Bank inhaltlich nachgefragt?", [el("div", { class: "b-scale-row", role: "group", "data-keys": "" }, ["0", "1", "2", "3", "4+"].map(w => el("button", { type: "button", class: "chip", "aria-pressed": String(String(z.rueckfragen ?? "") === w), on: { click: () => { const neu = String(z.rueckfragen ?? "") === w ? "" : w; setze("rueckfragen", neu); if (neu) bAuto(); } } }, w))),
+      el("p", { class: "b-hint" }, "Fragen zur Identität nicht mitzählen."), bBeispiel("0.")]],
+    sprache: () => ["Blieb die Bank bei Deutsch?", [wahl("beibehalten", "", ["ja", "nein"], "", "", { auto: true }), bMehr("Andere Sprache eintragen", text("sprache_antwort", "Sprache der Antwort")), bBeispiel("Ja.")]],
+    standort: () => ["Hat die Bank gesagt, von wo sie antwortet?", [wahl("standort", "", ["Schweiz", "Ausland", "nicht genannt"], "", "", { auto: true }), el("p", { class: "b-hint" }, "Nur, wenn die Bank es selbst sagt."), bBeispiel("Nicht genannt.")]],
+    weiter: () => ["Wie geht es für dich weiter?", [wahl("weiterverlauf", "", ["Schritt erklaert", "Verweis", "nichts"], "", "", { auto: true }), el("p", { class: "b-hint" }, "Nur «Schritt erklärt» zählt als erfüllt."), bBeispiel("Schritt erklärt.")]],
+    hoeflich: () => ["Wie höflich war die Bank?", [el("div", { class: "b-scale-row", role: "group", "aria-label": "Höflichkeit 1 bis 5", "data-keys": "" }, HOEFLICH.map(([n, t]) => el("button", { type: "button", class: "chip", title: t, "aria-pressed": String(String(z.hoeflichkeit) === String(n)), on: { click: () => { setze("hoeflichkeit", String(n)); bAuto(); } } }, String(n)))),
+      el("p", { class: "b-scale-text" }, z.hoeflichkeit ? (HOEFLICH.find(([n]) => String(n) === String(z.hoeflichkeit)) || [0, ""])[1] : "1 abweisend · 3 sachlich · 5 hilft ungefragt"), bBeispiel("4, freundlich.")]],
+    ende: () => ["Kontakt beendet?", [
+      live ? bEventButton("t_ende", "Kontakt beendet", "Antwort erhalten, abgebrochen oder Frist abgelaufen.") : null,
+      hand(zeitfeld("t_ende", "Ende", "Antwort erhalten, Abbruch oder Frist abgelaufen")),
+      z.t_start ? el("p", { class: "b-durations" }, `Bis zur ersten Person ${minuten(z.t_start, z.t_mensch) ?? "–"} min · bis zur vollständigen Antwort ${minuten(z.t_start, z.t_antwort) ?? "–"} min`) : null,
+      bBeispiel("Tippe den Knopf.")]],
+    code: () => ["Wie lief der Kontakt?", [wahl("code", "", ["durchgefuehrt", "erfolglos", "nicht angeboten", "nicht zugaenglich", "ausgefallen"], "", v.code, { auto: true }),
+      z.code && z.code !== "durchgefuehrt" ? text("ausfall_grund", "Grund", "z. B. Warteschleife 20 min, Kanal fehlt laut Website") : null, bBeispiel("Hat stattgefunden.")]],
+    menge: () => [tel ? "Wie viele Minuten hast du mit einer Person gesprochen?" : "Wie viele Nachrichten hat die Bank geschickt?", [
+      tel ? text("minuten_anbieter", "Gesprächsminuten mit einer Person", "Zahl") : text("nachrichten_anbieter", "Nachrichten der Bank", "Zahl"), bBeispiel("0.")]],
+    abbruch: () => ["Hast du abgebrochen?", [text("abbruch_grund", "Wenn ja, warum?", "leer lassen, wenn nicht abgebrochen. Zum Beispiel Wartezeit überschritten, Kanal nicht erreichbar, Bank verlangt Kontoänderung"), bBeispiel("Nein, leer lassen.")]],
+    notiz: () => ["Notizen", [text("verlauf", "Verlauf in Stichworten", "Uhrzeit, Schritt, Antwort sinngemäss; keine Namen, keine Zitate", true), text("bemerkung", "Bemerkung", "ein Satz, freiwillig")]],
+    pruefen: () => ["Stimmt alles?", [
+      el("ul", { class: "b-review" }, B_PRUEFFRAGEN.map((frage, i) => { const miss = bFehltIn(i); return el("li", { class: miss.length ? "is-open" : "is-ok" },
+        el("span", { class: "b-yn" }, miss.length ? "Nein" : "Ja"), el("span", { class: "b-yn-text" }, frage, miss.length ? el("small", {}, "Fehlt: " + miss.join(", ")) : null),
+        el("button", { type: "button", class: "b-link", "data-read-navigation": true, on: { click: () => showStep(i, bErsteLuecke(i)) } }, "Ändern")); })),
+      el("dl", { class: "b-facts" }, el("div", {}, el("dt", {}, "Ergebnis"), el("dd", {}, z.code ? anzeige("code", z.code) : "–")),
+        el("div", {}, el("dt", {}, "Start bis Person"), el("dd", {}, (minuten(z.t_start, z.t_mensch) ?? "–") + " min")),
+        el("div", {}, el("dt", {}, "Start bis Antwort"), el("dd", {}, (minuten(z.t_start, z.t_antwort) ?? "–") + " min"))),
+      probe ? simulationCheck() : null]]
+  };
+  const [frage, inhalt] = R[screens[bSub].k]();
   bBesucht.add(bStep);
-  fuelle(m, kopf, bStepper(), el("h2", { class: "b-form-title", tabindex: "-1" }, B_SCHRITTE[bStep]), el("div", { class: "b-step-content" }, teile[bStep].flat(Infinity)),
-    bHilfe((probe ? "Übung" : bWas(r)) + ", Schritt " + (bStep + 1) + " von " + B_SCHRITTE.length + ": " + B_SCHRITTE[bStep]));
+  fuelle(m, kopf, bStepper(), el("h2", { class: "b-form-title", tabindex: "-1" }, frage), el("div", { class: "b-step-content" }, inhalt.flat(Infinity)),
+    bHilfe((probe ? "Übung" : bWas(r)) + ", Schritt " + (bStep + 1) + " von " + B_SCHRITTE.length + ": " + frage));
+  bEben = -1;
   bStepNav();
   bUpdateReadiness();
 }
+// Tastatur am Laptop: Enter = weiter, 1–4 wählt die sichtbare Antwort.
+document.addEventListener("keydown", e => {
+  if (!aktiv || e.altKey || e.ctrlKey || e.metaKey || window.PA6View.active()) return;
+  const t = e.target, tippt = t && (t.tagName === "TEXTAREA" || t.tagName === "SELECT" || (t.tagName === "INPUT" && !["checkbox", "radio"].includes(t.type)));
+  if (e.key === "Enter" && !(t && t.tagName === "TEXTAREA") && !(t && t.tagName === "BUTTON") && !(t && t.tagName === "A")) { const n = document.querySelector(".b-next-step"); if (n && !n.disabled) { e.preventDefault(); n.click(); } return; }
+  if (!tippt && /^[1-5]$/.test(e.key)) { const b = document.querySelectorAll(".b-step-content [data-keys] > .chip")[+e.key - 1]; if (b && !b.disabled) { e.preventDefault(); b.click(); } }
+});
 function zeile(stand) {
   const o = Object.assign({}, z, { stand }); delete o._startVorher;
   o.mensch_hinweise = (z.hinweise || []).join("|");
@@ -399,7 +467,8 @@ async function speichern(stand) {
 document.getElementById("zwischen").addEventListener("click", () => speichern("laufend"));
 document.getElementById("fertig").addEventListener("click", () => {
   const first = B_SCHRITTE.findIndex((_, index) => bFehltIn(index).length);
-  if (first >= 0) showStep(first);
+  if (first >= 0) showStep(first, bErsteLuecke(first));
+  else if (aktiv) bFertigNr = aktiv.nr;
   speichern("abgeschlossen");
 });
 start();
