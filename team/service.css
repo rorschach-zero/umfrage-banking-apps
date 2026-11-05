@@ -391,3 +391,15 @@
 @media (hover:hover){.b-page .chip:hover:not(:disabled):not([aria-pressed="true"]){background:#F6F8F6}}
 .b-page .chip:focus{outline:none}
 .b-page .chip:focus-visible{outline:2px solid #6E64B8;outline-offset:3px}
+/* Übung (06.11.): Anweisung im Szenario-Ton oben, Zeitknopf-Rückfrage, Fussleiste immer sichtbar */
+.b-uebung{display:flex;gap:10px;align-items:flex-start;margin:0 0 18px;padding:12px 14px;border-radius:12px;background:#F2F0FB;border:1px solid #E1DDF4;color:#2B2550;font-size:15.5px;line-height:1.5;font-weight:600}
+.b-uebung.is-done{background:var(--bk-tint);border-color:#CFE6DF;color:var(--bk-acc-h)}
+.b-uebung .b-ico{flex:none;margin-top:2px;stroke-width:2.6}
+.b-zeit-frage{display:grid;gap:8px;padding:10px 12px;border:1px solid var(--bk-line);border-radius:12px;background:var(--bk-surface)}
+.b-zeit-frage p{margin:0;font-size:14px;font-weight:700}
+.b-page .b-fuss{position:fixed;left:0;right:0;bottom:0;z-index:30}
+body.bgl-offen.b-page .b-fuss{right:360px}
+body.bgl-leiste.b-page .b-fuss{right:56px}
+.is-uebung .b-suggest{display:none}
+.b-page .b-event .b-event-label,.b-page .b-event .b-event-time{color:inherit}
+.b-page .b-fuss{background:#fff}
