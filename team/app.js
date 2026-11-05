@@ -419,7 +419,7 @@ function awayButton(){
 }
 function awayLine(){
   const own=absences(data.person);
-  return own.length?el('p',{class:'away-line'},el('b',{},'Abwesend'),' · '+own.map(awayRange).join(' · ')+(preview.active()?'':' · Die Gruppe sieht es im Plan.')):null;
+  return own.length?el('p',{class:'away-line'},el('b',{},'Abwesend'),' · '+own.map(awayRange).join(' · ')+(preview.active()?'':' · Salah sieht es in der Übersicht.')):null;
 }
 function absenceForm(){
   if(preview.active()||!data||noteSaving||pending)return;
@@ -442,7 +442,7 @@ function absenceForm(){
     quick,
     el('div',{class:'away-dates'},el('label',{for:'away-from'},'Von',from),el('label',{for:'away-to'},'Bis',to)),
     sum,
-    el('label',{for:'away-why',class:'away-why'},'Grund ',el('small',{},'freiwillig'),why),
+    el('label',{for:'away-why',class:'away-why'},'Grund ',el('small',{},'freiwillig · sieht nur Salah'),why),
     own.length?el('p',{class:'away-known'},'Schon eingetragen · '+own.map(awayRange).join(' · ')):null,
     feedback,el('footer',{class:'task-footer'},button('Abbrechen',()=>$('detail').close(),'text-button'),save));
   form.addEventListener('submit',async event=>{
@@ -455,7 +455,7 @@ function absenceForm(){
       const result=await response.json();if(!response.ok||!result.ok||result.abwesenheit?.von!==range.von||result.abwesenheit?.bis!==range.bis)throw Error(result.fehler||'Nicht bestätigt. Bitte noch einmal versuchen.');
       if(key!==access||data?.person!==identity)return;
       clearResponses(cacheNamespace);
-      modal('Eingetragen',el('div',{class:'away-done'},el('span',{class:'away-done-mark','aria-hidden':'true'},'✓'),el('p',{class:'away-done-range'},awayRange(range)),el('p',{},'Die Gruppe sieht im Plan, dass du weg bist. Gute Zeit!')),
+      modal('Eingetragen',el('div',{class:'away-done'},el('span',{class:'away-done-mark','aria-hidden':'true'},'✓'),el('p',{class:'away-done-range'},awayRange(range)),el('p',{},'Eingetragen. Salah sieht es in der Übersicht.')),
         el('footer',{class:'task-footer'},button('Fertig',()=>{$('detail').close();load();},'button primary-action')));
       $('detail').querySelector('.primary-action')?.focus();
     }catch(error){feedback.textContent=error.name==='AbortError'?'Verbindung unterbrochen. Bitte noch einmal versuchen.':error.message;save.textContent='Eintragen';}
