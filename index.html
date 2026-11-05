@@ -241,6 +241,10 @@ header:has(+ * .schirm.start), body:has(.schirm.start) header { max-width: 1180p
   .schirm.start > .kurz { text-align:center; }
 }
 @media (prefers-reduced-motion: reduce) { .schirm.start .nav .knopf::after { transition: none; } }
+/* 3.33 (05.11.2026): Bei langen Fragen (z. B. Bankauswahl) rutschten «Weiter» und «Zurück» am Laptop unter den Bildschirmrand.
+   Die Knopfleiste klebt jetzt unten, sobald die Frage länger als der Bildschirm ist. Fragen, Antworten und Daten unverändert. */
+.schirm:not(.start) > .nav, .schirm:not(.start) .nav { position: sticky; bottom: 0; z-index: 5; margin-top: 20px; padding: 14px 0 calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(to top, var(--papier) 72%, transparent); }
+@media (max-width: 520px) { .schirm:not(.start) .nav { gap: 4px; padding-top: 10px; } .schirm:not(.start) .nav #zurueck { min-height: 40px; padding-top: 6px; padding-bottom: 6px; } }
 
 .lcode { display:none; }
 @media (max-width: 520px) {
@@ -327,7 +331,7 @@ header:has(+ * .schirm.start), body:has(.schirm.start) header { max-width: 1180p
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbxpPEfT4vd5-jXe3YAc6zl0HKgLV4oVRmLOHDZzGcbaqYryEv7xgkORDSjhnHg5Lp2Y0Q/exec";
 const BOTSCHAFTEN_AKTIV = false;   // Botschaftentest gestrichen nach Pruefung m2 (29.10.): A und B werden vorher erklaert, C nicht, kein fairer Vergleich
 const DAUER_TEXT = "6 bis 8 Minuten"; // Pretest 29.10.2026: 3:40, 4:22, 6:00, 8:00
-const VERSION = "3.32";                   // Stand des Fragebogens, wird mitgespeichert
+const VERSION = "3.33";                   // Stand des Fragebogens, wird mitgespeichert
 const KONTAKT = "umfrage@hydeout.ch";    // Kontakt der Studierendengruppe fuer Rueckfragen
 // Sprachen: die Seite zeigt Deutsch, Franzoesisch, Italienisch oder Englisch (Woerterbuch in sprachen.js, Schluessel ist der
 // deutsche Wortlaut). Gespeichert werden immer die deutschen Antwortwerte; die gewaehlte Sprache steht in der Spalte «sprache».
