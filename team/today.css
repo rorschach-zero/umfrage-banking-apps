@@ -58,6 +58,8 @@
 .week-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .week-foot .later-link{margin-left:auto}
 .week-more,.later-link{font-size:14px!important;font-weight:750;color:var(--bk-acc-h)!important}
+.week-missing{margin:0 0 10px;padding:10px 14px;border-radius:12px;background:var(--late-wash);color:#7a3418;font-size:14px;display:flex;flex-wrap:wrap;align-items:center;gap:0 10px}
+.week-missing .text-button{min-height:36px;padding:4px 0;font-size:14px;color:var(--bk-acc-h)}
 .week-empty{background:var(--bk-surface);border:1px solid var(--bk-line);border-radius:16px;padding:16px 18px;font-size:14px}
 .task-check.auto{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.6px dashed #b7bfb6;color:#fff;font-size:12px;flex:none;margin:0 11px}
 .task-check.auto:before{content:none}

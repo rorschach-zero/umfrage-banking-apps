@@ -347,12 +347,15 @@ function weekSection(rows){
   const open=[...tasks.filter(overdue).map(r=>({d:'0',n:weekTaskRow(r)})),...steps.map(s=>({d:s.when,n:stepRow(s)})),...tasks.filter(r=>!overdue(r)).map(r=>({d:day(r.due),n:weekTaskRow(r)}))]
     .sort((x,y)=>x.d.localeCompare(y.d)).map(x=>x.n);
   // Erledigte feste Schritte bleiben als kleines Erfolgserlebnis sichtbar, aber erst nach dem Offenen.
-  const items=[...open,...listed.filter(s=>!stepOpen(s)).map(stepRow)];
-  const openCount=open.length,extra=items.slice(3);extra.forEach(n=>{n.hidden=true;});
-  const list=items.length?el('ul',{class:'task-list week-list-new',id:'week-list'},items):null;
-  const showAll=extra.length?el('button',{type:'button',class:'text-button week-more','aria-controls':'week-list','aria-expanded':'false',onClick:event=>{extra.forEach(n=>{n.hidden=false;});event.currentTarget.remove();}},'+ '+extra.length+' weitere'):null;
-  return el('section',{class:'week-block'},el('div',{class:'block-head'},el('h2',{},'Bis Sonntag'),el('small',{},date(sunday)+' · '+(openCount?openCount+' offen'+(!todayKnown()?' · Stand teilweise unbekannt':''):todayKnown()?'alles erledigt':'Stand unbekannt'))),
-    list||el('p',{class:'quiet-note week-empty'},todayKnown()?'Bis Sonntag ist nichts fällig. Schön.':'Stand unbekannt · fehlende Daten zählen nicht als erledigt.'),
+  // Höchstens drei sichtbar; ein erledigter Schritt nur, wenn Platz ist. Der Rest einen Tipp entfernt.
+  const done=listed.filter(s=>!stepOpen(s)).map(stepRow),items=[...open,...done];
+  const shown=new Set([...open.slice(0,3),...(open.length<3?done.slice(0,1):[])]),extra=items.filter(n=>!shown.has(n));extra.forEach(n=>{n.hidden=true;});
+  const openCount=open.length,list=items.length?el('ul',{class:'task-list week-list-new',id:'week-list'},items):null;
+  const showAll=extra.length?el('button',{type:'button',class:'text-button week-more','aria-controls':'week-list','aria-expanded':'false',onClick:event=>{extra.forEach(n=>{n.hidden=false;});event.currentTarget.remove();extra[0].querySelector('button')?.focus();}},'+ '+extra.length+' weitere'):null;
+  const missing=missingSources();
+  return el('section',{class:'week-block'},el('div',{class:'block-head'},el('h2',{},'Bis Sonntag'),el('small',{},date(sunday)+(openCount?' · '+openCount+' offen':todayKnown()?' · alles erledigt':''))),
+    missing?el('p',{class:'week-missing',role:'status'},missing,' ',button('Neu laden',()=>load(),'text-button')):null,
+    list||(missing?null:el('p',{class:'quiet-note week-empty'},'Bis Sonntag ist nichts fällig. Schön.')),
     el('div',{class:'week-foot'},showAll,button('Alle Fristen ›',()=>navigate('deadlines'),'text-button later-link')));
 }
 function nextMeeting(){
@@ -373,6 +376,12 @@ function personPakete(tasks,person){
     .sort((a,b)=>(open(a.status)?0:1)-(open(b.status)?0:1)||String(a.ref).localeCompare(b.ref))
     .map(row=>({ref:row.ref,title:row.title,status:row.status||''}));
 }
+// Fehlt eine Quelle, sagt Heute konkret welche, einmal und an der betroffenen Stelle.
+function missingSources(){
+  const what={psp:'Aufgaben aus dem Projektplan',assignments:'Erhebungsaufträge',chapters:'Fristen aus dem Schreibwerk',meetings:'Termine'};
+  const list=Object.keys(what).filter(k=>data.sources?.[k]&&data.sources[k].state!=='ready').map(k=>what[k]);
+  return list.length?list.join(', ').replace(/, ([^,]*)$/,' und $1')+' laden gerade nicht.':'';
+}
 function weekZeitNote(){
   const w=data?.zeit?.woche;
   if(w==null||w===undefined||Number.isNaN(+w))return null;
@@ -391,7 +400,7 @@ function showToday(){
   const known=todayKnown();
   const parts=[due?el('b',{},due+(due===1?' Sache':' Dinge')+' bis Sonntag'):el('span',{},known?'Bis Sonntag nichts offen':'Stand unbekannt'),
     late?button(late+' überfällig',()=>{area='';navigate('tasks');},'text-button summary-late'):null,
-    nextMeeting()?el('span',{},nextMeeting()):null,!known&&due?el('span',{},'Stand teilweise unbekannt'):null].filter(Boolean);
+    nextMeeting()?el('span',{},nextMeeting()):null].filter(Boolean);
   const summary=el('p',{class:'today-summary'});parts.forEach((p,i)=>{if(i)summary.append(el('span',{class:'sep','aria-hidden':'true'},' · '));summary.append(p);});
   const head=el('div',{class:'heading today-head'},el('div',{},el('h1',{},greeting()+', '+names[data.person]),summary),el('div',{class:'today-side'},el('span',{class:'date-label'},date(today())),awayButton()));
   const focus=nowItem(rows);
@@ -1072,12 +1081,12 @@ function render() {
   }
   const notices=[];
   if(state==='stale')notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Verbindung unterbrochen. Veralteter Stand vom '+date(data.fetchedAt,true)+'. Aktuelle Aufgaben sind unbekannt.'),button('Erneut laden',()=>load(),'text-button')));
-  if(Object.values(data.sources).some(source=>source.state!=='ready'))notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Ein Teil des Projektstands ist unbekannt. Fehlende Quellen zählen nicht als leer.'),button('Erneut laden',()=>load(),'text-button')));
+  if(view!=='today'&&Object.values(data.sources).some(source=>source.state!=='ready'))notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Ein Teil des Projektstands ist unbekannt. Fehlende Quellen zählen nicht als leer.'),button('Erneut laden',()=>load(),'text-button')));
   const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,profile:showProfile,documents:showDocuments,sharing:showSharing};
   content.replaceChildren(...[...notices,...screens[view]()].flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false));
   const tabs=content.querySelector('.work-tabs'),selected=tabs?.querySelector('[aria-selected="true"]');
   if(selected)tabs.scrollLeft+=selected.getBoundingClientRect().left-tabs.getBoundingClientRect().left-3;
-  content.querySelector('.heading > div')?.append(el('p',{class:'sync-status',role:'status'},$('source-note').textContent));
+  if(view!=='today')content.querySelector('.heading > div')?.append(el('p',{class:'sync-status',role:'status'},$('source-note').textContent));
   announce(labels[view]+': '+(state==='stale'?'veralteter Stand.':'Projektstand angezeigt.'));
 }
 function announce(text){$('announcement').textContent=text;}
