@@ -632,8 +632,10 @@ function trackAuftrag(row,aktion,wert,vorgang){
   if(leadership&&data.person==='SA')body.leitung=true;
   try{fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body),referrerPolicy:'no-referrer'}).catch(()=>{});}catch{}
 }
+// Eine Kennung je Abschlussversuch: ein späterer Abschluss nach Rückgabe ergänzt die Zeit, statt die frühere Buchung zu überschreiben.
 function abschlussBuchung(row){
-  const id='abschluss-'+String(row&&row.id||'').replace(/[^a-zA-Z0-9_-]/g,'');
+  const base=String(row&&row.id||'').replace(/[^a-zA-Z0-9_-]/g,'').slice(0,56);
+  const id=base?'abschluss-'+base+'-'+newVorgang().replace(/[^a-zA-Z0-9]/g,'').slice(0,12):'';
   return /^[a-zA-Z0-9_-]{16,80}$/.test(id)?id:'';
 }
 function accessMark(k){let h=0;for(const ch of String(k||''))h=(h*31+ch.charCodeAt(0))>>>0;return h.toString(36);}

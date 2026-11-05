@@ -406,7 +406,14 @@ async function handover(c) {
   const btn = [...document.querySelectorAll('button')].find(b => b.textContent === 'Zur Prüfung geben');
   if (!spot.parentNode) (btn && btn.parentNode ? btn.parentNode : $('tab-auftrag')).append(spot);
   const lead = state.person === 'SA' && state.lead === true;
-  const buchung = 'abschluss-' + String(c.id).replace(/[^a-zA-Z0-9_-]/g, '');
+  // Eine Buchungskennung je Abschlussversuch: ein erneuter Abschluss nach Rückgabe legt eine neue Zeile an und ersetzt keine frühere Zeit.
+  const buchung = 'abschluss-' + String(c.id).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 56) + '-' + newVorgang().replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
+  // Zeitbuchung und Storno brauchen wie jede Schreibanfrage den persönlichen Zugang.
+  const saveZeit = async body => {
+    const saved = await post(Object.assign({}, body, {k: state.key}));
+    if (!saved || saved.ok === false) throw Error((saved && saved.fehler) || 'Nicht gespeichert.');
+    return saved;
+  };
   PA6Zeit.closureMount(spot, {
     person: state.person,
     aufgabe: (c.ref ? c.ref + ' · ' : '') + (c.title || 'Kapitel'),
@@ -414,11 +421,7 @@ async function handover(c) {
     id: /^[a-zA-Z0-9_-]{16,80}$/.test(buchung) ? buchung : '',
     quelle: 'schreibplatz',
     ref: c.ref || '',
-    save: async body => {
-      const saved = await post(body);
-      if (!saved || saved.ok === false) throw Error((saved && saved.fehler) || 'Nicht gespeichert.');
-      return saved;
-    },
+    save: saveZeit,
     onCancel: () => { spot.replaceChildren(); },
     onDone: async info => {
       try {
@@ -430,7 +433,7 @@ async function handover(c) {
         announce('Zur Prüfung gemeldet. Salah schaut es sich an.');
         renderAll();
       } catch (e) {
-        try { await post({typ:'projekt_save', formular:'arbeitszeit', id:info.id, felder:Object.assign({}, info.felder, {storniert:'ja'})}); } catch (ignore) {}
+        try { await saveZeit({typ:'projekt_save', formular:'arbeitszeit', id:info.id, felder:Object.assign({}, info.felder, {storniert:'ja'})}); } catch (ignore) {}
         announce(e.message || 'Nicht gemeldet.');
       }
     }

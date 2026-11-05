@@ -59,6 +59,8 @@ function closureMount(container, opts) {
   const bisher = +opts.bisher || 0;
   const paket = opts.paket || taskPaket(opts.row) || '';
   const send = typeof opts.save === 'function' ? opts.save : payload => sende(payload);
+  // Kennung einmal je geöffnetem Abschluss: Wiederholen nach einem Fehler trifft dieselbe Zeile, ein neuer Abschluss eine neue.
+  const attemptId = closureId(opts);
   const hint = node('p', {class: 'zeit-closure-hint', role: 'status'});
   const finish = node('button', {type: 'button', class: 'knopf', disabled: true}, 'Abschliessen');
   const dateInput = node('input', {type: 'date', value: todayIso(), 'aria-label': 'Datum'});
@@ -132,7 +134,7 @@ function closureMount(container, opts) {
         if (value === null || mine !== op) return;
         stunden = String(value);
       } else stunden = String(choice);
-      const id = closureId(opts);
+      const id = attemptId;
       const felder = {datum: dateInput.value || todayIso(), person: opts.person, stunden, aufgabe, paket, storniert: '', quelle: closureQuelle(opts)};
       pruef(await send({typ: 'projekt_save', formular: 'arbeitszeit', id, felder}));
       if (mine !== op) return;
