@@ -177,6 +177,7 @@ function chooser() {
   $('tabs').hidden = true;
   document.body.classList.add('choosing');
   document.body.classList.remove('kapitel');
+  $('side-toggle').hidden = true; docTrouble(false); applySide();
   $('tab-auftrag').removeAttribute('role');
   fill($('pick'));
   fill($('doc'));
@@ -363,7 +364,9 @@ function renderAll() {
     !other ? [dot(), el('span', {class:'mi person'}, initials(c.owner, 'owner'), initials(c.reader, 'reader'), el('span', {'aria-hidden':'true'}, [NAMES[c.owner], NAMES[c.reader]].filter(Boolean).join(' und ')))] : null);
   // Zeitleiste entfernt (Salah 03.11.): Zeit wird mit dem Auftrag erfasst, nicht separat im Schreibplatz.
   renderMenu(c);
+  $('side-toggle').hidden = false;
   renderAuftrag(c, g); renderInfos(g); renderRegeln(g); renderHilfe(c, g); renderDoc(c);
+  applySide();
   setTab(store.get('pa6-sp-tab', 'auftrag'));
 }
 function block(title, ...kids) { return card(title, '', ...kids); }
@@ -439,79 +442,150 @@ async function handover(c) {
     }
   });
 }
-// Schreibweg (Salah 03.11.2026): kein Informationsschwall, sondern ein geführter Weg zu vollen Punkten.
-// Immer ein Schritt offen, jeder ein- und ausklappbar, «Weiter» schliesst ab und öffnet den nächsten. Stand je Kapitel im Browser.
+// Schreibweg (Salah 03.11.2026, Seitenleiste neu 05.11.2026): ein Schritt im Fokus, ein Satz, ein Knopf.
+// Erledigte Schritte klappen zu, der Rest ist einen Tipp entfernt. «Weiter» lässt den Haken einrasten und öffnet dann den nächsten Schritt.
+// Inhalte nur aus auftraege.json (aus Konzept PA6, Merkmalblatt und Raster). Stand je Kapitel im Browser, Messung wie bisher.
+// Offizielle Kriterien des Bewertungsrasters (Konzept PA6), damit das Ziel zeigt, wofür es Punkte gibt.
+const RASTER = {R1:'Ausgangslage, Formulierung Marktforschungsauftrag und Forschungsdesign', R2:'Erhebungsinstrument', R3:'Stichprobe', R4:'Auswertung der Daten',
+  R5:'Interpretation der Daten', R6:'Niveau der Umsetzung', R7:'Reflexion der Arbeit und Ausblick', R8:'Grafische Gestaltung', R9:'Sprachliche Richtigkeit und Verständlichkeit',
+  B1:'Analyse', B2:'Ziele ökonomisch', B3:'Ziele vorökonomisch', B4:'Strategieansatz', B5:'Massnahme', B6:'Massnahmen Kreativität', B7:'Terminplan (fachlich)',
+  B8:'Umsetzbarkeit und Kontrolle', B9:'Budget', B10:'Nachhaltigkeit', B11:'Reflexion der Arbeit', B12:'Sprachliche Richtigkeit', B13:'Quellenarbeit', B14:'Grafische Gestaltung',
+  C7:'Stakeholder Analyse', C8:'Initiale Risiko Map'};
+// Seite der Kriterien im Konzept PA6 (Bewertungsraster), für den Hinweis auf den Wortlaut im Original.
+const RASTER_SEITE = {R1:5, R2:6, R3:6, R4:6, R5:7, R6:7, R7:7, R8:8, R9:9, B1:14, B2:14, B3:15, B4:15, B5:15, B6:16, B7:16, B8:16, B9:17, B10:17, B11:17, B12:18, B13:18, B14:19, C7:22, C8:22};
+const RASTER_TEIL = code => code[0] === 'R' ? 'PA6a Marketing' : code[0] === 'B' ? 'PA6b Marketing' : 'PA6b Projektmanagement';
+// Quellen öffentlich zeigen (05.11.2026): nur Schulunterlagen, Unterricht und veröffentlichte Standards.
+// Interne Arbeitspapiere der Gruppe erscheinen nicht; Verweise auf die Fachregeln werden zur Fundstelle im Unterricht.
+const FACHREGEL = {"A1": "Marketing-Unterricht, Deck 2 Analyse, Folie 3", "A2": "Marketing-Unterricht, Deck 2 Analyse, Folie 4", "A3": "Marketing-Unterricht, Deck 2 Analyse, Folie 5", "A4": "Marketing-Unterricht, Deck 2 Analyse, Folien 6, 7, 12 bis 15", "A5": "Marketing-Unterricht, Deck 2 Analyse, Folie 10", "A6": "Marketing-Unterricht, Deck 2 Analyse, Folie 16", "A7": "Marketing-Unterricht, Deck 2 Analyse, Folien 18 bis 23", "A8": "Marketing-Unterricht, Deck 2 Analyse, Folien 24, 25", "A9": "Marketing-Unterricht, Deck 2 Analyse, Folien 26, 27", "A10": "Marketing-Unterricht, Deck 2 Analyse, Folie 28", "A11": "Marketing-Unterricht, Deck 2 Analyse, Folien 29 bis 31", "A12": "Marketing-Unterricht, Deck 2 Analyse, Folie 32", "A13": "Marketing-Unterricht, Deck 2 Analyse, Folie 33", "A14": "Marketing-Unterricht, Deck 2 Analyse, Folie 35", "A15": "Marketing-Unterricht, Deck 2 Analyse, Folie 36", "A16": "Marketing-Unterricht, Deck 2 Analyse, Folie 37", "A17": "Marketing-Unterricht, Deck 2 Analyse, Folie 38", "G2": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 24", "G4": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 27", "G6": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 31", "G7": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 20", "G9": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folien 16, 39, 40", "G10": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 44", "G11": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folien 41 bis 50", "G12": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 17", "G13": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 19", "G14": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folien 34, 36", "G15": "Marketing-Unterricht, Deck 1 Marketing-Grundlagen, Folie 14", "R1": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 4", "R2": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 12", "R3": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 13, 19", "R5": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 15, 22", "R7": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 23", "R8": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 24, 25", "R9": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 17", "R10": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 38, 39", "R11": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 26, 27, 28", "R13": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 30", "R14": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 35", "R15": "Marketing-Unterricht, Skript 2a Marktforschung, Folien 36, 37", "R16": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 41", "R18": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 43", "R19": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 44", "R22": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 47", "R23": "Marketing-Unterricht, Skript 2a Marktforschung, Folie 5", "X1": "MRS Mystery Shopping Research Guidelines, Oktober 2011 (Datei 2013), Regel B44", "X2": "MRS 2011, Teil B Guidelines 1 und 2; ESOMAR Mystery Shopping Studies 2005, Abschnitte d und e", "X3": "MRS 2011, Teil B Guideline 3", "X4": "MRS 2011, Teil B Guidelines 4 und 5; ESOMAR 2005 Abschnitte f und g", "X5": "MRS 2011, Regel B46", "X6": "ESOMAR/GRBN Guideline for Online Research 2015, Abschnitte 3.2 bis 3.4", "X7": "MSPA EA Guidelines 2023, Abschnitte 4.1 und 4.2", "X8": "Blick, 28.04.2026", "X9": "Trustpilot, Terms of Use for Consumers, Version 8.0, gültig ab 01.10.2026, Abschnitte 4 und 6", "X10": "ESOMAR Guideline on Social Media Research, Juli 2011, Abschnitte 2.2, 2.3, 2.4", "X11": "Cohen, J. (1960). A coefficient of agreement for nominal scales. Educational and Psychological Measurement, 20(1), 37 bis 46; Landis, J. R. und Koch, G. G. (1977). The measurement of observer agreement for categorical data. Biometrics, 33(1), 159 bis 174", "X12": "Apple, Nutzungsbedingungen der Apple Media Services, Schweiz, Stand 14.09.2026, Abschnitt F", "X13": "Google, Nutzungsbedingungen, wirksam ab 30.07.2026, Abschnitte «Sie missbrauchen unsere Dienste nicht», «Andere Inhalte»"};
+function fachregeln(text) {
+  const codes = [];
+  String(text).replace(/\([^)]*\)/g, '').replace(/\b([RAGX])(\d+)(?: bis [RAGX](\d+))?/g, (_, a, b, c) => { for (let i = +b; i <= (c ? +c : +b); i += 1) codes.push(a + i); return ''; });
+  return codes.map(c => FACHREGEL[c]).filter(Boolean);
+}
+// Fundorte sachlich benennen, ohne Ablageketten: interne Ablagen gar nicht, der Gruppenordner nur mit Namen.
+function publicPlace(wo) {
+  const w = String(wo || '').trim();
+  if (!w || /notion/i.test(w)) return null;
+  if (/^Gruppenordner/.test(w)) return 'Gruppenordner «PA6 Yuh»';
+  const parts = w.split(/\s*›\s*/);
+  if (parts.length === 1) return w;
+  if (parts[0] === 'Moodle') return 'Moodle, Kurs ' + parts[1] + (parts[2] ? ', Bereich «' + parts.slice(2).join(' ') + '»' : '');
+  if (parts[0] === 'Team-App') return 'Team-App, ' + parts.slice(1).join(', ');
+  return parts.join(', ');
+}
+function publicSource(q) {
+  if (!q) return null;
+  const out = [];
+  for (const raw of String(q).split(';')) {
+    const part = raw.trim();
+    if (!part) continue;
+    if (/^(Konzept PA6|Merkmalblatt 6[ab]|Formale Vorschriften|Yuh-Praxisauftrag|Praxisauftrag|Auftrag PA6|WIAR Block|Wissenschaftlich schreiben)/.test(part)) out.push(part);
+    else if (/^Kap\. \d/.test(part) && out.length && /^Formale Vorschriften/.test(out[out.length - 1])) out.push('Formale Vorschriften HFW 2025, ' + part);
+    else if (/^Fachregel/.test(part)) out.push(...fachregeln(part.replace(/^Fachregeln?/, '')));
+    else if (/Fachregel [RAGX]\d/.test(part)) out.push(...fachregeln(part.split(/Fachregel/)[1]));
+    else if (/WIAR \(Block (\d+), Folie (\d+)\)/.test(part)) out.push(part.replace(/^.*WIAR \(Block (\d+), Folie (\d+)\).*$/, 'WIAR Block $1, Folie $2'));
+    else if (/^Raster Terminplan/.test(part)) out.push('Konzept PA6, S. 16 (Raster Terminplan (fachlich))');
+    else if (/^Raster-Checkliste A5/.test(part)) out.push('Vorlage SWOT aus dem Marketing-Unterricht');
+  }
+  const uniq = [...new Set(out)];
+  return uniq.length ? uniq.join(' · ') : 'Arbeitsgrundlage der Gruppe, abgeleitet aus dem Auftrag';
+}
+function more(label, ...kids) { const body = kids.flat().filter(Boolean); return body.length ? el('details', {class:'w-more'}, el('summary', {}, label), el('div', {}, body)) : null; }
 function renderAuftrag(c, g) {
   const reading = c.reader === state.person && c.owner !== state.person;
   const wegKey = 'pa6-sp-weg:' + c.ref, checksKey = 'pa6-sp-muss:' + c.ref, teileKey = 'pa6-sp-teile:' + c.ref;
   const weg = store.get(wegKey, {done:{}, open:null}), done = store.get(checksKey, {}), teile = store.get(teileKey, {});
-  const fragen = g.fragen || [], glied = g.gliederung || [], muss = g.muss || [], raster = g.raster || [];
-  const maxPunkte = raster.reduce((a, r) => a + (+r.punkte || 0), 0);
-  const gegen = c.reader ? (NAMES[c.reader] || c.reader) : '';
+  const fragen = g.fragen || [], glied = g.gliederung || [], raster = g.raster || [];
+  // «Fertig, wenn …»: Pflichtpunkte aus Konzept und Merkmalblatt, danach die Form (APA in diesem Kapitel, Abbildungen nach Vorschrift).
+  const wiarBild = state.wiar && (state.wiar.regeln || []).find(r => /Abbildungen/.test(r.thema || ''));
+  const form = (g.apa || []).map(x => ({punkt:x, quelle:null, form:true}))
+    .concat(wiarBild && wiarBild.pruefen ? [{punkt:wiarBild.pruefen, quelle:(state.wiar.quelle ? state.wiar.quelle + ', ' : '') + (wiarBild.seite ? 'S. ' + wiarBild.seite : wiarBild.quelle || ''), form:true}] : []);
+  const muss = (g.muss || []).concat(form);
+    const gegen = c.reader ? (NAMES[c.reader] || c.reader) : '';
   const autor = c.owner ? (NAMES[c.owner] || c.owner) : '';
-  const auftrag = g.kurz || (c.Was && c.Was !== 'noch offen' ? c.Was : 'Der ausführliche Auftrag für dieses Kapitel wird gerade ergänzt.');
-  const zahl = (n, all) => el('span', {class:'w-count'}, n + ' von ' + all);
+  const auftrag = g.kurz || (c.Was && c.Was !== 'noch offen' ? c.Was : 'Der genaue Auftrag für dieses Kapitel wird gerade ergänzt.');
+  const umfang = g.seiten ? 'rund ' + String(g.seiten).replace('.', ',') + (g.seiten === 1 ? ' Seite' : ' Seiten') : '';
   const check = (store_, key, i, text, quelle, onchange) => {
     const id = key + i, input = el('input', {type:'checkbox', id, disabled:viewing() ? true : null});
     input.checked = !!store_[i];
     input.addEventListener('change', () => { if (viewing()) { input.checked = !!store_[i]; return; } store_[i] = input.checked; onchange(); track(input.checked ? 'haken' : 'haken_weg', key === 'teil' ? 'schreiben' : 'pruefen', key + i); });
     return el('li', {}, input, el('label', {for:id}, el('span', {class:'lt'}, text, sourceTag(quelle))));
   };
-  const rasterBlock = () => raster.length ? el('details', {class:'rule achten w-raster'}, el('summary', {}, maxPunkte ? 'So gibt es die vollen ' + maxPunkte + ' Punkte' : 'So gibt es volle Punkte'), el('div', {}, raster.map(r => el('div', {class:'pts'}, el('span', {class:'pn'}, r.punkte + ' P.'), el('p', {}, r.volle_punkte_wenn))))) : null;
-  const muster = (list, cls) => list.length ? el('ul', {class:'plain ' + (cls || '')}, list.map(x => el('li', {}, x))) : null;
+  const linkBtn = (text, onclick) => el('button', {type:'button', class:'w-link', onclick}, text, el('span', {'aria-hidden':'true'}, ' ›'));
+  // Rasterkriterien der ganzen Arbeit, die dieses Kapitel betreffen: Name, Teil, Höchstpunkte, eine als Zusammenfassung gekennzeichnete Höchststufe.
+  // Keine Kapitelsumme: die Punkte gelten für die ganze Arbeit. Der Wortlaut steht im Original, die Quelle nennt die Seite.
+  const punkte = list => el('ul', {class:'w-pts'}, list.map(r => el('li', {},
+    el('span', {class:'w-pts-k'}, el('b', {}, RASTER[r.code] || r.code), el('span', {class:'w-pts-n'}, 'max. ' + r.punkte + ' P.')),
+    el('span', {class:'w-pts-p'}, RASTER_TEIL(r.code)),
+    el('span', {class:'w-pts-t'}, el('span', {class:'w-pts-z'}, 'Zusammenfassung: '), r.volle_punkte_wenn),
+    sourceTag('Wortlaut im Original: Konzept PA6, Bewertungsraster' + (RASTER_SEITE[r.code] ? ', S. ' + RASTER_SEITE[r.code] : '') + ', Kriterium «' + (RASTER[r.code] || r.code) + '», höchste Stufe'))));
 
-  // Schritte: id, Titel, Kurzsatz (eingeklappt sichtbar), Inhalt, Fortschritt
   const steps = [];
-  steps.push({id:'ziel', t:'Ziel verstehen', s:maxPunkte ? 'Worum es geht und wofür es volle ' + maxPunkte + ' Punkte gibt' : 'Worum es geht', body:() => [
+  steps.push({id:'ziel', t:'Ziel verstehen', s:raster.length ? 'Worum es geht und worauf das Raster achtet' : 'Worum es geht', body:() => [
     el('p', {class:'w-lead'}, auftrag),
-    fragen.length ? el('div', {class:'w-sub'}, el('h3', {}, reading ? 'Der Text muss diese Fragen beantworten' : 'Dein Text beantwortet diese Fragen'), el('ol', {class:'qs'}, fragen.map(q => el('li', {}, q)))) : null,
-    rasterBlock(),
-    g.daten_ab ? el('p', {class:'note'}, 'Daten liegen vor ab ' + g.daten_ab + '. Bis dahin Aufbau und Methode schreiben, keine Ergebnisse.') : null]});
+    raster.length ? el('div', {class:'w-sub'}, el('h3', {}, 'Darauf achtet das Raster'),
+      el('p', {class:'w-pts-note'}, 'Die Punkte gelten für die ganze Arbeit, nicht nur für dieses Kapitel. Welche Kriterien hierher gehören, ist eine Arbeitshilfe der Gruppe.'),
+      punkte(raster.slice(0, 3)),
+      raster.length > 3 ? more('Noch ' + (raster.length - 3) + (raster.length - 3 === 1 ? ' Kriterium' : ' Kriterien'), punkte(raster.slice(3))) : null) : null,
+    fragen.length ? more((reading ? 'Diese Fragen muss der Text beantworten' : 'Diese Fragen beantwortet dein Text') + ' (' + fragen.length + ')', el('ol', {class:'qs'}, fragen.map(q => el('li', {}, q)))) : null,
+    g.daten_ab ? el('p', {class:'note'}, 'Die Daten kommen ab ' + g.daten_ab + '. Bis dahin schreibst du Aufbau und Methode, noch keine Ergebnisse.') : null]});
   if (!reading) {
-    steps.push({id:'material', t:'Material holen', s:'Quellen und Daten, bevor du schreibst', body:() => [
-      el('p', {}, 'Sammle zuerst, was du belegen kannst. Notiere Stichworte und Quellen im Doc unter «Notizen».'),
-      (g.infos || []).length ? el('ul', {class:'w-infos'}, g.infos.slice(0, 4).map(i => el('li', {}, i.titel))) : null,
-      el('button', {type:'button', class:'btn secondary', onclick:() => setTab('infos')}, 'Alle Unterlagen ansehen')]});
-    steps.push({id:'geruest', t:'Gerüst ins Doc', s:glied.length ? glied.length + ' Abschnitte laut Vorgabe' : 'Aufbau laut Vorgabe', body:() => [
-      el('p', {}, 'Übernimm den Aufbau als Zwischentitel ins Doc. Dann weisst du beim Schreiben immer, wo du bist.'),
+    // Material: nur was dieses Kapitel braucht, je mit «Quelle». Interne Ablagen bleiben weg.
+    // Interne Ablagen erscheinen nicht. Dazu die Stellen aus den Vorgaben der Schule, die für dieses Kapitel gelten.
+    const intern = wo => /notion/i.test(wo || '');
+    const schule = [...new Set((g.muss || []).flatMap(m => String(m.quelle || '').split(';')).map(x => x.trim())
+      .filter(x => /^(Konzept PA6|Merkmalblatt 6[ab]|Yuh-Praxisauftrag|Praxisauftrag|Auftrag PA6|Formale Vorschriften)/.test(x)))];
+    const material = (g.infos || []).filter(i => !intern(i.wo))
+      .map(i => ({titel:i.titel, inhalt:i.inhalt, quelle:publicPlace(i.wo), link:i.link}))
+      .concat(schule.length ? [{titel:'Vorgaben der Schule', inhalt:'Diese Stellen gelten für dein Kapitel. Lies sie im Original nach.', quelle:schule.join(' · ')}] : []);
+    steps.push({id:'material', t:'Material holen', s:'Was du für dieses Kapitel brauchst', body:() => [
+      el('p', {}, 'Leg dir das bereit, bevor du schreibst. Zahlen nur aus Quellen, die du angeben kannst.'),
+      material.length ? el('ul', {class:'w-infos'}, material.map(i => el('li', {}, el('b', {}, i.titel), i.inhalt ? el('span', {class:'w-infos-t'}, i.inhalt) : null, el('span', {class:'w-infos-a'}, safeLink(i.link), sourceTag(i.quelle))))) : el('p', {class:'quiet'}, 'Für dieses Kapitel ist noch kein Material eingetragen.'),
+      g.daten_ab ? el('p', {class:'note'}, 'Die eigenen Daten kommen ab ' + g.daten_ab + '.') : null]});
+    steps.push({id:'geruest', t:'Gerüst ins Doc', s:glied.length ? glied.length + ' Zwischentitel laut Vorgabe' : 'Aufbau laut Vorgabe', body:() => [
+      el('p', {}, 'Kopier die Zwischentitel ins Doc. So weisst du beim Schreiben immer, wo du bist.'),
       glied.length ? el('ol', {class:'steps'}, glied.map(x => el('li', {}, x))) : el('p', {class:'quiet'}, 'Der Aufbau wird gerade ergänzt.'),
       glied.length ? copyBtnWide(glied.join('\n'), 'Gliederung kopieren') : null]});
     const teilListe = el('ul', {class:'checks'});
     const teilZahl = el('span', {class:'w-count'});
     const teilStand = () => { const n = glied.filter((_, i) => teile[i]).length; teilZahl.textContent = n + ' von ' + glied.length; store.set(teileKey, teile); kopf(); };
     fill(teilListe, glied.map((x, i) => check(teile, 'teil', i, x, null, teilStand)));
-    steps.push({id:'schreiben', t:'Abschnitt für Abschnitt schreiben', s:'Hak jeden Abschnitt ab, sobald er steht', progress:() => glied.length ? [glied.filter((_, i) => teile[i]).length, glied.length] : null, body:() => [
-      el('p', {}, 'Ein Abschnitt nach dem anderen, in ganzen Sätzen. Jede fremde Aussage bekommt gleich ihren Beleg (Autor, Jahr).'),
+    steps.push({id:'schreiben', t:'Abschnitt für Abschnitt schreiben', s:umfang ? 'Ziel: ' + umfang : 'Hak jeden Abschnitt ab, sobald er steht', progress:() => glied.length ? [glied.filter((_, i) => teile[i]).length, glied.length] : null, body:() => [
+      el('p', {}, 'Schreib einen Abschnitt nach dem anderen, in ganzen Sätzen. Jede fremde Aussage bekommt sofort ihren Beleg (Autor, Jahr).'),
+      umfang ? el('p', {class:'w-goal'}, el('span', {}, 'Umfang'), el('b', {}, umfang)) : null,
       glied.length ? el('div', {class:'w-sub'}, el('div', {class:'row'}, el('h3', {}, 'Geschrieben'), teilZahl), teilListe) : null,
-      el('button', {type:'button', class:'btn secondary', onclick:() => { track('hilfe', 'schreiben'); setTab('hilfe'); state.askHilfe && state.askHilfe('Schlag mir eine Gliederung in Stichworten vor.'); }}, 'Stichworte von der Schreibhilfe')], after:teilStand});
+      linkBtn('Stichworte von der Schreibhilfe', () => { track('hilfe', 'schreiben'); setTab('hilfe'); state.askHilfe && state.askHilfe('Schlag mir eine Gliederung in Stichworten vor.'); })], after:teilStand});
   }
   const mussListe = el('ul', {class:'checks'}), mussZahl = el('span', {class:'w-count'});
   const mussStand = () => { const n = muss.filter((_, i) => done[i]).length; mussZahl.textContent = n + ' von ' + muss.length; store.set(checksKey, done); kopf(); };
-  fill(mussListe, muss.map((m, i) => check(done, 'm', i, m.punkt, m.quelle, mussStand)));
-  steps.push({id:'pruefen', t:reading ? 'Gegenlesen mit der Liste' : 'Auf volle Punkte prüfen', s:muss.length ? muss.length + ' Pflichtpunkte abhaken' : 'Pflichtpunkte prüfen', progress:() => muss.length ? [muss.filter((_, i) => done[i]).length, muss.length] : null, body:() => [
+  fill(mussListe, muss.flatMap((m, i) => [m.form && i > 0 && !muss[i - 1].form ? el('li', {class:'checks-h', 'aria-hidden':'true'}, 'Form') : null, check(done, 'm', i, m.punkt, publicSource(m.quelle), mussStand)]));
+  steps.push({id:'pruefen', t:reading ? 'Gegenlesen mit der Liste' : 'Auf volle Punkte prüfen', s:muss.length ? 'Fertig, wenn alle ' + muss.length + ' Häkchen sitzen' : 'Pflichtpunkte prüfen', progress:() => muss.length ? [muss.filter((_, i) => done[i]).length, muss.length] : null, body:() => [
     el('p', {}, reading ? 'Geh Punkt für Punkt durch. Was fehlt, kommentierst du im Doc. Den Text änderst du nicht selbst.' : 'Hak nur ab, was wirklich im Text steht. Jeder fehlende Punkt kostet Punkte.'),
-    muss.length ? el('div', {class:'w-sub'}, el('div', {class:'row'}, el('h3', {}, 'Muss drin sein'), mussZahl), mussListe) : null,
-    rasterBlock(),
-    (g.nicht || []).length || (g.fallen || []).length ? el('details', {class:'rule achten'}, el('summary', {}, 'Typische Fehler und was nicht hierhin gehört'), el('div', {},
-      (g.fallen || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Typische Fehler'), muster(g.fallen)) : null,
-      (g.nicht || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Gehört nicht hierhin'), muster(g.nicht)) : null)) : null,
-    reading ? null : el('button', {type:'button', class:'btn secondary', onclick:() => { track('hilfe', 'pruefen'); setTab('hilfe'); state.askHilfe && state.askHilfe('Was fehlt mir noch für volle Punkte?'); }}, 'Schreibhilfe fragen, was noch fehlt')], after:mussStand});
-  steps.push({id:'abgeben', t:reading ? 'Rückmeldung geben' : 'Übergeben', s:reading ? 'Kommentare im Doc, dann Bescheid geben' : gegen ? gegen + ' liest gegen' : 'Zum Gegenlesen weitergeben', body:() => [
-    el('p', {}, reading ? 'Wenn deine Kommentare im Doc stehen, sag ' + (autor || 'der Person') + ' Bescheid. Sie arbeitet sie ein.' : 'Wenn alle Pflichtpunkte drin sind, gib das Kapitel zur Prüfung. Salah schaut es sich an.' + (gegen ? ' ' + gegen + ' liest gegen.' : '')),
+    muss.length ? el('div', {class:'w-sub'}, el('div', {class:'row'}, el('h3', {}, 'Fertig, wenn …'), mussZahl), mussListe) : null,
+    (g.nicht || []).length || (g.fallen || []).length ? more('Typische Fehler und was nicht hierhin gehört',
+      (g.fallen || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Typische Fehler'), el('ul', {class:'plain'}, g.fallen.map(x => el('li', {}, x)))) : null,
+      (g.nicht || []).length ? el('div', {class:'sub-block'}, el('h3', {class:'sub-h'}, 'Gehört nicht hierhin'), el('ul', {class:'plain'}, g.nicht.map(x => el('li', {}, x)))) : null) : null,
+    reading ? null : linkBtn('Schreibhilfe fragen, was noch fehlt', () => { track('hilfe', 'pruefen'); setTab('hilfe'); state.askHilfe && state.askHilfe('Was fehlt mir noch für volle Punkte?'); })], after:mussStand});
+  steps.push({id:'abgeben', t:reading ? 'Rückmeldung geben' : 'Übergeben', s:reading ? 'Kommentare ins Doc, dann Bescheid geben' : gegen ? 'An ' + gegen + ' zum Gegenlesen' : 'Zum Gegenlesen weitergeben', body:() => [
+    el('p', {}, reading ? 'Wenn deine Kommentare im Doc stehen, sag ' + (autor || 'der Person') + ' Bescheid. Sie arbeitet sie ein.' : 'Wenn alles abgehakt ist, gib das Kapitel weiter. ' + (gegen ? gegen + ' liest gegen, ' : '') + 'Salah schaut es sich an. Du trägst dabei deine Zeit ein.'),
     reading ? null : el('button', {type:'button', class:'btn', disabled:viewing() || !c.id || c.plan ? true : null, onclick:() => handover(c)}, 'Zur Prüfung geben')]});
 
-  const wrap = el('div', {class:'weg'}), bar = el('div', {class:'w-bar', 'aria-hidden':'true'}), stand = el('p', {class:'w-stand'});
+  const wrap = el('div', {class:'weg'}), dots = el('span', {class:'w-dots', 'aria-hidden':'true'}), stand = el('span', {class:'w-stand'});
+  const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   function kopf() {
-    const n = steps.filter(s => weg.done[s.id]).length;
-    stand.textContent = n === steps.length ? 'Alle Schritte erledigt. Stark.' : 'Schritt ' + (Math.min(n + 1, steps.length)) + ' von ' + steps.length;
-    fill(bar, steps.map(s => el('i', {class:weg.done[s.id] ? 'on' : s.id === weg.open ? 'now' : ''})));
+    const n = steps.filter(s => weg.done[s.id]).length, cur = steps.findIndex(s => s.id === weg.open);
+    stand.textContent = n === steps.length ? 'Alle Schritte erledigt' : 'Schritt ' + (cur >= 0 ? cur + 1 : Math.min(n + 1, steps.length)) + ' von ' + steps.length;
+    fill(dots, steps.map(s => el('i', {class:s.id === weg.open ? 'now' : weg.done[s.id] ? 'on' : ''})));
     for (const s of steps) { const p = s.progress && s.progress(); if (s.countEl) s.countEl.textContent = p ? p[0] + '/' + p[1] : ''; }
+    const open = steps[cur] || steps.find(s => !weg.done[s.id]);
+    state.weg = {n, all:steps.length, cur:cur >= 0 ? cur + 1 : Math.min(n + 1, steps.length), title:n === steps.length && cur < 0 ? 'Alle Schritte erledigt' : open ? open.t : ''};
+    drawRail();
   }
   function save() { store.set(wegKey, weg); }
   function open(id, focus, toggle) {
     weg.open = toggle && weg.open === id ? null : id; save(); apply();
     const s = steps.find(x => x.id === weg.open);
-    if (s && focus) { s.head.focus({preventScroll:true}); s.node.scrollIntoView({block:'nearest', behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
+    if (s && focus) { s.head.focus({preventScroll:true}); s.node.scrollIntoView({block:'nearest', behavior:reduce() ? 'auto' : 'smooth'}); }
   }
   function apply() {
     for (const s of steps) { const on = s.id === weg.open; s.node.classList.toggle('open', on); s.head.setAttribute('aria-expanded', String(on)); s.panel.hidden = !on; }
@@ -524,17 +598,27 @@ function renderAuftrag(c, g) {
       el('span', {class:'w-num', 'aria-hidden':'true'}, String(i + 1)),
       el('span', {class:'w-tt'}, el('span', {class:'w-t'}, s.t), el('span', {class:'w-s'}, s.s)),
       s.countEl, el('span', {class:'chev', 'aria-hidden':'true'}));
-    const weiter = el('button', {type:'button', class:'btn', disabled:viewing() ? true : null, onclick:() => { if (viewing()) return; weg.done[s.id] = true; save(); track('erledigt', s.id); s.node.classList.add('done'); announce(s.t + ' erledigt'); if (next) open(next.id, true); else { weg.open = null; save(); apply(); } }}, next ? 'Weiter: ' + next.t : 'Fertig');
+    // Haken rastet ein, kurz danach geht der nächste Schritt auf. Messung wie bisher: genau ein «erledigt» je Klick.
+    const weiter = el('button', {type:'button', class:'btn w-go', disabled:viewing() ? true : null, onclick:() => {
+      if (viewing()) return; weg.done[s.id] = true; save(); track('erledigt', s.id); s.node.classList.add('done', 'snap'); announce(s.t + ' erledigt');
+      const go = () => { s.node.classList.remove('snap'); if (next) open(next.id, true); else { weg.open = null; save(); apply(); } };
+      if (reduce()) go(); else { weiter.disabled = true; setTimeout(() => { weiter.disabled = false; go(); }, 420); }
+    }}, next ? 'Weiter: ' + next.t : 'Fertig');
     const zurueck = weg.done[s.id] ? el('button', {type:'button', class:'btn ghost', disabled:viewing() ? true : null, onclick:() => { if (viewing()) return; delete weg.done[s.id]; save(); track('wieder_offen', s.id); s.node.classList.remove('done'); kopf(); }}, 'Wieder öffnen') : null;
     s.panel = el('div', {class:'w-body', id:'w-' + s.id, hidden:true}, s.body(), el('div', {class:'w-act'}, weiter, zurueck));
     s.node = el('section', {class:'w-step' + (weg.done[s.id] ? ' done' : '')}, s.head, s.panel);
     if (s.after) s.after();
   });
   fill(wrap, steps.map(s => s.node));
-  fill($('tab-auftrag'), viewing() ? el('p', {class:'note'}, 'Diese Ansicht ist nur zum Lesen.') : null, el('div', {class:'w-top'}, stand, bar), wrap);
+  fill($('tab-auftrag'), viewing() ? el('p', {class:'note'}, 'Diese Ansicht ist nur zum Lesen.') : null, el('div', {class:'w-top'}, stand, dots), wrap);
   const first = steps.find(s => !weg.done[s.id]);
   weg.open = weg.open && steps.some(s => s.id === weg.open) ? weg.open : first ? first.id : null;
   apply();
+}
+// Nur Links auf den Gruppenordner in der Drive, im neuen Fenster.
+function safeLink(href) {
+  if (!/^https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]+$/.test(href || '')) return null;
+  return el('a', {class:'doc-ext', href, target:'_blank', rel:'noopener noreferrer'}, 'Gruppenordner öffnen', el('span', {class:'ext', 'aria-hidden':'true'}, '↗'));
 }
 function copyBtnWide(text, label) {
   return el('button', {class:'btn secondary', type:'button', disabled:viewing() ? true : null, onclick:async e => { if (viewing()) return; const b = e.currentTarget; try { await navigator.clipboard.writeText(text); b.textContent = 'Kopiert, jetzt im Doc einfügen'; announce('Gliederung kopiert'); track('kopiert', 'geruest'); setTimeout(() => { b.textContent = label; }, 2400); } catch { announce('Kopieren nicht möglich'); } }}, label);
@@ -546,7 +630,7 @@ function renderInfos(g) {
     {titel:'Dashboard', wo:'Team-App', href:'/team/dashboard/', inhalt:'Rücklauf und Stand der Erhebung.'},
     {titel:'Pia fragen', wo:'Team-App', href:'/team/frag/', inhalt:'Fragen zu Regeln, Terminen und Unterlagen.'}];
   fill($('tab-infos'), 
-    block('Hier findest du, was du brauchst', (g.infos || []).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), (state.person === 'SA' || !/notion/i.test(i.wo || '')) ? el('p', {class:'where'}, i.wo) : null))),
+    block('Hier findest du, was du brauchst', (g.infos || []).filter(i => !/notion/i.test(i.wo || '')).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), publicPlace(i.wo) ? el('p', {class:'where'}, publicPlace(i.wo)) : null, safeLink(i.link) ? el('p', {}, safeLink(i.link)) : null))),
     block('Direkt in der Team-App', el('div', {class:'links'}, inApp.map(i => el('a', {class:'lnk', href:i.href}, el('b', {}, i.titel), el('span', {}, i.inhalt), el('i', {class:'go', 'aria-hidden':'true'}, '›'))))));
 }
 function copyBtn(text) {
@@ -652,28 +736,73 @@ function renderHilfe(c, g) {
 }
 
 // ---------- Doc ----------
+// 05.11.2026 Salah: über dem Doc steht nichts. Links die Seitenleiste, rechts das Doc über die volle Höhe.
+// «Im eigenen Fenster öffnen» ist ein kleiner Link in der Seitenleiste; der Hinweis zum Anmelden erscheint nur, wenn das Doc wirklich nicht lädt.
 function renderDoc(c) {
   const url = docUrl(c);
+  clearTimeout(state.docTimer); docTrouble(false);
   const empty = (title, text, action) => fill($('doc'), el('div', {class:'doc-card doc-empty'}, el('span', {class:'doc-ico', 'aria-hidden':'true'}), el('p', {class:'big-note'}, title), el('p', {class:'quiet'}, text), action || null));
-  if (!url && c.plan) return empty('Das Doc dieses Kapitels sehen Pate und Gegenleser.', 'Den Auftrag kannst du hier lesen.');
+  fill($('bar-doc'));
+  if (!url && c.plan) return empty('Das Doc dieses Kapitels sehen Pate und Gegenleser.', 'Den Auftrag kannst du links lesen.');
   if (!url) return empty('Für dieses Kapitel ist noch kein Doc verknüpft.', 'Salah legt es an.');
   const docMode = viewing() ? '/preview' : '/edit';
-  const open = (cls, text) => el('a', {class:'btn ' + cls, href:url + docMode, target:'_blank', rel:'noopener noreferrer'}, text, el('span', {class:'ext', 'aria-hidden':'true'}, '↗'));
+  state.docHref = url + docMode;
+  fill($('bar-doc'), el('a', {class:'doc-ext', href:state.docHref, target:'_blank', rel:'noopener noreferrer'}, 'Im eigenen Fenster öffnen', el('span', {class:'ext', 'aria-hidden':'true'}, '↗')));
   // Safari und iOS sperren Drittanbieter-Cookies: dort ist man im eingebetteten Doc nicht angemeldet und kann nicht schreiben.
   const ua = navigator.userAgent, safari = /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS/.test(ua);
-  if (safari) return empty('In Safari öffnet sich dein Doc im eigenen Fenster.', 'Safari erlaubt das Schreiben im eingebetteten Doc nicht. Stell die Fenster nebeneinander, dann hast du den Auftrag immer daneben.', open('primary', 'Doc öffnen'));
+  if (safari) return empty('In Safari öffnet sich dein Doc im eigenen Fenster.', 'Safari erlaubt das Schreiben im eingebetteten Doc nicht. Stell die Fenster nebeneinander, dann hast du den Auftrag immer daneben.',
+    el('a', {class:'btn', href:state.docHref, target:'_blank', rel:'noopener noreferrer'}, 'Doc öffnen', el('span', {class:'ext', 'aria-hidden':'true'}, '↗')));
   const frame = el('iframe', {src:url + docMode + '?usp=sharing', title:'Google Doc ' + c.ref, allow:'clipboard-read; clipboard-write', referrerpolicy:'no-referrer'});
-  fill($('doc'),
-    el('div', {class:'doc-card'},
-      el('div', {class:'doc-bar'},
-        el('span', {class:'doc-ico', 'aria-hidden':'true'}),
-        el('span', {class:'doc-t'}, el('b', {}, 'Kapitel-Doc'), el('span', {class:'saved'}, 'Google Doc · speichert automatisch')),
-        open('secondary wide', 'Im eigenen Fenster öffnen'), open('primary narrow', 'Doc öffnen')),
-      frame),
-    el('p', {class:'doc-hint'}, 'Leer oder Anmeldung verlangt? Einmal «Im eigenen Fenster öffnen», bei Google anmelden, dann hier neu laden.'));
-  // 03.11.2026 Salah: Doc soll die Höhe ausnutzen. Am Desktop sitzen Öffnen-Knopf und Hinweis in der Kopfzeile statt über und unter dem Doc.
-  if ($('bar-doc')) fill($('bar-doc'), open('secondary', 'Im eigenen Fenster öffnen'), el('span', {class:'bar-hint', title:'Leer oder Anmeldung verlangt? Einmal «Im eigenen Fenster öffnen», bei Google anmelden, dann hier neu laden.'}, 'Doc leer? Einmal im eigenen Fenster öffnen, dann neu laden.'));
+  let loaded = false;
+  frame.addEventListener('load', () => { loaded = true; });
+  state.docTimer = setTimeout(() => { if (!loaded) docTrouble(true); }, 15000);
+  fill($('doc'), el('div', {class:'doc-card'}, frame));
 }
+// Fehlt die Google-Anmeldung, leitet das Doc auf die Anmeldeseite um. Die Seite lässt nur Docs zu, also meldet der Browser eine Sperre: daran erkennen wir es.
+document.addEventListener('securitypolicyviolation', e => {
+  if (/^frame-src|^child-src/.test(e.effectiveDirective || e.violatedDirective || '') && document.querySelector('#doc iframe')) docTrouble(true);
+});
+function docTrouble(on) {
+  const box = $('doc-warn');
+  document.body.classList.toggle('doc-problem', !!on);
+  if (!on) { box.hidden = true; fill(box); drawRail(); return; }
+  if (!box.hidden) return;
+  fill(box, el('p', {class:'dw-t'}, 'Das Doc lädt nicht.'),
+    el('p', {class:'dw-s'}, 'Öffne es einmal im eigenen Fenster und melde dich bei Google an. Dann lade diese Seite neu.'),
+    el('div', {class:'dw-act'}, state.docHref ? el('a', {class:'btn secondary', href:state.docHref, target:'_blank', rel:'noopener noreferrer'}, 'Im eigenen Fenster öffnen', el('span', {class:'ext', 'aria-hidden':'true'}, '↗')) : null,
+      el('button', {type:'button', class:'btn ghost', onclick:() => location.reload()}, 'Neu laden')));
+  box.hidden = false;
+  drawRail();
+}
+
+// ---------- Seitenleiste: einklappen am Laptop, unten als Blatt am Handy ----------
+const NARROW = '(max-width: 899px)';
+function narrow() { return !!(window.matchMedia && matchMedia(NARROW).matches); }
+function sideKey() { return narrow() ? 'pa6-sp-blatt' : 'pa6-sp-leiste'; }
+function sideClosed() { const v = store.get(sideKey(), null); return v === null ? narrow() : v === 'zu'; }
+function applySide(focus) {
+  const on = document.body.classList.contains('kapitel'), zu = on && sideClosed();
+  document.body.classList.toggle('side-zu', zu);
+  $('rail').hidden = !zu;
+  $('rail').setAttribute('aria-expanded', String(!zu));
+  $('side-toggle').setAttribute('aria-expanded', String(!zu));
+  $('side-toggle-t').textContent = narrow() ? 'Schritte ausblenden' : 'Seitenleiste einklappen';
+  drawRail();
+  if (focus) (zu ? $('rail') : $('side-toggle')).focus({preventScroll:true});
+}
+function setSide(zu) { store.set(sideKey(), zu ? 'zu' : 'auf'); applySide(true); announce(zu ? 'Seitenleiste eingeklappt' : 'Seitenleiste offen'); }
+function drawRail() {
+  const w = state.weg || {}, trouble = document.body.classList.contains('doc-problem');
+  fill($('rail'), el('span', {class:'rl-ico', 'aria-hidden':'true'}),
+    w.all ? el('span', {class:'rl-n', 'aria-hidden':'true'}, (w.n === w.all ? w.all : w.cur) + '/' + w.all) : null,
+    el('span', {class:'rl-t'}, el('span', {class:'rl-k'}, trouble ? 'Das Doc lädt nicht' : w.all ? (w.n === w.all ? 'Alle Schritte erledigt' : 'Schritt ' + w.cur + ' von ' + w.all) : 'Schreibweg'),
+      el('span', {class:'rl-s'}, w.n === w.all ? (state.chapter && state.chapter.title) || '' : w.title || '')),
+    el('span', {class:'sr'}, ' · Seitenleiste öffnen'),
+    trouble ? el('span', {class:'rl-warn', 'aria-hidden':'true'}) : null);
+}
+$('side-toggle').addEventListener('click', () => setSide(true));
+$('rail').addEventListener('click', () => setSide(false));
+if (window.matchMedia) { const mq = matchMedia(NARROW); if (mq && mq.addEventListener) mq.addEventListener('change', () => applySide()); }
 
 // ---------- Tabs ----------
 function setTab(name) {
@@ -682,9 +811,9 @@ function setTab(name) {
   for (const b of $('tabs').querySelectorAll('button')) { const on = b.dataset.tab === name; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; }
   for (const t of ['auftrag', 'infos', 'regeln', 'hilfe']) $('tab-' + t).hidden = t !== name;
   $('panel').scrollTop = 0;
-  // Schmal scrollt die ganze Seite: beim Wechsel an den Anfang des Bereichs, nicht mitten in den neuen Inhalt.
-  const side = document.querySelector('.side'), top = side ? side.getBoundingClientRect().top + scrollY : 0;
-  if (document.body.classList.contains('kapitel') && scrollY > top) scrollTo(0, top);
+  // Die Seitenleiste scrollt für sich: beim Wechsel an den Anfang des Bereichs, nicht mitten in den neuen Inhalt.
+  const sb = $('side-body'), tabs = $('tabs');
+  if (sb && tabs && sb.scrollTop > tabs.offsetTop) sb.scrollTop = tabs.offsetTop;
 }
 $('tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) setTab(b.dataset.tab); });
 $('tabs').addEventListener('keydown', e => {

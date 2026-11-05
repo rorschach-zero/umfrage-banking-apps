@@ -6,36 +6,40 @@
 <meta name="theme-color" content="#F8F9F6">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src https://docs.google.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Schreibplatz · PA6</title>
-<link rel="stylesheet" href="schreiben.css?v=52eba679cbc2">
+<link rel="stylesheet" href="schreiben.css?v=6fb96135951e">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0">
 <link rel="stylesheet" href="../zeit.css?v=0547fa549500">
 <script src="../view-as.js?v=41cc5d81f7cc" defer></script>
 <script src="../config.js?v=913895d9d484" defer></script>
 <script src="../zeit.js?v=9aae461011f6" defer></script>
-<script src="schreiben.js?v=d6d10df81e4d" defer></script>
+<script src="schreiben.js?v=b2152e0f0087" defer></script>
 </head>
 <body>
 <a class="skip" href="#panel">Direkt zum Auftrag</a>
-<header class="bar">
-  <a class="back" href="/team/">← Unser Projekt</a>
-  <div class="bar-title"><span class="eyebrow" id="part">Schreibplatz</span><h1 id="title">Kapitel wird geladen …</h1><div class="bar-meta" id="meta"></div></div>
-  <div class="bar-doc" id="bar-doc"></div>
-  <div class="pick" id="pick"></div>
-</header>
 <div class="layout">
-  <div class="side">
-    <nav class="tabs" id="tabs" role="tablist" aria-label="Bereiche">
-      <button type="button" role="tab" id="t-auftrag" data-tab="auftrag" aria-controls="tab-auftrag" aria-selected="true">Auftrag</button>
-      <button type="button" role="tab" id="t-infos" data-tab="infos" aria-controls="tab-infos" aria-selected="false" tabindex="-1">Infos</button>
-      <button type="button" role="tab" id="t-regeln" data-tab="regeln" aria-controls="tab-regeln" aria-selected="false" tabindex="-1"><span class="long">APA &amp; </span>Regeln</button>
-      <button type="button" role="tab" id="t-hilfe" data-tab="hilfe" aria-controls="tab-hilfe" aria-selected="false" tabindex="-1">Hilfe</button>
-    </nav>
-    <main class="panel" id="panel" tabindex="-1">
-      <section id="tab-auftrag" class="tab" role="tabpanel" aria-labelledby="t-auftrag"></section>
-      <section id="tab-infos" class="tab" role="tabpanel" aria-labelledby="t-infos" hidden></section>
-      <section id="tab-regeln" class="tab" role="tabpanel" aria-labelledby="t-regeln" hidden></section>
-      <section id="tab-hilfe" class="tab" role="tabpanel" aria-labelledby="t-hilfe" hidden></section>
-    </main>
+  <div class="side" id="side">
+    <button type="button" class="rail" id="rail" aria-controls="side-body" aria-expanded="false" hidden></button>
+    <div class="side-body" id="side-body">
+      <header class="bar">
+        <a class="back" href="/team/">← Unser Projekt</a>
+        <div class="bar-title"><span class="eyebrow" id="part">Schreibplatz</span><h1 id="title">Kapitel wird geladen …</h1><div class="bar-meta" id="meta"></div></div>
+        <button type="button" class="side-toggle" id="side-toggle" aria-controls="side-body" aria-expanded="true" hidden><span class="sr" id="side-toggle-t">Seitenleiste einklappen</span><span class="tg-ico" aria-hidden="true"></span></button>
+        <div class="bar-act"><div class="pick" id="pick"></div><div class="bar-doc" id="bar-doc"></div></div>
+        <div class="doc-warn" id="doc-warn" role="status" hidden></div>
+      </header>
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Bereiche">
+        <button type="button" role="tab" id="t-auftrag" data-tab="auftrag" aria-controls="tab-auftrag" aria-selected="true">Auftrag</button>
+        <button type="button" role="tab" id="t-infos" data-tab="infos" aria-controls="tab-infos" aria-selected="false" tabindex="-1">Infos</button>
+        <button type="button" role="tab" id="t-regeln" data-tab="regeln" aria-controls="tab-regeln" aria-selected="false" tabindex="-1"><span class="long">APA &amp; </span>Regeln</button>
+        <button type="button" role="tab" id="t-hilfe" data-tab="hilfe" aria-controls="tab-hilfe" aria-selected="false" tabindex="-1">Hilfe</button>
+      </nav>
+      <main class="panel" id="panel" tabindex="-1">
+        <section id="tab-auftrag" class="tab" role="tabpanel" aria-labelledby="t-auftrag"></section>
+        <section id="tab-infos" class="tab" role="tabpanel" aria-labelledby="t-infos" hidden></section>
+        <section id="tab-regeln" class="tab" role="tabpanel" aria-labelledby="t-regeln" hidden></section>
+        <section id="tab-hilfe" class="tab" role="tabpanel" aria-labelledby="t-hilfe" hidden></section>
+      </main>
+    </div>
   </div>
   <section class="doc" id="doc" aria-label="Kapitel-Dokument"></section>
 </div>
