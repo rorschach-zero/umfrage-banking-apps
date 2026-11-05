@@ -383,9 +383,8 @@ function missingSources(){
   return list.length?list.join(', ').replace(/, ([^,]*)$/,' und $1')+' laden gerade nicht.':'';
 }
 function weekZeitNote(){
-  const w=data?.zeit?.woche;
-  if(w==null||w===undefined||Number.isNaN(+w))return null;
-  return el('small',{class:'zeit-week'},+w>0?'Diese Woche erfasst: '+String(w).replace('.',',')+' h':'Noch keine Zeit diese Woche erfasst');
+  // Zeit wird nicht mehr sichtbar abgefragt (Salah 05.11.); gemessen wird still über den Auftragspfad.
+  return null;
 }
 function groupLine(){
   const sv=data.survey,parts=[];
