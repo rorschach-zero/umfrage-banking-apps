@@ -143,7 +143,7 @@ function openRequestedTask(){
 }
 function dedupeChapterTasks(){
   if(!data||!Array.isArray(data.tasks)||!Array.isArray(data.chapters))return;
-  // Nur echte Doppelungen: gleiches Kapitel, gleiche Person UND gleiche Frist. Ein zweiter Auftrag zum Kapitel mit eigener Frist bleibt sichtbar (Befund Astro t46).
+  // Nur echte Doppelungen: gleiches Kapitel, gleiche Person UND gleiche Frist. Ein zweiter Auftrag zum Kapitel mit eigener Frist bleibt sichtbar.
   const day=v=>String(v||'').slice(0,10),own=new Set(data.chapters.map(c=>(c.ref||'')+'|'+(c.owner||'')+'|'+day(c.due)));
   data.tasks=data.tasks.filter(t=>{const m=/schreiben\/\?k=([\w.-]+)/.exec(String(t.Wo||''));return !(m&&day(t.due)&&own.has(m[1]+'|'+(t.owner||'')+'|'+day(t.due)));});
 }
