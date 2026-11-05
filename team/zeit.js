@@ -37,7 +37,11 @@ function taskPaket(row) {
   return /^AP-\d{3}$/.test(row?.ref || '') ? row.ref : '';
 }
 function closureId(opts) {
-  return opts && /^[a-zA-Z0-9_-]{16,80}$/.test(opts.id || '') ? opts.id : crypto.randomUUID();
+  if (opts && /^[a-zA-Z0-9_-]{16,80}$/.test(opts.id || '')) return opts.id;
+  try { if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+  const bytes = new Uint8Array(16);
+  try { crypto.getRandomValues(bytes); } catch (e) { for (let i = 0; i < 16; i += 1) bytes[i] = Math.floor(Math.random() * 256); }
+  return 'z' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
 }
 function closureQuelle(opts) {
   return ['abschluss', 'werkzeug_b', 'werkzeug_c', 'schreibplatz', 'hand'].includes(opts && opts.quelle) ? opts.quelle : 'abschluss';
