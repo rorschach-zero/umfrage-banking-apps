@@ -7,6 +7,8 @@ async function serviceAction(body) {
   try { const result=await sende(body);bOffen=null;await start();window.dispatchEvent(new Event('workspace-saved'));serviceMessage(result.assigned!==undefined?result.assigned+' Kontakte übernommen.':'Gespeichert.');return result; }
   catch(error){serviceMessage(error.message);return null;}
 }
+// Zweck-Karte auf dieser Seite standardmässig eingeklappt: eine ruhige Zeile, «Heute dran» bleibt im ersten Bild.
+document.querySelector('.purpose-slot .purpose-card')?.removeAttribute('open');
 // bOffen: offener Vorbereitungsschritt (1–3), 0 = alle zu, null = automatisch der aktuelle.
 let bOffen=null, startDay='', bListeOffen='', bZuteilung=null, bZuteilungFehler='', bAuswahl=null;
 const B_ANLIEGEN={Karte:'Karte im Ausland verloren',Anmeldung:'App auf neuem Handy einrichten',Zahlung:'Ist meine Zahlung angekommen?',Kontodokumente:'Kontoauszug für die Steuer'};
@@ -48,17 +50,16 @@ async function bZuteilen(providers,day,button){
   const neu=bEchte().filter(r=>!vorher.has(r.nr));
   bZuteilung={n:result.assigned,wem:bName(),rows:neu.map(r=>r.nr)};
   if(!result.assigned)bOffen=2;
-  liste();serviceMessage(result.assigned+' Kontakte übernommen.');
+  liste();if(!result.assigned)serviceMessage(result.assigned+' Kontakte übernommen.');
   return result;
 }
 function bZuteilungsKarte(){
   if(!bZuteilung)return null;
-  const rows=bEchte().filter(r=>bZuteilung.rows.includes(r.nr));
   if(!bZuteilung.n)return el('div',{class:'b-result is-empty',role:'status'},el('p',{class:'b-result-title'},'Gerade ist nichts frei für dich.'),
     el('p',{},'Wähle eine weitere Bank oder einen späteren Tag. Klappt es nicht, frag Salah.'));
+  const n=bZuteilung.n;
   return el('div',{class:'b-result',role:'status'},
-    el('p',{class:'b-result-title'},bIcon('check'),bZuteilung.n+(bZuteilung.n===1?' Kontakt':' Kontakte')+' für '+bZuteilung.wem),
-    rows.length?el('ul',{class:'b-result-list'},rows.map(r=>el('li',{},el('b',{},bWas(r)),el('span',{},bKanalText(r)+' · '+bTag(r.tag)+' · '+bZeit(r.block))))):null,
+    el('p',{class:'b-result-title'},bIcon('check'),el('span',{},el('span',{},n+' Kontakte übernommen.'),' Sie gehören dir ('+bZuteilung.wem+') und sind unten mit «neu» markiert.')),
     el('button',{type:'button',class:'b-link','data-read-navigation':true,on:{click:()=>{bZuteilung=null;liste();}}},'Ausblenden'));
 }
 // «Heute dran»: der nächste Kontakt gross, mit genau einem Hauptknopf.
@@ -116,7 +117,7 @@ function renderBSetup(main) {
   const kopf=bereit?el('section',{class:'b-prep is-done','aria-labelledby':'b-prep-h'},el('h2',{id:'b-prep-h',class:'b-section-h'},'Vorbereitung'),steps)
     :el('section',{class:'b-today b-prep','aria-labelledby':'b-today-h'},el('h2',{id:'b-today-h'},'Heute dran'),
       el('p',{class:'b-today-lead'},'Bereite dich in drei Schritten vor. Danach steht hier dein nächster Kontakt.'),
-      el('div',{class:'b-path-k'},el('span',{},'Schritt '+aktuell+' von 3'),el('span',{class:'b-dots','aria-hidden':'true'},[s1,s2,s3].map((ok,i)=>el('i',{class:ok?'on':i===aktuell-1?'now':''})))),steps);
+      el('div',{class:'b-path-k'},el('span',{},'Schritt '+aktuell+' von 3'+([s1,s2,s3].filter(Boolean).length?' · '+[s1,s2,s3].filter(Boolean).length+' erledigt':'')),el('span',{class:'b-dots','aria-hidden':'true'},[s1,s2,s3].map((ok,i)=>el('i',{class:i===aktuell-1?'now':ok?'on':''})))),steps);
   if(bereit)main.append(bHeuteDran(state,naechster,laufend));
   main.append(kopf);
   if(echte.length)main.append(bKontaktliste(echte));
@@ -127,13 +128,13 @@ function renderBSetup(main) {
 }
 // Kontaktliste: nach Tag gruppiert, kompakt. Termin ändern erst nach Tipp auf einen Kontakt.
 function bKontaktZeile(r){
-  const status=statusVon(r),offen=bListeOffen===r.nr;
+  const status=statusVon(r),offen=bListeOffen===r.nr,neu=!!bZuteilung?.rows.includes(r.nr);
   const kopf=el('button',{type:'button',class:'b-row-head','aria-expanded':String(offen),'data-read-navigation':true,on:{click:()=>{bListeOffen=offen?'':r.nr;liste();document.querySelector('[data-nr="'+r.nr+'"] .b-row-head')?.focus();}}},
     el('span',{class:'b-row-time'},r.block==='A'?'09–12':'13–17'),
-    el('span',{class:'b-row-main'},el('b',{},bWas(r)),el('small',{},bKanalText(r)+' · '+r.wiederholung+'. Durchgang · '+r.nr)),
+    el('span',{class:'b-row-main'},el('b',{},bWas(r),neu?el('span',{class:'b-new'},'neu'):null),el('small',{},bKanalText(r)+' · '+r.wiederholung+'. Durchgang · '+r.nr)),
     el('span',{class:'b-row-state is-'+status},status==='abgeschlossen'?'erledigt':status==='laufend'?'läuft':'offen'),
     el('span',{class:'b-row-chev'},bIcon('chev')));
-  return el('li',{class:'b-row'+(offen?' is-open':''),'data-nr':r.nr},kopf,offen?el('div',{class:'b-row-body'},
+  return el('li',{class:'b-row'+(offen?' is-open':'')+(neu?' is-new':''),'data-nr':r.nr},kopf,offen?el('div',{class:'b-row-body'},
     el('button',{type:'button',class:'knopf b-go','data-read-navigation':true,on:{click:()=>oeffne(r)}},status==='abgeschlossen'?'Ansehen':window.PA6View.active()?'Kontakt ansehen':status==='laufend'?'Weiter erfassen':'Kontakt starten'),
     !r.erfasst?el('div',{class:'b-move'},el('p',{class:'b-label'},'Anderer Tag?'),serviceSchedule(r)):null):null);
 }

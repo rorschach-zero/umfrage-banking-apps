@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-oSXbHL7KwDY/1geI3nflkCJ+0XfdpcB1lcrq7UQ8+G0='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-D3xlZvNGjIptgdhkqwTCSWVqKz83z7pnws6+d7IbkYU='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
 <link rel="stylesheet" href="../zeit.css?v=89af72ec7702">
-<link rel="stylesheet" href="../service.css?v=0f9c853d9bc6">
+<link rel="stylesheet" href="../service.css?v=0e8c983262d5">
 <link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=f0c645b33957" defer></script>
 </head>
 <body class="b-page">
@@ -16,7 +16,7 @@
 <script src="../view-as.js?v=41cc5d81f7cc"></script>
 <script src="../team.js?v=d75ca30a4cc4"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
-<script src="../service.js?v=d1a1619da168"></script>
+<script src="../service.js?v=fd6415134c14"></script>
 <script src="../zeit.js?v=88cf8e4ad5e0"></script>
 <script>
 // Regeln aus 10_pa6a/beobachtung/Testprotokoll.md, Version 4. Die Maske schlaegt vor, die Person entscheidet.
@@ -53,13 +53,14 @@ function statusVon(r) { const e = r.erfasst; return !e ? "offen" : e.stand === "
 function liste() {
   if (aktiv?.erfasst?.stand === "abgeschlossen") bOffen = null;
   aktiv = null; document.getElementById("fuss").hidden = true; document.body.classList.remove("b-form-open");
-  const m = document.getElementById("main"); fuelle(m, );
+  const m = document.getElementById("main"), stand = document.getElementById("field-updated"); fuelle(m, );
   const p = bEchte();
   const fertig = p.filter(r => statusVon(r) === "abgeschlossen").length;
   const ziel = daten.service && daten.service.config ? daten.service.config.target : p.length;
   m.append(el("h1", {}, "Servicetest"),
     el("div", { class: "b-sub" }, el("p", {}, p.length ? el("b", {}, `${fertig} von ${p.length}`) : `Ziel ${ziel} Kontakte`, p.length ? " Kontakten erledigt" : " · so startest du"),
       p.length ? el("div", { class: "b-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(p.length), "aria-valuenow": String(fertig), "aria-label": "Kontakte erledigt" }, el("i", { style: "width:" + Math.round(100 * fertig / p.length) + "%" })) : null));
+  if (stand) m.querySelector(".b-sub").append(stand);
   renderBSetup(m);
 }
 function gesperrt() { const l = belastung[aktiv.anbieter] || { nachrichten: 0, minuten: 0 }; return !aktiv.erfasst && (l.nachrichten >= STOPP.nachrichten || l.minuten >= STOPP.minuten); }
