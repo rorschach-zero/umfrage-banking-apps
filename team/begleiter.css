@@ -1,0 +1,57 @@
+/* Auftragsbegleiter (05.11.2026), Bricks-Werte. Laptop: Seitenleiste rechts wie im Auftrag, eingeklappt eine schmale Leiste.
+   Die Arbeitsfläche und die feste Fussleiste rücken nach links, nichts wird überdeckt. Handy: einklappbare Zeile oben. */
+.begleiter{--bg-acc:#237E79;--bg-acc-h:#17645F;--bg-ink:#22282B;--bg-sub:#687276;--bg-line:#E3E8E4;box-sizing:border-box;color:var(--bg-ink);font:inherit;font-size:15px;line-height:1.5}
+.begleiter *{box-sizing:border-box}
+body.bgl-offen{padding-right:360px}
+body.bgl-leiste{padding-right:56px}
+body.bgl-offen .fuss{right:360px}
+body.bgl-leiste .fuss{right:56px}
+.begleiter.is-panel{position:fixed;top:0;right:0;bottom:0;width:360px;z-index:40;background:#fff;border-left:1px solid var(--bg-line);box-shadow:-4px 0 18px rgba(25,36,38,.045);padding:20px 22px 24px;overflow-y:auto;animation:bgIn .22s cubic-bezier(.2,.7,.2,1)}
+.begleiter.is-panel.is-closed{width:56px;padding:0;overflow:hidden}
+.bg-rail{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;cursor:pointer;width:100%;color:var(--bg-ink)}
+.is-panel .bg-rail{flex-direction:column;justify-content:flex-start;height:100%;padding:20px 0;gap:14px}
+.is-panel .bg-rail .bg-chev{transform:rotate(135deg)}
+.is-panel .bg-rail-k{writing-mode:vertical-rl;transform:rotate(180deg);font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--bg-sub)}
+.bg-rail-n{font-size:12px;font-weight:800;color:#2B2550;background:#BEB8EA;border-radius:999px;padding:3px 8px;font-variant-numeric:tabular-nums}
+.bg-rail:hover .bg-rail-k{color:var(--bg-ink)}
+.bg-rail:focus-visible,.bg-collapse:focus-visible,.bg-btn:focus-visible,.bg-link:focus-visible,.bg-end:focus-visible,.bg-help:focus-visible{outline:2px solid var(--bg-acc);outline-offset:2px}
+.bg-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 14px}
+.bg-kicker{font-size:12px;font-weight:700;color:var(--bg-sub);letter-spacing:.02em}
+.bg-collapse{all:unset;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;cursor:pointer}
+.bg-collapse:hover{background:#F1F3F0}
+.bg-chev{width:8px;height:8px;border-right:2px solid var(--bg-sub);border-bottom:2px solid var(--bg-sub);transform:rotate(-45deg);transition:transform .18s}
+.bg-title{margin:0 0 14px;font-size:19px;font-weight:800;line-height:1.3;letter-spacing:-.01em}
+.bg-progress{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.bg-k{font-size:13px;font-weight:700;color:var(--bg-sub);font-variant-numeric:tabular-nums}
+.bg-dots{display:flex;gap:6px}
+.bg-dots i{width:8px;height:8px;border-radius:50%;background:var(--bg-line)}
+.bg-dots i.on{background:var(--bg-acc)}
+.bg-dots i.now{background:#BEB8EA;transform:scale(1.2)}
+.bg-note{margin:0 0 10px;display:inline-block;font-size:13px;font-weight:700;color:var(--bg-acc-h);background:#E6F3F0;border-radius:999px;padding:4px 12px;animation:bgIn .22s cubic-bezier(.2,.7,.2,1)}
+.bg-step{margin:0 0 18px;font-size:20px;line-height:1.4;font-weight:750;letter-spacing:-.015em;outline:none}
+.bg-sub{margin:-8px 0 16px;color:var(--bg-sub)}
+.bg-act{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 6px}
+.bg-btn{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 20px;border-radius:12px;background:var(--bg-acc);color:#fff;font-size:15px;font-weight:750;cursor:pointer;text-decoration:none}
+.bg-btn:hover{background:var(--bg-acc-h)}
+.bg-btn.bg-sec{background:#fff;color:var(--bg-ink);border:1px solid #CDD5D0}
+.bg-help{display:inline-block;margin:8px 0 18px;font-size:13px;font-weight:650;color:var(--bg-sub);text-decoration:underline;text-underline-offset:3px;text-decoration-color:#C9D2CD}
+.bg-all{border-top:1px solid var(--bg-line);border-bottom:1px solid var(--bg-line);margin:0 0 16px}
+.bg-all summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:14px;font-weight:650;color:#3B4548;list-style:none}
+.bg-all summary::-webkit-details-marker{display:none}
+.bg-all ol{margin:0 0 12px;padding-left:20px;font-size:14px}
+.bg-all li{margin:0 0 6px}
+.bg-all li.done{color:#8A9397}
+.bg-all li.cur{font-weight:700}
+.bg-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px}
+.bg-link{font-weight:650;color:var(--bg-acc-h);text-decoration:none}
+.bg-end{all:unset;cursor:pointer;color:var(--bg-sub);font-size:12px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#C9D2CD}
+/* Handy und schmale Fenster: Zeile oben, klebt unter dem Kopf */
+.begleiter.is-bar{position:sticky;z-index:25;margin:12px 16px 4px;background:#fff;border:1px solid #D6DED9;border-radius:16px;box-shadow:0 4px 18px rgba(25,36,38,.06);padding:14px 16px 16px}
+.begleiter.is-bar.is-closed{padding:8px 12px}
+.is-bar .bg-rail .bg-chev{transform:rotate(45deg);margin:0 2px 3px}
+.is-bar .bg-rail-k{font-size:12px;font-weight:700;color:var(--bg-sub)}
+.bg-peek{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;font-weight:650}
+.is-bar .bg-collapse .bg-chev{transform:rotate(-135deg) translate(-2px,-2px)}
+@media (min-width:700px){.begleiter.is-bar{max-width:860px;margin:12px auto 4px}}
+@keyframes bgIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.begleiter,.bg-note{animation:none}.bg-chev{transition:none}}
