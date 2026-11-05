@@ -207,18 +207,6 @@ function takeOver(row){
   $('detail-body').prepend(el('section',{class:'takeover-note'},el('h3',{},'Übernahme vormerken'),el('p',{},'Aufgabe von '+(names[row.owner]||'der eingetragenen Person')+'. Kläre die Übernahme mit der Person und bestätige die neue Zuteilung separat.'),el('label',{for:'takeover-note'},'Deine Notiz'),note,
     button('Notiz auf diesem Gerät speichern',()=>{try{localStorage.setItem(storageKey,note.value);feedback.textContent='Notiz lokal gespeichert. Keine Zuteilung und kein Status geändert.';}catch{feedback.textContent='Notiz konnte auf diesem Gerät nicht gespeichert werden.';}},'text-button'),feedback));
 }
-function showLeadership(){
-  if(!Array.isArray(data.leadership))return [heading('Leitungsübersicht','Der Personenstand ist noch unbekannt.'),unknown('Bitte den aktuellen Empfängerstand laden.')];
-  const cards=data.leadership.map(summary=>{
-    const issues=(data.blockers||[]).filter(issue=>issue.owner===summary.person),row=allTasks().find(item=>item.id===summary.taskId);
-    const labels=[summary.overdue?summary.overdue+' überfällig':null,summary.backlog?'Rückstand unter 80 % Soll':null,summary.blockers?summary.blockers+' Hänger':null,summary.unknown?'Stand teilweise unbekannt':null].filter(Boolean);
-    return el('section',{class:'lead-person','data-person':summary.person,'data-priority':summary.priority},el('div',{class:'lead-person-head'},el('h2',{},el('span',{class:'person-avatar','aria-hidden':'true'},names[summary.person][0]),names[summary.person]),el('span',{class:'lead-status'+(summary.priority>=2?' urgent':'')},labels.join(' · ')||'Im Plan')),
-      button('Ansicht öffnen',()=>openPerson(summary.person),'button secondary view-person'),el('dl',{class:'lead-metrics'},leadMetric('Kontakte',summary.b,true),leadMetric('Bewertungen',summary.c,true),leadMetric('Schreiben',summary.writing),leadMetric('Aufgaben',summary.tasks)),
-      el('div',{class:'lead-next'},el('span',{},row?shortTitle(row)+' · '+relativeDue(row):'Keine offene Aufgabe verknüpft.'),row?button('Aufgabe ansehen',()=>details(row),'text-button'):null),
-      issues.length?el('details',{class:'lead-issues'},el('summary',{},'Hänger ansehen · '+issues.length),el('ul',{},issues.map(issue=>el('li',{},el('span',{},({b:'Kontakte',c:'Bewertungen',writing:'Schreiben',tasks:'Aufgaben'}[issue.area]||'Aufgabe')+' · '+issue.text),(()=>{const task=allTasks().find(item=>item.id===issue.taskId);return task?button('Ich übernehme',()=>takeOver(task),'text-button takeover'):el('small',{},'Aufgabe noch nicht verknüpft.');})())))):null);
-  });
-  return [heading('Leitungsübersicht','Alle fünf Personen · Dringendes zuerst.'),el('p',{class:'quiet-note'},'Öffne eine Personensicht oder prüfe eine Aufgabe. Die Personensichten sind nur zum Lesen.'),el('div',{class:'lead-people'},cards),proposalInbox(),fieldLeadership(),serviceCard(),shareCard(),practiceCard()];
-}
 function personalRows() {return allTasks().filter(r=>r.owner===data.person||r.reader===data.person);}
 function weekRows(rows) {
   const now=new Date(today()+'T12:00:00Z'),start=new Date(now),end=new Date(now);
@@ -250,10 +238,22 @@ function stepFocus(step){
     late:step.when&&daysUntil(step.when)<0,title:step.title,why:step.why,meta:['ca. '+step.minutes+' Min.',step.count?step.count():null].filter(Boolean).join(' · '),cta:step.cta,act:stepAct(step)};
 }
 function taskFocus(row){
-  const late=overdue(row);
+  const late=overdue(row),steps=cardText(row,"So geht's")==='noch offen'?[]:stepValues(row);
   return {area:null,chips:['Aufgabe',row.due?whenWord(row.due):null],late,title:shortTitle(row),
-    why:late?'Die Frist ist vorbei. Erledige die Aufgabe oder melde kurz, was noch fehlt.':'Das ist deine nächste Aufgabe nach Frist.',
-    meta:row.due?'Frist '+date(row.due):'',cta:'Aufgabe ansehen',act:()=>details(row),report:canReport(row)?()=>report(row):null};
+    why:late?'Die Frist ist vorbei. Erledige die Aufgabe oder melde kurz, was noch fehlt.':steps.length?steps.length+(steps.length===1?' Schritt':' Schritte')+', einer nach dem anderen.':'Das ist deine nächste Aufgabe nach Frist.',
+    meta:row.due?'Frist '+date(row.due):'',cta:pathLabel(row,steps),act:()=>openPath(row),report:canReport(row)&&row.status==='läuft'?()=>report(row):null,row};
+}
+// Heute führt direkt in den Auftragspfad: gleiche Ansicht und gleiche Messung wie «Los geht’s» in der Aufgabe selbst.
+function pathLabel(row,steps){
+  if(row.source==='chapters')return 'Kapitel öffnen';
+  if(!canReport(row)||!steps.length)return 'Aufgabe ansehen';
+  const next=steps.findIndex(value=>!stepDone(row,value));
+  return next<0?'Zum Abschluss':next>0?'Weiter mit Schritt '+(next+1):'Starten';
+}
+function openPath(row){
+  details(row);
+  const go=$('detail').querySelector('.path-footer .primary-action');
+  if(go&&go.tagName==='BUTTON'&&!go.disabled&&/^(Los geht|Weiter bei Schritt)/.test(go.textContent))go.click();
 }
 // Reihenfolge (mit Salah abgestimmt): Termin innert 48 h > Überfälliges > was den Feldstart B blockiert > Umfrage unter 2 Kanälen > nächste Aufgabe.
 function todayKnown(){
@@ -278,12 +278,22 @@ function nowItem(rows){
   const review=rows.some(r=>r.status==='in Prüfung');
   return {area:null,chips:[],title:review?'Deine Meldungen sind bei Salah':'Für heute ist alles erledigt',why:review?'Salah prüft sie. Du musst nichts tun.':'Gut gemacht. Neue Aufgaben erscheinen hier, sobald sie dran sind.',meta:'',cta:'Meine Arbeit ansehen',act:()=>{area='';navigate('tasks');},calm:true};
 }
-function focusSection(f){
+function focusSection(f,after){
   const chips=f.chips.filter(Boolean).map((text,i)=>el('span',{class:'chip'+(i===0&&f.area?' area-'+f.area:'')+(i===1&&f.late?' is-late':'')},text));
-  return el('section',{class:'focus-card now-card'+(f.area?' area-'+f.area:'')+(f.calm?' is-calm':'')},
+  const more=f.unknown?null:el('div',{class:'now-after'},
+    after?el('button',{type:'button',class:'now-next',onClick:after.act},el('span',{class:'now-next-k'},'Danach'),el('span',{class:'now-next-t'},after.title),after.when?el('span',{class:'now-next-w'},after.when):null):el('span',{class:'now-next is-empty'},el('span',{class:'now-next-k'},'Danach'),el('span',{class:'now-next-t'},'nichts Weiteres in Sicht')),
+    button('Alle meine Aufgaben ›',()=>{area='';navigate('tasks');},'text-button now-all'));
+  return el('section',{class:'focus-card now-card'+(f.area?' area-'+f.area:'')+(f.calm?' is-calm':''),'aria-labelledby':'now-title'},
     el('div',{class:'now-top'},el('span',{class:'now-label'},f.unknown?'Stand offen':f.calm?'Alles ruhig':'Jetzt dran'),...chips),
-    el('h2',{},f.title),el('p',{class:'now-why'},f.why),
-    el('div',{class:'now-actions'},button(f.cta,f.act,'button'),f.report?button('Fertig melden',f.report,'text-button'):null,f.meta?el('span',{class:'now-meta'},f.meta):null));
+    el('h2',{id:'now-title'},f.title),el('p',{class:'now-why'},f.why),
+    el('div',{class:'now-actions'},button(f.cta,f.act,'button'),f.report?button('Fertig melden',f.report,'text-button'):null,f.meta?el('span',{class:'now-meta'},f.meta):null),more);
+}
+// «Danach»: das nächste offene Ding nach Frist, ohne das, was oben schon steht.
+function afterItem(rows,f){
+  const steps=fixedSteps.filter(stepOpen).filter(s=>s.title!==f.title).map(s=>({due:s.when||'9999',title:s.title,when:s.when?whenWord(s.when):'',act:stepAct(s)}));
+  const open=sortRows(rows.filter(r=>!completed(r)&&r.status!=='in Prüfung')).filter(r=>shortTitle(r)!==f.title)
+    .map(r=>({due:r.due?day(r.due):'9999',title:shortTitle(r),when:r.due?whenWord(r.due):'',act:()=>details(r)}));
+  return [...steps,...open].sort((a,b)=>a.due.localeCompare(b.due))[0]||null;
 }
 function threadTile(id,value,total,unit,note,act){
   const known=Number.isFinite(value)&&Number.isFinite(total)&&total>0;
@@ -293,14 +303,30 @@ function threadTile(id,value,total,unit,note,act){
     known?el('progress',{class:'thread-bar',max:total,value:Math.max(0,Math.min(total,value)),'aria-hidden':'true'}):null,
     el('span',{class:'thread-note'},note));
 }
+function surveyOwn(){const sv=data.survey;return sv&&Number.isInteger(sv.own)&&sv.own>=0&&Number.isInteger(sv.target)&&sv.target>0?sv:null;}
+function surveyNote(sv){
+  if(!sv)return 'Stand offen · Umfrage teilen';
+  if(sv.own>=sv.target)return 'Ziel erreicht. Stark!';
+  if(sv.own>=sv.target/2)return 'Halbzeit geschafft · noch '+(sv.target-sv.own);
+  return sv.own?'Über deinen Link · noch '+(sv.target-sv.own):'Teile deinen Link · die erste zählt';
+}
 function threadsSection(){
-  const sh=data.sharing,sv=data.service&&!data.service.error?data.service:null,pr=data.practice,c=(data.areas||[]).find(m=>m.id==='c');
-  const a=threadTile('a',sh?.done,2,'Kanäle',!Number.isFinite(sh?.done)?'Stand unbekannt':sh.done>=2?'Ziel erreicht · mehr ist willkommen':'Nächster Schritt · Kanal wählen',()=>navigate('sharing'));
+  const sv=data.service&&!data.service.error?data.service:null,pr=data.practice,c=(data.areas||[]).find(m=>m.id==='c'),own=surveyOwn();
+  const a=threadTile('a',own?.own,own?.target,'Antworten',surveyNote(own),()=>navigate('sharing'));
+  if(own&&own.own>=own.target/2)a.classList.add('is-win');
   const b=threadTile('b',sv?.done,sv?.config?.target,'Kontakte',!sv||!Number.isFinite(sv.done)||!sv.config||!Array.isArray(sv.selected)||typeof sv.probeDone!=='boolean'?'Stand unbekannt':sv.selected.length<2?'Noch '+(2-sv.selected.length)+(sv.selected.length===1?' Bank':' Banken')+' wählen':!sv.probeDone?'Übung offen · echte Kontakte ab '+date(sv.config.official):sv.next?'Nächster Kontakt '+date(sv.next.tag)+' · '+(sv.next.block==='A'?'Vormittag':'Nachmittag'):sv.done>=sv.config.target?'Ziel erreicht':'Kontakte zuteilen',()=>{location.href='/team/b/';});
   const cReady=c&&c.state==='ready'&&c.total>0;
   const cTile=cReady?threadTile('c',c.done,c.total,'Bewertungen',Number.isFinite(c.expected)?'Soll bis heute '+c.expected:'Soll bis heute unbekannt',()=>{location.href='/team/c/';})
     :threadTile('c',pr?.done,pr?.total,'Übungen',!Number.isFinite(pr?.done)||!pr?.total?'Stand unbekannt':today()<'2026-11-03'?'Eigene Fälle ab Di 03.11.':'Deine Bewertungen kommen nach der Verteilung',()=>{location.href='/team/c/';});
-  return el('section',{class:'threads-block'},el('div',{class:'block-head'},el('h2',{},'Deine drei Fäden'),el('small',{},'A · B · C')),el('div',{class:'threads'},a,b,cTile));
+  return el('section',{class:'threads-block'},el('div',{class:'block-head'},el('h2',{},'Dein Beitrag'),weekZeitNote()),el('div',{class:'threads'},a,b,cTile));
+}
+// Kleines Erfolgserlebnis: bei 10 und 20 eigenen Antworten einmal eine Meldung, nie in der lesenden Ansicht.
+function celebrateSurvey(){
+  const own=surveyOwn();if(!own||preview.active()||config.demo)return;
+  const mark=own.own>=own.target?own.target:own.own>=own.target/2?own.target/2:0;if(!mark)return;
+  const slot='pa6-beitrag:'+data.person;let seen=0;try{seen=+localStorage.getItem(slot)||0;}catch{return;}
+  if(seen>=mark)return;try{localStorage.setItem(slot,String(mark));}catch{}
+  if(!pending)toast(mark>=own.target?'✓ '+own.target+' Antworten über deinen Link. Ziel erreicht, danke!':'✓ Halbzeit: '+mark+' Antworten über deinen Link.');
 }
 function stepRow(step){
   const done=!stepOpen(step);
@@ -317,14 +343,17 @@ function weekTaskRow(row){
 function weekSection(rows){
   const sunday=sundayIso();
   const tasks=sortRows(rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'&&r.due&&(overdue(r)||day(r.due)<=sunday)));
-  const steps=fixedSteps.filter(s=>s.when&&s.when<=sunday&&(()=>{try{return !s.skip();}catch{return false;}})());
-  const items=[...tasks.filter(overdue).map(r=>({d:'0',n:weekTaskRow(r)})),...steps.map(s=>({d:s.when,n:stepRow(s)})),...tasks.filter(r=>!overdue(r)).map(r=>({d:day(r.due),n:weekTaskRow(r)}))]
+  const listed=fixedSteps.filter(s=>s.when&&s.when<=sunday&&(()=>{try{return !s.skip();}catch{return false;}})()),steps=listed.filter(stepOpen);
+  const open=[...tasks.filter(overdue).map(r=>({d:'0',n:weekTaskRow(r)})),...steps.map(s=>({d:s.when,n:stepRow(s)})),...tasks.filter(r=>!overdue(r)).map(r=>({d:day(r.due),n:weekTaskRow(r)}))]
     .sort((x,y)=>x.d.localeCompare(y.d)).map(x=>x.n);
-  const later=rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'&&(!r.due||day(r.due)>sunday)).length;
-  const openCount=tasks.length+steps.filter(stepOpen).length;
+  // Erledigte feste Schritte bleiben als kleines Erfolgserlebnis sichtbar, aber erst nach dem Offenen.
+  const items=[...open,...listed.filter(s=>!stepOpen(s)).map(stepRow)];
+  const openCount=open.length,extra=items.slice(3);extra.forEach(n=>{n.hidden=true;});
+  const list=items.length?el('ul',{class:'task-list week-list-new',id:'week-list'},items):null;
+  const showAll=extra.length?el('button',{type:'button',class:'text-button week-more','aria-controls':'week-list','aria-expanded':'false',onClick:event=>{extra.forEach(n=>{n.hidden=false;});event.currentTarget.remove();}},'+ '+extra.length+' weitere'):null;
   return el('section',{class:'week-block'},el('div',{class:'block-head'},el('h2',{},'Bis Sonntag'),el('small',{},date(sunday)+' · '+(openCount?openCount+' offen'+(!todayKnown()?' · Stand teilweise unbekannt':''):todayKnown()?'alles erledigt':'Stand unbekannt'))),
-    items.length?el('ul',{class:'task-list week-list-new'},items):el('p',{class:'quiet-note'},todayKnown()?'Bis Sonntag ist nichts fällig.':'Stand unbekannt · fehlende Daten zählen nicht als erledigt.'),
-    later?button('Später · '+later+(later===1?' Aufgabe':' Aufgaben')+' →',()=>{area='';navigate('tasks');},'text-button later-link'):null);
+    list||el('p',{class:'quiet-note week-empty'},todayKnown()?'Bis Sonntag ist nichts fällig. Schön.':'Stand unbekannt · fehlende Daten zählen nicht als erledigt.'),
+    el('div',{class:'week-foot'},showAll,button('Alle Fristen ›',()=>navigate('deadlines'),'text-button later-link')));
 }
 function nextMeeting(){
   const soon=(data.meetings||[]).filter(m=>m.due&&dueMs(m.due)>=nowMs()&&daysUntil(m.due)>=0&&daysUntil(m.due)<=1).sort((a,b)=>a.due.localeCompare(b.due))[0];
@@ -347,7 +376,13 @@ function personPakete(tasks,person){
 function weekZeitNote(){
   const w=data?.zeit?.woche;
   if(w==null||w===undefined||Number.isNaN(+w))return null;
-  return el('p',{class:'quiet-note zeit-week'},+w>0?'Diese Woche erfasst: '+String(w).replace('.',',')+' h':'Noch keine Zeit diese Woche erfasst.');
+  return el('small',{class:'zeit-week'},+w>0?'Diese Woche erfasst: '+String(w).replace('.',',')+' h':'Noch keine Zeit diese Woche erfasst');
+}
+function groupLine(){
+  const sv=data.survey,parts=[];
+  if(sv&&Number.isInteger(sv.group)&&Number.isInteger(sv.groupTarget))parts.push(sv.group+' von '+sv.groupTarget+' Antworten');
+  if(data.group&&data.group.done!==null&&Number.isInteger(data.group.total))parts.push(data.group.done+' von '+data.group.total+' Aufgaben erledigt');
+  return el('p',{class:'group-line'},parts.length?'Gemeinsam · '+parts.join(' · '):'Gruppenstand unbekannt');
 }
 function showToday(){
   if(leadership && data.person==='SA')return showLeadership();
@@ -358,9 +393,100 @@ function showToday(){
     late?button(late+' überfällig',()=>{area='';navigate('tasks');},'text-button summary-late'):null,
     nextMeeting()?el('span',{},nextMeeting()):null,!known&&due?el('span',{},'Stand teilweise unbekannt'):null].filter(Boolean);
   const summary=el('p',{class:'today-summary'});parts.forEach((p,i)=>{if(i)summary.append(el('span',{class:'sep','aria-hidden':'true'},' · '));summary.append(p);});
-  const head=el('div',{class:'heading today-head'},el('div',{},el('h1',{},greeting()+', '+names[data.person]),summary),el('span',{class:'date-label'},date(today())));
-  return [head,weekZeitNote(),focusSection(nowItem(rows)),threadsSection(),weekSection(rows),
-    el('p',{class:'group-line'},data.group&&data.group.done!==null?'Gemeinsam · '+data.group.done+' von '+data.group.total+' Aufgaben erledigt':'Gruppenstand unbekannt')].filter(Boolean);
+  const head=el('div',{class:'heading today-head'},el('div',{},el('h1',{},greeting()+', '+names[data.person]),summary),el('div',{class:'today-side'},el('span',{class:'date-label'},date(today())),awayButton()));
+  const focus=nowItem(rows);
+  setTimeout(celebrateSurvey,0);
+  return [el('div',{class:'heute'},head,focusSection(focus,afterItem(rows,focus)),weekSection(rows),threadsSection(),awayLine(),groupLine())];
+}
+// Abwesenheiten (05.11.2026, Salah): «Ich bin weg von … bis …». Ein kleiner Knopf, ein schlankes Formular, eine Bestätigung.
+function isoDay(value){return /^\d{4}-\d{2}-\d{2}$/.test(String(value||''))&&Number.isFinite(Date.parse(value+'T12:00:00Z'))&&new Date(value+'T12:00:00Z').toISOString().slice(0,10)===value;}
+function plusDays(value,n){const d=new Date(value+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);}
+function spanDays(from,to){return Math.round((Date.parse(to+'T12:00:00Z')-Date.parse(from+'T12:00:00Z'))/86400000)+1;}
+function awayRange(a){return a.von===a.bis?date(a.von):date(a.von)+' bis '+date(a.bis);}
+function absences(who){return (Array.isArray(data?.absences)?data.absences:[]).filter(a=>a&&names[a.person]&&isoDay(a.von)&&isoDay(a.bis)&&a.von<=a.bis&&a.bis>=today()&&(!who||a.person===who));}
+function awayButton(){
+  if(preview.active())return null;
+  const own=absences(data.person)[0];
+  return el('button',{type:'button',class:'away-open',onClick:absenceForm,'aria-haspopup':'dialog'},icon('deadlines'),own?(own.von<=today()?'Weg bis '+date(own.bis):'Weg ab '+date(own.von)):'Ich bin weg');
+}
+function awayLine(){
+  const own=absences(data.person);
+  return own.length?el('p',{class:'away-line'},el('b',{},'Abwesend'),' · '+own.map(awayRange).join(' · ')+(preview.active()?'':' · Die Gruppe sieht es im Plan.')):null;
+}
+function absenceForm(){
+  if(preview.active()||!data||noteSaving||pending)return;
+  const t=today(),own=absences(data.person);
+  const from=el('input',{type:'date',id:'away-from',required:true,min:t,max:plusDays(t,365)}),to=el('input',{type:'date',id:'away-to',required:true,min:t,max:plusDays(t,426)});
+  from.value=t;to.value=t;
+  const why=el('input',{type:'text',id:'away-why',maxlength:80,autocomplete:'off',placeholder:'z. B. Ferien oder Prüfung'});
+  const sum=el('p',{class:'away-sum',role:'status'}),feedback=el('p',{class:'away-error',role:'alert'});
+  const save=el('button',{type:'submit',class:'button primary-action'},'Eintragen');
+  const check=()=>{
+    const a=from.value,b=to.value;to.min=a&&a>t?a:t;
+    const bad=!isoDay(a)||!isoDay(b)?'Bitte Von und Bis wählen.':b<a?'«Bis» liegt vor «Von».':a<t&&b<t?'Der Zeitraum liegt in der Vergangenheit.':spanDays(a,b)>62?'Höchstens zwei Monate am Stück.':'';
+    sum.textContent=bad||awayRange({von:a,bis:b})+' · '+spanDays(a,b)+(spanDays(a,b)===1?' Tag':' Tage');sum.classList.toggle('is-bad',!!bad);save.disabled=!!bad||noteSaving;return !bad;
+  };
+  const nextMonday=plusDays(t,((8-new Date(t+'T12:00:00Z').getUTCDay())%7)||7);
+  const quick=el('div',{class:'away-quick',role:'group','aria-label':'Schnell wählen'},[['Heute',t,t],['Morgen',plusDays(t,1),plusDays(t,1)],['Nächste Woche',nextMonday,plusDays(nextMonday,4)]].map(([label,a,b])=>
+    el('button',{type:'button',class:'away-chip',onClick:()=>{from.value=a;to.value=b;check();quick.querySelectorAll('.away-chip').forEach(n=>n.setAttribute('aria-pressed',String(n.textContent===label)));}},label)));
+  from.addEventListener('input',()=>{if(to.value<from.value)to.value=from.value;check();});to.addEventListener('input',check);
+  const form=el('form',{class:'away-form',novalidate:true},
+    quick,
+    el('div',{class:'away-dates'},el('label',{for:'away-from'},'Von',from),el('label',{for:'away-to'},'Bis',to)),
+    sum,
+    el('label',{for:'away-why',class:'away-why'},'Grund ',el('small',{},'freiwillig'),why),
+    own.length?el('p',{class:'away-known'},'Schon eingetragen · '+own.map(awayRange).join(' · ')):null,
+    feedback,el('footer',{class:'task-footer'},button('Abbrechen',()=>$('detail').close(),'text-button'),save));
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();if(!check()||noteSaving)return;
+    if(config.demo){feedback.textContent='In der Vorschau wird nichts gespeichert.';return;}
+    const access=key,identity=data.person,range={von:from.value,bis:to.value};noteSaving=true;save.disabled=true;feedback.textContent='';save.textContent='Wird eingetragen …';
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);
+    try{
+      const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({typ:'abwesenheit',k:access,von:range.von,bis:range.bis,grund:why.value.trim()}),signal:controller.signal,referrerPolicy:'no-referrer',cache:'no-store'});
+      const result=await response.json();if(!response.ok||!result.ok||result.abwesenheit?.von!==range.von||result.abwesenheit?.bis!==range.bis)throw Error(result.fehler||'Nicht bestätigt. Bitte noch einmal versuchen.');
+      if(key!==access||data?.person!==identity)return;
+      clearResponses(cacheNamespace);
+      modal('Eingetragen',el('div',{class:'away-done'},el('span',{class:'away-done-mark','aria-hidden':'true'},'✓'),el('p',{class:'away-done-range'},awayRange(range)),el('p',{},'Die Gruppe sieht im Plan, dass du weg bist. Gute Zeit!')),
+        el('footer',{class:'task-footer'},button('Fertig',()=>{$('detail').close();load();},'button primary-action')));
+      $('detail').querySelector('.primary-action')?.focus();
+    }catch(error){feedback.textContent=error.name==='AbortError'?'Verbindung unterbrochen. Bitte noch einmal versuchen.':error.message;save.textContent='Eintragen';}
+    finally{clearTimeout(timer);noteSaving=false;check();}
+  });
+  modal('Ich bin weg',form);check();from.focus();
+}
+// Leitung (Salah): gleich ruhig wie Heute. Eine Sache oben, das Team als kurze Liste, Details einen Tipp entfernt.
+function leadFocus(){
+  const review=sortRows(allTasks().filter(canReview)),urgent=data.leadership.find(s=>s.priority>=2);
+  if(review.length){const row=review[0];return {title:review.length===1?'Eine Meldung prüfen':review.length+' Meldungen prüfen',why:shortTitle(row)+' · von '+(names[row.owner]||'Teammitglied'),cta:'Prüfen',act:()=>details(row)};}
+  if(urgent){const row=allTasks().find(item=>item.id===urgent.taskId);return {title:names[urgent.person]+' braucht dich',why:leadLabels(urgent).join(' · ')||'Bitte kurz nachfragen.',cta:row?'Aufgabe ansehen':'Ansicht öffnen',act:row?()=>details(row):()=>openPerson(urgent.person)};}
+  return {title:'Alles im Plan',why:'Niemand hängt, nichts wartet auf deine Prüfung.',cta:'Arbeit der Gruppe ansehen',act:()=>{area='';navigate('tasks');},calm:true};
+}
+function leadLabels(summary){return [summary.overdue?summary.overdue+' überfällig':null,summary.backlog?'Rückstand unter 80 % Soll':null,summary.blockers?summary.blockers+' Hänger':null,summary.unknown?'Stand teilweise unbekannt':null].filter(Boolean);}
+function showLeadership(){
+  if(!Array.isArray(data.leadership))return [heading('Leitungsübersicht','Der Personenstand ist noch unbekannt.'),unknown('Bitte den aktuellen Empfängerstand laden.')];
+  const away=absences(null);
+  const cards=data.leadership.map(summary=>{
+    const issues=(data.blockers||[]).filter(issue=>issue.owner===summary.person),row=allTasks().find(item=>item.id===summary.taskId),labels=leadLabels(summary);
+    const gone=away.find(a=>a.person===summary.person&&a.von<=plusDays(today(),7));
+    return el('section',{class:'lead-person','data-person':summary.person,'data-priority':summary.priority},
+      el('div',{class:'lead-person-head'},el('h2',{},el('span',{class:'person-avatar','aria-hidden':'true'},names[summary.person][0]),names[summary.person]),
+        el('span',{class:'lead-status'+(summary.priority>=2?' urgent':'')},labels.join(' · ')||'Im Plan'),gone?el('span',{class:'lead-away'},'weg '+awayRange(gone)):null),
+      button('Ansicht öffnen',()=>openPerson(summary.person),'button secondary view-person'),
+      el('div',{class:'lead-next'},el('span',{},row?shortTitle(row)+' · '+relativeDue(row):'Keine offene Aufgabe verknüpft.'),row?button('Aufgabe ansehen',()=>details(row),'text-button'):null),
+      el('div',{class:'lead-extra'},el('details',{class:'lead-numbers'},el('summary',{},'Zahlen'),el('dl',{class:'lead-metrics'},leadMetric('Kontakte',summary.b,true),leadMetric('Bewertungen',summary.c,true),leadMetric('Schreiben',summary.writing),leadMetric('Aufgaben',summary.tasks))),
+      issues.length?el('details',{class:'lead-issues'},el('summary',{},'Hänger ansehen · '+issues.length),el('ul',{},issues.map(issue=>el('li',{},el('span',{},({b:'Kontakte',c:'Bewertungen',writing:'Schreiben',tasks:'Aufgaben'}[issue.area]||'Aufgabe')+' · '+issue.text),(()=>{const task=allTasks().find(item=>item.id===issue.taskId);return task?button('Ich übernehme',()=>takeOver(task),'text-button takeover'):el('small',{},'Aufgabe noch nicht verknüpft.');})())))):null));
+  });
+  const f=leadFocus();
+  const focus=el('section',{class:'lead-now'+(f.calm?' is-calm':''),'aria-labelledby':'lead-now-title'},el('div',{class:'now-top'},el('span',{class:'now-label'},f.calm?'Alles ruhig':'Jetzt dran')),
+    el('h2',{id:'lead-now-title'},f.title),el('p',{class:'now-why'},f.why),el('div',{class:'now-actions'},button(f.cta,f.act,'button')));
+  const head=el('div',{class:'heading today-head'},el('div',{},el('h1',{},'Leitungsübersicht'),el('p',{class:'subtitle'},'Alle fünf Personen · Dringendes zuerst.')),el('div',{class:'today-side'},el('span',{class:'date-label'},date(today())),awayButton()));
+  return [el('div',{class:'heute is-lead'},head,focus,
+    el('section',{class:'lead-team'},el('div',{class:'block-head'},el('h2',{},'Team'),el('small',{},'Personensichten sind nur zum Lesen')),el('div',{class:'lead-people'},cards)),
+    away.length?el('section',{class:'lead-away-block'},el('div',{class:'block-head'},el('h2',{},'Abwesend'),el('small',{},away.length+(away.length===1?' Eintrag':' Einträge'))),el('ul',{class:'lead-away-list'},away.map(a=>el('li',{},el('b',{},names[a.person]),' · '+awayRange(a)+(a.grund?' · '+a.grund:''))))):null,
+    proposalInbox(),
+    el('details',{class:'lead-more'},el('summary',{},'Erhebung und Teilen'),fieldLeadership(),serviceCard(),shareCard(),practiceCard()),
+    groupLine())];
 }
 function groupedTasks(rows,compact=false){
   const now=new Date(today()+'T12:00:00Z'),end=new Date(now);end.setUTCDate(end.getUTCDate()+(7-(now.getUTCDay()||7)));
