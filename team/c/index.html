@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-zggRbN8OTadMD2JV+1fptETwrMebMsVZ0rH0NtwOWh4='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-yOYX/3O0/cFId7WYXyCza3NXEbSF0YzJq4X62MzaxEk='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>C Bewertungen</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
-<link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=525b6739900b">
+<link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=f40cadc15e41">
 <link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=dc552e850c40" defer></script>
 </head>
 <body>
@@ -42,6 +42,8 @@ const AUSSCHLUSS = ["Sprache", "kein Text", "nicht Zak", "Duplikat", "nicht im Z
 const AUSSCHLUSS_TEXT = { "Sprache": "Andere Sprache", "kein Text": "Nur Sterne, kein Text", "nicht Zak": "Nicht über die Zak-App", "Duplikat": "Doppelt erfasst", "nicht im Zeitraum": "Datum passt nicht" };
 function ausschlussText(w) { return AUSSCHLUSS_TEXT[w] || w; }
 let q = [], i = 0, wer = "", c = null, savePending = false, caseOpenedAt = 0, lastActiveAt = 0;
+// Ausschluss nur bewusst (Befund 06.11.2026: 20 Fälle unbemerkt «Doppelt erfasst», weil der Fokus nach dem Speichern auf dem Ausschluss-Knopf des nächsten Falls lag).
+let ausschlussOffen = false, ausschlussWahl = "", neuerFall = false;
 function bindCaseTimer() { caseOpenedAt = Date.now(); lastActiveAt = caseOpenedAt; }
 function sessionMinutes() {
   if (!caseOpenedAt) return 0;
@@ -76,8 +78,22 @@ function fortschritt() { renderExtraCases(); const n = q.filter(x => x.eigen).le
 function draftKey(x) { return "c-" + wer + ":" + x.rolle + ":" + x.nr; }
 function zeige() {
   bindCaseTimer();
-  const x = q[i]; c = lokal(draftKey(x)) || (x.eigen ? aus(x.eigen) : leer(x)); fortschritt(); bild();
+  ausschlussOffen = false; ausschlussWahl = "";
+  const x = q[i]; c = lokal(draftKey(x)) || (x.eigen ? aus(x.eigen) : leer(x)); fortschritt();
+  if (document.activeElement && document.activeElement !== document.body && document.getElementById("main").contains(document.activeElement)) document.activeElement.blur();
+  neuerFall = true; bild(); neuerFall = false;
+  if (!window.PA6View.active() && !fieldPending) { window.scrollTo(0, 0); ersterFokus(); }
 }
+// Nach jedem Fallwechsel: Fokus auf das erste Codierfeld, nie auf einen Ausschluss.
+function ersterFokus() {
+  const ziel = document.querySelector('#main [data-erstes="1"][aria-pressed="true"]') || document.querySelector('#main [data-erstes="1"]');
+  if (ziel) ziel.focus({ preventScroll: true });
+}
+function zaehler() {
+  const fertig = q.filter(y => y.eigen), weg = fertig.filter(y => y.eigen.ausschluss).length;
+  return { erfasst: fertig.length, auswertbar: fertig.length - weg, ausgeschlossen: weg };
+}
+function ausschlussSetzen(w) { c.ausschluss = w; ausschlussOffen = false; ausschlussWahl = ""; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }
 function merke() { lokal(draftKey(q[i]), c); bild(); }
 function kat(n) {
   if (c.ausschluss) return;
@@ -106,14 +122,14 @@ function updateReadiness() {
   document.getElementById("speichern").disabled=window.PA6View.active()||fieldPending||savePending||!!missing;
 }
 function bild() {
-  const focused = document.activeElement;
+  const focused = neuerFall ? null : document.activeElement;
   const focusKey = focused?.getAttribute("data-focus");
   const focusText = focused?.tagName === "BUTTON" ? focused.textContent : null;
   const focusQuestion = focused?.closest(".c-q")?.querySelector("h2")?.textContent;
   const x = q[i], m = document.getElementById("main"), n = q.filter(y => y.eigen).length, probe = q.every(y => y.probe);
   const def = el("details", { class: "c-defs" }, el("summary", {}, "Alle Abgrenzungen ansehen"), el("table", { class: "def" }, KAT.map(([k, t, d, a]) => el("tr", {}, el("td", {}, el("b", {}, k)), el("td", {}, el("b", {}, t), el("br"), d, el("br"), el("span", { class: "leise" }, a))))));
   const offen = pruefe(), zak = x.anbieter === "Zak" && x.quelle === "Trustpilot";
-  const prog = el("div", { class: "c-progress" }, el("div", { class: "c-progress-top" }, el("b", {}, (probe ? "Übung " : "Fall ") + (i + 1) + " von " + q.length), el("span", { class: "leise" }, n + " gespeichert")), el("progress", { max: q.length, value: n }));
+  const prog = el("div", { class: "c-progress" }, el("div", { class: "c-progress-top" }, el("b", {}, (probe ? "Übung " : "Fall ") + (i + 1) + " von " + q.length), (z => el("span", { class: "leise c-zaehler" }, `erfasst ${z.erfasst} · auswertbar ${z.auswertbar} · ausgeschlossen ${z.ausgeschlossen}`))(zaehler())), el("progress", { max: q.length, value: n }));
   fuelle(m, prog,
     x.probe ? el("p", { class: "c-probe" }, el("b", {}, "Übungsfall, zählt nicht. "), "Das Datum ist absichtlich alt. Ordne trotzdem normal ein und wähle nicht «Datum passt nicht» nur wegen des alten Datums.") : null,
     el("section", { class: "c-review" },
@@ -121,11 +137,21 @@ function bild() {
       x.text ? el("div", { class: "textbox" }, x.text) : x.fundort && /^https:\/\//.test(x.fundort)
         ? el("a", { class: "knopf c-open", href: x.fundort, target: "_blank", rel: "noopener noreferrer", "data-read-navigation": true }, "Bewertung lesen ↗") : el("div", { class: "textbox" }, x.fundort || "Text fehlt. Bitte Salah melden."),
       el("p", { class: "leise" }, "Nur lesen. Nichts kopieren, nichts antworten, kein Konto nötig.")),
-    frage(1, "Zählt diese Bewertung?", "Meistens ja. Nur einen Grund wählen, wenn er klar zutrifft.", !!c.ausschluss || ["de", "en", "fr"].includes(c.sprache),
-      chips(AUSSCHLUSS.filter(w => w !== "nicht Zak" || (c.ausschluss === "nicht Zak" && !zak)).map(w => [w, ausschlussText(w)]), c.ausschluss, w => { c.ausschluss = w; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }, { abwaehlbar: true }),
-      c.ausschluss ? el("p", { class: "c-excluded" }, "Zählt nicht: " + ausschlussText(c.ausschluss) + ". Fertig, speichern und weiter.") : el("div", {}, el("label", { class: "f" }, "Sprache"), chips([["de", "Deutsch"], ["en", "Englisch"], ["fr", "Französisch"]], c.sprache, w => { c.sprache = w; merke(); })),
+    frage(1, "Zählt diese Bewertung?", "Meistens ja. Wähle die Sprache. Ausschliessen nur, wenn ein Grund klar zutrifft.", !!c.ausschluss || ["de", "en", "fr"].includes(c.sprache),
+      c.ausschluss ? el("div", { class: "c-excluded-box", role: "status" }, el("p", { class: "c-excluded" }, "Ausgeschlossen: " + ausschlussText(c.ausschluss) + ". Zählt nicht als auswertbarer Fall."),
+          el("button", { type: "button", class: "chip", on: { click: () => { if (c.ausschluss === "nicht Zak") c.zak_bezug = ""; ausschlussSetzen(""); } } }, "Ausschluss aufheben"))
+        : el("div", {}, el("label", { class: "f" }, "Sprache"), el("div", { class: "chips", role: "group" }, [["de", "Deutsch"], ["en", "Englisch"], ["fr", "Französisch"]].map(([w, tx]) => el("button", { type: "button", class: "chip", "data-erstes": "1", "aria-pressed": String(c.sprache === w), on: { click: () => { c.sprache = w; merke(); } } }, tx)))),
       c.ausschluss && VERBOTEN.test(c.bemerkung) ? el("div", {}, el("label", { class: "f" }, "Bemerkung bitte ohne Nummern und Adressen"), el("input", { class: "t", value: c.bemerkung, on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })) : null,
-      zak ? el("div", {}, el("label", { class: "f" }, "Geht es um die Zak-App? ", el("span", { class: "hilfe" }, "Trustpilot führt Zak unter der Bank Cler.")), chips([["ja", "Ja, um die App"], ["nein", "Nein, um die Bank Cler allgemein"]], c.zak_bezug, w => { c.zak_bezug = w; if (w === "nein") { c.ausschluss = "nicht Zak"; c.kats = []; } else if (c.ausschluss === "nicht Zak") c.ausschluss = ""; merke(); })) : null),
+      zak ? el("div", {}, el("label", { class: "f" }, "Geht es um die Zak-App? ", el("span", { class: "hilfe" }, "Trustpilot führt Zak unter der Bank Cler.")), chips([["ja", "Ja, um die App"], ["nein", "Nein, um die Bank Cler allgemein"]], c.zak_bezug, w => { c.zak_bezug = w; if (w === "nein") { ausschlussSetzen("nicht Zak"); return; } else if (c.ausschluss === "nicht Zak") c.ausschluss = ""; merke(); })) : null,
+      c.ausschluss ? null : el("div", { class: "c-exclude" },
+        !ausschlussOffen ? el("button", { type: "button", class: "c-exclude-open", "data-ausschluss": "1", on: { click: () => { ausschlussOffen = true; ausschlussWahl = ""; bild(); document.querySelector(".c-exclude .chip")?.focus({ preventScroll: true }); } } }, "Diese Bewertung ausschliessen …")
+        : ausschlussWahl ? el("div", { class: "c-exclude-confirm", role: "alertdialog", "aria-label": "Ausschluss bestätigen" },
+            el("p", {}, el("b", {}, "Diesen Fall ausschliessen? "), "Grund: " + ausschlussText(ausschlussWahl) + ". Er zählt dann nicht als auswertbarer Fall."),
+            el("div", { class: "chips" }, el("button", { type: "button", class: "knopf c-exclude-yes", "data-ausschluss": "1", on: { click: () => ausschlussSetzen(ausschlussWahl) } }, "Ja, ausschliessen"),
+              el("button", { type: "button", class: "knopf hell", "data-ausschluss": "1", on: { click: () => { ausschlussOffen = false; ausschlussWahl = ""; bild(); } } }, "Nein, normal einordnen")))
+        : el("div", { class: "c-exclude-reasons" }, el("p", { class: "leise" }, "Warum zählt sie nicht? Danach kommt eine Rückfrage."),
+            el("div", { class: "chips", role: "group" }, AUSSCHLUSS.filter(w => w !== "nicht Zak").map(w => el("button", { type: "button", class: "chip", "data-ausschluss": "1", on: { click: () => { ausschlussWahl = w; bild(); document.querySelector(".c-exclude-yes")?.focus({ preventScroll: true }); } } }, ausschlussText(w))),
+              el("button", { type: "button", class: "chip", "data-ausschluss": "1", on: { click: () => { ausschlussOffen = false; bild(); } } }, "Abbrechen"))))),
     c.ausschluss ? null : frage(2, "Beschreibt sie einen Kontakt mit dem Kundendienst?", "Also eine Anfrage, einen Chat, ein Telefonat oder eine Antwort. Taste J oder N.", !!c.kundendienst_kontakt,
       chips(["ja", "nein"], c.kundendienst_kontakt, w => { c.kundendienst_kontakt = w; merke(); })),
     c.ausschluss ? null : frage(3, "Worum geht es?", "Höchstens drei Themen, das wichtigste zuerst. Tasten 1 bis 9, 0 für Sonstiges. Pro Thema: Kritik, Lob oder gemischt.", c.kats.length > 0 && c.kats.every(k => c.vals[k]),
@@ -153,7 +179,7 @@ function pruefe() {
   if (x.anbieter === "Zak" && x.quelle === "Trustpilot" && !["ja", "nein"].includes(c.zak_bezug)) return "Beantworte, ob es um die Zak-App geht";
   if (VERBOTEN.test(c.bemerkung)) return "Bemerkung bitte ohne Nummern und Adressen";
   if (c.ausschluss) return "";
-  if (!["de", "en", "fr"].includes(c.sprache)) return "Wähle die Sprache oder «Andere Sprache»";
+  if (!["de", "en", "fr"].includes(c.sprache)) return "Wähle die Sprache (andere Sprache: ausschliessen)";
   if (!c.kundendienst_kontakt) return "Beantworte Frage 2 zum Kontakt mit dem Kundendienst";
   if (!c.kats.length) return "Wähle ein Thema oder einen Grund, warum sie nicht zählt";
   if (c.kats.some(n => !c.vals[n])) return "Bei einem Thema fehlt Kritik, Lob oder gemischt";
@@ -174,16 +200,17 @@ async function speichern() {
   x.eigen = Object.assign({codiert_von:wer}, z);
   const next = q.findIndex((row, index) => index > i && !row.eigen);
   i = next >= 0 ? next : Math.min(i + 1, q.length - 1); zeige();
-  msg.className = "meldung"; msg.textContent = "Speichert …";
+  const als = z.ausschluss ? "ausgeschlossen (" + ausschlussText(z.ausschluss) + ")" : "auswertbar";
+  msg.className = "meldung"; msg.textContent = "Speichert als " + als + " …";
   try {
     await sende({ typ: "codierung", rolle: x.rolle, maske: "c2", zeile: z, zeit_min: zeitMin });
     window.dispatchEvent(new Event("workspace-saved"));
     x.eigen = Object.assign({ codiert_von: wer }, z); try { localStorage.removeItem(draftKey(x)); } catch (e) {}
     fieldValue.queue = q; fieldPersist();
-    msg.className = "meldung ok"; msg.textContent = "Gespeichert.";
+    msg.className = "meldung ok" + (z.ausschluss ? " c-saved-excluded" : ""); msg.textContent = "Fall " + (q.indexOf(x) + 1) + " gespeichert als: " + als + ".";
     fortschritt();
     renderExtraCases();
-    if (q.every(y => y.eigen)) { msg.textContent = "Alle Bewertungen eingeordnet. Danke."; }
+    if (q.every(y => y.eigen)) { msg.textContent = "Fall " + (q.indexOf(x) + 1) + " gespeichert als: " + als + ". Alle Bewertungen eingeordnet. Danke."; }
   } catch (e) { x.eigen = previous; i = previousIndex; zeige(); msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
   finally { savePending = false; updateReadiness(); }
 }
@@ -201,7 +228,7 @@ document.addEventListener("keydown", e => {
   else if (e.key === "j" || e.key === "J") { c.kundendienst_kontakt = "ja"; merke(); }
   else if (e.key === "n" || e.key === "N") { c.kundendienst_kontakt = "nein"; merke(); }
   else if ((e.key === "-" || e.key === "+" || e.key === "=") && c.kats.length) { const l = c.kats[c.kats.length - 1]; c.vals[l] = e.key === "-" ? "-" : "+"; merke(); }
-  else if (e.key === "Enter") { speichern(); e.preventDefault(); }
+  else if (e.key === "Enter") { if (document.activeElement.closest("[data-ausschluss]")) return; speichern(); e.preventDefault(); }
   else if (e.key === "ArrowLeft" && i > 0) { i--; zeige(); }
 });
 if(window.PA6View.active()) {
