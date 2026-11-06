@@ -58,7 +58,7 @@
   const NS = 'http://www.w3.org/2000/svg';
 
   // ---------- Marketing ----------
-  const CHANNELS = {WA: 'WhatsApp', RD: 'Reddit', HS: 'Andere Schulen', OR: 'Organisationen', SCH: 'Schulhaus', KL: 'Klasse', GE: 'Geschäft', CL: 'Club', IG: 'Instagram', LI: 'LinkedIn', FB: 'Facebook', SM: 'Jodel und andere', DZ: 'Dozierende', TEIL: 'Weitergeleitet', AD: 'Anzeigen', YU: 'Yuh-Nutzerkreise (eigene Kanäle)', YUH: 'Yuh-Kanäle', Sonstige: 'Sonstige'};
+  const CHANNELS = {WA: 'WhatsApp', RD: 'Reddit', HS: 'Andere Schulen', OR: 'Organisationen', SCH: 'Schulhaus', KL: 'Klasse', GE: 'Geschäft', CL: 'Club', IG: 'Instagram', LI: 'LinkedIn', FB: 'Facebook', SM: 'Jodel und andere', DZ: 'Dozierende', TEIL: 'Weitergeleitet', AD: 'Anzeigen', YU: 'Yuh-Nutzerkreise (eigene Kanäle)', YUH: 'Yuh-Kanäle', Y: 'Foren', Sonstige: 'Sonstige'};
   // Rücklauf-Etappen: feste Zuordnung Meilenstein → Schwelle (Designspezifikation Teil A 8). Datum aus dem PSP.
   const STAGES = [['MS-07', 30], ['MS-08', 60], ['MS-10', 85], ['MS-11', 100]];
   const stages = data => {const ms = (data.pm && data.pm.milestones) || []; return STAGES.map(([ref, n]) => ({ref, n, due: (ms.find(m => m.ref === ref) || {}).due || null})).filter(s => s.due);};
@@ -124,7 +124,7 @@
     const spark = c => ext ? `<span class="t" aria-hidden="true"><span class="sp">${days.map(d => {const v = (ext[c] || {})[d] || 0; return `<i style="height:${v ? Math.max(10, v / top * 100) : 0}%"></i>`;}).join('')}</span></span>` : '';
     const label = range === 'feld' || !ext ? 'Top Kanäle · Feldzeit' : `Top Kanäle · ${range === '7' ? 'letzte 7 Tage' : 'letzte 30 Tage'}`;
     const body = rows.length ? `<ul class="rank${ext ? ' with-t' : ''}"><li class="h"><span>Kanal</span><span class="v">Gültig</span><span class="p">Anteil</span>${ext ? '<span class="t">7 Tage</span>' : ''}</li>${rows.map(([c, v]) => `<li style="--w:${v / max * 100}%"><span>${esc(CHANNELS[c] || c)}</span><span class="v">${num(v)}</span><span class="p">${pct(v / n)}</span>${spark(c)}</li>`).join('')}</ul>
-      <p class="note">Anteil an ${num(n)} gültigen Antworten${range === 'feld' || !ext ? '' : ' im Zeitraum'}. YU ${num((f.channels || {}).YU || 0)} · YUH ${num((f.channels || {}).YUH || 0)} (Yuh-Kanäle getrennt).</p>`
+      <p class="note">Anteil an ${num(n)} gültigen Antworten${range === 'feld' || !ext ? '' : ' im Zeitraum'}. YU ${num((f.channels || {}).YU || 0)} · YUH ${num((f.channels || {}).YUH || 0)} (Yuh-Kanäle getrennt).${Object.keys(f.forums || {}).length ? ' Foren je Ort: ' + Object.keys(f.forums).sort((a, b) => f.forums[b] - f.forums[a] || a.localeCompare(b)).map(k => esc(k) + ' ' + num(f.forums[k])).join(', ') + '.' : ''}</p>`
       : empty(range === 'feld' || !ext ? 'Noch keine gültigen Antworten.' : 'Im gewählten Zeitraum keine gültigen Antworten.');
     return cell({id: 'kanaele', label, body, explain: '<p>Gültige Antworten je Kanalpräfix der Kennung. Yuh-Kundinnen und -Kunden werden nur über eigene und öffentliche Kanäle angesprochen; YUH-Kanäle kommen nur dazu, wenn Yuh sie anbietet.</p>' + (ext ? '' : '<p>Der Zeitraum filtert die Kanäle erst, wenn die Tageswerte je Kanal geliefert werden; bis dahin gilt die ganze Feldzeit.</p>'), source: 'Umfrage, Blatt Antworten, Kennungspräfix'});
   }
