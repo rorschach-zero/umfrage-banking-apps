@@ -1,6 +1,6 @@
 'use strict';
 // Bestaetigung des Projektauftrags. Liest den eigenen Stand, speichert «ja» oder einen Einwand.
-// Inhalt: Notion-Projektauftrag PA-V1, in Alltagssprache zusammengefasst. Gespeichert wird im Blatt «Bestaetigungen».
+// Inhalt: Projektauftrag PA-V1, in Alltagssprache zusammengefasst. Gespeichert wird im Blatt «Bestaetigungen».
 const DOK = 'projektauftrag';
 const PUNKTE = [
   ['Was wir liefern', 'Die PA6a mit Forschung und Analyse in sieben Kapiteln, Abgabe 12.12.2026. Die PA6b mit einer ausgearbeiteten Massnahme für Yuh, Abgabe 27.02.2027. Die Präsentation mit Fachgespräch am 22.03.2027.'],
@@ -35,7 +35,7 @@ function meldung(text, art) {
   m.textContent = nachricht.text; m.className = 'meldung' + (nachricht.art ? ' ' + nachricht.art : ''); m.hidden = !nachricht.text;
 }
 async function speichern(antwort) {
-  if (busy) return;
+  if (busy || !stand || window.PA6View.active()) return;
   const einwand = antwort === 'einwand' ? String(($('pa-einwand') || {}).value || '').trim() : '';
   if (antwort === 'einwand' && einwand.length < 3) { meldung('Bitte schreib kurz, was dich stört.', 'fehler'); $('pa-einwand').focus(); return; }
   busy = true; render(); meldung('Wird gespeichert …');
@@ -56,12 +56,12 @@ function knoepfe() {
   if (window.PA6View && PA6View.active()) return el('p', {class: 'leise'}, 'In der lesenden Ansicht kannst du nichts bestätigen.');
   const ja = stand && stand.eigene && stand.eigene.antwort === 'ja';
   const box = el('div', {class: 'pa-aktion'},
-    el('button', {type: 'button', class: 'knopf', disabled: busy || ja, on: {click: () => speichern('ja')}}, ja ? 'Bestätigt' : 'Ich bestätige den Projektauftrag'),
-    el('button', {type: 'button', class: 'chip', 'aria-expanded': String(einwandOffen), disabled: busy, on: {click: () => { einwandOffen = !einwandOffen; render(); if (einwandOffen) $('pa-einwand').focus(); }}}, 'Ich habe einen Einwand'));
+    el('button', {type: 'button', class: 'knopf', disabled: busy || !stand || ja, on: {click: () => speichern('ja')}}, ja ? 'Bestätigt' : 'Ich bestätige den Projektauftrag'),
+    el('button', {type: 'button', class: 'chip', 'aria-expanded': String(einwandOffen), disabled: busy || !stand, on: {click: () => { einwandOffen = !einwandOffen; render(); if (einwandOffen) $('pa-einwand').focus(); }}}, 'Ich habe einen Einwand'));
   const einwand = einwandOffen ? el('div', {class: 'pa-einwand'},
     el('label', {for: 'pa-einwand'}, 'Was stört dich? Salah bekommt deinen Text direkt.'),
     el('textarea', {id: 'pa-einwand', rows: '4', maxlength: '2000'}),
-    el('button', {type: 'button', class: 'knopf', disabled: busy, on: {click: () => speichern('einwand')}}, 'Einwand senden')) : null;
+    el('button', {type: 'button', class: 'knopf', disabled: busy || !stand, on: {click: () => speichern('einwand')}}, 'Einwand senden')) : null;
   return el('div', {}, box, einwand);
 }
 function render() {
@@ -77,8 +77,17 @@ function render() {
   if (stand) $('wer').textContent = stand.name;
 }
 async function laden(still) {
+  if (window.PA6View.active()) {
+    render();
+    $('wer').textContent = TEAM[PA6View.target()] || 'Teammitglied';
+    meldung('Du liest den Projektauftrag. Der persönliche Bestätigungsstand ist in dieser Ansicht nicht verfügbar.');
+    return;
+  }
   try { stand = await sende({typ: 'bestaetigung_stand', dokument: DOK}); }
   catch (e) { if (!still) { render(); meldung(e.denied ? 'Dein Zugang fehlt. Öffne bitte den Link aus der Mail noch einmal.' : 'Gerade nicht erreichbar. ' + e.message, 'fehler'); } return; }
   render();
 }
-document.addEventListener('DOMContentLoaded', () => { schluessel(); laden(false); });
+document.addEventListener('DOMContentLoaded', () => {
+  if (!schluessel()) { render(); meldung('Öffne deinen persönlichen Link, um den Projektauftrag zu bestätigen.', 'fehler'); return; }
+  laden(false);
+});

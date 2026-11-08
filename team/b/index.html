@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-bEXTeiOXp5Ls1hFhsWe8Wc0qgmvSaXKr5m8k5Bt/wm4='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-DF9LbPgZuXyWbAUJ1GHtLyC0xRBL46KDhEXTaR4jxF4='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=f40cadc15e41">
 <link rel="stylesheet" href="../zeit.css?v=0547fa549500">
@@ -249,8 +249,8 @@ function bUpdateReadiness() {
     status.className=lesen?"":miss.length?"b-stepnav-missing":"";
     status.textContent=lesen?"Nur lesen":miss.length?"Noch offen: "+miss.join(", "):"";
   }
-  document.getElementById("zwischen").disabled=window.PA6View.active()||fieldPending||gesperrt()||current.length>0;
-  document.getElementById("fertig").disabled=window.PA6View.active()||fieldPending||gesperrt()||all.length>0;
+  document.getElementById("zwischen").disabled=window.PA6View.active()||fieldPending||savePending||gesperrt()||current.length>0;
+  document.getElementById("fertig").disabled=window.PA6View.active()||fieldPending||savePending||gesperrt()||all.length>0;
 }
 function bUhr(value) { const m = /[T ](\d{2}:\d{2})/.exec(String(value || "")); return m ? m[1] : ""; }
 let bZeitFrage = "";
@@ -268,7 +268,7 @@ function bEventButton(key,label,hilfe) {
 function bBeispiel(text) { return null; } // Übung: ersetzt durch die Anweisung oben (bUebungAnweisung)
 // Übungsuhr: in der Übung setzen die Zeitknöpfe die Zeiten aus dem Szenario, nie die echte Uhr.
 const B_UEBUNG_ZEIT = { t_start: "09:00", t_auto: "09:01", t_mensch: "09:05", t_antwort: "09:08", t_ende: "09:09" };
-function bUebungZeit(k) { return heute() + "T" + B_UEBUNG_ZEIT[k]; }
+function bUebungZeit(k) { return (z.t_start ? String(z.t_start).slice(0, 10) : heute()) + "T" + B_UEBUNG_ZEIT[k]; }
 const B_UEBUNG = { // [Anweisung, erledigt?, Bestätigung]
   frage: ["Stell dir vor, du schreibst der Bank im Chat. Lies die Frage und tippe auf Weiter."],
   angebot: ["Den Chat gibt es. «Ja, erreichbar» ist schon gewählt. Tippe auf Weiter."],
@@ -350,7 +350,7 @@ function formular() {
     el("h1", { class: "b-form-h" }, probe ? "Übung · " + (B_ANLIEGEN[r.anliegen] || r.anliegen) : bWas(r)),
     el("p", { class: "b-form-meta" }, [B_KANAL[r.kanal] || r.kanal, r.block === "A" ? "09–12" : "13–17", r.wiederholung + ". Durchgang", probe ? "" : r.nr].filter(Boolean).join(" · "),
       !probe && lauf !== null && !z.t_ende ? el("span", { class: "b-running" }, "läuft seit " + (lauf < 60 ? lauf + " min" : lauf < 1440 ? Math.floor(lauf / 60) + " h " + (lauf % 60) + " min" : (lauf < 2880 ? "gestern" : Math.floor(lauf / 1440) + " Tagen"))) : null),
-    !probe && lauf !== null && !z.t_ende && lauf >= 1440 ? el("p", { class: "b-note-warn" }, probe ? "Diese Übung ist seit " + (lauf < 2880 ? "gestern" : Math.floor(lauf / 1440) + " Tagen") + " offen. Mach sie fertig, die Zeiten zählen hier nicht." : "Dieser Kontakt ist seit " + (lauf < 2880 ? "gestern" : Math.floor(lauf / 1440) + " Tagen") + " offen. Schliess ihn ab oder markiere ihn als Ausfall.") : null,
+    !probe && lauf !== null && !z.t_ende && lauf >= 1440 ? el("p", { class: "b-note-warn" }, (r.kanal === "mail" || r.kanal === "formular") && lauf < FRIST[r.kanal].gesamt ? "Die Antwort steht noch aus. Beobachte den Verlauf bis 72 Stunden nach dem Start. Speichere inzwischen deinen Zwischenstand." : "Dieser Kontakt ist noch offen. Prüfe den Verlauf und die Frist für diesen Kontaktweg. Erfasse die Antwort oder den tatsächlichen Ausfallgrund.") : null,
     probe && z.t_start && String(z.t_start).slice(0, 10) < heute() && aktiv.erfasst?.stand !== "abgeschlossen" ? el("div", { class: "b-skip" }, el("p", {}, "Du hast diese Übung an einem anderen Tag angefangen."), el("button", { type: "button", class: "knopf hell", on: { click: bUebungNeu } }, "Übung neu starten")) : null,
     gesperrt() ? el("div", { class: "b-alert", role: "alert" }, bIcon("alert"), el("div", {}, `${r.anbieter} wurde schon genug kontaktiert. Diesen Kontakt nicht starten, bitte Salah melden.`)) : null,
     !probe && v.inFrist === false && z.t_antwort ? el("p", { class: "b-note-warn" }, "Die vollständige Antwort kam zu spät. Sie zählt als «nicht in der Frist».") : null,
@@ -488,10 +488,10 @@ async function speichern(stand) {
   if (stand === "laufend" && VERBOTEN.test([z.verlauf, z.bemerkung].join(" "))) { msg.className = "meldung fehler"; msg.textContent = "Notizen ohne Nummern, Mailadressen und Links"; return; }
   const row = aktiv, planRow = daten.plan.find(item => item.nr === row.nr) || row;
   const previous = planRow.erfasst, payload = zeile(stand), nummer = ++bSpeicherNr;
-  savePending = true; row.erfasst = planRow.erfasst = payload;
+  savePending = true; bUpdateReadiness(); row.erfasst = planRow.erfasst = payload;
   msg.textContent = "Speichert …";
   try {
-    const result = await sende({ typ: "beobachtung", maske: "b4", simulation: aktiv.nr.startsWith("PROBE-B-") && z.simulation_confirmed === true, zeile: payload, start_korrektur: payload.start_korrektur === true });
+    const result = await sende({ typ: "beobachtung", maske: "b4", simulation: aktiv.nr.startsWith("PROBE-B-"), zeile: payload, start_korrektur: payload.start_korrektur === true });
     delete z.start_korrektur;
     window.dispatchEvent(new Event("workspace-saved"));
     row.erfasst = planRow.erfasst = payload; try { localStorage.removeItem("b-" + row.nr); } catch (e) {}
@@ -513,7 +513,7 @@ async function speichern(stand) {
       setTimeout(liste, 900);
     } else if (stand === "abgeschlossen") setTimeout(liste, 900);
   } catch (e) { row.erfasst = planRow.erfasst = previous; msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
-  finally { savePending = false; }
+  finally { savePending = false; bUpdateReadiness(); }
 }
 document.getElementById("zwischen").addEventListener("click", () => speichern("laufend"));
 document.getElementById("fertig").addEventListener("click", () => {

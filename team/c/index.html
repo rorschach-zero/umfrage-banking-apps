@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-yOYX/3O0/cFId7WYXyCza3NXEbSF0YzJq4X62MzaxEk='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-KYxIHTRyBBLU3mojwhCzXlsBNa12xUFoZpT8KaU65H8='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>C Bewertungen</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=f40cadc15e41">
 <link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=dc552e850c40" defer></script>
@@ -10,7 +10,7 @@
 <div class="purpose-slot" data-purpose-area="c"></div>
 <section id="workspace-progress" class="workspace-progress" aria-live="polite" hidden></section>
 <main id="main"><p class="leise">Wird geladen …</p></main>
-<div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung"></div><div class="zeile"><button class="knopf hell" id="zurueck" title="Pfeil links">‹ Zurück</button><button class="knopf" id="speichern" title="Enter">Speichern und weiter</button></div></div></div>
+<div class="fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung" role="status" aria-live="polite"></div><div class="zeile"><button class="knopf hell" id="zurueck" title="Pfeil links">‹ Zurück</button><button class="knopf" id="speichern" title="Enter">Speichern und weiter</button></div></div></div>
 <script src="../view-as.js?v=41cc5d81f7cc"></script>
 <script src="../team.js?v=126f6cd983b5"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
@@ -61,12 +61,12 @@ async function start() {
   q.sort((a, b) => (a.rolle + a.anbieter + a.quelle + a.schicht + String(a.position).padStart(4, "0")).localeCompare(b.rolle + b.anbieter + b.quelle + b.schicht + String(b.position).padStart(4, "0")));
   const offen = q.findIndex(x => !x.eigen); i = offen >= 0 ? offen : 0;
   document.getElementById("fuss").hidden = !q.length;
-  if (!q.length) { c = null; document.getElementById("main").replaceChildren(el("h1", {}, "Noch nichts zugeteilt"), el("p", { class: "leise" }, "Am 03.11. werden die Bewertungen verteilt. Danach erscheinen deine hier.")); return; }
+  if (!q.length) { c = null; document.getElementById("main").replaceChildren(el("h1", {}, "Noch nichts zugeteilt"), el("p", { class: "leise" }, "Hier erscheinen deine zugeteilten Bewertungen. Geh zurück zu «Meine Arbeit». Fehlt ein erwarteter Fall, melde es der Leitung.")); return; }
   document.getElementById("fuss").hidden = false; zeige();
   });
 }
 function leer(x) { return { nr: x.nr, ausschluss: "", kundendienst_kontakt: "", kats: [], vals: {}, anker: "", bemerkung: "", zak_bezug: x.anbieter === "Zak" && x.quelle === "Trustpilot" ? "" : "nicht anwendbar", sprache: x.sprache || "" }; }
-function aus(e) { const k = []; const v = {}; [1, 2, 3].forEach(n => { if (e["kat_" + n]) { k.push(Number(e["kat_" + n])); v[e["kat_" + n]] = e["val_" + n]; } }); return Object.assign(leer(q[i]), { ausschluss: e.ausschluss || "", kundendienst_kontakt: e.kundendienst_kontakt || "", kats: k, vals: v, anker: e.anker || "", bemerkung: e.bemerkung || "", zak_bezug: e.zak_bezug || "nicht anwendbar" }); }
+function aus(e) { const k = []; const v = {}; [1, 2, 3].forEach(n => { if (e["kat_" + n]) { k.push(Number(e["kat_" + n])); v[e["kat_" + n]] = e["val_" + n]; } }); return Object.assign(leer(q[i]), { ausschluss: e.ausschluss || "", kundendienst_kontakt: e.kundendienst_kontakt || "", kats: k, vals: v, anker: e.anker || "", bemerkung: e.bemerkung || "", zak_bezug: e.zak_bezug || "nicht anwendbar", sprache: e.sprache || q[i].sprache || "" }); }
 function renderExtraCases() {
   let box=document.getElementById('extra-cases');if(box)box.remove();
   if(!q.length||!q.every(row=>row.eigen)||!q.some(row=>!row.probe))return;
@@ -79,6 +79,8 @@ function draftKey(x) { return "c-" + wer + ":" + x.rolle + ":" + x.nr; }
 function zeige() {
   bindCaseTimer();
   ausschlussOffen = false; ausschlussWahl = "";
+  document.getElementById("zurueck").disabled = i === 0 || savePending;
+  const nextButton = document.getElementById("c-next"); if (nextButton) nextButton.disabled = i >= q.length - 1;
   const x = q[i]; c = lokal(draftKey(x)) || (x.eigen ? aus(x.eigen) : leer(x)); fortschritt();
   if (document.activeElement && document.activeElement !== document.body && document.getElementById("main").contains(document.activeElement)) document.activeElement.blur();
   neuerFall = true; bild(); neuerFall = false;
@@ -93,7 +95,7 @@ function zaehler() {
   const fertig = q.filter(y => y.eigen), weg = fertig.filter(y => y.eigen.ausschluss).length;
   return { erfasst: fertig.length, auswertbar: fertig.length - weg, ausgeschlossen: weg };
 }
-function ausschlussSetzen(w) { c.ausschluss = w; ausschlussOffen = false; ausschlussWahl = ""; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; } merke(); }
+function ausschlussSetzen(w) { c.ausschluss = w; ausschlussOffen = false; ausschlussWahl = ""; if (w) { c.kats = []; c.vals = {}; c.kundendienst_kontakt = ""; c.anker = ""; if (w === "nicht Zak") c.zak_bezug = "nein"; } merke(); }
 function merke() { lokal(draftKey(q[i]), c); bild(); }
 function kat(n) {
   if (c.ausschluss) return;
@@ -136,13 +138,14 @@ function bild() {
       el("div", { class: "c-review-meta" }, el("span", {}, `${x.anbieter} · ${x.quelle}`), el("span", { class: "sterne" }, "★".repeat(Number(x.sterne) || 0) + "☆".repeat(5 - (Number(x.sterne) || 0))), el("span", { class: "leise" }, `${x.datum} · ${x.sprache}`), x.rolle === "B" ? el("span", { class: "pille" }, "Zweite Einschätzung, ohne die erste zu kennen") : null),
       x.text ? el("div", { class: "textbox" }, x.text) : x.fundort && /^https:\/\//.test(x.fundort)
         ? el("a", { class: "knopf c-open", href: x.fundort, target: "_blank", rel: "noopener noreferrer", "data-read-navigation": true }, "Bewertung lesen ↗") : el("div", { class: "textbox" }, x.fundort || "Text fehlt. Bitte Salah melden."),
-      el("p", { class: "leise" }, "Nur lesen. Nichts kopieren, nichts antworten, kein Konto nötig.")),
+      el("p", { class: "leise" }, "Nur lesen. Nichts kopieren, nichts antworten, kein Konto nötig."),
+      x.eigen ? el("p", { class: "leise" }, "Schon gespeichert. Tippfehler kannst du bis zehn Minuten nach dem ersten Speichern korrigieren. Danach klärt ihr Änderungen gemeinsam mit der Leitung.") : null),
     frage(1, "Zählt diese Bewertung?", "Meistens ja. Wähle die Sprache. Ausschliessen nur, wenn ein Grund klar zutrifft.", !!c.ausschluss || ["de", "en", "fr"].includes(c.sprache),
       c.ausschluss ? el("div", { class: "c-excluded-box", role: "status" }, el("p", { class: "c-excluded" }, "Ausgeschlossen: " + ausschlussText(c.ausschluss) + ". Zählt nicht als auswertbarer Fall."),
           el("button", { type: "button", class: "chip", on: { click: () => { if (c.ausschluss === "nicht Zak") c.zak_bezug = ""; ausschlussSetzen(""); } } }, "Ausschluss aufheben"))
         : el("div", {}, el("label", { class: "f" }, "Sprache"), el("div", { class: "chips", role: "group" }, [["de", "Deutsch"], ["en", "Englisch"], ["fr", "Französisch"]].map(([w, tx]) => el("button", { type: "button", class: "chip", "data-erstes": "1", "aria-pressed": String(c.sprache === w), on: { click: () => { c.sprache = w; merke(); } } }, tx)))),
       c.ausschluss && VERBOTEN.test(c.bemerkung) ? el("div", {}, el("label", { class: "f" }, "Bemerkung bitte ohne Nummern und Adressen"), el("input", { class: "t", value: c.bemerkung, on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })) : null,
-      zak ? el("div", {}, el("label", { class: "f" }, "Geht es um die Zak-App? ", el("span", { class: "hilfe" }, "Trustpilot führt Zak unter der Bank Cler.")), chips([["ja", "Ja, um die App"], ["nein", "Nein, um die Bank Cler allgemein"]], c.zak_bezug, w => { c.zak_bezug = w; if (w === "nein") { ausschlussSetzen("nicht Zak"); return; } else if (c.ausschluss === "nicht Zak") c.ausschluss = ""; merke(); })) : null,
+      zak ? el("div", {}, el("label", { class: "f" }, "Geht es um die Zak-App? ", el("span", { class: "hilfe" }, "Trustpilot führt Zak unter der Bank Cler.")), chips([["ja", "Ja, um die App"], ["nein", "Nein, um die Bank Cler allgemein"]], c.zak_bezug, w => { if (w === "nein") { ausschlussOffen = true; ausschlussWahl = "nicht Zak"; bild(); document.querySelector(".c-exclude-yes")?.focus({ preventScroll: true }); return; } c.zak_bezug = w; if (c.ausschluss === "nicht Zak") c.ausschluss = ""; merke(); })) : null,
       c.ausschluss ? null : el("div", { class: "c-exclude" },
         !ausschlussOffen ? el("button", { type: "button", class: "c-exclude-open", "data-ausschluss": "1", on: { click: () => { ausschlussOffen = true; ausschlussWahl = ""; bild(); document.querySelector(".c-exclude .chip")?.focus({ preventScroll: true }); } } }, "Diese Bewertung ausschliessen …")
         : ausschlussWahl ? el("div", { class: "c-exclude-confirm", role: "alertdialog", "aria-label": "Ausschluss bestätigen" },
@@ -155,9 +158,10 @@ function bild() {
     c.ausschluss ? null : frage(2, "Beschreibt sie einen Kontakt mit dem Kundendienst?", "Also eine Anfrage, einen Chat, ein Telefonat oder eine Antwort. Taste J oder N.", !!c.kundendienst_kontakt,
       chips(["ja", "nein"], c.kundendienst_kontakt, w => { c.kundendienst_kontakt = w; merke(); })),
     c.ausschluss ? null : frage(3, "Worum geht es?", "Höchstens drei Themen, das wichtigste zuerst. Tasten 1 bis 9, 0 für Sonstiges. Pro Thema: Kritik, Lob oder gemischt.", c.kats.length > 0 && c.kats.every(k => c.vals[k]),
-      el("div", { class: "c-themes" }, KAT.map(([k, t, d]) => el("button", { type: "button", class: "c-theme", "data-focus": "theme-" + k, "aria-pressed": String(c.kats.includes(k)), on: { click: () => kat(k) } },
+      el("div", { class: "c-themes" }, KAT.map(([k, t, d]) => el("button", { type: "button", class: "c-theme", "data-focus": "theme-" + k, disabled: k !== 10 && !c.kats.includes(k) && c.kats.length >= 3, "aria-pressed": String(c.kats.includes(k)), on: { click: () => kat(k) } },
         el("span", { class: "c-theme-top" }, el("span", { class: "c-key" }, k === 10 ? "0" : String(k)), el("b", {}, t), c.kats.includes(k) ? el("span", { class: "rang" }, "#" + (c.kats.indexOf(k) + 1)) : null),
         el("span", { class: "c-theme-def" }, d)))),
+      c.kats.length === 3 ? el("p", { class: "leise", role: "status" }, "Drei Themen gewählt. Entferne eines, bevor du ein anderes hinzufügst.") : null,
       c.kats.length ? el("div", { class: "c-vals" }, c.kats.map((k, r) => el("div", { class: "c-val-row" },
         el("b", {}, `${r + 1}. ${KAT[k - 1][1]}`),
         el("div", { class: "val chips" }, [["-", "Kritik"], ["+", "Lob"], ["0", "gemischt oder neutral"]].map(([w, tx]) => el("button", { type: "button", class: "chip", "data-focus": "value-" + k + "-" + w, "aria-pressed": String(c.vals[k] === w), on: { click: () => { c.vals[k] = w; merke(); } } }, tx))),
@@ -165,7 +169,7 @@ function bild() {
       hinweise().map(h => el("div", { class: "hinweisbox" }, h)), def),
     c.ausschluss ? null : frage(4, "Kurz festhalten", "Freiwillig. Fass den Kern in höchstens fünf eigenen Wörtern zusammen, nie abschreiben.", false,
       el("div", { class: "gitter" },
-        el("div", {}, el("label", { class: "f" }, "Kern in deinen Worten"), el("input", { class: "t", value: c.anker, maxlength: "60", placeholder: "z. B. Antwort kam nach drei Tagen", on: { input: e => { c.anker = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })),
+        el("div", {}, el("label", { class: "f" }, "Kern in deinen Worten"), el("input", { class: "t", value: c.anker, maxlength: "60", placeholder: "z. B. Antwort nach drei Tagen", on: { input: e => { c.anker = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })),
         el("div", {}, el("label", { class: "f" }, "Bemerkung"), el("input", { class: "t", value: c.bemerkung, placeholder: "Was war unsicher?", on: { input: e => { c.bemerkung = e.target.value; lokal(draftKey(q[i]), c); updateReadiness(); } } })))),
     el("p", { class: "c-ready" + (offen ? "" : " ok") }, offen ? "Noch offen · " + offen : "Bereit. Enter oder «Speichern und weiter»."),
     el("p", { class: "leise c-rules" }, "Keine Namen, Beträge oder Orte. Achte auf den Text, nicht auf die Sterne.")
@@ -192,7 +196,7 @@ async function speichern() {
   if(window.PA6View.active() || fieldPending || savePending)return;
   const msg = document.getElementById("meldung"), f = pruefe();
   if (f) { msg.className = "meldung fehler"; msg.textContent = f; return; }
-  const x = q[i], z = { nr: x.nr, ausschluss: c.ausschluss, kundendienst_kontakt: c.ausschluss ? "" : c.kundendienst_kontakt, anker: c.anker.trim(), bemerkung: c.bemerkung.trim(), zak_bezug: c.zak_bezug, sprache: c.sprache };
+  const x = q[i], z = { nr: x.nr, ausschluss: c.ausschluss, kundendienst_kontakt: c.ausschluss ? "" : c.kundendienst_kontakt, anker: c.ausschluss ? "" : c.anker.trim(), bemerkung: c.bemerkung.trim(), zak_bezug: c.zak_bezug, sprache: c.sprache };
   c.kats.forEach((n, r) => { z["kat_" + (r + 1)] = String(n); z["val_" + (r + 1)] = c.vals[n]; });
   const previous = x.eigen, previousIndex = i;
   const zeitMin = x.probe ? 0 : sessionMinutes();
@@ -212,11 +216,12 @@ async function speichern() {
     renderExtraCases();
     if (q.every(y => y.eigen)) { msg.textContent = "Fall " + (q.indexOf(x) + 1) + " gespeichert als: " + als + ". Alle Bewertungen eingeordnet. Danke."; }
   } catch (e) { x.eigen = previous; i = previousIndex; zeige(); msg.className = "meldung fehler"; msg.textContent = "Nicht gespeichert: " + e.message + ". Deine Eingaben bleiben auf diesem Gerät."; }
-  finally { savePending = false; updateReadiness(); }
+  finally { savePending = false; document.getElementById("zurueck").disabled = i === 0; updateReadiness(); }
 }
 document.getElementById("speichern").addEventListener("click", speichern);
-document.getElementById("zurueck").addEventListener("click", () => { if (i > 0) { i--; zeige(); } });
+document.getElementById("zurueck").addEventListener("click", () => { if (!savePending && i > 0) { i--; zeige(); } });
 document.addEventListener("keydown", e => {
+  if(savePending)return;
   if(window.PA6View.active() || fieldPending) {
     if(e.target.closest('input,textarea,select,button,summary,a'))return;
     if(e.key==='ArrowLeft'&&i>0){i--;zeige();}
@@ -228,12 +233,12 @@ document.addEventListener("keydown", e => {
   else if (e.key === "j" || e.key === "J") { c.kundendienst_kontakt = "ja"; merke(); }
   else if (e.key === "n" || e.key === "N") { c.kundendienst_kontakt = "nein"; merke(); }
   else if ((e.key === "-" || e.key === "+" || e.key === "=") && c.kats.length) { const l = c.kats[c.kats.length - 1]; c.vals[l] = e.key === "-" ? "-" : "+"; merke(); }
-  else if (e.key === "Enter") { if (document.activeElement.closest("[data-ausschluss]")) return; speichern(); e.preventDefault(); }
+  else if (e.key === "Enter") { if (document.activeElement.closest("button, a, summary")) return; speichern(); e.preventDefault(); }
   else if (e.key === "ArrowLeft" && i > 0) { i--; zeige(); }
 });
 if(window.PA6View.active()) {
   document.getElementById('speichern').disabled=true;
-  document.getElementById('speichern').after(el('button',{class:'knopf hell','data-read-navigation':true,on:{click:()=>{if(i<q.length-1){i++;zeige();}}}},'Nächste Bewertung'));
+  document.getElementById('speichern').after(el('button',{id:'c-next',class:'knopf hell','data-read-navigation':true,on:{click:()=>{if(i<q.length-1){i++;zeige();}}}},'Nächste Bewertung'));
 }
 start();
 </script>
