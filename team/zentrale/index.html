@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#F8F9F6">
+<title>Kommandozentrale · PA6</title>
+<link rel="stylesheet" href="zentrale.css">
+<link rel="stylesheet" href="../view-as.css">
+<script src="../config.js" defer></script>
+<script src="../view-as.js" defer></script>
+<script src="model.js" defer></script>
+<script src="render.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Zum Inhalt</a>
+<header class="top"><div class="top-in">
+<a class="brand" href="/team/"><span class="brand-mark" aria-hidden="true">▦</span><span>PA6 Kommandozentrale<small>Yuh · HF Marketing</small></span></a>
+<div class="seg" role="group" aria-label="Modus"><button data-mode="marketing" aria-pressed="true">Marketing</button><button data-mode="projekt" aria-pressed="false">Projekt</button></div>
+<button class="cmd" id="tools">✧ <span>Werkzeuge und Auftrag an Juno</span><kbd>⌘K</kbd></button>
+<button class="btn" id="refresh">Aktualisieren</button>
+</div></header>
+<div class="status-line"><span id="status" role="status">Stand wird geladen …</span><span id="identity"></span><a href="/team/dashboard/">Dashboard v3</a></div>
+<main class="wrap" id="main" tabindex="-1" aria-busy="true">
+<p class="empty">Die Live-Daten werden geladen …</p>
+</main>
+<div id="overlay"></div><p id="notice" class="notice" role="status" hidden></p>
+<footer>Praxisarbeit · Studierendengruppe 601/H25-B · KV Business School Zürich</footer>
+</body></html>
