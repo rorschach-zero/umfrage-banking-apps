@@ -3385,8 +3385,21 @@
       "reviewTime": "23:59"
     }
   ],
-  "absences": [],
-  "absenceNote": "Abwesenheiten: noch nicht erfasst",
+  "absences": [
+    {
+      "person": "Leonie",
+      "from": "2026-11-16",
+      "to": "2026-11-23",
+      "note": "abwesend"
+    },
+    {
+      "person": "Ernes",
+      "from": null,
+      "to": null,
+      "note": "keine Abwesenheit gemeldet"
+    }
+  ],
+  "absenceNote": "Abwesenheiten: Leonie 16.–23.11. · Ernes keine · Salah, Arber, Melisa noch offen",
   "notes": [
     "Planungsstand 09.11.2026; Status wird aus den vorhandenen Daten ergänzt.",
     "Phasen nach Wasserfall; vorgezogene Vorbereitung und laufende Steuerung können Phasengrenzen überlappen.",

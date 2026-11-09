@@ -16,7 +16,7 @@
     if(data)return data;
     if(loading)return loading;
     failure=false;
-    loading=fetch('zeitplan.json?v=43f7824e28db',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Zeitplan nicht verfügbar');return r.json();}).then(d=>{
+    loading=fetch('zeitplan.json?v=4251cffdee54',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('Zeitplan nicht verfügbar');return r.json();}).then(d=>{
       if(d.schema!=='pa6.schedule.v1'||!Array.isArray(d.items)||!Array.isArray(d.phases))throw Error('Zeitplan ungültig');
       data=d;return d;
     }).catch(()=>{failure=true;return null;}).finally(()=>{loading=null;});
