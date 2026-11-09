@@ -109,9 +109,9 @@ function bKarteJetzt(state,naechster,laufend,danach){
   return el('section',{class:'b-card b-now','aria-labelledby':'b-card-h'},
     el('h2',{id:'b-card-h'},titel),
     el('p',{class:'b-today-what'},bWas(row)),
-    el('p',{class:'b-today-meta'},weg+' · '+bTag(row.tag,true)+', '+bZeit(row.block)),
+    el('p',{class:'b-today-meta'},row.status==='nicht angeboten'?'Nur Vermerk: Diesen Weg bietet die Bank im Gratis-Plan nicht an. Quelle ist schon eingetragen, du speicherst nur.':weg+' · '+bTag(row.tag,true)+', '+bZeit(row.block)),
     bZuteilungsSatz(),
-    el('button',{class:'knopf b-go b-next',type:'button','data-read-navigation':true,on:{click:()=>oeffne(row)}},window.PA6View.active()?'Kontakt ansehen':laufend?'Weiter erfassen':'Kontakt starten'),
+    el('button',{class:'knopf b-go b-next',type:'button','data-read-navigation':true,on:{click:()=>oeffne(row)}},window.PA6View.active()?'Kontakt ansehen':laufend?'Weiter erfassen':row.status==='nicht angeboten'?'Vermerk erfassen':'Kontakt starten'),
     danach?el('p',{class:'b-after'},'Danach: '+bWas(danach)+' · '+bTag(danach.tag)+', '+bZeit(danach.block)):null);
 }
 function renderBSetup(main) {
@@ -144,7 +144,7 @@ function bKontaktZeile(r){
     el('span',{class:'b-row-state is-'+status},status==='abgeschlossen'?'erledigt':status==='laufend'?'läuft':'offen'),
     el('span',{class:'b-row-chev'},bIcon('chev')));
   return el('li',{class:'b-row'+(offen?' is-open':'')+(neu?' is-new':''),'data-nr':r.nr},kopf,offen?el('div',{class:'b-row-body'},
-    el('button',{type:'button',class:'knopf b-go','data-read-navigation':true,on:{click:()=>oeffne(r)}},status==='abgeschlossen'?'Ansehen':window.PA6View.active()?'Kontakt ansehen':status==='laufend'?'Weiter erfassen':'Kontakt starten'),
+    el('button',{type:'button',class:'knopf b-go','data-read-navigation':true,on:{click:()=>oeffne(r)}},status==='abgeschlossen'?'Ansehen':window.PA6View.active()?'Kontakt ansehen':status==='laufend'?'Weiter erfassen':r.status==='nicht angeboten'?'Vermerk erfassen':'Kontakt starten'),
     !r.erfasst?el('div',{class:'b-move'},el('p',{class:'b-label'},'Anderer Tag?'),serviceSchedule(r)):null):null);
 }
 let bListeZu=true;

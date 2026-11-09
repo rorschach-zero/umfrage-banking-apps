@@ -135,3 +135,6 @@ html:has(body.b-page){background:#F3F2EE;min-height:100%}
 .b-page .contact-edit{justify-self:start;border:0;background:none;text-decoration:underline;padding:8px 0;color:var(--bk-acc)}
 .b-page #fertig:not(:disabled){background:var(--bk-acc);color:#fff;opacity:1}
 .b-page #fertig:disabled{background:#D8D6CF;color:#62696C;opacity:1}
+
+/* Wörter in Antwortknöpfen nicht mitten im Wort brechen (Audit 09.11.: «Wahrscheinli ch Mensch») */
+.b-page .contact-choices .contact-button{overflow-wrap:normal;word-break:normal;-webkit-hyphens:auto;hyphens:auto}

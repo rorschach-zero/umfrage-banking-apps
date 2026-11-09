@@ -28,10 +28,13 @@ async function start() {
     daten = value; belastung = daten.belastung || {};
     document.getElementById("wer").textContent = TEAM[daten.person] || daten.person;
     if (!cached) bOffen = selectedStep;
-    liste();
-    // Direktlink je Kontakt (09.11.2026): team/b/?nr=B05#k=… öffnet diesen Kontakt, einmal pro Laden.
+    // Direktlink je Kontakt: team/b/?nr=B05#k=… öffnet diesen Kontakt. Der Stand kommt zweimal (Zwischenspeicher,
+    // dann frisch vom Server); ist der Zielkontakt schon offen, bleibt er offen und bekommt nur den frischen Stand.
     const ziel = new URLSearchParams(location.search).get("nr") || new URLSearchParams(location.hash.slice(1)).get("nr");
-    if (ziel && !bDirektOffen) { const r = (daten.plan || []).find(x => x.nr === ziel); if (r) { bDirektOffen = true; openForm(r); } }
+    const zielZeile = ziel ? (daten.plan || []).find(x => x.nr === ziel) : null;
+    if (zielZeile && bDirektOffen && aktiv && aktiv.nr === ziel) { aktiv.erfasst = zielZeile.erfasst || aktiv.erfasst; return; }
+    liste();
+    if (zielZeile && !bDirektOffen) { bDirektOffen = true; openForm(zielZeile); }
   });
 }
 function statusVon(r) { const e = r.erfasst; return !e ? "offen" : e.stand === "abgeschlossen" ? "abgeschlossen" : "laufend"; }
