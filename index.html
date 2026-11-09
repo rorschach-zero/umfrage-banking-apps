@@ -641,6 +641,8 @@ function zeigeGesendet() {
   const st = document.getElementById("sendestatus"); const k = document.getElementById("absenden");
   if (st) { st.className = "status ok"; st.textContent = t("Deine Antworten sind gespeichert."); } if (k) k.hidden = true; const vb = document.getElementById("vorher"); if (vb) vb.hidden = true;
   document.getElementById("nachher").hidden = false; document.getElementById("kennung").textContent = A.id;
+  // SurveyCircle (Kanal /y/scirc): Code zum Einloesen nur fuer Teilnehmende aus SurveyCircle, Wortlaut von SurveyCircle vorgegeben.
+  if (String(A.id).startsWith("Y-scirc-") && !document.getElementById("scirc-code")) { const sc = document.createElement("div"); sc.className = "karte"; sc.id = "scirc-code"; sc.innerHTML = '<p>Löse den folgenden Survey Code unter <a href="https://www.surveycircle.com" target="_blank" rel="noopener">https://www.surveycircle.com</a> ein und erhalte durch SurveyCircle kostenlos Teilnehmer für deine Studie: <b>QSJS-GJQ9-CMR6-BQCS</b></p><p><a href="https://www.surveycircle.com/QSJS-GJQ9-CMR6-BQCS/" target="_blank" rel="noopener">Survey Code mit einem Klick einlösen</a></p>'; const nh = document.getElementById("nachher"); nh.insertBefore(sc, nh.children[1] || null); }
   if (A._mail) { ["mail", "mailsenden"].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = true; }); const lb = document.querySelector('label[for="mail"]'); if (lb) lb.hidden = true; const ms = document.getElementById("mailstatus"); if (ms) { ms.className = "status ok"; ms.textContent = t("Adresse hinterlegt."); } }
   if (mailVerdrahtet) return; mailVerdrahtet = true;
   // Teilen: WhatsApp, Link kopieren, Systemdialog. Der geteilte Link traegt die Kennung TEIL- (Weiterleitung) und die Sprache.
