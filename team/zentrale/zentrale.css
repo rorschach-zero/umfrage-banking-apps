@@ -328,3 +328,43 @@ button,.btn,.btn.sm,.seg button,.tabs button,summary{min-height:44px;min-width:4
 #juno.skeleton .skeleton-lines{margin:20px}
 @media(max-width:1200px){#stand>.act{height:190px}}
 @media(max-width:760px){#stand>div:first-child{height:290px}#stand>.eng,#stand>.act{height:180px}#team{--module-height:540px}}
+
+/* Group schedule */
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px #1924261f}
+.gantt-page{--label-width:250px;--row-height:48px;min-width:0}
+.gantt-heading{display:flex;justify-content:space-between;align-items:center;gap:24px;margin:10px 0 24px}
+.gantt-eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--accent-h);text-transform:uppercase}
+.gantt-heading h1{font-family:var(--display);font-size:clamp(25px,3.1vw,40px);line-height:1.18;letter-spacing:-.045em;margin:10px 0}
+.gantt-heading p:last-child{color:var(--ink2);margin:0}
+.gantt-plan-stamp{color:var(--ink2);font-size:12px;line-height:1.8;text-align:right;white-space:nowrap}
+.gantt-plan-stamp b{color:var(--accent-h);font-weight:600}
+.gantt-deadlines{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:24px}
+.gantt-deadline{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1px solid var(--line);border-radius:16px;padding:18px 22px;background:var(--surface);gap:7px;transition:transform .15s,box-shadow .15s}
+.gantt-deadline:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.gantt-deadline strong{font-family:var(--display);font-size:29px;font-weight:650;letter-spacing:-.04em}
+.gantt-deadline>span:not(:first-child){display:flex;justify-content:space-between;gap:14px;width:100%;font-size:12px;font-weight:600}
+.gantt-deadline small{color:var(--ink2);font-size:11px}.gantt-deadline b{color:var(--accent)}
+.gantt-board{border:1px solid var(--line);border-radius:18px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow)}
+.gantt-toolbar{display:flex;justify-content:space-between;gap:12px;padding:16px 20px 12px;align-items:center}.gantt-actions{display:flex;gap:8px}
+.gantt-legend{display:flex;flex-wrap:wrap;gap:18px;padding:0 22px 16px;font-size:11px;color:var(--ink2);align-items:center}.gantt-legend>span{display:flex;align-items:center;gap:6px}
+.legend-bar,.legend-reserve{display:inline-block;width:16px;height:8px;border-radius:3px;background:#9acbc1}.legend-reserve{background:repeating-linear-gradient(135deg,#fff 0 3px,#b7a47c 3px 4px);border:1px solid #b7a47c}
+.gantt-scroll{overflow:auto;max-height:600px;scrollbar-color:#b5c7c2 var(--surface2);scrollbar-width:thin;overscroll-behavior:contain;--label-width:250px}
+.gantt-canvas{position:relative;width:calc(var(--label-width) + var(--timeline-width));min-width:100%}
+.gantt-axis,.gantt-row{display:flex;height:48px;width:100%}.gantt-axis{position:sticky;top:0;z-index:7;height:58px;background:var(--canvas);border-block:1px solid var(--line)}
+.gantt-label{position:sticky;left:0;z-index:5;flex:0 0 var(--label-width);width:var(--label-width);min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;text-align:left;padding:5px 16px;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface);font-size:12px}
+.gantt-label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%}.gantt-label small{font-size:10px;color:var(--ink2);font-weight:400}.gantt-label:hover{background:var(--surface2)}
+.axis-label{background:var(--canvas);font-size:11px;font-weight:600;border-bottom:0}.phase-label{font-weight:700;background:var(--phase-light)}
+.gantt-weeks{position:relative;flex:none}.gantt-week{position:absolute;top:0;height:100%;display:flex;flex-direction:column;justify-content:center;gap:1px;padding-left:9px;border-left:1px solid var(--line);font-size:10px;color:var(--ink2)}.gantt-week strong{font-size:11px;color:var(--ink);font-weight:600}
+.gantt-body{position:relative}.gantt-track{position:relative;flex:none;border-bottom:1px solid #edf0ed;background:repeating-linear-gradient(90deg,transparent 0 83px,#e6ebe680 83px 84px);background-position:24px 0}
+.phase-row .gantt-track{background-color:#f8faf8}.gantt-row.is-selected .gantt-track{background-color:var(--tint)}
+.tone-0{--phase:#a1cfc3;--phase-light:#edf6f2;--phase-ink:#205c51}.tone-1{--phase:#c9c1e8;--phase-light:#f3f0fa;--phase-ink:#514276}.tone-2{--phase:#b5d3ed;--phase-light:#eef5fa;--phase-ink:#355775}.tone-3{--phase:#ecd29a;--phase-light:#faf5e9;--phase-ink:#6e5527}
+.gantt-bar{position:absolute;z-index:2;top:13px;height:22px;min-width:12px;padding:0;border:1px solid color-mix(in srgb,var(--phase-ink) 20%,transparent);border-radius:6px;background:var(--phase);color:var(--phase-ink);text-align:left;box-shadow:0 1px 2px #243c3110}
+.gantt-bar span{display:block;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:600}.gantt-bar:hover{filter:brightness(.95);outline:2px solid var(--phase-ink);outline-offset:2px}.gantt-bar.is-phase{top:16px;height:16px;border-radius:4px;opacity:.85}.gantt-bar.is-phase span{font-size:9px;line-height:14px}.gantt-bar.is-reserve{background:repeating-linear-gradient(135deg,var(--phase-light) 0 4px,var(--phase) 4px 6px)}.gantt-bar.is-done{box-shadow:inset 0 -3px 0 var(--phase-ink)}
+.gantt-milestone{position:absolute;top:2px;height:44px;min-width:44px;border:0;background:transparent;z-index:3;display:flex;align-items:center;padding:0 10px;gap:10px;color:var(--ink2);white-space:nowrap;text-align:left}.gantt-milestone i{display:block;width:11px;height:11px;border:1.5px solid currentColor;background:var(--surface);transform:rotate(45deg);flex:none}.gantt-milestone span{font-size:10px;background:#ffffffdc;padding:3px;border-radius:3px}.gantt-milestone.critical{color:var(--coral-ink);font-weight:700}.gantt-milestone.critical i{background:var(--coral-tint);border-width:2px}.gantt-milestone:hover span{background:var(--tint)}
+.gantt-links{position:absolute;left:var(--label-width);top:0;overflow:visible;pointer-events:none;z-index:1;color:#8d9d98}.gantt-edge{fill:none;stroke:#a7b7b0;stroke-width:1;opacity:.6}.gantt-edge.is-selected{stroke:var(--accent);stroke-width:2;opacity:1}
+.gantt-today{position:absolute;top:0;bottom:0;z-index:4;width:1px;background:var(--accent);pointer-events:none}.gantt-today span{position:sticky;top:58px;display:block;width:max-content;padding:3px 7px;border-radius:0 5px 5px 0;background:var(--accent);color:white;font-size:10px;box-shadow:0 1px 3px #0002}
+.gantt-foot{display:flex;justify-content:space-between;gap:12px;padding:13px 20px;border-top:1px solid var(--line);font-size:11px;color:var(--ink2);background:var(--canvas)}.gantt-notes{margin:18px 4px;color:var(--ink2);font-size:12px;max-width:850px}.gantt-notes summary{cursor:pointer;font-weight:600}.gantt-notes li{overflow-wrap:anywhere}.gantt-warning{padding:12px;border-radius:10px;background:var(--honey-tint)}
+@media(max-width:760px){.gantt-page,.gantt-scroll{--label-width:140px}.gantt-heading{align-items:flex-start;gap:10px;margin:4px 0 18px}.gantt-heading h1{font-size:26px;max-width:230px}.gantt-heading p:last-child{font-size:12px}.gantt-plan-stamp{display:none}.gantt-eyebrow{font-size:9px}.gantt-deadlines{gap:6px;margin-bottom:16px}.gantt-deadline{padding:10px 8px;border-radius:10px;gap:5px}.gantt-deadline strong{font-size:17px}.gantt-deadline .gantt-eyebrow{font-size:8px;letter-spacing:0;min-height:24px}.gantt-deadline>span:not(:first-child){font-size:10px;display:block;min-height:42px}.gantt-deadline small{font-size:9px}.gantt-deadline b{display:none}.gantt-toolbar{padding:12px;flex-wrap:wrap;gap:10px}.gantt-toolbar .seg{width:100%;margin:0}.gantt-toolbar .seg button{min-height:40px}.gantt-actions{width:100%;justify-content:space-between}.gantt-actions .btn{min-height:40px}.gantt-legend{padding:0 12px 12px;gap:8px 12px;font-size:10px}.gantt-label{padding:5px 9px;font-size:10.5px}.gantt-label small{font-size:9px}.phase-label small{font-size:8px}.gantt-scroll{max-height:560px}.gantt-foot{padding:10px 12px;flex-direction:column;gap:5px}.gantt-notes{font-size:11px}}
+
+.gantt-bar{min-height:0;min-width:0}
+.gantt-bar::after{content:"";position:absolute;inset:-11px 0;min-width:24px}

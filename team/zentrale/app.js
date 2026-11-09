@@ -3,13 +3,16 @@
   const M=window.CentralModel,R=window.CentralRender,C=window.CentralCache,main=document.getElementById('main'),overlay=document.getElementById('overlay');
   const status=document.getElementById('status'),identity=document.getElementById('identity'),refresh=document.getElementById('refresh');
   let key='',generation=0,controller=null,timer=null,view=null,mode='marketing',chosenMode=false,lane='offen',rules=[],memos=[],slot='',pending=true,stale=false,lastFocus=null,extraRules=[];
+  const G=window.CentralGantt;
   let storageWarning=false,noticeTimer,cacheSlot='',cacheWarning=false;
   const target=()=>window.PA6View?.target()||'';
   const announce=text=>{const n=document.getElementById('notice');n.textContent=text;n.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{n.hidden=true;},7000);};
   function render(focus) {
     if(!view){main.innerHTML=R.skeleton(mode);return;}
     rules=[...M.rules(view),...extraRules];
-    main.innerHTML=R.page(view,{mode,lane,rules,memos,disabled:pending||stale||view.readOnly});
+    const scroll=document.querySelector('.gantt-scroll'), position=scroll?{left:scroll.scrollLeft,top:scroll.scrollTop}:null;
+    main.innerHTML=mode==='zeitplan'?G.page(view):R.page(view,{mode,lane,rules,memos,disabled:pending||stale||view.readOnly});
+    if(mode==='zeitplan'){const next=document.querySelector('.gantt-scroll');if(next&&position){next.scrollLeft=position.left;next.scrollTop=position.top;}}
     document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
     if(focus){const node=typeof focus==='string'?document.getElementById(focus):focus;node?.focus();}
   }
@@ -137,7 +140,13 @@
     const b=event.target.closest('button,a[data-tool]');if(!b||b.disabled)return;
     if(b.hasAttribute('data-close')){closeDialog();return;}
     if(b.hasAttribute('data-retry')){load();return;}
-    if(b.dataset.mode){mode=b.dataset.mode;chosenMode=true;render();return;}
+    if(b.dataset.mode){mode=b.dataset.mode;chosenMode=true;render();if(mode==='zeitplan')G.load().then(()=>{if(mode==='zeitplan'){render();G.scrollToday();}});return;}
+    if(b.hasAttribute('data-gantt-retry')){G.load().then(()=>{if(mode==='zeitplan'){render();G.scrollToday();}});return;}
+    if(b.hasAttribute('data-gantt-today')){G.scrollToday();return;}
+    if(b.dataset.ganttFilter){G.action('filter',b.dataset.ganttFilter);render();G.scrollToday();main.querySelector('[data-gantt-filter="'+b.dataset.ganttFilter+'"]')?.focus({preventScroll:true});return;}
+    if(b.dataset.ganttPhase){G.action('phase',b.dataset.ganttPhase);render();main.querySelector('[data-gantt-phase="'+b.dataset.ganttPhase+'"]')?.focus({preventScroll:true});return;}
+    if(b.hasAttribute('data-gantt-expand')){G.action('expand');render();main.querySelector('[data-gantt-expand]')?.focus({preventScroll:true});return;}
+    if(b.dataset.ganttItem){const card=G.detail(b.dataset.ganttItem,view);if(card){render();(document.getElementById('gantt-'+b.dataset.ganttItem)||main.querySelector('[data-gantt-item="'+b.dataset.ganttItem+'"]'))?.focus({preventScroll:true});dialog(card.title,card.body);}return;}
     if(b.dataset.lane){lane=b.dataset.lane;render('juno');return;}
     if(b.dataset.undo){undo(b.dataset.undo);return;}
     if(b.dataset.tool){const tool=b.dataset.tool;mode=tool==='schedule'?'projekt':'marketing';chosenMode=true;closeDialog();render(tool);document.getElementById(tool)?.scrollIntoView({block:'start'});return;}
@@ -157,7 +166,7 @@
   document.addEventListener('keydown',event=>{
     if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();openTools();}
     if(event.key==='Escape'){if(overlay.children.length)closeDialog();else document.querySelectorAll('.source[open]').forEach(d=>d.open=false);}
-    if(event.key==='Tab'&&overlay.children.length){const nodes=[...overlay.querySelectorAll('button:not(:disabled),a,textarea,input')],first=nodes[0],last=nodes.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
+    if(event.key==='Tab'&&overlay.children.length){const nodes=[...overlay.querySelectorAll('button:not(:disabled),a,textarea,input,summary')],first=nodes[0],last=nodes.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
   });
   document.addEventListener('click',event=>{if(event.target.classList.contains('scrim'))closeDialog();if(!event.target.closest('.source'))document.querySelectorAll('.source[open]').forEach(d=>d.open=false);});
   refresh.addEventListener('click',load);document.getElementById('tools').addEventListener('click',openTools);

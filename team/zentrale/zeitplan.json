@@ -1,0 +1,3396 @@
+{
+  "deliveryTargets": [
+    {
+      "id": "L1",
+      "targetText": "Design 30.10., Pretest 29.10. bis 02.11., Feld 01.11. bis 01.12., Feldschluss 01.12. 23:59, Verlosung 08.12.",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L2",
+      "targetText": "31.10. Geruest, 06.12. Inhalt",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L3",
+      "targetText": "29.10.",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L4",
+      "targetText": "06.12.",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L5",
+      "targetText": "30.10.",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L6",
+      "targetText": "30.10.",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L7",
+      "targetText": "Geruest 31.10., Zahlen 02. bis 03.12., Zweitlesung 04.12.",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L8",
+      "targetText": "vorlaeufig 31.10., final 05.12., Zweitlesung 06.12.",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L9",
+      "targetText": "31.10. Geruest, 08.12., Zweitlesung 09.12. 12:00",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L10",
+      "targetText": "Reflexion 04.12., Fazit 09.12., Zweitlesung Fazit 10.12. 12:00",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "L11",
+      "targetText": "31.10. Geruest, 10.12.",
+      "source": "00_auftrag/Lieferplan.md, §1"
+    },
+    {
+      "id": "M1",
+      "targetText": "Entwurf 10.11., final 18.11. (Auftragserteilung 16.11.)",
+      "source": "00_auftrag/Lieferplan.md, §2"
+    },
+    {
+      "id": "M1b",
+      "targetText": "15.02.",
+      "source": "00_auftrag/Lieferplan.md, §2"
+    },
+    {
+      "id": "M2",
+      "targetText": "initiale Fassung 14./15.11. (AP-010, AP-009) für den Projektstart 16.11., nachgefuehrt 09.12. (AP-037) und 17.12. (AP-031)",
+      "source": "00_auftrag/Lieferplan.md, §2"
+    },
+    {
+      "id": "M3",
+      "targetText": "laufend",
+      "source": "00_auftrag/Lieferplan.md, §2"
+    },
+    {
+      "id": "M4",
+      "targetText": "Termine bis 20.11. fixiert",
+      "source": "00_auftrag/Lieferplan.md, §2"
+    },
+    {
+      "id": "M5",
+      "targetText": "Geruest 20.11., Inhalt 15.02., Abgabe 27.02.",
+      "source": "00_auftrag/Lieferplan.md, §2"
+    },
+    {
+      "id": "M6",
+      "targetText": "Musterfolien 31.10. (Zusatz, nur zur Freigabe des Niveaus), Deck 28.02., Proben Maerz",
+      "source": "00_auftrag/Lieferplan.md, §2"
+    },
+    {
+      "id": "M7",
+      "targetText": "Maerz",
+      "source": "00_auftrag/Lieferplan.md, §2"
+    }
+  ],
+  "schema": "pa6.schedule.v1",
+  "asOf": "2026-11-09",
+  "timezone": "Europe/Zurich",
+  "sources": [
+    {
+      "path": "00_auftrag/Termine.md",
+      "sha256": "35efa00e4c55fc6e3b4f4401f313d548f715e3adbbb48b64d4eb2672dfdea52c"
+    },
+    {
+      "path": "00_auftrag/Lieferplan.md",
+      "sha256": "4769d46aba7dca85dae6f954c52d3bc35519c7d0b123a381afeff72f07ff76ec"
+    },
+    {
+      "path": "40_projektmanagement/plan_2026-11-03.md",
+      "sha256": "fe90e7fe936003bc626a0f0c49dc7bfd8c12fbef698d70b97e1bd979a426635b"
+    },
+    {
+      "path": "40_projektmanagement/fristen_ausgleich_2026-11-05.md",
+      "sha256": "d4c86e2d2c3e9a1addd27c20d2d1c7d7f7874ee7e8e6b0fa2e06398c63665d8a"
+    },
+    {
+      "path": "Fristenmodell, Fassung 5, referenziert in Fristenausgleich §6",
+      "sha256": "fcedd9be854faa951590207a8bca983c90f230242e6e4ee089f87ec750086e31"
+    },
+    {
+      "path": "40_projektmanagement/snapshots/fristen_2026-11-05/nachher_psp.json",
+      "sha256": "356039ce2f09a753a22fb90a2cead0a24e2e1f0478c19a42f382a7044c6f2703"
+    }
+  ],
+  "phases": [
+    {
+      "id": "PH-01",
+      "title": "Initialisierung",
+      "start": "2026-10-19",
+      "end": "2026-11-18",
+      "source": "Fristenausgleich 05.11.2026, Fassung 5; PSP-Snapshot 05.11.2026"
+    },
+    {
+      "id": "PH-02",
+      "title": "Konzept",
+      "start": "2026-11-19",
+      "end": "2026-12-12",
+      "source": "Fristenausgleich 05.11.2026, Fassung 5; PSP-Snapshot 05.11.2026"
+    },
+    {
+      "id": "PH-03",
+      "title": "Realisierung",
+      "start": "2026-12-13",
+      "end": "2027-02-27",
+      "source": "Fristenausgleich 05.11.2026, Fassung 5; PSP-Snapshot 05.11.2026"
+    },
+    {
+      "id": "PH-04",
+      "title": "Einführung",
+      "start": "2027-02-28",
+      "end": "2027-03-31",
+      "source": "Fristenausgleich 05.11.2026, Fassung 5; PSP-Snapshot 05.11.2026"
+    }
+  ],
+  "items": [
+    {
+      "id": "AP-001",
+      "title": "Online-Befragung · Vorbereitung ab 28.10., Umfrage läuft bis 18.11.",
+      "phase": "PH-01",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Arber",
+      "start": "2026-10-28",
+      "end": "2026-11-18",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 6,
+      "durationDays": 22,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L1",
+        "L6"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-002",
+      "title": "Servicebeobachtung · Probelauf 06.11., Kontakte 09.–18.11.",
+      "phase": "PH-01",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Ernes",
+      "start": "2026-11-06",
+      "end": "2026-11-18",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 13,
+      "durationDays": 13,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L1",
+        "L6"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-003",
+      "title": "Bewertungen: die Gruppe beim Einordnen begleiten",
+      "phase": "PH-01",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Melisa",
+      "start": "2026-10-29",
+      "end": "2026-11-18",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 10,
+      "durationDays": 21,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L1",
+        "L6"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-004",
+      "title": "Auswertung: bereinigte Zahlen und F1/F2 (Vorlieferung)",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Arber",
+      "start": "2026-12-02",
+      "end": "2026-12-03",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 7,
+      "durationDays": 2,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-034",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-035",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-036",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-040",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-041",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L7"
+      ],
+      "notes": [
+        "AP-004 → 6a-2.8 (FS)",
+        "AP-004 → 6a-2.9 (FS)",
+        "AP-004 → AP-042 (FS)",
+        "AP-004 → AP-043 (FS)",
+        "6a-2.8-f12 → AP-004 (SP): Teilkapitel nicht in AP-004, Zusammenführung in 6a-2.8",
+        "6a-2.8-f3 → AP-004 (SP)",
+        "6a-2.8-f4 → AP-004 (SP)",
+        "AP-004 → 6a-2.8-f12 (FF): F1/F2 aus den bereinigten Zahlen",
+        "Abgezeichnete Teilkapitel werden erst am 05.12. in 2.8 zusammengeführt; Zweitlesung am 06.12. (Fristenausgleich §3.2)."
+      ]
+    },
+    {
+      "id": "AP-005",
+      "title": "Stärken, Schwächen, Chancen, Risiken (Kapitel 2.9)",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Melisa",
+      "start": "2026-12-05",
+      "end": "2026-12-05",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 6,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-004",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-046",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L8"
+      ],
+      "notes": [
+        "AP-005 → AP-044 (FS)",
+        "6a-2.8-f12 → AP-005 (FS)",
+        "6a-2.8-f3 → AP-005 (FS)",
+        "6a-2.8-f4 → AP-005 (FS)",
+        "AP-005 → AP-043 (FS)"
+      ]
+    },
+    {
+      "id": "AP-006",
+      "title": "Bericht 6a zusammenführen, Kapitel 1 bis 7 (Rohfassung)",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-12-06",
+      "end": "2026-12-09",
+      "startTime": "00:00",
+      "endTime": "12:00",
+      "effortHours": 12,
+      "durationDays": 4,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-005",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L2",
+        "L3",
+        "L4"
+      ],
+      "notes": [
+        "6a-2.8 → AP-006 (FF)",
+        "6a-2.9 → AP-006 (FF)",
+        "6a-2 → AP-006 (FS)",
+        "6a-1 → AP-006 (FS)",
+        "6a-2.4 → AP-006 (FS)",
+        "6a-2.4-design → AP-006 (FS)",
+        "6a-2.4-instrumente → AP-006 (FS)",
+        "6a-2.4-stichprobe → AP-006 (FS)",
+        "6a-5 → AP-006 (FS)",
+        "6a-7 → AP-006 (FS)",
+        "AP-046 → AP-006 (FS)",
+        "6a-4 → AP-006 (SP): Fazit nicht in der Rohfassung, Einfügung in AP-045",
+        "6a-6 → AP-006 (SP): Literaturverzeichnis nicht in der Rohfassung, Einfügung in AP-045",
+        "6a-3 → AP-006 (SP): Kapitel 3 nicht in der Rohfassung, Einfügung zu Beginn von AP-044",
+        "6a-6-abbildungen → AP-006 (SP): Verzeichnis, Endstand in AP-045",
+        "6a-6-tabellen → AP-006 (SP): Verzeichnis, Endstand in AP-045"
+      ]
+    },
+    {
+      "id": "AP-007",
+      "title": "Projektauftrag",
+      "phase": "PH-01",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-11-02",
+      "end": "2026-11-18",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 5,
+      "durationDays": 17,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M1"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-008",
+      "title": "Arbeitsplan und Zeitplan der Gruppe",
+      "phase": "PH-01",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-11-02",
+      "end": "2026-11-18",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 5,
+      "durationDays": 17,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M1"
+      ],
+      "notes": [
+        "Lieferplan M1: Entwurf 10.11., final 18.11.2026."
+      ]
+    },
+    {
+      "id": "AP-009",
+      "title": "Initiale Stakeholder-Map bis 15.11.",
+      "phase": "PH-01",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-11-09",
+      "end": "2026-11-15",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 3,
+      "durationDays": 7,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M2"
+      ],
+      "notes": [
+        "AP-009 → MS-01 (FS): initiale Stakeholder-Map liegt zum Projektstart vor",
+        "AP-009 → 6b-5 (FS)"
+      ]
+    },
+    {
+      "id": "AP-010",
+      "title": "Initiale Risiko-Map bis 14.11.",
+      "phase": "PH-01",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-11-09",
+      "end": "2026-11-14",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 1,
+      "durationDays": 6,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M2"
+      ],
+      "notes": [
+        "AP-010 → MS-01 (FS): initiale Risiko-Map liegt zum Projektstart vor"
+      ]
+    },
+    {
+      "id": "AP-011",
+      "title": "Controlling und Statusberichte · Initialisierung",
+      "phase": "PH-01",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-11-09",
+      "end": "2026-11-13",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 1,
+      "durationDays": 5,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M3"
+      ],
+      "notes": [
+        "AP-011 → MS-01 (FS): Aufwandserfassung bereit zum Projektstart"
+      ]
+    },
+    {
+      "id": "AP-012",
+      "title": "Coaching vom 02.11. festhalten · Startphase",
+      "phase": "PH-01",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2026-11-01",
+      "end": "2026-11-10",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 2,
+      "durationDays": 10,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M4"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-013",
+      "title": "Bericht 6b · Zusammenführung und Schlussprüfung, Kapitel 1–14",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2027-02-16",
+      "end": "2027-02-19",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 12,
+      "durationDays": 4,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-014",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-027",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "6b-1 → AP-013 (FS)",
+        "6b-3 → AP-013 (FS)",
+        "6b-6 → AP-013 (FS)",
+        "6b-7 → AP-013 (FS)",
+        "6b-11 → AP-013 (FS)",
+        "6b-13 → AP-013 (FS)",
+        "6b-12 → AP-013 (FS)",
+        "6b-14 → AP-013 (FS)",
+        "AP-013 → MS-03 (FS): Unterschriften 6b-14 nach Schlussprüfung"
+      ]
+    },
+    {
+      "id": "AP-014",
+      "title": "Terminplan der Massnahme für Yuh",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2027-02-03",
+      "end": "2027-02-11",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 5,
+      "durationDays": 9,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-024",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M1b"
+      ],
+      "notes": [
+        "6b-8 → AP-014 (FS)",
+        "AP-014 → 6b-8 (SP): Zeitplan der Massnahme, Verweis in AP-013"
+      ]
+    },
+    {
+      "id": "AP-015",
+      "title": "Präsentation, Folien und Sprechtexte",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2027-02-28",
+      "end": "2027-03-10",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 10,
+      "durationDays": 11,
+      "dependencies": [
+        {
+          "id": "MS-03",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M6"
+      ],
+      "notes": [
+        "Terminspannung: Lieferplan M6 verlangt Deck am 28.02.; dieses Arbeitspaket endet 10.03. Klärung offen."
+      ]
+    },
+    {
+      "id": "AP-016",
+      "title": "Flipchart für die Präsentation",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Melisa",
+      "start": "2027-03-01",
+      "end": "2027-03-10",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 3,
+      "durationDays": 10,
+      "dependencies": [
+        {
+          "id": "MS-03",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M6"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-017",
+      "title": "Fachgespräch, 20 Fragen mit Musterantworten und Probe",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Ernes",
+      "start": "2027-03-01",
+      "end": "2027-03-12",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 8,
+      "durationDays": 12,
+      "dependencies": [
+        {
+          "id": "MS-03",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M7"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-018",
+      "title": "Proben der Präsentation mit Beobachtungsbögen",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2027-03-13",
+      "end": "2027-03-19",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 10,
+      "durationDays": 7,
+      "dependencies": [
+        {
+          "id": "MS-03",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-015",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-016",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-017",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M6"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-019",
+      "title": "Abschluss und gemeinsamer Rückblick",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2027-03-23",
+      "end": "2027-03-30",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 3,
+      "durationDays": 8,
+      "dependencies": [
+        {
+          "id": "MS-03",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "MS-04",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": []
+    },
+    {
+      "id": "AP-020",
+      "title": "Auftrag 6a prüfen und Projektgrundlage vorbereiten",
+      "phase": "PH-01",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-10-19",
+      "end": "2026-10-26",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 5,
+      "durationDays": 8,
+      "dependencies": [],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": []
+    },
+    {
+      "id": "AP-021",
+      "title": "6b · Ausgangslage und Fazit aus 6a, Kapitel 1–2",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-12-13",
+      "end": "2026-12-18",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 6,
+      "durationDays": 6,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "AP-021 → 6b-1 (FF)",
+        "AP-021 → 6b-2 (FF)"
+      ]
+    },
+    {
+      "id": "AP-022",
+      "title": "6b · Ziele und Zielgruppen, Kapitel 3 und 6",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Arber",
+      "start": "2026-12-20",
+      "end": "2027-01-08",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 6,
+      "durationDays": 20,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-021",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "6b-2 → AP-022 (FS)",
+        "AP-022 → 6b-3 (FF)",
+        "AP-022 → 6b-6 (FF)"
+      ]
+    },
+    {
+      "id": "AP-023",
+      "title": "6b · Strategie, Kapitel 7",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2027-01-10",
+      "end": "2027-01-14",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 6,
+      "durationDays": 5,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-022",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "6b-3 → AP-023 (FS): Strategie braucht gegengelesene Ziele",
+        "6b-6 → AP-023 (FS): Strategie braucht gegengelesene Zielgruppen",
+        "AP-023 → 6b-7 (FF)"
+      ]
+    },
+    {
+      "id": "AP-024",
+      "title": "6b · Marketing-Mix und ausgearbeitete Massnahme, Kapitel 8",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Ernes",
+      "start": "2027-01-15",
+      "end": "2027-01-31",
+      "startTime": "12:00",
+      "endTime": "23:59",
+      "effortHours": 14,
+      "durationDays": 17,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-023",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "6b-7 → AP-024 (FS0): Zweitlesung 6b-7 durch Ernes selbst bis Fr 15.01. 12:00",
+        "AP-024 → 6b-8 (FF)"
+      ]
+    },
+    {
+      "id": "AP-025",
+      "title": "6b · Nachhaltigkeit, Kapitel 9",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Melisa",
+      "start": "2027-02-03",
+      "end": "2027-02-07",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 4,
+      "durationDays": 5,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-024",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "6b-8 → AP-025 (FS)",
+        "AP-025 → 6b-9 (FF)"
+      ]
+    },
+    {
+      "id": "AP-026",
+      "title": "6b · Kosten und Erfolgskontrolle, Kapitel 10",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Arber",
+      "start": "2027-02-03",
+      "end": "2027-02-10",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 7,
+      "durationDays": 8,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-024",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "6b-8 → AP-026 (FS)",
+        "AP-026 → 6b-10 (FF)",
+        "6b-3 → AP-026 (FS): Erfolgskontrolle je Ziel"
+      ]
+    },
+    {
+      "id": "AP-027",
+      "title": "6b · Fazit, Reflexion und Verzeichnisse, Kapitel 11–14",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2027-02-11",
+      "end": "2027-02-14",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 7,
+      "durationDays": 4,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-025",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-026",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "6b-11 → AP-027 (FF)",
+        "6b-12 → AP-027 (FF)",
+        "6b-13 → AP-027 (FF)",
+        "6b-14 → AP-027 (FF)"
+      ]
+    },
+    {
+      "id": "AP-028",
+      "title": "Risiko-Maps und Risikomanagement · Realisierung, Kapitel 4",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-12-13",
+      "end": "2027-02-26",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 4,
+      "durationDays": 76,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M3"
+      ],
+      "notes": [
+        "AP-037 → AP-028 (FS): Stand der Risiken aus AP-037",
+        "Teillieferung Risiken für Kapitel 4: 02.02.2027 23:59; Zweitlesung Massnahme am 02.02. 12:00."
+      ]
+    },
+    {
+      "id": "AP-029",
+      "title": "Controlling und Statusberichte · Realisierung",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-12-13",
+      "end": "2027-02-26",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 4,
+      "durationDays": 76,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M3"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-030",
+      "title": "Coachings 14.12. und 01.02. vorbereiten und protokollieren",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2026-12-13",
+      "end": "2027-02-02",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 4,
+      "durationDays": 52,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M4"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-031",
+      "title": "6b · Stakeholder nachführen, Kapitel 5",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2026-12-13",
+      "end": "2026-12-17",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 3,
+      "durationDays": 5,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-009",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M2",
+        "M5"
+      ],
+      "notes": [
+        "6a-3 → AP-031 (FS): Stakeholder der Ideen",
+        "AP-031 → 6b-5 (FF): AP-031 schreibt Kapitel 5 der 6b"
+      ]
+    },
+    {
+      "id": "AP-032",
+      "title": "Risikomanagement · Einführung",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2027-02-28",
+      "end": "2027-03-30",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 2,
+      "durationDays": 31,
+      "dependencies": [
+        {
+          "id": "MS-03",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M3"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-033",
+      "title": "Controlling · Einführung",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2027-02-28",
+      "end": "2027-03-30",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 2,
+      "durationDays": 31,
+      "dependencies": [
+        {
+          "id": "MS-03",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M3"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-034",
+      "title": "Online-Befragung · weiterführen, bis die Umfrage am 01.12. schliesst",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Arber",
+      "start": "2026-11-19",
+      "end": "2026-12-01",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 12,
+      "durationDays": 13,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-001",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L1"
+      ],
+      "notes": [
+        "AP-034 → 6a-2.4-stichprobe (FS)",
+        "AP-034 → 6a-2.8-f12 (FS)",
+        "AP-034 → 6a-6-anhang (FS)"
+      ]
+    },
+    {
+      "id": "AP-035",
+      "title": "Servicebeobachtung · Kontakte 19.–20.11., späte Antworten bis 23.11.",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Ernes",
+      "start": "2026-11-19",
+      "end": "2026-11-23",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 2,
+      "durationDays": 5,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-002",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L1"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-036",
+      "title": "Bewertungen: Einordnen für alle abschliessen",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Melisa",
+      "start": "2026-11-19",
+      "end": "2026-11-21",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 10,
+      "durationDays": 3,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-003",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L1"
+      ],
+      "notes": [
+        "AP-036 → 6a-2.8-f4 (FS)"
+      ]
+    },
+    {
+      "id": "AP-037",
+      "title": "Risiken der Ideen bewerten · Phase Konzept bis 09.12.",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a",
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-11-19",
+      "end": "2026-12-09",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 2,
+      "durationDays": 21,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-010",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M2"
+      ],
+      "notes": [
+        "6a-3 → AP-037 (FF): Risiken der Ideen nach Kapitel 3",
+        "AP-037 → AP-028 (FS): Stand der Risiken aus AP-037"
+      ]
+    },
+    {
+      "id": "AP-038",
+      "title": "Controlling und Statusberichte · Konzept",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a",
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-11-19",
+      "end": "2026-12-06",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 2,
+      "durationDays": 18,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-011",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M3"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-039",
+      "title": "Coachings vom 19.11. bis 08.12. vorbereiten und festhalten",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a",
+        "b"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2026-11-19",
+      "end": "2026-12-08",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 1,
+      "durationDays": 20,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-012",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "M4"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-040",
+      "title": "Servicetest-Daten prüfen ab 21.11.",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Ernes",
+      "start": "2026-11-21",
+      "end": "2026-11-24",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 3,
+      "durationDays": 4,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-002",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L1"
+      ],
+      "notes": [
+        "AP-040 → 6a-2.8-f3 (FS)"
+      ]
+    },
+    {
+      "id": "AP-041",
+      "title": "Statistische Prüfverfahren für die Auswertung",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-11-09",
+      "end": "2026-11-26",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 8,
+      "durationDays": 18,
+      "dependencies": [],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L1"
+      ],
+      "notes": []
+    },
+    {
+      "id": "AP-042",
+      "title": "Mehrwert für Yuh und Ideen für weitere Studien",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Melisa",
+      "start": "2026-12-05",
+      "end": "2026-12-08",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 5,
+      "durationDays": 4,
+      "dependencies": [
+        {
+          "id": "AP-004",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L7"
+      ],
+      "notes": [
+        "AP-004 → AP-042 (FS)",
+        "6a-2.8-f12 → AP-042 (FS)",
+        "6a-2.8-f3 → AP-042 (FS)",
+        "6a-2.8-f4 → AP-042 (FS)",
+        "6a-2.8 → AP-042 (FF): Sätze zu 2.8 nach dessen Zweitlesung, als Nachtrag N-6a-2.8",
+        "AP-042 → 6a-4 (FS): Abschnitte «Mehrwert für Yuh» und «Ideen für weitere Studien» im Fazit",
+        "AP-042 → 6a-2.8 (NT): Nachtrag N-6a-2.8"
+      ]
+    },
+    {
+      "id": "AP-043",
+      "title": "Reflexion und Ausblick PA6b",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2026-12-06",
+      "end": "2026-12-08",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 3,
+      "durationDays": 3,
+      "dependencies": [
+        {
+          "id": "AP-004",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-005",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L10"
+      ],
+      "notes": [
+        "AP-004 → AP-043 (FS)",
+        "AP-005 → AP-043 (FS)",
+        "AP-043 → 6a-5 (NT): Nachtrag N-6a-5"
+      ]
+    },
+    {
+      "id": "AP-044",
+      "title": "Kürzung auf 20 Seiten und Anhang",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-12-09",
+      "end": "2026-12-10",
+      "startTime": "12:00",
+      "endTime": "12:00",
+      "effortHours": 6,
+      "durationDays": 2,
+      "dependencies": [
+        {
+          "id": "AP-006",
+          "type": "FS0",
+          "note": "Rohfassung AP-006 bis Mi 09.12. 12:00"
+        },
+        {
+          "id": "AP-047",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-005",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": [
+        "AP-047 → AP-044 (FS)",
+        "AP-005 → AP-044 (FS)",
+        "6a-3 → AP-044 (FS0): Zweitlesung 6a-3 (Ernes) bis Mi 09.12. 12:00",
+        "AP-044 → 6a-6-anhang (SP): Kürzung verschiebt Teile in den Anhang, Prüfung in AP-045"
+      ]
+    },
+    {
+      "id": "AP-045",
+      "title": "Layout, Verzeichnisse und Lektorat 6a",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Leonie",
+      "start": "2026-12-10",
+      "end": "2026-12-10",
+      "startTime": "12:00",
+      "endTime": "23:59",
+      "effortHours": 5,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "AP-044",
+          "type": "FS0",
+          "note": "Kürzung AP-044 bis Do 10.12. 12:00"
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L11"
+      ],
+      "notes": [
+        "6a-4 → AP-045 (FS0): Zweitlesung Fazit (Salah) bis Do 10.12. 12:00",
+        "6a-6 → AP-045 (FS0): Zweitlesung Literatur (Arber) bis Do 10.12. 12:00",
+        "6a-6-abbildungen → AP-045 (FS)",
+        "6a-6-tabellen → AP-045 (FS)",
+        "6a-6-anhang → AP-045 (FS)",
+        "AP-045 → MS-02 (FS): Unterschriften 6a-7 nach Schlussprüfung, vor dem Upload"
+      ]
+    },
+    {
+      "id": "AP-046",
+      "title": "Unternehmen, Markt, Konkurrenz · sechs Teilkapitel aus 2.1–2.7",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-11-04",
+      "end": "2026-11-28",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 8,
+      "durationDays": 25,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L2",
+        "L5"
+      ],
+      "notes": [
+        "AP-046 → AP-006 (FS)",
+        "6a-2-ziel → AP-046 (FF)",
+        "6a-2-partner → AP-046 (FF)",
+        "6a-2-sicherheit → AP-046 (FF)",
+        "6a-2-konkurrenz → AP-046 (FF)",
+        "6a-reserve-markt → AP-046 (FF)",
+        "6a-reserve-unternehmen → AP-046 (FF)"
+      ]
+    },
+    {
+      "id": "AP-047",
+      "title": "Strategische Überlegungen und mögliche Methoden, Kapitel 3",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "package",
+      "owner": "Salah",
+      "start": "2026-12-07",
+      "end": "2026-12-08",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 4,
+      "durationDays": 2,
+      "dependencies": [
+        {
+          "id": "AP-004",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-005",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [
+        "L9"
+      ],
+      "notes": [
+        "AP-047 → AP-044 (FS)",
+        "6a-2.9 → AP-047 (FS)",
+        "6a-2.8 → AP-047 (FS): Ideen mit Befundnummer aus 2.8"
+      ]
+    },
+    {
+      "id": "MS-01",
+      "title": "Auftragserteilung PA6b mit Yuh",
+      "phase": "PH-01",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "milestone",
+      "owner": "Salah",
+      "start": "2026-11-16",
+      "end": "2026-11-16",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "00_auftrag/Termine.md",
+      "deliverables": [],
+      "notes": [
+        "AP-009 → MS-01 (FS): initiale Stakeholder-Map liegt zum Projektstart vor",
+        "AP-010 → MS-01 (FS): initiale Risiko-Map liegt zum Projektstart vor",
+        "AP-011 → MS-01 (FS): Aufwandserfassung bereit zum Projektstart"
+      ],
+      "date": "2026-11-16",
+      "category": "Unterricht",
+      "critical": false,
+      "time": "ganzer Tag",
+      "sourceDate": "2026-11-16"
+    },
+    {
+      "id": "MS-02",
+      "title": "Abgabe PA6a",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "milestone",
+      "owner": "Salah",
+      "start": "2026-12-12",
+      "end": "2026-12-12",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "RS-01",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-037",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-038",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-039",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-046",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-047",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "00_auftrag/Termine.md",
+      "deliverables": [],
+      "notes": [
+        "MS-02 → 6b-1 (FS)",
+        "MS-02 → 6b-2 (FS)",
+        "MS-02 → 6b-5 (FS)",
+        "AP-045 → MS-02 (FS): Unterschriften 6a-7 nach Schlussprüfung, vor dem Upload",
+        "Upload-Ziel 18:00 gemäss Lieferplan L13; offizielle Frist 23:59."
+      ],
+      "date": "2026-12-12",
+      "category": "Abgabe",
+      "critical": true,
+      "time": "23:59",
+      "sourceDate": "2026-12-12"
+    },
+    {
+      "id": "MS-03",
+      "title": "Abgabe PA6b",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "milestone",
+      "owner": "Salah",
+      "start": "2027-02-27",
+      "end": "2027-02-27",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "RS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-028",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-029",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-030",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-031",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "00_auftrag/Termine.md",
+      "deliverables": [],
+      "notes": [
+        "AP-013 → MS-03 (FS): Unterschriften 6b-14 nach Schlussprüfung"
+      ],
+      "date": "2027-02-27",
+      "category": "Abgabe",
+      "critical": true,
+      "time": "23:59",
+      "sourceDate": "2027-02-27"
+    },
+    {
+      "id": "MS-04",
+      "title": "Präsentation und Fachgespräch PA6a/PA6b",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "milestone",
+      "owner": "Salah",
+      "start": "2027-03-22",
+      "end": "2027-03-22",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "RS-04",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "00_auftrag/Termine.md",
+      "deliverables": [],
+      "notes": [],
+      "date": "2027-03-22",
+      "category": "Abgabe",
+      "critical": true,
+      "time": "13:00",
+      "sourceDate": "2027-03-22"
+    },
+    {
+      "id": "MS-05",
+      "title": "Tor Initialisierung",
+      "phase": "PH-01",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "milestone",
+      "owner": "Salah",
+      "start": "2026-11-18",
+      "end": "2026-11-18",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "RS-03",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "MS-01",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-001",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-002",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-003",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-007",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-008",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-009",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-010",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-011",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-012",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": [],
+      "date": "2026-11-18",
+      "category": "Intern",
+      "critical": false
+    },
+    {
+      "id": "MS-06",
+      "title": "Tor Einführung · Projektabschluss",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "milestone",
+      "owner": "Salah",
+      "start": "2027-03-31",
+      "end": "2027-03-31",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "AP-019",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-032",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-033",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": [],
+      "date": "2027-03-31",
+      "category": "Intern",
+      "critical": false
+    },
+    {
+      "id": "MS-07",
+      "title": "Rücklauf 30 gültige Antworten",
+      "phase": "PH-01",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "milestone",
+      "owner": "Arber",
+      "start": "2026-11-08",
+      "end": "2026-11-08",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "AP-001",
+          "type": "SS",
+          "note": "Zwischenmeilenstein im laufenden Paket"
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": [],
+      "date": "2026-11-08",
+      "category": "Intern",
+      "critical": false
+    },
+    {
+      "id": "MS-08",
+      "title": "Rücklauf 60 gültige Antworten",
+      "phase": "PH-01",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "milestone",
+      "owner": "Arber",
+      "start": "2026-11-15",
+      "end": "2026-11-15",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "AP-001",
+          "type": "SS",
+          "note": "Zwischenmeilenstein im laufenden Paket"
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": [],
+      "date": "2026-11-15",
+      "category": "Intern",
+      "critical": false
+    },
+    {
+      "id": "MS-09",
+      "title": "Yuh-Mindestziel 30 Teilnahmen mit Yuh",
+      "phase": "PH-01",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "milestone",
+      "owner": "Arber",
+      "start": "2026-11-18",
+      "end": "2026-11-18",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "AP-001",
+          "type": "SS",
+          "note": "Zwischenmeilenstein im laufenden Paket"
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": [],
+      "date": "2026-11-18",
+      "category": "Intern",
+      "critical": false
+    },
+    {
+      "id": "MS-10",
+      "title": "Rücklauf 85 gültige Antworten",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "milestone",
+      "owner": "Arber",
+      "start": "2026-11-22",
+      "end": "2026-11-22",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "AP-034",
+          "type": "SS",
+          "note": "Zwischenmeilenstein im laufenden Paket"
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": [],
+      "date": "2026-11-22",
+      "category": "Intern",
+      "critical": false
+    },
+    {
+      "id": "MS-11",
+      "title": "Rücklauf 100 gültige Antworten",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "milestone",
+      "owner": "Arber",
+      "start": "2026-12-01",
+      "end": "2026-12-01",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 0,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "AP-034",
+          "type": "SS",
+          "note": "Zwischenmeilenstein im laufenden Paket"
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": [
+        "Rücklaufziel ist ein interner Kontrollpunkt; der offizielle Feldschluss steht separat und ist unabhängig von der Zielerreichung."
+      ],
+      "date": "2026-12-01",
+      "category": "Intern",
+      "critical": false
+    },
+    {
+      "id": "RS-01",
+      "title": "Reserve vor Abgabe PA6a",
+      "phase": "PH-02",
+      "stage": "a",
+      "stages": [
+        "a"
+      ],
+      "kind": "reserve",
+      "owner": "Salah",
+      "start": "2026-12-11",
+      "end": "2026-12-11",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 3,
+      "durationDays": 1,
+      "dependencies": [
+        {
+          "id": "MS-05",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-006",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-045",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": []
+    },
+    {
+      "id": "RS-02",
+      "title": "Reserve vor Abgabe PA6b",
+      "phase": "PH-03",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "reserve",
+      "owner": "Salah",
+      "start": "2027-02-20",
+      "end": "2027-02-26",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 8,
+      "durationDays": 7,
+      "dependencies": [
+        {
+          "id": "MS-02",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-013",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": []
+    },
+    {
+      "id": "RS-03",
+      "title": "Reserve Initialisierung",
+      "phase": "PH-01",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "reserve",
+      "owner": "Salah",
+      "start": "2026-11-17",
+      "end": "2026-11-18",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 1,
+      "durationDays": 2,
+      "dependencies": [
+        {
+          "id": "AP-020",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": []
+    },
+    {
+      "id": "RS-04",
+      "title": "Reserve Einführung",
+      "phase": "PH-04",
+      "stage": "b",
+      "stages": [
+        "b"
+      ],
+      "kind": "reserve",
+      "owner": "Salah",
+      "start": "2027-03-20",
+      "end": "2027-03-21",
+      "startTime": "00:00",
+      "endTime": "23:59",
+      "effortHours": 3,
+      "durationDays": 2,
+      "dependencies": [
+        {
+          "id": "MS-03",
+          "type": "FS",
+          "note": ""
+        },
+        {
+          "id": "AP-018",
+          "type": "FS",
+          "note": ""
+        }
+      ],
+      "status": null,
+      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "deliverables": [],
+      "notes": []
+    },
+    {
+      "id": "T-01",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Auftragserteilung PA6a",
+      "start": "2026-10-19",
+      "end": "2026-10-19",
+      "date": "2026-10-19",
+      "phase": "PH-01",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-10-19"
+    },
+    {
+      "id": "T-02",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Unterlagen PA6a auf Moodle",
+      "start": "2026-10-26",
+      "end": "2026-10-26",
+      "date": "2026-10-26",
+      "phase": "PH-01",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-10-26"
+    },
+    {
+      "id": "T-03",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Marketing: Ziele und Strategie",
+      "start": "2026-10-31",
+      "end": "2026-10-31",
+      "date": "2026-10-31",
+      "phase": "PH-01",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "08:00",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-10-31"
+    },
+    {
+      "id": "T-04",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Feldstart Online-Befragung A",
+      "start": "2026-11-01",
+      "end": "2026-11-01",
+      "date": "2026-11-01",
+      "phase": "PH-01",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Feld",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-01"
+    },
+    {
+      "id": "T-05",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Feldschluss Online-Befragung A",
+      "start": "2026-12-01",
+      "end": "2026-12-01",
+      "date": "2026-12-01",
+      "phase": "PH-02",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Feld",
+      "time": "23:59",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-12-01"
+    },
+    {
+      "id": "T-06",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Feldstart Bewertungen C",
+      "start": "2026-11-03",
+      "end": "2026-11-03",
+      "date": "2026-11-03",
+      "phase": "PH-01",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Feld",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-03"
+    },
+    {
+      "id": "T-07",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Feldschluss Bewertungen C",
+      "start": "2026-11-21",
+      "end": "2026-11-21",
+      "date": "2026-11-21",
+      "phase": "PH-02",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Feld",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-21"
+    },
+    {
+      "id": "T-08",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Gruppentreffen / Kick-off",
+      "start": "2026-11-01",
+      "end": "2026-11-01",
+      "date": "2026-11-01",
+      "phase": "PH-01",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Intern",
+      "time": "18:00",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-01"
+    },
+    {
+      "id": "T-09",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Probelauf Servicebeobachtung B",
+      "start": "2026-11-06",
+      "end": "2026-11-06",
+      "date": "2026-11-06",
+      "phase": "PH-01",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Feld",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-06"
+    },
+    {
+      "id": "T-10",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Kontaktfeld B beginnt",
+      "start": "2026-11-09",
+      "end": "2026-11-09",
+      "date": "2026-11-09",
+      "phase": "PH-01",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Feld",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-09"
+    },
+    {
+      "id": "T-11",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Kontaktfeld B endet",
+      "start": "2026-11-20",
+      "end": "2026-11-20",
+      "date": "2026-11-20",
+      "phase": "PH-02",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Feld",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-20"
+    },
+    {
+      "id": "T-12",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Datenprüfung / Auswertung B beginnt",
+      "start": "2026-11-21",
+      "end": "2026-11-21",
+      "date": "2026-11-21",
+      "phase": "PH-02",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Feld",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-21"
+    },
+    {
+      "id": "T-13",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "72-h-Nachlauf B endet",
+      "start": "2026-11-23",
+      "end": "2026-11-23",
+      "date": "2026-11-23",
+      "phase": "PH-02",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Feld",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-23"
+    },
+    {
+      "id": "T-14",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Marketing: Coaching PA6a",
+      "start": "2026-11-02",
+      "end": "2026-11-02",
+      "date": "2026-11-02",
+      "phase": "PH-01",
+      "stage": "a",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "08:45",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-02"
+    },
+    {
+      "id": "T-15",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "PM Block 2: Stakeholder, Risiko",
+      "start": "2026-11-23",
+      "end": "2026-11-23",
+      "date": "2026-11-23",
+      "phase": "PH-02",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "08:45",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-11-23"
+    },
+    {
+      "id": "T-16",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "PM Block 3 und 4",
+      "start": "2026-12-07",
+      "end": "2026-12-07",
+      "date": "2026-12-07",
+      "phase": "PH-02",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-12-07"
+    },
+    {
+      "id": "T-17",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [
+        "Individueller Termin noch offen."
+      ],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "PM Coaching PA6b · Platzhalter",
+      "start": "2026-12-14",
+      "end": "2026-12-14",
+      "date": "2026-12-14",
+      "phase": "PH-03",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2026-12-14"
+    },
+    {
+      "id": "T-18",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [
+        "Individueller Termin noch offen."
+      ],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "PM Coaching PA6b · Platzhalter",
+      "start": "2027-02-01",
+      "end": "2027-02-01",
+      "date": "2027-02-01",
+      "phase": "PH-03",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2027-02-01"
+    },
+    {
+      "id": "T-19",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Marketing: Prüfungssimulation online",
+      "start": "2027-03-08",
+      "end": "2027-03-08",
+      "date": "2027-03-08",
+      "phase": "PH-04",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2027-03-08"
+    },
+    {
+      "id": "T-20",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "deliverables": [],
+      "notes": [
+        "Separater Unterrichtstermin, kein PA6-Arbeitspaket."
+      ],
+      "effortHours": null,
+      "durationDays": 0,
+      "title": "Prüfung 2a Marketing",
+      "start": "2027-03-20",
+      "end": "2027-03-20",
+      "date": "2027-03-20",
+      "phase": "PH-04",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Unterricht",
+      "time": "13:00",
+      "critical": false,
+      "source": "00_auftrag/Termine.md",
+      "sourceDate": "2027-03-20"
+    },
+    {
+      "id": "D-M1",
+      "title": "M1 · Projektplanung Entwurf",
+      "start": "2026-11-10",
+      "end": "2026-11-10",
+      "date": "2026-11-10",
+      "phase": "PH-01",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Intern",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "effortHours": null,
+      "durationDays": 0,
+      "critical": false,
+      "source": "00_auftrag/Lieferplan.md, §2 M1",
+      "deliverables": [
+        "M1"
+      ],
+      "notes": [
+        "Solltermin; Zuständigkeit nicht eigens belegt."
+      ]
+    },
+    {
+      "id": "D-M4",
+      "title": "M4 · Coaching-Termine fixiert",
+      "start": "2026-11-20",
+      "end": "2026-11-20",
+      "date": "2026-11-20",
+      "phase": "PH-02",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Intern",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "effortHours": null,
+      "durationDays": 0,
+      "critical": false,
+      "source": "00_auftrag/Lieferplan.md, §2 M4",
+      "deliverables": [
+        "M4"
+      ],
+      "notes": [
+        "Solltermin; Zuständigkeit nicht eigens belegt."
+      ]
+    },
+    {
+      "id": "D-M5",
+      "title": "M5 · Kapitelgerüst PA6b",
+      "start": "2026-11-20",
+      "end": "2026-11-20",
+      "date": "2026-11-20",
+      "phase": "PH-02",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Intern",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "effortHours": null,
+      "durationDays": 0,
+      "critical": false,
+      "source": "00_auftrag/Lieferplan.md, §2 M5",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "Solltermin; Zuständigkeit nicht eigens belegt."
+      ]
+    },
+    {
+      "id": "D-M5-IN",
+      "title": "M5 · Inhalte vollständig",
+      "start": "2027-02-15",
+      "end": "2027-02-15",
+      "date": "2027-02-15",
+      "phase": "PH-03",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Intern",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "effortHours": null,
+      "durationDays": 0,
+      "critical": false,
+      "source": "00_auftrag/Lieferplan.md, §2 M5",
+      "deliverables": [
+        "M5"
+      ],
+      "notes": [
+        "Solltermin; Zuständigkeit nicht eigens belegt."
+      ]
+    },
+    {
+      "id": "D-M6",
+      "title": "M6 · Deck laut Lieferplan",
+      "start": "2027-02-28",
+      "end": "2027-02-28",
+      "date": "2027-02-28",
+      "phase": "PH-04",
+      "stage": "b",
+      "kind": "milestone",
+      "category": "Intern",
+      "owner": null,
+      "dependencies": [],
+      "status": null,
+      "effortHours": null,
+      "durationDays": 0,
+      "critical": false,
+      "source": "00_auftrag/Lieferplan.md, §2 M6",
+      "deliverables": [
+        "M6"
+      ],
+      "notes": [
+        "Solltermin; Zuständigkeit nicht eigens belegt.",
+        "Terminspannung: AP-015 läuft bis 10.03.2027. Klärung offen."
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "id": "6a-1",
+      "owner": "Salah",
+      "reviewer": "Ernes",
+      "start": "2026-11-05",
+      "end": "2026-11-15",
+      "reviewBy": "2026-11-17",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2",
+      "owner": "Leonie",
+      "reviewer": "Arber",
+      "start": "2026-11-05",
+      "end": "2026-11-29",
+      "reviewBy": "2026-12-02",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2-ziel",
+      "owner": "Melisa",
+      "reviewer": "Arber",
+      "start": "2026-11-05",
+      "end": "2026-11-13",
+      "reviewBy": "2026-11-14",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2-partner",
+      "owner": "Melisa",
+      "reviewer": "Arber",
+      "start": "2026-11-05",
+      "end": "2026-11-24",
+      "reviewBy": "2026-11-25",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2-sicherheit",
+      "owner": "Melisa",
+      "reviewer": "Arber",
+      "start": "2026-11-05",
+      "end": "2026-11-25",
+      "reviewBy": "2026-11-26",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2-konkurrenz",
+      "owner": "Ernes",
+      "reviewer": "Melisa",
+      "start": "2026-11-05",
+      "end": "2026-11-26",
+      "reviewBy": "2026-11-27",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2.4",
+      "owner": "Arber",
+      "reviewer": "Leonie",
+      "start": "2026-11-05",
+      "end": "2026-11-15",
+      "reviewBy": "2026-11-17",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2.4-design",
+      "owner": "Arber",
+      "reviewer": "Leonie",
+      "start": "2026-11-05",
+      "end": "2026-11-13",
+      "reviewBy": "2026-11-14",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2.4-instrumente",
+      "owner": "Arber",
+      "reviewer": "Leonie",
+      "start": "2026-11-05",
+      "end": "2026-11-18",
+      "reviewBy": "2026-11-19",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2.4-stichprobe",
+      "owner": "Arber",
+      "reviewer": "Leonie",
+      "start": "2026-12-02",
+      "end": "2026-12-02",
+      "reviewBy": "2026-12-03",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2.8",
+      "owner": "Leonie",
+      "reviewer": "Arber",
+      "start": "2026-12-05",
+      "end": "2026-12-05",
+      "reviewBy": "2026-12-06",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2.8-f12",
+      "owner": "Arber",
+      "reviewer": "Leonie",
+      "start": "2026-12-02",
+      "end": "2026-12-03",
+      "reviewBy": "2026-12-04",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2.8-f3",
+      "owner": "Ernes",
+      "reviewer": "Melisa",
+      "start": "2026-12-02",
+      "end": "2026-12-03",
+      "reviewBy": "2026-12-04",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2.8-f4",
+      "owner": "Melisa",
+      "reviewer": "Arber",
+      "start": "2026-12-02",
+      "end": "2026-12-03",
+      "reviewBy": "2026-12-04",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-2.9",
+      "owner": "Melisa",
+      "reviewer": "Arber",
+      "start": "2026-12-05",
+      "end": "2026-12-05",
+      "reviewBy": "2026-12-06",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-3",
+      "owner": "Salah",
+      "reviewer": "Ernes",
+      "start": "2026-12-07",
+      "end": "2026-12-08",
+      "reviewBy": "2026-12-09",
+      "reviewTime": "12:00"
+    },
+    {
+      "id": "6a-4",
+      "owner": "Leonie",
+      "reviewer": "Salah",
+      "start": "2026-12-09",
+      "end": "2026-12-09",
+      "reviewBy": "2026-12-10",
+      "reviewTime": "12:00"
+    },
+    {
+      "id": "6a-5",
+      "owner": "Leonie",
+      "reviewer": "Salah",
+      "start": "2026-11-05",
+      "end": "2026-12-04",
+      "reviewBy": "2026-12-05",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-6",
+      "owner": "Leonie",
+      "reviewer": "Arber",
+      "start": "2026-11-05",
+      "end": "2026-12-09",
+      "reviewBy": "2026-12-10",
+      "reviewTime": "12:00"
+    },
+    {
+      "id": "6a-6-abbildungen",
+      "owner": "Leonie",
+      "reviewer": "Arber",
+      "start": "2026-12-02",
+      "end": "2026-12-06",
+      "reviewBy": "2026-12-08",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-6-tabellen",
+      "owner": "Leonie",
+      "reviewer": "Arber",
+      "start": "2026-12-02",
+      "end": "2026-12-06",
+      "reviewBy": "2026-12-09",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-6-anhang",
+      "owner": "Leonie",
+      "reviewer": "Arber",
+      "start": "2026-12-02",
+      "end": "2026-12-05",
+      "reviewBy": "2026-12-08",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-7",
+      "owner": "Leonie",
+      "reviewer": "Salah",
+      "start": "2026-11-05",
+      "end": "2026-11-15",
+      "reviewBy": "2026-11-17",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-reserve-markt",
+      "owner": "Ernes",
+      "reviewer": "Melisa",
+      "start": "2026-11-05",
+      "end": "2026-11-27",
+      "reviewBy": "2026-11-28",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6a-reserve-unternehmen",
+      "owner": "Salah",
+      "reviewer": "Ernes",
+      "start": "2026-11-05",
+      "end": "2026-11-21",
+      "reviewBy": "2026-11-22",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-1",
+      "owner": "Salah",
+      "reviewer": "Ernes",
+      "start": "2026-12-13",
+      "end": "2026-12-18",
+      "reviewBy": "2026-12-19",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-2",
+      "owner": "Melisa",
+      "reviewer": "Arber",
+      "start": "2026-12-13",
+      "end": "2026-12-18",
+      "reviewBy": "2026-12-19",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-3",
+      "owner": "Salah",
+      "reviewer": "Ernes",
+      "start": "2026-12-20",
+      "end": "2027-01-08",
+      "reviewBy": "2027-01-09",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-4",
+      "owner": "Ernes",
+      "reviewer": "Melisa",
+      "start": "2027-02-03",
+      "end": "2027-02-05",
+      "reviewBy": "2027-02-06",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-5",
+      "owner": "Leonie",
+      "reviewer": "Salah",
+      "start": "2026-12-13",
+      "end": "2026-12-18",
+      "reviewBy": "2026-12-19",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-6",
+      "owner": "Arber",
+      "reviewer": "Leonie",
+      "start": "2026-12-20",
+      "end": "2027-01-08",
+      "reviewBy": "2027-01-09",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-7",
+      "owner": "Salah",
+      "reviewer": "Ernes",
+      "start": "2027-01-10",
+      "end": "2027-01-14",
+      "reviewBy": "2027-01-15",
+      "reviewTime": "12:00"
+    },
+    {
+      "id": "6b-8",
+      "owner": "Ernes",
+      "reviewer": "Melisa",
+      "start": "2027-01-16",
+      "end": "2027-01-31",
+      "reviewBy": "2027-02-02",
+      "reviewTime": "12:00"
+    },
+    {
+      "id": "6b-9",
+      "owner": "Melisa",
+      "reviewer": "Arber",
+      "start": "2027-02-03",
+      "end": "2027-02-07",
+      "reviewBy": "2027-02-09",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-10",
+      "owner": "Ernes",
+      "reviewer": "Salah",
+      "start": "2027-02-03",
+      "end": "2027-02-10",
+      "reviewBy": "2027-02-11",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-11",
+      "owner": "Leonie",
+      "reviewer": "Salah",
+      "start": "2027-02-12",
+      "end": "2027-02-13",
+      "reviewBy": "2027-02-14",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-12",
+      "owner": "Leonie",
+      "reviewer": "Salah",
+      "start": "2026-12-13",
+      "end": "2027-02-11",
+      "reviewBy": "2027-02-12",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-13",
+      "owner": "Leonie",
+      "reviewer": "Salah",
+      "start": "2027-02-12",
+      "end": "2027-02-13",
+      "reviewBy": "2027-02-14",
+      "reviewTime": "23:59"
+    },
+    {
+      "id": "6b-14",
+      "owner": "Leonie",
+      "reviewer": "Salah",
+      "start": "2026-12-13",
+      "end": "2027-02-11",
+      "reviewBy": "2027-02-12",
+      "reviewTime": "23:59"
+    }
+  ],
+  "absences": [],
+  "absenceNote": "Abwesenheiten: noch nicht erfasst",
+  "notes": [
+    "Planungsstand 09.11.2026; Status wird aus den vorhandenen Daten ergänzt.",
+    "Phasen nach Wasserfall; vorgezogene Vorbereitung und laufende Steuerung können Phasengrenzen überlappen.",
+    "Planstunden sind geschätzter Aufwand; Balken zeigen Kalendertage, keine Vollzeitauslastung.",
+    "Deck-Termin offen: Lieferplan 28.02. / AP-015 10.03.2027."
+  ]
+}
