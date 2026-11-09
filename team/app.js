@@ -127,7 +127,7 @@ function workLink(row) {
   const doc=url.protocol==='https:' && url.hostname==='docs.google.com' && /^\/document\//.test(url.pathname);
   const drive=url.protocol==='https:' && url.hostname==='drive.google.com';
   if(!internal&&!doc&&!drive&&!notionLink)return null;
-  const p=url.pathname,label=doc?'Kapitel-Doc öffnen':internal?(/^\/team\/b/.test(p)?'Kontaktmaske öffnen':/^\/team\/c/.test(p)?'Bewertungsmaske öffnen':/^\/team\/schreiben/.test(p)?'Schreibplatz öffnen':/^\/team\/projektauftrag/.test(p)?'Projektauftrag öffnen':/^\/team\/projekt/.test(p)?'Projekt öffnen':/^\/team\/dashboard/.test(p)?'Dashboard öffnen':/^\/team\/frag/.test(p)?'Pia fragen':url.search==='?view=sharing'?'Umfrage teilen':'Öffnen'):'Unterlagen öffnen';
+  const p=url.pathname,label=doc?'Kapitel-Doc öffnen':internal?(/^\/team\/b/.test(p)?'Kontaktmaske öffnen':/^\/team\/c/.test(p)?'Bewertungsmaske öffnen':/^\/team\/schreiben/.test(p)?'Schreibplatz öffnen':/^\/team\/projektauftrag/.test(p)?'Projektauftrag öffnen':/^\/team\/projekt/.test(p)?'Projekt öffnen':/^\/team\/(dashboard|zentrale)/.test(p)?'Kommandozentrale öffnen':/^\/team\/frag/.test(p)?'Pia fragen':url.search==='?view=sharing'?'Umfrage teilen':'Öffnen'):'Unterlagen öffnen';
   return el('a',{class:'button secondary work-link',...(notionLink?{target:'_blank'}:{}),href:internal?url.pathname+url.search:preview.active()&&doc?url.origin+url.pathname.replace(/(?:\/edit)?\/?$/, '/preview'):url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
 }
 function steps(row,readOnly=false) {
@@ -793,7 +793,7 @@ function measuredHours(row){
 // Auftragspfad (05.11.2026, Salah: «kein Textwall»): Start → ein Schritt nach dem anderen → Abschluss.
 // Sichtbar ist immer nur, was man jetzt braucht. Warum, Massstab und Plan sind einen Tipp entfernt.
 const DEST=[[/Team-App\s*›\s*Bewertungen/,()=>'/team/c/','Bewertungen öffnen'],[/Team-App\s*›\s*Servicetest/,()=>'/team/b/','Servicetest öffnen'],
-  [/Team-App\s*›\s*Umfrage teilen/,()=>'/team/?view=sharing','Umfrage teilen öffnen'],[/Team-App\s*›\s*Dashboard|im Dashboard/,()=>'/team/dashboard/','Dashboard öffnen'],
+  [/Team-App\s*›\s*Umfrage teilen/,()=>'/team/?view=sharing','Umfrage teilen öffnen'],[/Team-App\s*›\s*Dashboard|im Dashboard/,()=>'/team/zentrale/','Kommandozentrale öffnen'],
   [/Schreibplatz\s*›\s*Kapitel\s*([\w.-]+)/,(m)=>'/team/schreiben/?k='+encodeURIComponent(m[1]),'Kapitel öffnen'],
   [/Schreibplatz|Kapitel-Doc/,(m,row)=>row.source==='chapters'&&row.ref?'/team/schreiben/?k='+encodeURIComponent(row.ref):'/team/schreiben/','Kapitel öffnen']];
 function stepDest(row,text){
