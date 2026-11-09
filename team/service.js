@@ -80,7 +80,7 @@ function bKarteVorbereitung(state,aktuell,erledigt,schritt){
   const kopf=bPunkte(schritt,erledigt);
   if(schritt===1){const s1=erledigt[0];
     return el('section',{class:'b-card','aria-labelledby':'b-card-h'},kopf,el('h2',{id:'b-card-h'},'Übung durchspielen'),
-      el('p',{class:'b-card-text'},s1?'Erledigt. Du kannst sie jederzeit nochmals ansehen.':'Spiel einen erfundenen Chat durch. Niemand wird kontaktiert. Etwa 15 Minuten.'),bZuteilungsSatz(),
+      el('p',{class:'b-card-text'},s1?'Erledigt. Du kannst sie jederzeit nochmals ansehen.':'Spiel einen erfundenen Chat durch. Niemand wird kontaktiert. Etwa 2 Minuten.'),bZuteilungsSatz(),
       el('button',{class:'knopf b-go',type:'button','data-read-navigation':true,on:{click:()=>oeffne(state.probe)}},s1?'Übung ansehen':'Übung starten'));}
   if(schritt===2){
     const rest=Math.max(0,(config.target||0)-state.assigned);
@@ -140,7 +140,7 @@ function bKontaktZeile(r){
   const status=statusVon(r),offen=bListeOffen===r.nr,neu=!!bZuteilung?.rows.includes(r.nr);
   const kopf=el('button',{type:'button',class:'b-row-head','aria-expanded':String(offen),'data-read-navigation':true,on:{click:()=>{bListeOffen=offen?'':r.nr;liste();document.querySelector('[data-nr="'+r.nr+'"] .b-row-head')?.focus();}}},
     el('span',{class:'b-row-time'},r.block==='A'?'09–12':'13–17'),
-    el('span',{class:'b-row-main'},el('b',{},bWas(r),neu?el('span',{class:'b-new'},'neu'):null),el('small',{},bKanalText(r)+' · '+r.wiederholung+'. Durchgang',el('span',{class:'b-row-nr'},' · '+r.nr))),
+    el('span',{class:'b-row-main'},el('b',{},bWas(r),neu?el('span',{class:'b-new'},'neu'):null),el('small',{},bKanalText(r)+' · Kontakt '+r.wiederholung,el('span',{class:'b-row-nr'},' · '+r.nr))),
     el('span',{class:'b-row-state is-'+status},status==='abgeschlossen'?'erledigt':status==='laufend'?'läuft':'offen'),
     el('span',{class:'b-row-chev'},bIcon('chev')));
   return el('li',{class:'b-row'+(offen?' is-open':'')+(neu?' is-new':''),'data-nr':r.nr},kopf,offen?el('div',{class:'b-row-body'},
@@ -227,18 +227,4 @@ async function oeffne(row){
 function serviceSchedule(row){
   const input=el('input',{type:'date',value:row.tag,min:daten.service?.config.start,max:daten.service?.config.end,'aria-label':'Termin '+row.nr});
   return el('div',{class:'service-schedule'},input,el('button',{class:'chip',type:'button',on:{click:()=>serviceAction({typ:'b_schedule',nr:row.nr,day:input.value})}},'Termin speichern'));
-}
-// Übung: der erfundene Verlauf als kurze Zeitleiste; das Häkchen steht am Schluss bei der Prüfung.
-function simulationNotice(){
-  return el('aside',{class:'b-sim'},el('h2',{},'Übung ohne Bank'),el('p',{class:'b-sim-warn'},'Ruf keine Bank an und schick keine Nachricht.'),
-    el('ol',{class:'b-timeline'},[['09:00','Du schickst die Frage ab'],['09:01','Automatische Antwort, klar als Bot erkennbar'],['09:05','Eine Person antwortet'],['09:08','Beide Kartenschritte sind erklärt'],['09:09','Ende']].map(([t,x])=>el('li',{},el('time',{},t),el('span',{},x)))),
-    el('p',{class:'b-hint'},'Freundlich, keine Rückfragen, bleibt bei Deutsch, kein Standort, kein Link. Nachrichten der Bank: 0.'));
-}
-function simulationCheck(){
-  return el('label',{class:'b-check'},el('input',{type:'checkbox',checked:z.simulation_confirmed,on:{change:event=>{z.simulation_confirmed=event.target.checked;formular();}}}),el('span',{},'Ich habe die Übung durchgespielt und keine Bank kontaktiert.'));
-}
-async function startServiceContact(){
-  const message=document.getElementById('meldung');
-  try { await sende({typ:'b_begin',nr:aktiv.nr});const nr=aktiv.nr;daten=await hole('plan');openForm(daten.plan.find(row=>row.nr===nr));window.dispatchEvent(new Event('workspace-saved'));}
-  catch(error){message.textContent=error.message;message.className='meldung fehler';}
 }
