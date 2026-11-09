@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-KYxIHTRyBBLU3mojwhCzXlsBNa12xUFoZpT8KaU65H8='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-SU2CBV94syKtz9Rc+bRS8CWcrzQkv9pfWOPD5NNk9MA='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>C Bewertungen</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=f40cadc15e41">
 <link rel="stylesheet" href="../begleiter.css?v=a3a159af8437"><script src="../begleiter.js?v=dc552e850c40" defer></script>
@@ -115,7 +115,7 @@ function hinweise() {
 }
 // Numbered presentation; keep the existing instrument and keyboard rules.
 function frage(nr, titel, hilfe, fertig, ...inhalt) {
-  return el("section", { class: "c-q" + (fertig ? " is-done" : "") }, el("div", { class: "c-q-head" }, el("span", { class: "c-q-num" }, fertig ? "✓" : String(nr)), el("div", {}, el("h2", {}, titel), hilfe ? el("p", { class: "leise" }, hilfe) : null)), el("div", { class: "c-q-body" }, inhalt));
+  return el("section", { class: "c-q" + (fertig ? " is-done" : "") }, el("div", { class: "c-q-head" }, el("span", { class: "c-q-num" }, fertig ? "✓" : String(nr)), el("div", {}, el("h2", {}, titel), hilfe ? el("p", { class: "leise" }, hilfe) : null)), el("div", { class: "c-q-body" }, inhalt.flat(3)));
 }
 function updateReadiness() {
   const node = document.querySelector(".c-ready"); if (!node) return;
