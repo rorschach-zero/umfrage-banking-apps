@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex, nofollow">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-DF9LbPgZuXyWbAUJ1GHtLyC0xRBL46KDhEXTaR4jxF4='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-j4ZjaAnqTPPjGX67/95OnLKWVkuw2HxN2ozatDC0bRI='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>B Servicetest</title><link rel="stylesheet" href="../team.css?v=314766aae31f"><link rel="stylesheet" href="../design.css?v=ed33034ddeb1">
 <link rel="stylesheet" href="../view-as.css?v=9a6ae0def5a0"><link rel="stylesheet" href="../flow.css?v=f40cadc15e41">
 <link rel="stylesheet" href="../zeit.css?v=0547fa549500">
@@ -14,7 +14,7 @@
 <main id="main"><p class="leise">Wird geladen …</p></main>
 <div class="fuss b-fuss" id="fuss" hidden><div class="innen"><div class="meldung" id="meldung" role="status" aria-live="polite"></div><div class="b-fuss-top"><p id="b-step-status"></p><button type="button" class="b-quiet" id="zwischen">Zwischenstand speichern</button></div><div class="b-fuss-nav"><span id="b-nav-back"></span><span id="b-nav-next"></span><button class="knopf b-finish" id="fertig" hidden>Speichern und abschliessen</button></div></div></div>
 <script src="../view-as.js?v=41cc5d81f7cc"></script>
-<script src="../team.js?v=126f6cd983b5"></script>
+<script src="../team.js?v=72330450688b"></script>
 <script src="../purpose.js?v=5ec0008c81c2"></script>
 <script src="../service.js?v=afd3336e94b4"></script>
 <script src="../zeit.js?v=9aae461011f6"></script>
@@ -36,6 +36,7 @@ const FRIST = { // Minuten bis Mensch, danach bis zur vollständigen Antwort (Mi
 const HINWEISE = [["Name oder Kürzel", "Name oder Kürzel"], ["Bezug auf ein Detail der Frage", "Geht auf meine Frage genau ein"], ["Sichtbare Tippzeit oder Schreibanzeige", "«Schreibt gerade …» war sichtbar"], ["Freitext ohne Bausteincharakter", "Eigener Text, kein Standardbaustein"]];
 const HOEFLICH = [[1, "abweisend oder herablassend"], [2, "einsilbig, geht nicht auf Dank oder Rückfrage ein"], [3, "korrekt und sachlich"], [4, "freundlich, nimmt Bezug auf die Person"], [5, "freundlich und vorausschauend, bietet ungefragt Hilfe an"]];
 const STOPP = { nachrichten: 42, minuten: 140 };
+let bDirektOffen = false;
 let daten = null, aktiv = null, z = {}, belastung = {}, savePending = false, startCorrection = false;
 
 function frei(s) { return (s || "").replace(/\s+/g, " ").trim(); }
@@ -47,6 +48,9 @@ async function start() {
     document.getElementById("wer").textContent = TEAM[daten.person] || daten.person;
     if (!cached) bOffen = selectedStep;
     liste();
+    // Direktlink je Kontakt (09.11.2026): team/b/?nr=B05#k=… öffnet diesen Kontakt, einmal pro Laden.
+    const ziel = new URLSearchParams(location.search).get("nr") || new URLSearchParams(location.hash.slice(1)).get("nr");
+    if (ziel && !bDirektOffen) { const r = (daten.plan || []).find(x => x.nr === ziel); if (r) { bDirektOffen = true; openForm(r); } }
   });
 }
 function statusVon(r) { const e = r.erfasst; return !e ? "offen" : e.stand === "abgeschlossen" ? "abgeschlossen" : "laufend"; }
