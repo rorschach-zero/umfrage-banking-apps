@@ -4,8 +4,11 @@ const VERBOTEN = /[\w.+-]+@[\w-]+\.[\w.-]+|https?:\/\/|www\.|\b[\w-]+\.(ch|com|n
 const ENDPUNKT = "https://script.google.com/macros/s/AKfycbwKYjD-T2hJvIi84_RlplTnkqDE7ilWuDftVvfRa4ZR61V3s6S83lQ7IcTygDzJkHRI/exec";   // Web-App-URL des Empfaengers erfassung.gs, nach der Bereitstellung eintragen
 const TEAM = { SA: "Salah", ES: "Ernes", MG: "Melisa", AM: "Arber", LB: "Leonie" };
 function schluessel() {
-  const h = new URLSearchParams(location.hash.slice(1)).get("k");
-  if (h) { try { if ((localStorage.getItem("pa6k") || "") !== h) localStorage.removeItem("pa6-begleiter"); localStorage.setItem("pa6k", h); } catch (e) {} history.replaceState(null, "", location.pathname + location.search); return h; }
+  // Schluessel aus #k= (Standard) oder ?k= (Excel und Outlook schneiden beim Anklicken oft alles ab # ab).
+  // Er wird sofort gespeichert und aus der sichtbaren Adresse entfernt; die Seiten senden keinen Referrer.
+  const q = new URLSearchParams(location.search);
+  const h = new URLSearchParams(location.hash.slice(1)).get("k") || q.get("k");
+  if (h) { try { if ((localStorage.getItem("pa6k") || "") !== h) localStorage.removeItem("pa6-begleiter"); localStorage.setItem("pa6k", h); } catch (e) {} q.delete("k"); const rest = q.toString(); history.replaceState(null, "", location.pathname + (rest ? "?" + rest : "")); return h; }
   try { return localStorage.getItem("pa6k") || ""; } catch (e) { return ""; }
 }
 // Gelesen wird per POST: der Schluessel steht nur im Inhalt der Anfrage, nie in einer Adresse.
