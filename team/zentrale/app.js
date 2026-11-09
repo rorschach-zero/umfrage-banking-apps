@@ -1,13 +1,13 @@
 'use strict';
 (() => {
-  const M=window.CentralModel,R=window.CentralRender,main=document.getElementById('main'),overlay=document.getElementById('overlay');
+  const M=window.CentralModel,R=window.CentralRender,C=window.CentralCache,main=document.getElementById('main'),overlay=document.getElementById('overlay');
   const status=document.getElementById('status'),identity=document.getElementById('identity'),refresh=document.getElementById('refresh');
   let key='',generation=0,controller=null,timer=null,view=null,mode='marketing',chosenMode=false,lane='offen',rules=[],memos=[],slot='',pending=true,stale=false,lastFocus=null,extraRules=[];
-  let storageWarning=false,noticeTimer;
+  let storageWarning=false,noticeTimer,cacheSlot='',cacheWarning=false;
   const target=()=>window.PA6View?.target()||'';
   const announce=text=>{const n=document.getElementById('notice');n.textContent=text;n.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{n.hidden=true;},7000);};
   function render(focus) {
-    if(!view)return;
+    if(!view){main.innerHTML=R.skeleton(mode);return;}
     rules=[...M.rules(view),...extraRules];
     main.innerHTML=R.page(view,{mode,lane,rules,memos,disabled:pending||stale||view.readOnly});
     document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
@@ -70,16 +70,40 @@
     const ticket=++generation,access=key,as=target();controller?.abort();controller=new AbortController();clearTimeout(timer);
     pending=true;refresh.disabled=true;main.setAttribute('aria-busy','true');closeDialog();render();
     if(!access){main.innerHTML='<section class="card"><h1>Persönlichen Team-Link öffnen</h1><p>Für die Kommandozentrale brauchst du deine Anmeldung in der Team-App.</p><a class="btn" href="/team/">Zur Anmeldung</a></section>';status.textContent='Nicht angemeldet';pending=false;refresh.disabled=false;main.setAttribute('aria-busy','false');return;}
-    status.textContent=view?'Letzter Stand '+M.stamp(view.generatedAt)+' · wird aktualisiert …':'Stand wird geladen …';
+    status.textContent=view?'Stand '+C.stamp(view.generatedAt)+' · wird aktualisiert':'Stand wird geladen …';
     const activeController=controller;
     const timeout=setTimeout(()=>activeController.abort(),30000);
     try{
-      const responses=await Promise.allSettled([read('dashboard',access,as,controller.signal),read('team',access,as,controller.signal)]);
+      // Start both reads before storage/crypto work; neither route waits for the other.
+      const requests=Promise.allSettled([read('dashboard',access,as,controller.signal),read('team',access,as,controller.signal)]);
+      const nextCacheSlot=await C.slot(access,as,crypto);
+      if(ticket!==generation||access!==key||as!==target())return;
+      cacheSlot=nextCacheSlot;
+      if(!view&&cacheSlot){
+        let entry=null;try{entry=C.get(localStorage,cacheSlot,as);}catch{}
+        view=C.restore(entry,as);
+        if(view){
+          stale=true;
+          if(!chosenMode)mode=view.role==='leitung'?'marketing':'projekt';
+          identity.textContent=M.NAMES[view.identity]+' · '+(view.readOnly?'Personenansicht, nur lesen':view.role==='leitung'?'Leitung':'Mitglied');
+          status.textContent='Stand '+C.stamp(view.generatedAt)+' · wird aktualisiert';
+          render();
+        }
+      }
+      const responses=await requests;
       if(ticket!==generation||access!==key||as!==target())return;
       const denied=responses.find(r=>r.status==='rejected'&&r.reason.denied);
       if(denied)throw denied.reason;
-      if(responses[0].status==='rejected')throw responses[0].reason;
       const personal=responses[1].status==='fulfilled'?responses[1].value:null;
+      let dashboard=null,dashboardError=responses[0].status==='rejected'?responses[0].reason:null;
+      if(!dashboardError){
+        try{dashboard=M.normalize(responses[0].value,personal);dashboard.role=responses[0].value.role==='leitung'?'leitung':'mitglied';}
+        catch(error){dashboardError=error;}
+      }
+      try{cacheWarning=!C.save(localStorage,cacheSlot,as,{dashboard,team:personal});}catch{cacheWarning=true;}
+      if(dashboardError)throw dashboardError;
+      // A partial refresh must not replace a complete old stand with missing details.
+      if(!personal&&view)throw responses[1].reason;
       const next=M.normalize(responses[0].value,personal);
       if(as)next.readOnly=true;
       const nextSlot=next.identity?await memoSlot(access,next.identity,as):'';
@@ -89,14 +113,14 @@
       view=next;extraRules=extraRules.filter(r=>r.kind==='frei');stale=false;pending=false;
       if(!chosenMode)mode=view.role==='leitung'?'marketing':'projekt';
       identity.textContent=(view.identity?M.NAMES[view.identity]:'Person noch nicht geliefert')+' · '+(view.readOnly?'Personenansicht, nur lesen':view.role==='leitung'?'Leitung':'Mitglied');
-      status.textContent='Datenstand '+M.stamp(view.generatedAt)+(personal?'':' · persönliche Pakete gerade nicht erreichbar')+(!slot?' · Vormerkungen nur in dieser Sitzung':'');
+      status.textContent='Datenstand '+M.stamp(view.generatedAt)+(personal?'':' · persönliche Pakete gerade nicht erreichbar')+(!slot?' · Vormerkungen nur in dieser Sitzung':'')+(cacheWarning?' · Kennzahlen nur in dieser Sitzung':'');
       render();
     }catch(error){
       if(ticket!==generation||access!==key||as!==target())return;
       pending=false;stale=true;
-      if(error.denied){view=null;memos=[];slot='';extraRules=[];identity.textContent='';}
+      if(error.denied){try{if(cacheSlot)localStorage.removeItem(cacheSlot);}catch{}view=null;memos=[];slot='';extraRules=[];identity.textContent='';}
       status.textContent=(error.name==='AbortError'?'Daten gerade nicht erreichbar; Zeitlimit erreicht.':error.message)+(error.retry?' Erneut laden nach '+M.cleanText(error.retry)+' Sekunden.':'');
-      if(view){status.textContent+=' Letzter Stand: '+M.stamp(view.generatedAt)+'. Vormerkungen pausiert.';render();}
+      if(view){status.textContent='Stand '+C.stamp(view.generatedAt)+' · Aktualisierung fehlgeschlagen. '+status.textContent+' Letzter Stand bleibt sichtbar. Vormerkungen pausiert.';render();}
       else main.innerHTML=`<section class="card"><h1>${error.denied?'Anmeldung erforderlich':'Daten gerade nicht erreichbar'}</h1><p>${R.esc(status.textContent)}</p><button class="btn" data-retry>Erneut laden</button> <a class="btn" href="/team/">Zur Team-App</a></section>`;
     }finally{
       clearTimeout(timeout);
@@ -104,10 +128,10 @@
     }
   }
   function accessChanged() {
-    generation++;controller?.abort();clearTimeout(timer);view=null;memos=[];slot='';extraRules=[];identity.textContent='';chosenMode=false;key='';
+    generation++;controller?.abort();clearTimeout(timer);view=null;memos=[];slot='';extraRules=[];identity.textContent='';chosenMode=false;key='';cacheSlot='';cacheWarning=false;
     const incoming=new URLSearchParams(location.hash.slice(1)).get('k');
     try{if(incoming){localStorage.setItem('pa6k',incoming);window.PA6View?.clear();}key=incoming||localStorage.getItem('pa6k')||'';}catch{key=incoming||'';}
-    history.replaceState(null,'',location.pathname+location.search);main.innerHTML='<p class="empty">Stand wird geladen …</p>';load();
+    history.replaceState(null,'',location.pathname+location.search);main.innerHTML=R.skeleton(mode);load();
   }
   document.addEventListener('click',event=>{
     const b=event.target.closest('button,a[data-tool]');if(!b||b.disabled)return;

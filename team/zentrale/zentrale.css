@@ -309,3 +309,22 @@ button,.btn,.btn.sm,.seg button,.tabs button,summary{min-height:44px;min-width:4
 @media(max-width:900px){.grid{grid-template-columns:1fr}.juno{position:static}.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr}.top-in{gap:10px}.brand small{display:none}}
 @media(max-width:760px){.top{position:static}.top-in{padding:12px 16px;grid-template-columns:minmax(0,1fr) auto;gap:10px}.brand{font-size:14px}.seg{grid-column:1/-1;grid-row:2;justify-content:center}.seg button{flex:1}.cmd{grid-row:3}.cmd kbd{display:none}.status-line{padding:10px 16px 0}.status-line a{margin-left:0}.wrap{padding:14px 16px 32px}.wrap>*+*{margin-top:14px}.grid,.cols{gap:14px}.c2,.c3{grid-template-columns:minmax(0,1fr)}.card{padding:14px}.lage{grid-template-columns:1fr}.lage>div{padding:14px}.lage>div+div{border-left:0;border-top:1px solid var(--line)}.lage>.act{grid-column:auto}.big{font-size:28px}.lage .stand-row{display:grid;grid-template-columns:1fr}.meter{width:100%}.hm{grid-template-columns:54px minmax(0,1fr) minmax(0,1fr)}.hm .ch{font-size:11.5px}.cell{padding:10px 8px}.cell .bdg{position:static;align-self:start;margin-top:6px}.cell .v{font-size:20px}.cell .m{font-size:11.5px}.hm .rh{font-size:11.5px}.bar-r{font-size:12px}.card svg{max-height:none}.schedule-row{grid-template-columns:minmax(0,1fr) 86px}.schedule-track{display:none}.package-row{grid-template-columns:minmax(0,1fr) 86px}.qc{padding:14px}.qc dl{grid-template-columns:1fr}.qc dt{font-weight:600}.qc .row .btn{flex:1}.tm{grid-template-columns:1fr}.source .pop{right:12px}.scrim{align-items:flex-end;padding:0 0 12px}.dialog{padding:20px;max-height:90vh}.juno{width:100%}.tabs{padding:4px}.tabs button{font-size:12px}.card-h h2{font-size:16px}svg text{font-size:11.5px}.note{overflow-wrap:anywhere}.steps3{gap:5px}.steps3 .s .num{font-size:22px}}
 .progress-ring{display:flex;align-items:center;gap:12px;min-width:0}.card svg.metric-ring,.metric-ring{width:44px;height:44px;flex:none}.hours-track{grid-column:1/-1}.tm .t.hours-track{height:12px}
+
+/* Fixed module frames keep loading, cached and live states in the same slots.
+   Long lists remain available by keyboard and touch within their module. */
+#modules .card,#own-packages{height:var(--module-height,380px);overflow:auto;scrollbar-gutter:stable}
+#curve,#quotas{--module-height:480px}
+#channels,#funnel,#organizations{--module-height:420px}
+#tempo{--module-height:420px}
+#waves{--module-height:220px}
+#method-b,#method-c{--module-height:260px}
+#schedule,#packages{--module-height:520px}
+#team,#risks{--module-height:460px}
+#own-packages{--module-height:280px}
+#stand>div{height:270px;overflow:auto;scrollbar-gutter:stable}
+#juno{height:640px}
+.skeleton{pointer-events:none}
+.skeleton-lines{height:140px;margin-top:20px;border-radius:8px;background:linear-gradient(var(--surface2),var(--surface2)) 0 0/85% 18px no-repeat,linear-gradient(var(--surface2),var(--surface2)) 0 40px/65% 18px no-repeat,linear-gradient(var(--surface2),var(--surface2)) 0 80px/95% 18px no-repeat}
+#juno.skeleton .skeleton-lines{margin:20px}
+@media(max-width:1200px){#stand>.act{height:190px}}
+@media(max-width:760px){#stand>div:first-child{height:290px}#stand>.eng,#stand>.act{height:180px}#team{--module-height:540px}}

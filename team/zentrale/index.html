@@ -13,6 +13,7 @@
 <script src="../view-as.js" defer></script>
 <script src="model.js" defer></script>
 <script src="render.js" defer></script>
+<script src="cache.js" defer></script>
 <script src="app.js" defer></script>
 </head>
 <body>
@@ -25,7 +26,7 @@
 </div></header>
 <div class="status-line"><span id="status" role="status">Stand wird geladen …</span><span id="identity"></span><a href="/team/dashboard/">Dashboard v3</a></div>
 <main class="wrap" id="main" tabindex="-1" aria-busy="true">
-<p class="empty">Die Live-Daten werden geladen …</p>
+<section class="lage skeleton" id="stand" aria-hidden="true"><div><div class="step">Stand</div><div class="skeleton-lines"></div></div><div><div class="step">Engpass</div><div class="skeleton-lines"></div></div><div><div class="step">Nächster Schritt</div><div class="skeleton-lines"></div></div></section><div class="grid"><div class="cols" id="modules"><div class="cols c2"><section class="card skeleton" id="curve" aria-hidden="true"><div class="card-h"><h2>Rücklauf</h2></div><div class="skeleton-lines"></div></section><section class="card skeleton" id="quotas" aria-hidden="true"><div class="card-h"><h2>Quoten</h2></div><div class="skeleton-lines"></div></section></div><div class="cols c3"><section class="card skeleton" id="channels" aria-hidden="true"><div class="card-h"><h2>Kanäle</h2></div><div class="skeleton-lines"></div></section><section class="card skeleton" id="funnel" aria-hidden="true"><div class="card-h"><h2>Trichter</h2></div><div class="skeleton-lines"></div></section><section class="card skeleton" id="organizations" aria-hidden="true"><div class="card-h"><h2>Organisationen</h2></div><div class="skeleton-lines"></div></section></div><section class="card skeleton" id="tempo" aria-hidden="true"><div class="card-h"><h2>Tempo</h2></div><div class="skeleton-lines"></div></section><section class="card skeleton" id="waves" aria-hidden="true"><div class="card-h"><h2>Wellen</h2></div><div class="skeleton-lines"></div></section><div class="cols c2 methods"><section class="card skeleton" id="method-b" aria-hidden="true"><div class="card-h"><h2>Servicebeobachtung B</h2></div><div class="skeleton-lines"></div></section><section class="card skeleton" id="method-c" aria-hidden="true"><div class="card-h"><h2>Bewertungen C</h2></div><div class="skeleton-lines"></div></section></div></div><aside class="juno skeleton" id="juno" aria-hidden="true"><div class="juno-h"><h2>Warteschlange</h2></div><div class="skeleton-lines"></div></aside></div>
 </main>
 <div id="overlay"></div><p id="notice" class="notice" role="status" hidden></p>
 <footer>Praxisarbeit · Studierendengruppe 601/H25-B · KV Business School Zürich</footer>
