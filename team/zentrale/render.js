@@ -7,8 +7,31 @@
   const num = (value,digits=1) => M.number(value)===null?'noch nicht geliefert':new Intl.NumberFormat('de-CH',{maximumFractionDigits:digits}).format(value);
   const empty = (state='missing',label='') => `<p class="empty">${esc(label)}${label?': ':''}${state==='error'?'Daten gerade nicht erreichbar':state==='empty'?'Noch keine Einträge':'noch nicht geliefert'}.</p>`;
   const pct = value => M.number(value)===null?'noch nicht geliefert':Math.round(value*100)+' %';
-  const info = (id,source,body='') => `<details class="source"><summary class="info" aria-label="Quelle und Berechnung">i</summary><div class="pop"><b>Quelle</b><p>${esc(source)}</p>${body}</div></details>`;
-  const card = (v,id,title,source,body,sub='',explain='',sourceTime=v.generatedAt) => `<section class="card" id="${id}" tabindex="0"><div class="card-h"><div><h2>${esc(title)}</h2>${sub?`<div class="sub">${esc(sub)}</div>`:''}</div>${info(id,`${source} · ${M.stamp(sourceTime)}`,explain)}</div>${body}</section>`;
+  const explanations = {
+    'stand-marketing':'Gezählt werden die gültigen Umfrage-Antworten und wie viele davon von Yuh-Nutzenden stammen; die Ziele kommen aus unserem Erhebungsplan.',
+    'stand-projekt':'Der Projektstand verbindet die geplanten Stunden mit dem gemeldeten Arbeitsbeginn und den Fertigmeldungen; begonnene Aufgaben zählen zur Hälfte.',
+    quotas:'Die Umfrage-Antworten sind nach Alter und Art der Banking-App aufgeteilt; markiert ist die Gruppe mit dem grössten Abstand zum Ziel.',
+    curve:'Die Linie zeigt die gültigen Umfrage-Antworten bis zum jeweiligen Tag; die gestrichelte Linie zeigt unsere geplanten Zwischenziele.',
+    channels:'Die Zahlen zeigen, über welche Links gültige Umfrage-Antworten eingegangen sind; ein persönlicher Link muss nicht von der betreffenden Person selbst geteilt worden sein.',
+    funnel:'Seit dem angegebenen Messbeginn zählen wir geöffnete, begonnene, vollständige und gültige Umfragen; die Prozentzahl vergleicht jeden Schritt mit dem vorherigen.',
+    organizations:'Die Zahlen stammen aus der Versand- und Antwortliste der Organisationen; für die Antwortquote zählen nur menschliche Antworten.',
+    waves:'Hier würden die Versandtage und die Zahl der angeschriebenen Organisationen stehen; diese Angaben fehlen derzeit in der gelieferten Versandübersicht.',
+    'method-b':'Gezählt werden abgeschlossene echte Servicekontakte aus den Testprotokollen; Übungen zählen nicht zum Ziel von 48 Kontakten.',
+    'method-c':'Diese Zahl aus unserer Bewertungsliste zählt jede erstmals eingeordnete Bewertung einmal; in den Auswertungsgruppen kann sie mehrfach vorkommen.',
+    packages:'Hier stehen die Aufgaben mit Frist und gemeldetem Status aus dem Projektplan; die Zuständigkeiten kommen aus den persönlichen Aufgabenlisten.',
+    'own-packages':'Hier stehen deine Aufgaben mit Frist und gemeldetem Status aus deiner persönlichen Aufgabenliste.',
+    schedule:'Die Termine kommen aus dem Projektplan; Aufgabenbalken zeigen den geplanten Zeitraum und die Markierungen unsere Zwischenziele.',
+    team:'Die Stunden kommen aus den Zeiteinträgen, die geplanten Stunden und Reserven aus dem Projektplan; ein Haken bedeutet, dass der Projektauftrag bestätigt wurde.',
+    risks:'Hier stehen mögliche Probleme aus unserer Risikoliste; erledigte Einträge bleiben sichtbar.',
+    'rule-meilenstein_setzen':'Der Vorschlag vergleicht die gültigen Umfrage-Antworten mit einem Zwischenziel im Projektplan; Vormerken führt noch nichts aus.',
+    'rule-quote_ansprache':'Der Vorschlag zeigt, welche Alters- und Nutzergruppe laut Umfrage-Antworten noch zu klein ist; Vormerken führt noch nichts aus.',
+    'rule-yuh_ansprache':'Der Vorschlag vergleicht die Zahl der Yuh-Nutzenden in der Umfrage mit unserem Ziel und dem geplanten Prüftermin.',
+    'rule-paket_schritt':'Der Vorschlag zeigt eine bald fällige oder überfällige Aufgabe, die im Projektplan noch als offen gemeldet ist.',
+    'rule-zahlen_pruefen':'Der Vorschlag weist auf Zahlen aus der Erhebungs- oder Projektübersicht hin, die geprüft werden müssen.',
+    'rule-frei':'Dieser Auftrag stammt aus deiner eigenen Eingabe und wird nur auf diesem Gerät vorgemerkt.'
+  };
+  const info = (id,source,body='',sourceTime=null) => `<details class="source"><summary class="info" aria-label="Zahl einfach erklärt">i</summary><div class="pop"><b>Einfach erklärt</b><p>${esc(explanations[id]||'Diese Angabe stammt aus der Erhebungs- und Projektübersicht.')} Stand: ${esc(M.stamp(sourceTime))}.</p></div></details>`;
+  const card = (v,id,title,source,body,sub='',explain='',sourceTime=v.generatedAt) => `<section class="card" id="${id}" tabindex="0"><div class="card-h"><div><h2>${esc(title)}</h2>${sub?`<div class="sub">${esc(sub)}</div>`:''}</div>${info(id,source,'',sourceTime)}</div>${body}</section>`;
   const meter = (share,cls='') => `<div class="meter ${cls}" aria-hidden="true"><span style="width:${Math.min(100,Math.max(0,share??0)*100)}%"></span></div>`;
   function ring(share,color='var(--accent)') {
     if(share===null)return '';
@@ -21,7 +44,7 @@
     const next=(v.role==='leitung'?v.packages:v.own)?.filter(p=>p.status!=='fertig'&&p.due).sort((a,b)=>a.due.localeCompare(b.due))[0];
     const gap=mode==='marketing'?v.gap:null;
     const middle=mode==='marketing' ? gap?`<h3>${esc(M.quoteLabel(gap))}</h3><p>Schwächste Quotenzelle. Im Quoten-Raster markiert.</p>`:empty(v.quotas?.length===0?'empty':v.states.survey) : next?`<h3>${esc(next.title)}</h3><p>Nächste offene Paketfrist. Details unter Pakete.</p>`:empty();
-    return `<section class="lage" id="stand"><div><div class="step">Stand ${info('stand',mode==='marketing'?'methods.A.field.totals; yuh_target; pm.milestones.MS-09':'pm.progress.share; pm.packages; pm.progress.counts',`<p>Stand ${esc(M.stamp(v.generatedAt))}. ${mode==='projekt'?'Status aus Einzelpaketen gezählt; begonnen = läuft und in Prüfung. Fortschritt aus gewichteten Planstunden, begonnene Pakete zählen halb. Planstunden je Paket werden noch nicht geliefert.':'Gesamte Feldzeit, gültige Antworten. Der Kontrollpunkt ist keine Frist.'}</p>`)}</div>${primary}</div><div class="eng"><div class="step">${mode==='marketing'?'Engpass':'Nächster Prüfbedarf'}</div>${middle}</div><div class="act"><div class="step">Nächster Schritt</div><h3>Juno bereitet vor</h3><p>Befund, Beleg und Vorschlag prüfen. Freigabe merkt den Auftrag nur lokal vor.</p><a class="btn primary" href="#juno">Karten prüfen</a></div></section>`;
+    return `<section class="lage" id="stand"><div><div class="step">Stand ${info('stand-'+mode,'','',v.generatedAt)}</div>${primary}</div><div class="eng"><div class="step">${mode==='marketing'?'Engpass':'Nächster Prüfbedarf'}</div>${middle}</div><div class="act"><div class="step">Nächster Schritt</div><h3>Juno bereitet vor</h3><p>Befund, Beleg und Vorschlag prüfen. Freigabe merkt den Auftrag nur lokal vor.</p><a class="btn primary" href="#juno">Karten prüfen</a></div></section>`;
   }
   function quotas(v) {
     const q=v.quotas;
@@ -56,16 +79,16 @@
   }
   function organizations(v) {
     const o=v.outreach,k=o.kinds;
-    const body=o.state!=='ready'?empty(o.state):`<div class="steps3">${[[o.sent,'angeschrieben'],[o.answered,'geantwortet'],[M.number(k?.Zusage),'Zusagen']].map(([n,l])=>`<div class="s"><strong class="num">${num(n)}</strong><span>${l}</span></div>`).join('<span class="arr">›</span>')}</div><div class="stack" aria-hidden="true">${[[k?.Zusage,'var(--accent)'],[k?.Absage,'var(--coral)'],[k?.Automatisch,'var(--honey)']].map(([n,c])=>`<span style="width:${Math.min(100,100*(M.ratio(n,o.sent)||0))}%;background:${c}"></span>`).join('')}</div><p>${num(M.number(k?.Absage))} Absagen · ${num(M.number(k?.Automatisch))} Abwesenheitsnotizen · ${num(o.noReply)} ohne Antwort</p><p class="note">Antwortquote ${o.share===null?'noch nicht geliefert':num(o.share*100)+' %'}</p><p class="muted">Zusagen-Referenz: ${o.reference===null?'noch nicht geliefert':num(o.reference)}</p>`;
+    const body=o.state!=='ready'?empty(o.state):`<div class="steps3">${[[o.sent,'angeschrieben'],[o.answered,'geantwortet'],[M.number(k?.Zusage),'Zusagen']].map(([n,l])=>`<div class="s"><strong class="num">${num(n)}</strong><span>${l}</span></div>`).join('<span class="arr">›</span>')}</div><div class="stack" aria-hidden="true">${[[k?.Zusage,'var(--accent)'],[k?.Absage,'var(--coral)'],[k?.Automatisch,'var(--honey)']].map(([n,c])=>`<span style="width:${Math.min(100,100*(M.ratio(n,o.sent)||0))}%;background:${c}"></span>`).join('')}</div><p>${num(M.number(k?.Absage))} Absagen · ${num(M.number(k?.Automatisch))} automatische Antworten · ${num(o.noReply)} ohne Antwort</p><p class="note">Antwortquote ${o.share===null?'noch nicht geliefert':num(o.share*100)+' %'}</p><p class="muted">Zusagen-Referenz: ${o.reference===null?'nicht in der Versandübersicht enthalten':num(o.reference)}</p>`;
     return card(v,'organizations','Organisationen','outreach',body,'Angeschrieben und Antworten','<p>Antwortquote = geantwortet / angeschrieben. Automatische Antworten zählen nicht als menschliche Antwort. Eine vermutete Fehlzuordnung wird nicht still korrigiert.</p>');
   }
   function waves(v) {
     const list=v.outreach.waves;
-    return card(v,'waves','Wellen','outreach.waves',v.cached?'<p class="muted">Wellendetails werden nachgeladen.</p>':list?list.length?list.map(w=>`<p>${esc(w.label||w.id)} · ${esc(M.dateLabel(w.on))} · ${num(M.number(w.sent))} angeschrieben</p>`).join(''):empty('empty'):empty());
+    return card(v,'waves','Wellen','outreach.waves',v.cached?'<p class="muted">Wellendetails werden nachgeladen.</p>':list?list.length?list.map(w=>`<p>${esc(w.label||w.id)} · ${esc(M.dateLabel(w.on))} · ${num(M.number(w.sent))} angeschrieben</p>`).join(''):empty('empty'):'<p class="muted">Versandtage und Zahlen je Welle sind in der aktuellen Datenlieferung nicht enthalten.</p>');
   }
   function methods(v) {
     const b=card(v,'method-b','Servicebeobachtung B','methods.B.field.n; methods.B.field.target',`${v.B.state==='error'?empty('error','Servicebeobachtung'):''}<div class="progress-ring">${ring(M.ratio(v.B.n,v.B.target),'var(--sky)')}<p class="method-count">${num(v.B.n)} von ${num(v.B.target)} Kontakten</p></div><a class="btn" href="/team/b/">Protokoll öffnen</a>`, '', '<p>Abgeschlossene Kontakte und Ziel laut Testprotokoll. Fehlende Messwerte bleiben unbekannt.</p>');
-    const c=card(v,'method-c','Bewertungen C','methods.C.field.n; planned; cells',`${v.C.state==='error'?empty('error','Bewertungen'):''}<div class="progress-ring">${ring(M.ratio(v.C.n,v.C.planned),'var(--lilac)')}<p class="method-count">${num(v.C.n)} von ${num(v.C.planned)} eingeordnet</p></div>${v.C.conflict?flag('nicht abgestimmt'):''}<p><a class="btn" href="/team/c/">Codierungen öffnen</a></p>`,'',`<p>${v.C.cellTotals?`Zellsummen: ${num(v.C.cellTotals.n)} eingeordnet; ${num(v.C.cellTotals.captured)} erfasst; ${num(v.C.cellTotals.planned)} geplant.`:'Zellsummen noch nicht geliefert.'} Bei Widerspruch bleibt die Kopfzahl gekennzeichnet.</p>`);
+    const c=card(v,'method-c','Bewertungen C','methods.C.field.n; planned; cells',`${v.C.state==='error'?empty('error','Bewertungen'):''}<div class="progress-ring">${ring(M.ratio(v.C.n,v.C.planned),'var(--lilac)')}<p class="method-count">${num(v.C.n)} von ${num(v.C.planned)} erstmals eingeordnet</p></div>${v.C.conflict?flag('nicht abgestimmt'):''}<p><a class="btn" href="/team/c/">Codierungen öffnen</a></p>`,'',`<p>${v.C.cellTotals?`Zellsummen: ${num(v.C.cellTotals.n)} eingeordnet; ${num(v.C.cellTotals.captured)} erfasst; ${num(v.C.cellTotals.planned)} geplant.`:'Zellsummen noch nicht geliefert.'} Bei Widerspruch bleibt die Kopfzahl gekennzeichnet.</p>`);
     return `<div class="cols c2 methods">${b}${c}</div>`;
   }
   function tempo(v) {
@@ -100,7 +123,7 @@
     return card(v,'risks','Risiken','pm.risks.items',v.cached?'<p class="muted">Risikodetails werden nachgeladen.</p>':list?.length?`<div class="risks">${list.map(r=>`<div class="rk${r.status==='erledigt'?' done':''}"><i aria-hidden="true"></i><span>${esc(r.title)}</span></div>`).join('')}</div>`:empty(list?'empty':v.states.risks),list?`${list.filter(r=>r.status==='offen').length} offen, ${list.filter(r=>r.status==='erledigt').length} erledigt${list.some(r=>!['offen','erledigt'].includes(r.status))?' · weitere Status nicht zugeordnet':''}`:'','<p>Risiko-IDs werden noch nicht geliefert; deshalb sind hier keine Statusaktionen möglich.</p>');
   }
   function ruleCard(rule,disabled=false) {
-    return `<article class="qc" data-rule="${esc(rule.id)}"><div class="anl">${esc(rule.kind==='frei'?'Freier Auftrag':'Juno · Regelvorschlag')}</div><h3>${esc(rule.title)}</h3><dl><dt>Beleg</dt><dd>${esc(rule.evidence)}</dd><dt>Vorschlag</dt><dd>${esc(rule.suggestion)}</dd></dl>${info('rule',rule.source+' · Datenstand '+M.stamp(rule.generatedAt||rule.version)+(rule.kind==='paket_schritt'?' · Persönliche Aufgaben '+M.stamp(rule.personalAt):''))}<div class="row"><button class="btn primary" data-action="approve" data-id="${esc(rule.id)}" ${disabled?'disabled':''}>Freigabe</button><button class="btn" data-action="other" data-id="${esc(rule.id)}" ${disabled?'disabled':''}>Anders</button><button class="btn ghost" data-action="later" data-id="${esc(rule.id)}" ${disabled?'disabled':''}>Später</button></div></article>`;
+    return `<article class="qc" data-rule="${esc(rule.id)}"><div class="anl">${esc(rule.kind==='frei'?'Freier Auftrag':'Juno · Regelvorschlag')}</div><h3>${esc(rule.title)}</h3><dl><dt>Beleg</dt><dd>${esc(rule.evidence)}</dd><dt>Vorschlag</dt><dd>${esc(rule.suggestion)}</dd></dl>${info('rule-'+rule.kind,'','',rule.generatedAt||rule.version)}<div class="row"><button class="btn primary" data-action="approve" data-id="${esc(rule.id)}" ${disabled?'disabled':''}>Freigabe</button><button class="btn" data-action="other" data-id="${esc(rule.id)}" ${disabled?'disabled':''}>Anders</button><button class="btn ghost" data-action="later" data-id="${esc(rule.id)}" ${disabled?'disabled':''}>Später</button></div></article>`;
   }
   function queue(v,rules,memos,lane,disabled=false) {
     const pending=rules.filter(r=>!memos.some(m=>m.id===r.id));

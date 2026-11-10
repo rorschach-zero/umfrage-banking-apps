@@ -3,7 +3,7 @@
   if (typeof module === 'object' && module.exports) module.exports = factory(require('./model.js'));
   else root.CentralCache = factory(root.CentralModel);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (M) {
-  const PREFIX = 'pa6-central-metrics-v1:';
+  const PREFIX = 'pa6-central-metrics-v2:';
   const enumOf = values => value => values.includes(value) ? value : null;
   const bool = value => typeof value === 'boolean' ? value : null;
   const time = value => typeof value === 'string' && /^\d{4}-\d\d-\d\dT[\d:.]+Z$/.test(value) && Number.isFinite(Date.parse(value)) ? value : null;
@@ -20,7 +20,7 @@
     people:numeric('coded without'),curve:[{day:M.day,...numeric('n total')}],dailyConsistent:bool,funnel:[M.number],funnelSince:time,
     outreach:{state:metricState,...numeric('sent answered share noReply reference'),kinds:{Zusage:M.number,Absage:M.number,Automatisch:M.number}},
     B:{state:metricState,...numeric('n target')},C:{state:metricState,...numeric('n planned'),cellTotals:numeric('n planned captured'),conflict:bool},
-    counts:count,exportCounts:count,countConflict:bool,milestones:[milestone],next:milestone,checkpoint:milestone,fieldClose:M.day,horizon:M.day,
+    counts:count,statusCounts:count,exportCounts:count,countConflict:bool,milestones:[milestone],next:milestone,checkpoint:milestone,fieldClose:M.day,horizon:M.day,
     states:{survey:metricState,project:metricState}
   };
   function project(shape, value) {

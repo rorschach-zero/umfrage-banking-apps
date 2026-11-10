@@ -6,7 +6,7 @@
   const short=d=>d.slice(8,10)+'.'+d.slice(5,7)+'.';
   const full=d=>short(d)+d.slice(0,4);
   const today=()=>M.dateOf(new Date().toISOString());
-  const week=d=>{const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));return Math.ceil((((x-new Date(Date.UTC(x.getUTCFullYear(),0,1)))/864e5)+1)/7);};
+  const week=d=>{const x=new Date(d+'T00:00:00Z');x.setUTCDate(x.getUTCDate()+4-(x.getUTCDay()||7));return Math.ceil((((x-new Date(Date.UTC(x.getUTCFullYear(),0,1)))/864e5)+1)/7);};
   const inFilter=i=>filter==='all'||(i.stages||[i.stage]).includes(filter);
   function live(item,v) {
     const candidate=[...(v?.own||[]),...(v?.packages||[]),...(v?.milestones||[])].find(p=>p.id===item.id&&p.status);

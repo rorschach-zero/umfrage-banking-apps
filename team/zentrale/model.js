@@ -45,15 +45,19 @@
     const owners = Object.fromEntries((rows(P.deadline_buckets?.next)||[]).filter(p=>p.ref&&NAMES[p.owner]).map(p=>[p.ref,p.owner]));
     const personalTasks=personal?.ok===true && rows(personal.tasks);
     for(const p of personalTasks||[]) if(p.ref && NAMES[p.owner] && (personal.person==='SA'&&personal.role==='leitung'&&!personal.readOnly || p.owner===personal.person)) owners[p.ref]=p.owner;
-    const pack = p=>({id:p.ref,title:cleanText(p.title).split(' · ')[0],start:day(p.start),due:day(p.due),status:status(p.status),owner:NAMES[p.owner]?p.owner:owners[p.ref]||null,revision:number(p.revision),done_at:p.done_at||null});
+    const pack = p=>({id:p.ref,title:cleanText(p.title),start:day(p.start),due:day(p.due),status:status(p.status),owner:NAMES[p.owner]?p.owner:owners[p.ref]||null,revision:number(p.revision),done_at:p.done_at||null});
     const packages = rows(P.packages)?.filter(p=>p.ref).map(pack) ?? null;
     const identity = personal?.ok===true && NAMES[personal.person] ? personal.person : null;
     const own = identity && rows(personal.tasks) ? personal.tasks.filter(p=>p.ref && (p.owner===identity || p.person===identity)).map(pack) : null;
-    const counts = packages && packages.every(p=>p.status) ? {done:packages.filter(p=>p.status==='fertig').length,begun:packages.filter(p=>['laeuft','in_pruefung'].includes(p.status)).length,open:packages.filter(p=>p.status==='offen').length} : null;
+    const statusCounts = packages && packages.every(p=>p.status) ? {done:packages.filter(p=>p.status==='fertig').length,begun:packages.filter(p=>['laeuft','in_pruefung'].includes(p.status)).length,open:packages.filter(p=>p.status==='offen').length} : null;
+    const exportedCounts = P.progress?.counts;
+    const counts = exportedCounts && ['done','begun','open'].every(k=>number(exportedCounts[k])!==null) ? {...exportedCounts} : null;
     const cells = rows(C.cells);
     const cellTotals = cells ? {n:sum(cells.map(c=>c.n)),planned:sum(cells.map(c=>c.planned)),captured:sum(cells.map(c=>c.captured))} : null;
-    const codeConflict = cellTotals && ((number(C.n)!==null && cellTotals.n!==null && C.n!==cellTotals.n)||(number(C.planned)!==null&&cellTotals.planned!==null&&C.planned!==cellTotals.planned));
-    const countConflict = counts && P.progress?.counts && ['done','begun','open'].some(k=>number(P.progress.counts[k])!==null && counts[k]!==P.progress.counts[k]);
+    // Unique review IDs and assignments to overlapping windows have different units.
+    const codeConflict = number(C.n)!==null && number(C.planned)!==null && C.n>C.planned;
+    // Progress also counts recorded actual starts; status-only counts need not match.
+    const countConflict = counts && statusCounts && (sum(Object.values(counts))!==packages.length || counts.done!==statusCounts.done || counts.begun<statusCounts.begun);
     const stages = milestones?.filter(m=>m.kind==='meilenstein' && m.target!==null && m.due).sort((a,b)=>a.due.localeCompare(b.due))||[];
     const next = n!==null ? stages.find(m=>m.target>n)||null : null;
     const remaining = next ? Math.max(0,next.target-n) : null, remainingDays = next ? days(today,next.due) : null;
@@ -68,8 +72,8 @@
       curve,dailyConsistent,todayGain:number(A.daily?.[today]),funnel,funnelSince:starts?.since,
       outreach:{state:state(raw.outreach),sent:number(O.sent),answered:number(O.answered),share:ratio(number(O.answered),number(O.sent)),kinds:O.kinds||null,noReply:number(O.no_reply),reference:number(O.reference?.kinds?.Zusage),waves:rows(O.waves)||rows(raw.v3?.outreach?.waves)},
       B:{state:state(methods.B?.field),n:number(B.n),target:number(B.target)},C:{state:state(methods.C?.field),n:number(C.n),planned:number(C.planned),cellTotals,conflict:!!codeConflict},
-      packages,own,milestones,counts,countConflict:!!countConflict,exportCounts:P.progress?.counts||null,progress:number(P.progress?.share),next,remaining,remainingDays,tempo:remainingDays>0?remaining/remainingDays:null,
-      hours:state(P.hours)==='ready'?P.hours?.per_person||null:null,plan:P.plan_by_person||null,reserve:P.reserve_by_person||null,confirmations:state(P.confirmations)==='ready'?P.confirmations||null:null,
+      packages,own,milestones,counts,statusCounts,countConflict:!!countConflict,exportCounts:exportedCounts||null,progress:number(P.progress?.share),next,remaining,remainingDays,tempo:remainingDays>0?remaining/remainingDays:null,
+      hours:state(P.hours)==='ready'?P.hours?.per_person||null:null,plan:P.plan_by_person||null,reserve:P.reserve_by_person&&typeof P.reserve_by_person==='object'&&!Array.isArray(P.reserve_by_person)?Object.fromEntries(Object.keys(NAMES).map(k=>[k,Object.hasOwn(P.reserve_by_person,k)?number(P.reserve_by_person[k]):0])):null,confirmations:state(P.confirmations)==='ready'?P.confirmations||null:null,
       risks:state(P.risks)==='ready'?rows(P.risks?.items)?.map(r=>({title:cleanText(r.title),status:r.status}))||null:null,horizon:day(P.deadline_buckets?.horizon),
       states:{survey:state(methods.A?.field),project:state(raw.pm),risks:state(P.risks),hours:state(P.hours),confirmations:state(P.confirmations)},personalState:personal?.ok===true?'ready':'missing'};
     view.yuh.share=ratio(view.yuh.n,view.yuh.target);
@@ -90,8 +94,8 @@
     }
     const packs=v.role==='leitung'?v.packages:v.own;
     for(const p of packs||[]) if(p.status==='offen' && days(v.today,p.due)!==null && days(v.today,p.due)<=2) add('package:'+p.id,'paket_schritt',p.id,'Paketfrist ohne gemeldeten Start',`${p.id}: ${dateLabel(p.due)}; ${days(v.today,p.due)<0?'überfällig':'in '+days(v.today,p.due)+' Tagen'}; Status offen.`,'Nächsten Schritt und Zuständigkeit prüfen und einen Arbeitsauftrag vorbereiten. Ein geplantes Startdatum belegt keinen tatsächlichen Start.', 'pm.packages / persönliche tasks',p.owner);
-    if(v.C.conflict) add('conflict:C','zahlen_pruefen','C','Bewertungen sind nicht abgestimmt',`Kopf ${v.C.n} / ${v.C.planned}; Zellsumme ${v.C.cellTotals.n} / ${v.C.cellTotals.planned}.`,'Die beiden Zählungen abgleichen; bis dahin keine Zahl korrigieren.','methods.C.field; methods.C.field.cells');
-    if(v.countConflict) add('conflict:packages','zahlen_pruefen','packages','Paketstatus widerspricht dem Export',`Einzelpakete ${v.counts.done} / ${v.counts.begun} / ${v.counts.open}; Export ${v.exportCounts.done} / ${v.exportCounts.begun} / ${v.exportCounts.open} (fertig / begonnen / offen).`,'Statuszählung abgleichen und erst danach den Projektstand übernehmen.','pm.packages; pm.progress.counts');
+    if(v.C.conflict) add('conflict:C','zahlen_pruefen','C','Bewertungen prüfen',`${v.C.n} erstmals eingeordnet, aber nur ${v.C.planned} Bewertungen geplant.`,'Die Zahl der einzelnen Bewertungen prüfen.','methods.C.field');
+    if(v.countConflict) add('conflict:packages','zahlen_pruefen','packages','Projektzählung prüfen',`Paketstatus ${v.statusCounts.done} / ${v.statusCounts.begun} / ${v.statusCounts.open}; Fortschrittszählung ${v.counts.done} / ${v.counts.begun} / ${v.counts.open} (fertig / begonnen / offen).`,'Anzahl und Fertigmeldungen abgleichen; ein erfasster Arbeitsbeginn zählt im Fortschritt ebenfalls als begonnen.','pm.packages; pm.progress.counts');
     if(v.outreach.reference!==null && number(v.outreach.kinds?.Zusage)!==null && v.outreach.reference!==v.outreach.kinds.Zusage) add('conflict:outreach','zahlen_pruefen','outreach','Zusagen widersprechen der Referenz',`Dashboard ${v.outreach.kinds.Zusage}; Referenz ${v.outreach.reference}.`,'Zuordnungen prüfen; keine bereinigte Quote behaupten.','outreach.kinds.Zusage; outreach.reference.kinds.Zusage');
     return result;
   }
