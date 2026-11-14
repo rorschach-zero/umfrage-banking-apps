@@ -18,6 +18,11 @@ const B_ICONS={check:'M5 12.5l4.2 4.2L19 7',chev:'M9 6l6 6-6 6',back:'M15 6l-6 6
 function bIcon(name){const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),path=document.createElementNS(ns,'path');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');svg.setAttribute('class','b-ico b-ico-'+name);path.setAttribute('d',B_ICONS[name]);svg.append(path);return svg;}
 function bWas(row){return row.anbieter+' · '+(B_ANLIEGEN[row.anliegen]||row.anliegen);}
 function bKanalText(row){return B_KANAL[row.kanal]||row.kanal;}
+// Feste Zuteilung (ab 13.11.2026, Yuh und Zak, ein Durchgang): Der Empfänger liefert service.fixed und service.planned
+// (Anbieter der eigenen Kontakte). Ohne fixed gilt der bisherige Ablauf unverändert.
+function bFest(state){state=state||daten?.service;return !!state&&state.fixed===true&&Array.isArray(state.planned);}
+function bKeineEigenen(state){return bFest(state)&&(!state.planned.length||!(state.config?.target>0));}
+function bUnd(list){return list.length>1?list.slice(0,-1).join(', ')+' und '+list.at(-1):list[0]||'';}
 function bZeit(block){return block==='A'?'09–12 Uhr':'13–17 Uhr';}
 function bTag(day,lang){if(!day)return 'Tag offen';const d=new Date(day+'T12:00:00');return (day===heute()?'Heute, ':'')+new Intl.DateTimeFormat('de-CH',lang?{weekday:'long',day:'2-digit',month:'2-digit'}:{weekday:'short',day:'2-digit',month:'2-digit'}).format(d);}
 function bName(){return TEAM[daten?.person]||daten?.person||'dich';}
@@ -41,8 +46,10 @@ function bGrundNull(providers){
   return {art:'leer',titel:'Für deine Banken ist gerade nichts frei.',text:'Die anderen haben diese Kontakte schon. Wähle eine weitere Bank oder einen späteren Tag. Klappt es nicht, frag Salah.'};
 }
 async function bZuteilen(providers,day,button){
-  const vorher=new Set(bEchte().map(r=>r.nr));bZuteilung=null;bZuteilungFehler='';
-  const fb=document.getElementById('b-assign-feedback');if(fb)fb.replaceChildren(el('p',{class:'b-wait'},'Wird zugeteilt …'));if(button)button.disabled=true;
+  const fest=bFest(),vorher=new Set(bEchte().map(r=>r.nr));bZuteilung=null;bZuteilungFehler='';
+  if(fest){const fehlt=daten.service.planned.filter(a=>!providers.includes(a));
+    if(fehlt.length){bZuteilungFehler='Setz zuerst das Häkchen bei '+bUnd(fehlt)+'.';bOffen=2;liste();serviceMessage('');document.querySelector('.b-alert')?.focus();return null;}}
+  const fb=document.getElementById('b-assign-feedback');if(fb)fb.replaceChildren(el('p',{class:'b-wait'},fest?'Wird bestätigt …':'Wird zugeteilt …'));if(button)button.disabled=true;
   serviceMessage('Wird gespeichert …');
   let result=null,unklar=false;
   try{result=await sende({typ:'b_assign',providers,day});}
@@ -53,6 +60,17 @@ async function bZuteilen(providers,day,button){
   bOffen=null;
   try{await start();}catch{}
   const neu=bEchte().filter(r=>!vorher.has(r.nr));
+  if(fest){
+    // Nur Kontobestätigung: Erfolg heisst, der neu geladene Stand führt alle eigenen Banken als bestätigt.
+    const state=daten.service||{},ok=bFest(state)&&state.planned.length>0&&state.planned.every(a=>(state.selected||[]).includes(a));
+    // Der Empfänger hat bestätigt, der neu geladene Stand ist aber noch der gespeicherte: Bestätigung in den Stand übernehmen, damit Karte und Meldung übereinstimmen.
+    if(!unklar&&!ok&&Array.isArray(state.selected))state.selected=[...new Set([...state.selected,...providers])];
+    if(unklar&&(fieldPending||!ok)){bZuteilungFehler=fieldPending?'unbestätigt-offline':'unbestätigt';bOffen=2;liste();serviceMessage('');document.querySelector('.b-alert')?.focus();return null;}
+    bAuswahl=null;window.dispatchEvent(new Event('workspace-saved'));
+    bZuteilung={n:0,fest:true,wem:bName(),rows:[],banken:[...state.planned],kontakte:state.assigned};
+    liste();serviceMessage('');
+    return result||{assigned:0};
+  }
   if(unklar){
     if(fieldPending||!neu.length){bZuteilungFehler=fieldPending?'unbestätigt-offline':'unbestätigt';bOffen=2;liste();serviceMessage('');document.querySelector('.b-alert')?.focus();return null;}
     result={assigned:neu.length};
@@ -65,6 +83,11 @@ async function bZuteilen(providers,day,button){
 }
 function bZuteilungsFehler(){
   if(!bZuteilungFehler)return null;
+  if(bFest()){
+    if(bZuteilungFehler.startsWith('unbestätigt'))return el('div',{class:'b-alert',role:'alert',tabindex:'-1'},bIcon('alert'),el('div',{},el('b',{},'Konnte nicht bestätigt werden.'),' ',el('span',{},'Die Verbindung brach ab, bevor die Antwort kam.'),
+      el('small',{},bZuteilungFehler==='unbestätigt-offline'?'Lade die Seite nochmals, sobald du wieder Netz hast. Erst dann siehst du, ob dein Konto bestätigt ist.':'Dein Konto ist noch nicht als bestätigt gespeichert. Lade die Seite nochmals und tipp erst dann erneut.')));
+    return el('div',{class:'b-alert',role:'alert',tabindex:'-1'},bIcon('alert'),el('div',{},el('b',{},'Noch nicht bestätigt.'),' ',el('span',{},bZuteilungFehler)));
+  }
   if(bZuteilungFehler.startsWith('unbestätigt'))return el('div',{class:'b-alert',role:'alert',tabindex:'-1'},bIcon('alert'),el('div',{},el('b',{},'Konnte nicht bestätigt werden.'),' ',el('span',{},'Die Verbindung brach ab, bevor die Antwort kam.'),
     el('small',{},bZuteilungFehler==='unbestätigt-offline'?'Lade die Seite nochmals, sobald du wieder Netz hast. Erst dann siehst du, ob die Kontakte da sind.':'Beim Nachladen sind keine neuen Kontakte aufgetaucht. Lade die Seite nochmals und tipp erst dann erneut.')));
   return el('div',{class:'b-alert',role:'alert',tabindex:'-1'},bIcon('alert'),el('div',{},el('b',{},'Nicht zugeteilt.'),' ',el('span',{},bZuteilungFehler),el('small',{},'Korrigiere die Auswahl und tipp nochmals.')));
@@ -72,6 +95,7 @@ function bZuteilungsFehler(){
 // Bestätigung als ein Satz in der Karte, keine eigene Box.
 function bZuteilungsSatz(){
   if(!bZuteilung)return null;
+  if(bZuteilung.fest)return el('p',{class:'b-confirm',role:'status'},bIcon('check'),el('span',{},el('span',{},'Konto bestätigt.'),' Du ('+bZuteilung.wem+') testest '+bUnd(bZuteilung.banken)+(bZuteilung.kontakte>0?' mit '+bZuteilung.kontakte+(bZuteilung.kontakte===1?' Kontakt.':' Kontakten.'):'.')));
   if(!bZuteilung.n){const g=bZuteilung.grund;return el('p',{class:'b-confirm is-'+g.art,role:'status','data-grund':g.art},el('span',{class:'b-confirm-n'},'0 Kontakte übernommen.'),' ',el('b',{},g.titel),' ',g.text);}
   return el('p',{class:'b-confirm',role:'status'},bIcon('check'),el('span',{},el('span',{},bZuteilung.n+' Kontakte übernommen.'),' Sie gehören dir ('+bZuteilung.wem+') und sind in der Liste mit «neu» markiert.'));
 }
@@ -82,10 +106,24 @@ function bKarteVorbereitung(state,aktuell,erledigt,schritt){
     return el('section',{class:'b-card','aria-labelledby':'b-card-h'},kopf,el('h2',{id:'b-card-h'},'Übung durchspielen'),
       el('p',{class:'b-card-text'},s1?'Erledigt. Du kannst sie jederzeit nochmals ansehen.':'Spiel einen erfundenen Chat durch. Niemand wird kontaktiert. Etwa 2 Minuten.'),bZuteilungsSatz(),
       el('button',{class:'knopf b-go',type:'button','data-read-navigation':true,on:{click:()=>oeffne(state.probe)}},s1?'Übung ansehen':'Übung starten'));}
+  if(schritt===2&&bFest(state)){
+    // Feste Zuteilung: nur das aktive Konto bei den eigenen Banken bestätigen. Kein Häkchen wird vorbelegt;
+    // angekreuzt ist nur, was die Person schon bestätigt hat. Tage verschiebt man je Kontakt in der Liste.
+    const eigene=state.planned,bestaetigt=eigene.every(a=>state.selected.includes(a));
+    const wahl=bAuswahl||new Set(state.selected.filter(a=>eigene.includes(a)));
+    const tag=[nextServiceDay(config.start),config.end].sort()[0];
+    const banken=el('fieldset',{class:'bank-options'},el('legend',{},'Ich habe dort ein aktives Konto'),eigene.map(provider=>el('label',{},el('input',{type:'checkbox',name:'provider',value:provider,checked:wahl.has(provider),on:{change:event=>{event.target.checked?wahl.add(provider):wahl.delete(provider);bAuswahl=wahl;bZuteilungFehler='';serviceMessage('');}}}),provider)));
+    return el('section',{class:'b-card','aria-labelledby':'b-card-h'},kopf,el('h2',{id:'b-card-h'},'Konto bestätigen'),
+      el('p',{class:'b-card-text'},'Du ('+bName()+') testest '+bUnd(eigene)+'. '+(bestaetigt?'Dein Konto ist bestätigt.':'Bestätige, dass du dort ein aktives Konto hast.')),
+      banken,
+      bZuteilungsSatz(),
+      el('button',{class:'knopf b-go',type:'button',on:{click:event=>bZuteilen([...wahl],tag,event.currentTarget)}},'Bestätigen'),
+      el('div',{id:'b-assign-feedback'},bZuteilungsFehler()));
+  }
   if(schritt===2){
     const rest=Math.max(0,(config.target||0)-state.assigned);
     const date=el('input',{type:'date',id:'service-day',min:config.start,max:config.end,value:startDay||nextServiceDay(config.start),on:{change:event=>{startDay=event.target.value;}}});
-    const banken=el('fieldset',{class:'bank-options'},el('legend',{},'Wo hast du ein aktives Konto?'),['Yuh','Neon','Zak','Revolut'].map(provider=>el('label',{},el('input',{type:'checkbox',name:'provider',value:provider,checked:selected.has(provider),on:{change:event=>{event.target.checked?selected.add(provider):selected.delete(provider);bAuswahl=selected;bZuteilungFehler='';serviceMessage('');}}}),provider)));
+    const banken=el('fieldset',{class:'bank-options'},el('legend',{},'Wo hast du ein aktives Konto?'),['Yuh','Zak'].map(provider=>el('label',{},el('input',{type:'checkbox',name:'provider',value:provider,checked:selected.has(provider),on:{change:event=>{event.target.checked?selected.add(provider):selected.delete(provider);bAuswahl=selected;bZuteilungFehler='';serviceMessage('');}}}),provider)));
     return el('section',{class:'b-card','aria-labelledby':'b-card-h'},kopf,el('h2',{id:'b-card-h'},'Banken wählen'),
       el('p',{class:'b-card-text'},rest?'Die App teilt dir ('+bName()+') '+rest+' Kontakte zu, fair auf alle verteilt.':'Du ('+bName()+') hast alle '+state.assigned+' Kontakte. Hier änderst du nur deine Banken.'),
       banken,
@@ -103,7 +141,7 @@ function bKarteJetzt(state,naechster,laufend,danach){
   if(!row){const alle=state.assigned>0;
     return el('section',{class:'b-card','aria-labelledby':'b-card-h'},el('h2',{id:'b-card-h'},alle?'Alle Kontakte erledigt':'Noch keine Kontakte'),
       el('p',{class:'b-card-text'},alle?'Stark. Du hast alle '+state.assigned+' Kontakte abgeschlossen.':'Sobald du Kontakte hast, steht hier der nächste.'),
-      state.canTakeMore?el('button',{class:'knopf b-go',type:'button',on:{click:()=>serviceAction({typ:'take_more',area:'b',day:startDay||nextServiceDay(state.config.start)})}},'Weitere Kontakte übernehmen'):null);}
+      state.canTakeMore&&(!bFest(state)||daten.person==='SA')?el('button',{class:'knopf b-go',type:'button',on:{click:()=>serviceAction({typ:'take_more',area:'b',day:startDay||nextServiceDay(state.config.start)})}},'Weitere Kontakte übernehmen'):null);}
   const info=kanalInfo(row.anbieter,row.kanal),weg=info&&info.kanal!=='keiner'?info.text.split(' · ')[0].replace(/\s*\(.*\)$/,''):bKanalText(row);
   const titel=laufend?'Läuft gerade':!row.tag||row.tag<=heute()?'Jetzt dran':'Als Nächstes';
   return el('section',{class:'b-card b-now','aria-labelledby':'b-card-h'},
@@ -112,13 +150,24 @@ function bKarteJetzt(state,naechster,laufend,danach){
     el('p',{class:'b-today-meta'},row.status==='nicht angeboten'?'Nur Vermerk: Diesen Weg bietet die Bank im Gratis-Plan nicht an. Quelle ist schon eingetragen, du speicherst nur.':weg+' · '+bTag(row.tag,true)+', '+bZeit(row.block)),
     bZuteilungsSatz(),
     el('button',{class:'knopf b-go b-next',type:'button','data-read-navigation':true,on:{click:()=>oeffne(row)}},window.PA6View.active()?'Kontakt ansehen':laufend?'Weiter erfassen':row.status==='nicht angeboten'?'Vermerk erfassen':'Kontakt starten'),
-    danach?el('p',{class:'b-after'},'Danach: '+bWas(danach)+' · '+bTag(danach.tag)+', '+bZeit(danach.block)):null);
+    danach?el('p',{class:'b-after'},'Danach: '+bWas(danach)+' · '+bKanalText(danach)+' · '+bTag(danach.tag)+', '+bZeit(danach.block)):null);
 }
 function renderBSetup(main) {
   const state=daten.service;
   if(!state||state.error){main.append(el('p',{role:'alert',class:'b-alert'},state?.error||'Servicetest gerade nicht verfügbar. Lade die Seite neu oder frag Salah.'));return;}
-  const fehlend=bFehlendeKanaele(state);
-  const s1=!!state.probeDone,s2=state.selected.length>=2&&state.assigned>0,s3=s2&&!fehlend.length,bereit=s1&&s2&&s3,erledigt=[s1,s2,s3];
+  if(bKeineEigenen(state)){
+    // Ohne eigene Kontakte (seit 13.11.2026 möglich): keine drei Schritte, nur eine ruhige Auskunft. Die Übung bleibt erreichbar.
+    const plan=bEinsatzplan(state);
+    main.append(el('section',{class:'b-card','aria-labelledby':'b-card-h'},el('h2',{id:'b-card-h'},'Du hast im Servicetest keine eigenen Kontakte.'),
+      el('p',{class:'b-card-text'},plan?'Du leitest den Servicetest. Unten siehst du alle '+plan.querySelectorAll('.b-plan-row').length+' Kontakte.':'Seit dem 13.11.2026 testen wir nur noch Yuh und Zak, mit insgesamt 12 Kontakten.'),
+      state.probe?bLink(state.probeDone?'Übung ansehen':'Übung ausprobieren',()=>oeffne(state.probe)):null));
+    main.append(el('p',{id:'service-message',role:'status','aria-live':'polite'}));
+    if(plan)main.append(plan);
+    const zweck=document.querySelector('.purpose-card[data-area="b"]');if(zweck){zweck.removeAttribute('open');main.append(zweck);}
+    return;
+  }
+  const fest=bFest(state),fehlend=bFehlendeKanaele(state);
+  const s1=!!state.probeDone,s2=fest?state.planned.every(a=>state.selected.includes(a)):state.selected.length>=2&&state.assigned>0,s3=s2&&!fehlend.length,bereit=s1&&s2&&s3,erledigt=[s1,s2,s3];
   const aktuell=!s1?1:!s2?2:!s3?3:0;
   if(bOffen===null)bOffen=aktuell;
   const echte=bEchte(),offen=echte.filter(r=>statusVon(r)!=='abgeschlossen');
@@ -129,10 +178,11 @@ function renderBSetup(main) {
   // Einen Tipp entfernt: die anderen Vorbereitungsschritte, die Liste, das Warum.
   const wege=el('nav',{class:'b-more-links','aria-label':'Mehr'},
     bOffen&&bereit?bLink('Zurück zu «Jetzt dran»',()=>{bOffen=0;liste();}):null,
-    [[1,'Übung ansehen',s1],[2,'Banken ändern',s2],[3,'Kontaktwege ansehen',s3]].filter(([nr,,ok])=>ok&&bOffen!==nr).map(([nr,text])=>bLink(text,()=>{bOffen=nr;liste();},{'data-step':String(nr)})),
+    [[1,'Übung ansehen',s1],[2,fest?'Konto-Bestätigung ansehen':'Banken ändern',s2],[3,'Kontaktwege ansehen',s3]].filter(([nr,,ok])=>ok&&bOffen!==nr).map(([nr,text])=>bLink(text,()=>{bOffen=nr;liste();},{'data-step':String(nr)})),
     bOffen&&!bereit&&aktuell&&bOffen!==aktuell?bLink('Zum aktuellen Schritt',()=>{bOffen=aktuell;liste();}):null);
   if(wege.children.length)main.append(wege);
   if(echte.length)main.append(bKontaktliste(echte));
+  const einsatz=bEinsatzplan(state);if(einsatz)main.append(einsatz);
   const zweck=document.querySelector('.purpose-card[data-area="b"]');if(zweck){zweck.removeAttribute('open');main.append(zweck);}
 }
 // Kontaktliste: eigener aufklappbarer Bereich, standardmässig zu. Termin ändern erst nach Tipp auf einen Kontakt.
@@ -140,7 +190,7 @@ function bKontaktZeile(r){
   const status=statusVon(r),offen=bListeOffen===r.nr,neu=!!bZuteilung?.rows.includes(r.nr);
   const kopf=el('button',{type:'button',class:'b-row-head','aria-expanded':String(offen),'data-read-navigation':true,on:{click:()=>{bListeOffen=offen?'':r.nr;liste();document.querySelector('[data-nr="'+r.nr+'"] .b-row-head')?.focus();}}},
     el('span',{class:'b-row-time'},r.block==='A'?'09–12':'13–17'),
-    el('span',{class:'b-row-main'},el('b',{},bWas(r),neu?el('span',{class:'b-new'},'neu'):null),el('small',{},bKanalText(r)+' · Kontakt '+r.wiederholung,el('span',{class:'b-row-nr'},' · '+r.nr))),
+    el('span',{class:'b-row-main'},el('b',{},bWas(r),neu?el('span',{class:'b-new'},'neu'):null),el('small',{},bKanalText(r)+(bFest()?'':' · Kontakt '+r.wiederholung),el('span',{class:'b-row-nr'},' · '+r.nr))),
     el('span',{class:'b-row-state is-'+status},status==='abgeschlossen'?'erledigt':status==='laufend'?'läuft':'offen'),
     el('span',{class:'b-row-chev'},bIcon('chev')));
   return el('li',{class:'b-row'+(offen?' is-open':'')+(neu?' is-new':''),'data-nr':r.nr},kopf,offen?el('div',{class:'b-row-body'},
@@ -148,6 +198,25 @@ function bKontaktZeile(r){
     !r.erfasst?el('div',{class:'b-move'},el('p',{class:'b-label'},'Anderer Tag?'),serviceSchedule(r)):null):null);
 }
 let bListeZu=true;
+// Einsatzplan für die Leitung (Salah, Ernes als Lead B): alle Kontakte der Gruppe, nur lesen. Der Empfänger liefert service.team
+// nur diesen beiden; fehlt das Feld oder ist es leer, erscheint nichts.
+let bPlanZu=true;
+function bEinsatzplan(state){
+  const team=Array.isArray(state?.team)?state.team.filter(r=>r&&r.nr):[];
+  if(!team.length)return null;
+  const rows=[...team].sort((a,b)=>((a.tag||'9')+(a.block||'')+a.nr).localeCompare((b.tag||'9')+(b.block||'')+b.nr));
+  // Überfällig ist nur, was nicht begonnen wurde. Ein laufender Kontakt wartet auf Antwort (schriftlich bis 23.11.) und ist nicht überfällig.
+  const stand=r=>['laufend','abgeschlossen'].includes(r.stand)?r.stand:'offen',spaet=r=>!!r.tag&&r.tag<heute()&&stand(r)==='offen';
+  const fertig=rows.filter(r=>stand(r)==='abgeschlossen').length,laeuft=rows.filter(r=>stand(r)==='laufend').length,zuSpaet=rows.filter(spaet).length;
+  const box=el('details',{class:'b-list b-plan'},el('summary',{},'Einsatzplan · alle '+rows.length+' Kontakte',el('span',{class:'b-count'},fertig+' erledigt'+(laeuft?' · '+laeuft+' läuft':'')+(zuSpaet?' · '+zuSpaet+' überfällig':'')),bIcon('chev')),
+    el('div',{},el('ul',{},rows.map(r=>el('li',{class:'b-row b-plan-row'+(spaet(r)?' is-late':'')},
+      el('span',{class:'b-row-time'},bTag(r.tag).replace(/^Heute, /,'')),
+      el('span',{class:'b-row-main'},el('b',{},bWas(r)),el('small',{},(TEAM[r.person]||r.person||'noch niemand')+' · '+bKanalText(r)+(spaet(r)?' · überfällig':''))),
+      el('span',{class:'b-row-state is-'+stand(r)},stand(r)==='abgeschlossen'?'erledigt':stand(r)==='laufend'?'läuft, Antwort offen':'offen')))),
+      el('p',{class:'b-foot-note'},'Nur zum Lesen. Jede Person erfasst und verschiebt ihre Kontakte selbst.')));
+  box.open=!bPlanZu;box.addEventListener('toggle',()=>{bPlanZu=!box.open;});
+  return box;
+}
 function bKontaktliste(echte){
   const offen=echte.filter(r=>statusVon(r)!=='abgeschlossen'),fertig=echte.filter(r=>statusVon(r)==='abgeschlossen'),tage=[...new Set(offen.map(r=>r.tag||''))];
   const box=el('details',{class:'b-list'},el('summary',{},'Alle '+echte.length+' Kontakte',el('span',{class:'b-count'},offen.length+' offen'),bIcon('chev')),
@@ -172,12 +241,20 @@ const KANAELE_BELEGT={
            telefon:[{kanal:'keiner',text:'Gratis-Plan · Anruf nur mit Ultra-Abo und deshalb nicht angeboten',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'}]}
 };
 function kanalInfo(anbieter,kanal){const art=kanal==='telefon'?'telefon':'schriftlich',options=((KANAELE_BELEGT[anbieter]||{})[art]||[]);return options.find(v=>v.kanal===kanal)||(kanal==='telefon'?options.find(v=>v.kanal==='keiner'):null)||null;}
+function bKanalPaare(state){
+  if(!bFest(state))return null;
+  const quelle=Array.isArray(state.team)&&state.team.length?state.team:(daten.plan||[]).filter(r=>!String(r.nr).startsWith('PROBE-B-'));
+  return [...new Set(quelle.map(r=>r.anbieter+'|'+(r.kanal==='telefon'?'telefon':'schriftlich')))];
+}
 function channelSetup(state,fehlend){
   fehlend=fehlend||bFehlendeKanaele(state);
-  const provider=el('select',{id:'channel-provider'},state.selected.map(a=>el('option',{value:a},a))),kind=el('select',{id:'channel-kind'},el('option',{value:'schriftlich'},'Schriftlich'),el('option',{value:'telefon'},'Telefon')),
+  // Feste Zuteilung: Der Empfänger nimmt einen Kontaktweg nur von der Person an, die diese Bank auf diesem Weg testet, oder von der Leitung.
+  // Darum nur die Wege der eigenen Kontakte anbieten; die Leitung (sie bekommt service.team) sieht alle.
+  const paare=bKanalPaare(state),banken=paare?[...new Set(paare.map(p=>p.split('|')[0]))]:state.selected,arten=['schriftlich','telefon'].filter(art=>!paare||paare.some(p=>p.endsWith('|'+art)));
+  const provider=el('select',{id:'channel-provider'},banken.map(a=>el('option',{value:a},a))),kind=el('select',{id:'channel-kind'},arten.map(art=>el('option',{value:art},art==='telefon'?'Telefon':'Schriftlich'))),
     channel=el('select',{id:'channel-value'},['chat','mail','formular','telefon','keiner'].map(a=>el('option',{value:a},{chat:'Chat',mail:'E-Mail',formular:'Formular',telefon:'Telefon',keiner:'Gibt es nicht'}[a]))),source=el('input',{id:'channel-source',type:'url',placeholder:'https://…'}),date=el('input',{id:'channel-date',type:'date',max:heute(),value:heute()}),checked=el('input',{type:'checkbox',id:'channel-checked'});
   const belegt=new Set((state.channels||[]).map(r=>r.anbieter+'|'+r.art));
-  const vorschlaege=state.selected.flatMap(a=>['schriftlich','telefon'].filter(art=>!belegt.has(a+'|'+art)).map(art=>({a,art,optionen:(KANAELE_BELEGT[a]||{})[art]||[]}))).filter(v=>v.optionen.length);
+  const vorschlaege=banken.flatMap(a=>['schriftlich','telefon'].filter(art=>!belegt.has(a+'|'+art)&&(!paare||paare.includes(a+'|'+art))).map(art=>({a,art,optionen:(KANAELE_BELEGT[a]||{})[art]||[]}))).filter(v=>v.optionen.length);
   const formular=el('div',{class:'channel-form'});
   const uebernehmen=(a,art,o)=>{provider.value=a;kind.value=art;channel.value=o.kanal;source.value=o.quelle;date.value=heute();checked.checked=false;serviceMessage('Übernommen. Öffne die Quelle, prüfe sie und setze dann das Häkchen.');formular.scrollIntoView?.({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});};
   formular.append(el('p',{class:'b-label'},'Kontaktweg festhalten'),
@@ -224,7 +301,15 @@ async function oeffne(row){
   const unavailable=row.kanal==='telefon'&&channel.kanal==='keiner';
   openForm(unavailable?{...row,status:'nicht angeboten'}:row);
 }
+// Termin vor dem Senden prüfen: gültiges Datum, im Feldfenster, kein Wochenende. Der Empfänger prüft dasselbe nochmals.
+function bTagFehler(day,config){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day||'')||Number.isNaN(Date.parse(day+'T12:00:00')))return 'Wähle zuerst einen Tag.';
+  const start=config?.start,end=config?.end;
+  if((start&&day<start)||(end&&day>end))return 'Dieser Tag liegt ausserhalb der Testtage.'+(start&&end?' Möglich ist '+formatServiceDate(start).slice(0,6)+' bis '+formatServiceDate(end).slice(0,6):'');
+  if([0,6].includes(new Date(day+'T12:00:00').getDay()))return 'Am Wochenende wird nicht getestet. Wähle einen Werktag.';
+  return '';
+}
 function serviceSchedule(row){
   const input=el('input',{type:'date',value:row.tag,min:daten.service?.config.start,max:daten.service?.config.end,'aria-label':'Termin '+row.nr});
-  return el('div',{class:'service-schedule'},input,el('button',{class:'chip',type:'button',on:{click:()=>serviceAction({typ:'b_schedule',nr:row.nr,day:input.value})}},'Termin speichern'));
+  return el('div',{class:'service-schedule'},input,el('button',{class:'chip',type:'button',on:{click:()=>{const fehler=bTagFehler(input.value,daten.service?.config);if(fehler){serviceMessage(fehler);input.focus();return;}serviceAction({typ:'b_schedule',nr:row.nr,day:input.value});}}},'Termin speichern'));
 }

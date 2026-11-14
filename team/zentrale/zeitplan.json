@@ -97,16 +97,16 @@
     }
   ],
   "schema": "pa6.schedule.v1",
-  "asOf": "2026-11-09",
+  "asOf": "2026-11-13",
   "timezone": "Europe/Zurich",
   "sources": [
     {
       "path": "00_auftrag/Termine.md",
-      "sha256": "35efa00e4c55fc6e3b4f4401f313d548f715e3adbbb48b64d4eb2672dfdea52c"
+      "sha256": "a6f2e565c5c3bc1b3bab7ca06d8721f9b953f9a791823ec5674529e27848239b"
     },
     {
       "path": "00_auftrag/Lieferplan.md",
-      "sha256": "4769d46aba7dca85dae6f954c52d3bc35519c7d0b123a381afeff72f07ff76ec"
+      "sha256": "e895a92909cd7701a340129944d6c8561acdfa92ebbc0eacd52ab7b566f47921"
     },
     {
       "path": "40_projektmanagement/plan_2026-11-03.md",
@@ -189,7 +189,7 @@
     },
     {
       "id": "AP-002",
-      "title": "Servicebeobachtung · Probelauf 06.11., Kontakte 09.–18.11.",
+      "title": "Servicebeobachtung · Probelauf 06.11., Kontakte 17.–18.11.",
       "phase": "PH-01",
       "stage": "a",
       "stages": [
@@ -216,7 +216,9 @@
         "L1",
         "L6"
       ],
-      "notes": []
+      "notes": [
+        "Am 13.11.2026 reduziert: 12 Kontakte bei Yuh und Zak, ein Durchgang, Di 17. bis Do 19.11.; Fr 20.11. Reserve, späte Antworten bis 23.11. Zeitfenster des Pakets unverändert; der Planaufwand stammt noch vom alten Umfang (48 Kontakte)."
+      ]
     },
     {
       "id": "AP-003",
@@ -1387,7 +1389,7 @@
     },
     {
       "id": "AP-035",
-      "title": "Servicebeobachtung · Kontakte 19.–20.11., späte Antworten bis 23.11.",
+      "title": "Servicebeobachtung · Kontakte 19.11., Reserve 20.11., späte Antworten bis 23.11.",
       "phase": "PH-02",
       "stage": "a",
       "stages": [
@@ -1418,7 +1420,9 @@
       "deliverables": [
         "L1"
       ],
-      "notes": []
+      "notes": [
+        "Am 13.11.2026 reduziert: 12 Kontakte bei Yuh und Zak, ein Durchgang, Di 17. bis Do 19.11.; Fr 20.11. Reserve, späte Antworten bis 23.11. Zeitfenster des Pakets unverändert; der Planaufwand stammt noch vom alten Umfang (48 Kontakte)."
+      ]
     },
     {
       "id": "AP-036",
@@ -2668,21 +2672,23 @@
       "dependencies": [],
       "status": null,
       "deliverables": [],
-      "notes": [],
+      "notes": [
+        "Am 13.11.2026 reduziert: 12 Kontakte bei Yuh und Zak, ein Durchgang, Di 17. bis Do 19.11., 09–12 Uhr. Alt: 09.–20.11., 48 Kontakte bei vier Anbietern."
+      ],
       "effortHours": null,
       "durationDays": 0,
       "title": "Kontaktfeld B beginnt",
-      "start": "2026-11-09",
-      "end": "2026-11-09",
-      "date": "2026-11-09",
+      "start": "2026-11-17",
+      "end": "2026-11-17",
+      "date": "2026-11-17",
       "phase": "PH-01",
       "stage": "a",
       "kind": "milestone",
       "category": "Feld",
-      "time": "",
+      "time": "09:00",
       "critical": false,
       "source": "00_auftrag/Termine.md",
-      "sourceDate": "2026-11-09"
+      "sourceDate": "2026-11-17"
     },
     {
       "id": "T-11",
@@ -2690,21 +2696,23 @@
       "dependencies": [],
       "status": null,
       "deliverables": [],
-      "notes": [],
+      "notes": [
+        "Fr 20.11. ist Reserve; späte Antworten zählen bis 23.11."
+      ],
       "effortHours": null,
       "durationDays": 0,
       "title": "Kontaktfeld B endet",
-      "start": "2026-11-20",
-      "end": "2026-11-20",
-      "date": "2026-11-20",
+      "start": "2026-11-19",
+      "end": "2026-11-19",
+      "date": "2026-11-19",
       "phase": "PH-02",
       "stage": "a",
       "kind": "milestone",
       "category": "Feld",
-      "time": "",
+      "time": "12:00",
       "critical": false,
       "source": "00_auftrag/Termine.md",
-      "sourceDate": "2026-11-20"
+      "sourceDate": "2026-11-19"
     },
     {
       "id": "T-12",
@@ -3393,15 +3401,34 @@
       "note": "abwesend"
     },
     {
+      "person": "Melisa",
+      "from": "2026-12-04",
+      "to": "2026-12-07",
+      "note": "abwesend"
+    },
+    {
+      "person": "Melisa",
+      "from": "2026-12-23",
+      "to": "2027-01-02",
+      "note": "abwesend"
+    },
+    {
+      "person": "Salah",
+      "from": "2026-12-24",
+      "to": "2027-01-01",
+      "note": "abwesend"
+    },
+    {
       "person": "Ernes",
       "from": null,
       "to": null,
       "note": "keine Abwesenheit gemeldet"
     }
   ],
-  "absenceNote": "Abwesenheiten: Leonie 16.–23.11. · Ernes keine · Salah, Arber, Melisa noch offen",
+  "absenceNote": "Abwesenheiten: Leonie 16.–23.11. · Melisa 04.–07.12. und 23.12.–02.01. · Salah 24.12.–01.01. · Ernes keine · Arber noch offen",
   "notes": [
-    "Planungsstand 09.11.2026; Status wird aus den vorhandenen Daten ergänzt.",
+    "Planungsstand 13.11.2026; Status wird aus den vorhandenen Daten ergänzt.",
+    "Servicebeobachtung B am 13.11.2026 reduziert: nur Yuh und Zak, ein Durchgang, 12 statt 48 Kontakte, Di 17. bis Do 19.11.; die Pakete AP-002, AP-035 und AP-040 behalten ihre Zeitfenster.",
     "Phasen nach Wasserfall; vorgezogene Vorbereitung und laufende Steuerung können Phasengrenzen überlappen.",
     "Planstunden sind geschätzter Aufwand; Balken zeigen Kalendertage, keine Vollzeitauslastung.",
     "Deck-Termin offen: Lieferplan 28.02. / AP-015 10.03.2027."

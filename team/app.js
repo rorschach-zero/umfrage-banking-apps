@@ -179,8 +179,17 @@ function taskRow(row){
 function taskList(rows,all=true){return rows===null?unknown():rows.length?el('ul',{class:'rows task-list'},sortRows(rows.filter(r=>all||!completed(r))).map(taskRow)):empty('Hier ist alles ruhig.','In diesem Bereich sind noch keine Aufgaben zugeteilt.');}
 function progress(done,total,label){return el('div',{class:'progress-block'},el('span',{},label||done+' von '+total+' erledigt'),el('progress',{max:Math.max(1,total||0),value:done||0,'aria-label':label||'Erledigte Aufgaben'}));}
 function areaRows(module){return allTasks().filter(r=>module.taskIds.includes(r.id));}
+// Servicetest ab 13.11.2026: feste Zuteilung. service.fixed und service.planned (Anbieter der eigenen Kontakte) kommen vom Empfänger;
+// planned leer oder Ziel 0 heisst «keine eigenen Kontakte». Ohne fixed gilt die alte Regel (zwei Banken wählen).
+function bFixed(s){return !!s&&s.fixed===true&&Array.isArray(s.planned);}
+function bNone(s){return bFixed(s)&&(!s.planned.length||!(s.config?.target>0));}
+function bMissing(s){const chosen=Array.isArray(s?.selected)?s.selected:[];return bFixed(s)?s.planned.filter(a=>!chosen.includes(a)).length:Math.max(0,2-chosen.length);}
+function bHalf(s){return s.next?.block==='A'?'Vormittag':'Nachmittag';}
+const B_NONE_TEXT='Keine eigenen Kontakte';
 function areaSummary(module){
   if(module.state!=='ready')return 'Stand teilweise unbekannt';
+  if(module.id==='b'&&!Number.isFinite(module.total))return 'Stand teilweise unbekannt';
+  if(module.id==='b'&&module.total===0&&bFixed(data.service))return B_NONE_TEXT;
   const unit=module.id==='b'?'Kontakten':module.id==='c'?'Bewertungen':'Aufgaben';
   return module.done+' von '+module.total+' '+unit+(module.id==='c'?' · Soll bis heute '+module.expected:'');
 }
@@ -188,20 +197,22 @@ function openArea(id){area=id;workRole='mine';navigate('tasks');}
 function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'↗':module.id==='c'?'≡':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},areaTitle(module)),el('small',{},areaSummary(module))),el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
 function serviceCard(){
   const s=data.service;if(!s||s.error)return null;
-  return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Kundenservice testen'),el('p',{},(s.probeDone?'Übungskontakt erledigt':'Übungskontakt jetzt möglich')+' · '+s.done+' von '+s.config.target+' Kontakten'),el('small',{},'Die eigentlichen Kontakte beginnen am '+date(s.config.official))),el('a',{class:'button secondary',href:'/team/b/'},s.probeDone?'Kontakte öffnen':'Übungskontakt öffnen'));
+  return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Kundenservice testen'),el('p',{},(s.probeDone?'Übungskontakt erledigt':'Übungskontakt jetzt möglich')+' · '+(bNone(s)?'keine eigenen Kontakte':s.done+' von '+s.config.target+' Kontakten')),el('small',{},'Die eigentlichen Kontakte beginnen am '+date(s.config.official))),el('a',{class:'button secondary',href:'/team/b/'},s.probeDone?'Kontakte öffnen':'Übungskontakt öffnen'));
 }
 function shareCard(){return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Umfrage teilen'),el('p',{},(data.sharing?.done??'–')+' von 2 Kanälen · ohne Namen im Link')),button('Umfrage teilen',()=>navigate('sharing'),'button secondary'));}
 function fieldLeadership(){
   return el('section',{class:'field-leadership'},el('h2',{},'Erhebung und Verteilung'),
-    data.service?.open?el('p',{},'Noch offene Kontakte · '+data.service.open.map(r=>r.provider+' '+r.open).join(' · ')):null,
+    data.service?.open?el('p',{},bFixed(data.service)&&data.service.open.every(r=>!r.open)?'Alle Kontakte sind fest zugeteilt.':'Noch offene Kontakte · '+data.service.open.map(r=>r.provider+' '+r.open).join(' · ')):null,
     data.sharing?.people?el('ul',{},data.sharing.people.map(r=>el('li',{},names[r.person]+' · '+r.done+' von 2 Kanälen'))):null,
     el('details',{},el('summary',{},'Übernahmen · '+(data.transfers?.length||0)),el('ul',{},(data.transfers||[]).map(r=>{let change={};try{change=JSON.parse(r.change);}catch{}return el('li',{},r.date+' · '+r.nr+' · '+(names[change.alt]||'frei')+' → '+(names[change.neu]||r.person));}))));
 }
 function practiceCard(){
   return data.practice?.total ? el('section',{class:'practice-card'},el('div',{},el('strong',{},'Übungsbewertungen'),el('p',{},data.practice.done+' von '+data.practice.total+' Übungen erledigt')),el('a',{class:'button secondary',href:'/team/c/'},'Bewerten üben')) : null;
 }
+// «keine eigenen» nur bei fester Zuteilung und genau 0 geplanten Kontakten; fehlt die Zahl, bleibt der Stand unbekannt.
+function leadNone(label,value){return label==='Kontakte'&&bFixed(data.service)&&value?.total===0;}
 function leadMetric(label,value,field=false){
-  return el('div',{class:'lead-metric'},el('dt',{},label),el('dd',{},value&&value.done!==null?value.done+' / '+value.total:'unbekannt'),field&&value?el('small',{},'Soll '+value.expected+(label==='Kontakte'?' · davon erledigt '+value.expectedDone:'')):null);
+  return el('div',{class:'lead-metric'},el('dt',{},label),el('dd',{},value&&value.done!==null&&!(label==='Kontakte'&&!Number.isFinite(value.total))?(leadNone(label,value)?'keine eigenen':value.done+' / '+value.total):'unbekannt'),field&&value&&!(label==='Kontakte'&&(leadNone(label,value)||!Number.isFinite(value.total)))?el('small',{},'Soll '+value.expected+(label==='Kontakte'?' · davon erledigt '+value.expectedDone:'')):null);
 }
 function takeOver(row){
   details(row,'Übernahme prüfen',true);
@@ -224,10 +235,14 @@ function weekRows(rows) {
 const fixedSteps=[
   {id:'probe-c',area:'c',title:'10 Übungsfälle codieren',why:'Alle codieren dieselben zehn Fälle. So sehen wir, wo das Codebuch noch unklar ist, bevor es zählt.',when:'2026-11-02',whenText:'nach dem Coaching',minutes:30,href:'/team/c/',cta:'Übung Bewertungen starten',
     skip:()=>!data.practice?.total,done:()=>data.practice.done>=data.practice.total,count:()=>data.practice.done+' von '+data.practice.total},
-  {id:'banken',area:'b',title:'Zwei Banken für den Servicetest wählen',why:'Nur Banken mit eigenem, aktivem Konto. Danach teilt dir die App deine Kontakte zu.',when:'2026-11-06',minutes:3,href:'/team/b/',cta:'Banken wählen',
-    skip:()=>!data.service||!!data.service.error||!Array.isArray(data.service.selected),done:()=>data.service.selected.length>=2,count:()=>data.service.selected.length+' von 2'},
+  {id:'banken',area:'b',get when(){return bFixed(data.service)?'2026-11-16':'2026-11-06';},minutes:3,href:'/team/b/',
+    get title(){return bFixed(data.service)?'Konto für den Servicetest bestätigen':'Zwei Banken für den Servicetest wählen';},
+    get why(){const s=data.service;return bFixed(s)?'Du testest '+s.planned.join(' und ')+'. Bestätige, dass du dort ein eigenes, aktives Konto hast.':'Nur Banken mit eigenem, aktivem Konto. Danach teilt dir die App deine Kontakte zu.';},
+    get cta(){return bFixed(data.service)?'Konto bestätigen':'Banken wählen';},
+    skip:()=>!data.service||!!data.service.error||!Array.isArray(data.service.selected)||bNone(data.service),done:()=>bMissing(data.service)===0,
+    count:()=>{const s=data.service,n=bFixed(s)?s.planned.length:2;return (n-bMissing(s))+' von '+n;}},
   {id:'probe-b',area:'b',title:'Übung Servicetest durchspielen',why:'Ein Übungskontakt ohne Bank. Danach sitzt das Erfassen beim echten Kontakt.',when:'2026-11-06',minutes:15,href:'/team/b/',cta:'Übung Servicetest starten',
-    skip:()=>!data.service||!!data.service.error||typeof data.service.probeDone!=='boolean',done:()=>data.service.probeDone},
+    skip:()=>!data.service||!!data.service.error||typeof data.service.probeDone!=='boolean'||bNone(data.service),done:()=>data.service.probeDone},
   {id:'teilen',area:'a',title:'Umfrage in zwei Kanälen teilen',why:'Jeder neue Kanal bringt andere Menschen in die Umfrage. Das macht die Antworten breiter.',minutes:5,view:'sharing',cta:'Kanal wählen',
     skip:()=>!Number.isFinite(data.sharing?.done),done:()=>data.sharing.done>=2,count:()=>data.sharing.done+' von 2'},
 ];
@@ -300,11 +315,11 @@ function afterItem(rows,f){
     .map(r=>({due:r.due?day(r.due):'9999',title:shortTitle(r),when:r.due?whenWord(r.due):'',act:()=>details(r)}));
   return [...steps,...open].sort((a,b)=>a.due.localeCompare(b.due))[0]||null;
 }
-function threadTile(id,value,total,unit,note,act){
+function threadTile(id,value,total,unit,note,act,none){
   const known=Number.isFinite(value)&&Number.isFinite(total)&&total>0;
   return el('button',{type:'button',class:'thread area-'+id,onClick:act},
     el('span',{class:'thread-head'},el('span',{class:'thread-letter','aria-hidden':'true'},id.toUpperCase()),areaNames[id].split(' · ')[1]),
-    el('span',{class:'thread-value'},known?String(value):'–',el('small',{},known?' / '+total+' '+unit:' Stand offen')),
+    none?el('span',{class:'thread-value'},el('small',{},none)):el('span',{class:'thread-value'},known?String(value):'–',el('small',{},known?' / '+total+' '+unit:' Stand offen')),
     known?el('progress',{class:'thread-bar',max:total,value:Math.max(0,Math.min(total,value)),'aria-hidden':'true'}):null,
     el('span',{class:'thread-note'},note));
 }
@@ -319,7 +334,7 @@ function threadsSection(){
   const sv=data.service&&!data.service.error?data.service:null,pr=data.practice,c=(data.areas||[]).find(m=>m.id==='c'),own=surveyOwn();
   const a=threadTile('a',own?.own,own?.target,'Antworten',surveyNote(own),()=>navigate('sharing'));
   if(own&&own.own>=own.target/2)a.classList.add('is-win');
-  const b=threadTile('b',sv?.done,sv?.config?.target,'Kontakte',!sv||!Number.isFinite(sv.done)||!sv.config||!Array.isArray(sv.selected)||typeof sv.probeDone!=='boolean'?'Stand unbekannt':sv.selected.length<2?'Noch '+(2-sv.selected.length)+(sv.selected.length===1?' Bank':' Banken')+' wählen':!sv.probeDone?'Übung offen · echte Kontakte ab '+date(sv.config.official):sv.next?'Nächster Kontakt '+date(sv.next.tag)+' · '+(sv.next.block==='A'?'Vormittag':'Nachmittag'):sv.done>=sv.config.target?'Ziel erreicht':'Kontakte zuteilen',()=>{location.href='/team/b/';});
+  const b=threadTile('b',sv?.done,sv?.config?.target,'Kontakte',!sv||!Number.isFinite(sv.done)||!sv.config||!Array.isArray(sv.selected)||typeof sv.probeDone!=='boolean'?'Stand unbekannt':bNone(sv)?'Seit 13.11. testen wir nur Yuh und Zak':bMissing(sv)?(bFixed(sv)?'Konto bestätigen':'Noch '+bMissing(sv)+(bMissing(sv)===1?' Bank':' Banken')+' wählen'):!sv.probeDone?'Übung offen · echte Kontakte ab '+date(sv.config.official):sv.next?'Nächster Kontakt '+date(sv.next.tag)+' · '+bHalf(sv):sv.done>=sv.config.target?'Ziel erreicht':bFixed(sv)?'Servicetest öffnen':'Kontakte zuteilen',()=>{location.href='/team/b/';},bNone(sv)?B_NONE_TEXT:null);
   const cReady=c&&c.state==='ready'&&c.total>0;
   const cTile=cReady?threadTile('c',c.done,c.total,'Bewertungen',Number.isFinite(c.expected)?'Soll bis heute '+c.expected:'Soll bis heute unbekannt',()=>{location.href='/team/c/';})
     :threadTile('c',pr?.done,pr?.total,'Übungen',!Number.isFinite(pr?.done)||!pr?.total?'Stand unbekannt':today()<'2026-11-03'?'Eigene Fälle ab Di 03.11.':'Deine Bewertungen kommen nach der Verteilung',()=>{location.href='/team/c/';});
@@ -565,8 +580,8 @@ function workRow(row){
 }
 function workHeader(id){
   if(id==='a'){const sh=data.sharing;return el('section',{class:'work-tool area-a'},el('div',{},el('strong',{},'A · Umfrage'),el('span',{},Number.isFinite(sh?.done)?sh.done+' von 2 Kanälen geteilt':'Stand unbekannt')),button('Umfrage teilen',()=>navigate('sharing'),'button'));}
-  if(id==='b'){const value=data.service;const sv=value&&!value.error&&Number.isFinite(value.done)&&Number.isFinite(value.config?.target)&&value.config.target>0&&value.config.official&&Array.isArray(value.selected)&&typeof value.probeDone==='boolean'?value:null;
-    const line=!sv?'Stand unbekannt':sv.done+' von '+sv.config.target+' Kontakten · '+(!sv.probeDone?'Übung offen':(sv.selected?.length||0)<2?'Banken wählen':sv.next?'nächster '+date(sv.next.tag)+' · '+(sv.next.block==='A'?'Vormittag':'Nachmittag'):'echte Kontakte ab '+date(sv.config.official));
+  if(id==='b'){const value=data.service;const sv=value&&!value.error&&Number.isFinite(value.done)&&Number.isFinite(value.config?.target)&&(value.config.target>0||bNone(value))&&value.config.official&&Array.isArray(value.selected)&&typeof value.probeDone==='boolean'?value:null;
+    const line=!sv?'Stand unbekannt':bNone(sv)?B_NONE_TEXT+' · seit 13.11. testen wir nur Yuh und Zak':sv.done+' von '+sv.config.target+' Kontakten · '+(!sv.probeDone?'Übung offen':bMissing(sv)?(bFixed(sv)?'Konto bestätigen':'Banken wählen'):sv.next?'nächster '+date(sv.next.tag)+' · '+bHalf(sv):'echte Kontakte ab '+date(sv.config.official));
     return el('section',{class:'work-tool area-b'},el('div',{},el('strong',{},'B · Servicetest'),el('span',{},line)),el('a',{class:'button',href:'/team/b/'},'Servicetest öffnen'));}
   if(id==='c'){const c=(data.areas||[]).find(m=>m.id==='c'),pr=data.practice;
     const line=c&&c.state==='ready'&&Number.isFinite(c.done)&&c.total>0?c.done+' von '+c.total+' Bewertungen'+(Number.isFinite(c.expected)?' · Soll bis heute '+c.expected:' · Soll unbekannt'):Number.isFinite(pr?.done)&&pr?.total?pr.done+' von '+pr.total+' Übungen · eigene Fälle ab 03.11.':'Stand unbekannt';
@@ -624,12 +639,12 @@ function showDocuments(){
       chapters===null||chapters===undefined?unknown('Die Kapitel konnten nicht geladen werden.'):chapters.length?el('ul',{class:'document-list'},[...chapters].sort((a,b)=>(a.ref||'').localeCompare(b.ref||'','de',{numeric:true})).map(row=>documentRow(row,true))):empty('Noch keine Kapitel zugeteilt.','Sobald deine Zuteilung hinterlegt ist, findest du hier deine Docs.'))];
 }
 function profileAgreements(){
-  const people={"SA": {"name": "Salah", "role": "Projektleitung und Yuh", "sentence": "Du hältst Entscheide, Verteilung und den Kontakt zu Schule und Yuh zusammen.", "work": ["Du hältst Entscheide mit Datum in den Projektunterlagen fest.", "Du verteilst offene Arbeit nach bestätigten Angaben neu.", "Ungeprüfte Zugänge oder Resultate als bestätigt behandeln."]}, "ES": {"name": "Ernes", "role": "Lead Servicebeobachtung B", "sentence": "Du koordinierst die Übung, Kontakte und Nachläufe; alle fünf erheben mit.", "work": ["Du prüfst im Feld täglich Kontakte und Nachläufe.", "Du sammelst unklare Felder und holst Hilfe bei Salah.", "Bei einer Stoppregel weitere Kontakte starten."]}, "MG": {"name": "Melisa", "role": "Lead Bewertungen C", "sentence": "Du leitest die Übung und klärst Unterschiede nach den unabhängigen Erstcodes.", "work": ["Du hältst Erstcodes und Konsens getrennt fest.", "Du klärst Grenzfälle gemeinsam am Codebuch.", "Erstcodes angleichen oder durch Konsens ersetzen."]}, "AM": {"name": "Arber", "role": "Lead Umfrage A und Reichweite", "sentence": "Du koordinierst die Verteilung und hilfst der Gruppe bei Lücken in der Reichweite.", "work": ["Du schaust sonntags auf Kanäle und Zwischenziele.", "Du schlägst bei Lücken neue Verteilorte vor.", "Echte Umfrageantworten selbst ausfüllen oder lenken."]}, "LB": {"name": "Leonie", "role": "Lead Qualität und Formales", "sentence": "Du koordinierst Quellen, Zweitlesungen und die vollständige Abgabe.", "work": ["Du führst die Liste, wer welches Kapitel schreibt und wer es gegenliest.", "Du gibst fehlende Belege an die zuständige Person zurück.", "Quellen erfinden oder für andere unterschreiben."]}};
+  const people={"SA": {"name": "Salah", "role": "Projektleitung und Yuh", "sentence": "Du hältst Entscheide, Verteilung und den Kontakt zu Schule und Yuh zusammen.", "work": ["Du hältst Entscheide mit Datum in den Projektunterlagen fest.", "Du verteilst offene Arbeit nach bestätigten Angaben neu.", "Ungeprüfte Zugänge oder Resultate als bestätigt behandeln."]}, "ES": {"name": "Ernes", "role": "Lead Servicebeobachtung B", "sentence": "Du koordinierst die Übung, Kontakte und Nachläufe; die Kontakte machen Arber und Salah.", "work": ["Du prüfst im Feld täglich Kontakte und Nachläufe.", "Du sammelst unklare Felder und holst Hilfe bei Salah.", "Bei einer Stoppregel weitere Kontakte starten."]}, "MG": {"name": "Melisa", "role": "Lead Bewertungen C", "sentence": "Du leitest die Übung und klärst Unterschiede nach den unabhängigen Erstcodes.", "work": ["Du hältst Erstcodes und Konsens getrennt fest.", "Du klärst Grenzfälle gemeinsam am Codebuch.", "Erstcodes angleichen oder durch Konsens ersetzen."]}, "AM": {"name": "Arber", "role": "Lead Umfrage A und Reichweite", "sentence": "Du koordinierst die Verteilung und hilfst der Gruppe bei Lücken in der Reichweite.", "work": ["Du schaust sonntags auf Kanäle und Zwischenziele.", "Du schlägst bei Lücken neue Verteilorte vor.", "Echte Umfrageantworten selbst ausfüllen oder lenken."]}, "LB": {"name": "Leonie", "role": "Lead Qualität und Formales", "sentence": "Du koordinierst Quellen, Zweitlesungen und die vollständige Abgabe.", "work": ["Du führst die Liste, wer welches Kapitel schreibt und wer es gegenliest.", "Du gibst fehlende Belege an die zuständige Person zurück.", "Quellen erfinden oder für andere unterschreiben."]}};
   const current=people[data.person];
   if(!current)return [];
   const fold=(label,...children)=>el('details',{class:'team-agreement'},el('summary',{},label),el('div',{class:'agreement-content'},...children));
   return [
-    fold('Deine Rolle und dein Lead',el('p',{},el('strong',{},current.role),' · ',current.sentence),el('p',{},'Dein Lead koordiniert. Bei A, B und C packen alle mit an.'),el('p',{},'Deine Aufgaben, Schreibkarten und Fristen stehen weiter unten mit ihrem aktuellen Stand.')),
+    fold('Deine Rolle und dein Lead',el('p',{},el('strong',{},current.role),' · ',current.sentence),el('p',{},'Dein Lead koordiniert. Bei A und C packen alle mit an; die Kontakte im Servicetest (B) '+(data.person==='AM'?'machst du zusammen mit Salah.':data.person==='SA'?'machst du zusammen mit Arber.':'machen Arber und Salah.')),el('p',{},'Deine Aufgaben, Schreibkarten und Fristen stehen weiter unten mit ihrem aktuellen Stand.')),
     fold('So arbeitest du',...['So läuft’s','Gern gesehen','Lieber nicht'].map((label,i)=>el('p',{},el('strong',{},label),el('br'),current.work[i]))),
     fold('Wenn’s klemmt',el('p',{},el('strong',{},'Pia → zuständiger Lead → Salah')),el('p',{},"A Arber · B Ernes · C Melisa · Schreiben Leonie"),el('p',{},data.person==='SA'?'Offene Vorgaben klärst du mit der Quelle oder der zuständigen Ansprechperson.':'Als Lead gehst du bei offenen Fragen zu Salah. Zugang oder Ausfall direkt Salah.'),el('a',{class:'button secondary',href:'/team/frag/'},'Pia öffnen →')),
     fold('Was wir voneinander erwarten',el('ul',{},["Wir halten Fristen ein oder melden früh, wenn es klemmt.", "Wir fragen für den Einstieg Pia und klären offene Punkte mit dem Lead.", "Wir beobachten und codieren ergebnisoffen; Zugänge und private Daten bleiben geschützt.", "Wir setzen den Stand ehrlich auf «in Prüfung», solange die Prüfung offen ist.", "Wir schauen wöchentlich auf den Stand und erfassen ab 16.11. unsere echte Arbeitszeit."].map(text=>el('li',{},text)))),

@@ -12,9 +12,9 @@
     b: {
       question: 'die Servicebeobachtung',
       lines: [
-        'Wir testen den Kundendienst von Yuh, Neon, Zak und Revolut mit denselben Fragen.',
-        'harte Vergleichsdaten wie Wartezeit und Lösung beim ersten Kontakt.',
-        'zeigt, wo Yuh im Alltag wirklich besser oder schlechter ist.'
+        'Wir testen den Kundendienst von Yuh und Zak mit denselben Fragen, je sechs Kontakte.',
+        'eine kleine beschreibende Stichprobe mit Wartezeit und Lösung beim ersten Kontakt. Kein Beweis.',
+        'zeigt Beispiele und Auffälligkeiten, keine sichere Aussage über den ganzen Kundendienst.'
       ]
     },
     c: {

@@ -162,9 +162,9 @@
   function outreachCell(data) {
     const O = data.outreach, f = data.methods.A.field;
     if (!ready(O)) return cell({id: 'organisationen', label: 'Organisationen', body: unknown() + (ready(f) ? `<p class="aside"><b>${num(sum(f.organizations))}</b> gültige Antworten über Organisationslinks.</p><details class="more" data-key="org-gruppen"><summary>Je Kategorie und Sprache</summary>${yieldLists(f)}</details>` : '')});
-    const w = n => O.sent ? Math.max(n ? 0.6 : 0, n / O.sent * 100) : 0, yieldN = ready(f) ? sum(f.organizations) : null, zusage = O.kinds.Zusage || 0;
+    const w = n => O.sent ? Math.max(n ? 0.6 : 0, n / O.sent * 100) : 0, yieldN = ready(f) ? sum(f.organizations) : null, zusage = Number.isFinite(O.positive) ? O.positive : (O.kinds.Zusage || 0);
     const group = obj => `<div class="list">${Object.entries(obj || {}).sort((a, b) => b[1].sent - a[1].sent || a[0].localeCompare(b[0])).map(([k, v]) => row(esc(k), '', `${num(v.answered)} von ${num(v.sent)}`)).join('')}</div>`;
-    const kinds = [['Zusage', 'Zusage'], ['Weiterleitung', 'Weitergeleitet'], ['Absage', 'Absage'], ['Frage', 'Rückfrage'], ['Unklar', 'Unklar'], ['Automatisch', 'nur automatisch'], ['Unzustellbar', 'unzustellbar']];
+    const kinds = [['Zusage', 'Zusage'], ['Zusage mit Auftrag', 'Zusage mit Auftrag'], ['Weiterleitung', 'Weitergeleitet'], ['Absage', 'Absage'], ['Frage', 'Rückfrage'], ['Unklar', 'Unklar'], ['Automatisch', 'nur automatisch'], ['Unzustellbar', 'unzustellbar']];
     const body = O.sent ? `<div class="fun" role="img" aria-label="${num(O.sent)} angeschrieben, ${num(O.answered)} geantwortet, ${num(zusage)} machen mit">
         <div><span>angeschrieben</span><span class="b"><i style="width:100%"></i></span><span class="v">${num(O.sent)}</span></div>
         <div><span>haben geantwortet</span><span class="b"><i style="width:${w(O.answered)}%"></i></span><span class="v">${num(O.answered)}</span></div>
@@ -176,7 +176,7 @@
         ${ready(f) ? yieldLists(f) : ''}</details>`
       : empty('Noch keine Organisation angeschrieben.');
     return cell({id: 'organisationen', label: 'Organisationen · Trichter', body,
-      explain: `<p>Gezählt wird je <b>Organisation</b>, nicht je Mailverlauf. Nenner: ${num(O.sent)} verschiedene Organisationen mit mindestens einer versandten Mail (aus ${num(O.rows.sent)} Versandzeilen; ${num(O.rows.deferred)} zurückgestellt und ${num(O.rows.errors)} Fehler gelten nicht als versandt).</p><p>Geantwortet: mindestens eine inhaltliche Antwort; massgeblich ist die jüngste Einordnung. Eigene Adressen, Unzustellbares und automatische Antworten zählen nicht. ${num(O.replies.unassigned)} Rückmeldungen ohne sichere Zuordnung bleiben ausserhalb.</p><p>Die gültigen Antworten über Organisationslinks sind Fälle der Befragung, nicht Organisationen; sie stehen deshalb neben dem Trichter.</p>`,
+      explain: `<p>Gezählt wird je <b>Organisation</b>, nicht je Mailverlauf. Nenner: ${num(O.sent)} verschiedene Organisationen mit mindestens einer versandten Mail (aus ${num(O.rows.sent)} Versandzeilen; ${num(O.rows.deferred)} zurückgestellt und ${num(O.rows.errors)} Fehler gelten nicht als versandt).</p><p>Geantwortet: mindestens eine inhaltliche Antwort; massgeblich ist die jüngste Einordnung. Eigene Adressen, Unzustellbares und automatische Antworten zählen nicht. Machen mit: alle Zusagen, auch die Zusagen mit Auftrag. Zusage mit Auftrag: Selbstaushang erlaubt oder bedingte Zusage (wir bringen vorbei, hängen auf oder senden gedruckt). ${num(O.replies.unassigned)} Rückmeldungen ohne sichere Zuordnung bleiben ausserhalb.</p><p>Die gültigen Antworten über Organisationslinks sind Fälle der Befragung, nicht Organisationen; sie stehen deshalb neben dem Trichter.</p>`,
       source: 'Team-Blatt, Versand und Rückmeldungen; Umfrage (OR-Kennungen)'});
   }
 
@@ -202,14 +202,24 @@
     rows.push(`<div class="ln" id="karte-freigabe"><span>Ergebnisse der Umfrage<small>${data.released ? 'freigegeben' : 'erscheinen erst nach der Freigabe'}</small></span><span class="v">${data.released ? 'da' : 'ab ' + esc(dateWd(todayOf({generated_at: data.release_at})))}</span></div>`);
     return cell({id: 'ohne-abschluss', label: data.released ? 'Auswertung' : 'Noch ohne Abschluss', body: rows.join('')});
   }
+  // Servicetest: Ziel kommt aus den Daten. 48 = alter Plan (vier Anbieter, zwei Durchgänge), sonst der Plan ab 13.11.2026 (Yuh und Zak, ein Durchgang).
+  const serviceExplain = target => { const t = Number.isFinite(target) ? num(target) + ' ' : ''; return target === 48
+    ? `Nur durchgeführte Kontakte zählen gegen die ${t}geplanten (4 Anbieter × 3 Anliegen × 2 Kanäle × 2 Wiederholungen).`
+    : target === 12 ? `Nur durchgeführte Kontakte zählen gegen die ${t}geplanten (2 Anbieter × 3 Anliegen × 2 Kanäle, ein Durchgang). Am 13.11.2026 von 48 auf 12 reduziert: nur Yuh und Zak, ohne zweiten Durchgang.`
+    : `Nur durchgeführte Kontakte zählen gegen die ${t}geplanten.`; };
+  // Belastung je Anbieter: wirksam sind Nachrichten und Gesprächsminuten. Die Kontaktgrenze aus dem Testprotokoll ist eine Obergrenze,
+  // die mit wenigen geplanten Kontakten je Anbieter gar nicht erreicht werden kann; sie steht darum nur in der Erklärung.
+  const serviceLimits = f => { const l = f.limits || {}, c = Number.isFinite(l.contacts) ? l.contacts : 14, m = Number.isFinite(l.messages) ? l.messages : 42, min = Number.isFinite(l.minutes) ? l.minutes : 140;
+    const most = Math.max(0, ...(f.banks || []).map(b => Number.isFinite(b.planned) ? b.planned : 0));
+    return {c, m, min, text: `Belastung je Anbieter inklusive echter Proben: Stopp ab ${num(m)} Nachrichten oder ${num(min)} Gesprächsminuten. Das Testprotokoll nennt zudem eine Obergrenze von ${num(c)} Kontakten je Anbieter${most && most < c ? `; mit ${num(most)} geplanten wird sie nicht erreicht` : ''}.`}; };
   function serviceCell(data) {
     const f = data.methods.B.field;
     if (!ready(f)) return cell({id: 'servicetest', label: 'Servicetest', body: unknown()});
-    const failed = Object.entries(f.failures || {}).filter(([, v]) => v > 0);
+    const failed = Object.entries(f.failures || {}).filter(([, v]) => v > 0), lim = serviceLimits(f);
     return cell({id: 'servicetest', label: 'Servicetest', body: `<p class="say">${num(f.n)} von ${num(f.target)} Kontakten durchgeführt.</p><div class="two"><i style="width:${Math.min(100, f.n / f.target * 100)}%;background:var(--ink)"></i></div>
       <p class="note">${failed.length ? 'Ausfälle, nicht im Soll: ' + failed.map(([k, v]) => `${FAIL_LABELS[k] || k} ${num(v)}`).join(' · ') : 'Keine Ausfälle.'}</p>
-      ${f.banks.map(b => row(esc(b.bank), `${num(b.contacts)} von 14 Kontakten · ${num(b.messages)} von 42 Nachrichten · ${num(b.minutes)} von 140 Minuten`, `${num(b.n)} / ${num(b.planned)}${b.stop ? ' · Stopp' : ''}`)).join('')}`,
-      explain: '<p>Nur durchgeführte Kontakte zählen gegen die 48 geplanten (4 Anbieter × 3 Anliegen × 2 Kanäle × 2 Wiederholungen). Ausfälle stehen je Code getrennt und füllen das Soll nie auf.</p><p>Belastung je Anbieter inklusive echter Proben: Stopp ab 14 Kontakten, 42 Nachrichten oder 140 Gesprächsminuten.</p>', source: 'Team-Blatt, Plan und Beobachtung; Testprotokoll B'});
+      ${f.banks.map(b => row(esc(b.bank), `${num(b.messages)} von ${num(lim.m)} Nachrichten · ${num(b.minutes)} von ${num(lim.min)} Minuten`, `${num(b.n)} / ${num(b.planned)}${b.stop ? ' · Stopp' : ''}`)).join('')}`,
+      explain: `<p>${serviceExplain(f.target)} Ausfälle stehen je Code getrennt und füllen das Soll nie auf.</p><p>${lim.text}</p>`, source: 'Team-Blatt, Plan und Beobachtung; Testprotokoll B'});
   }
   function codingCell(data) {
     const f = data.methods.C.field;

@@ -14,9 +14,9 @@
     curve:'Die Linie zeigt die gültigen Umfrage-Antworten bis zum jeweiligen Tag; die gestrichelte Linie zeigt unsere geplanten Zwischenziele.',
     channels:'Die Zahlen zeigen, über welche Links gültige Umfrage-Antworten eingegangen sind; ein persönlicher Link muss nicht von der betreffenden Person selbst geteilt worden sein.',
     funnel:'Seit dem angegebenen Messbeginn zählen wir geöffnete, begonnene, vollständige und gültige Umfragen; die Prozentzahl vergleicht jeden Schritt mit dem vorherigen.',
-    organizations:'Die Zahlen stammen aus der Versand- und Antwortliste der Organisationen; für die Antwortquote zählen nur menschliche Antworten.',
+    organizations:'Die Zahlen stammen aus der Versand- und Antwortliste der Organisationen; für die Antwortquote zählen nur menschliche Antworten. Zusagen zählen beide Arten von Ja. Zusage mit Auftrag: Selbstaushang erlaubt oder bedingte Zusage (wir bringen vorbei, hängen auf oder senden gedruckt).',
     waves:'Hier würden die Versandtage und die Zahl der angeschriebenen Organisationen stehen; diese Angaben fehlen derzeit in der gelieferten Versandübersicht.',
-    'method-b':'Gezählt werden abgeschlossene echte Servicekontakte aus den Testprotokollen; Übungen zählen nicht zum Ziel von 48 Kontakten.',
+    'method-b':'Gezählt werden abgeschlossene echte Servicekontakte aus den Testprotokollen; Übungen zählen nicht zum Ziel.',
     'method-c':'Diese Zahl aus unserer Bewertungsliste zählt jede erstmals eingeordnete Bewertung einmal; in den Auswertungsgruppen kann sie mehrfach vorkommen.',
     packages:'Hier stehen die Aufgaben mit Frist und gemeldetem Status aus dem Projektplan; die Zuständigkeiten kommen aus den persönlichen Aufgabenlisten.',
     'own-packages':'Hier stehen deine Aufgaben mit Frist und gemeldetem Status aus deiner persönlichen Aufgabenliste.',
@@ -78,8 +78,8 @@
     return card(v,'funnel','Trichter','methods.A.field.starts.total; starts.since',body,v.funnelSince?'Seit '+M.stamp(v.funnelSince):'Messbeginn noch nicht geliefert','<p>Nur seit dem Messbeginn gezählt. Jede Übergangsquote bezieht sich auf den vorigen Schritt; bei Nenner Null keine Quote.</p>');
   }
   function organizations(v) {
-    const o=v.outreach,k=o.kinds;
-    const body=o.state!=='ready'?empty(o.state):`<div class="steps3">${[[o.sent,'angeschrieben'],[o.answered,'geantwortet'],[M.number(k?.Zusage),'Zusagen']].map(([n,l])=>`<div class="s"><strong class="num">${num(n)}</strong><span>${l}</span></div>`).join('<span class="arr">›</span>')}</div><div class="stack" aria-hidden="true">${[[k?.Zusage,'var(--accent)'],[k?.Absage,'var(--coral)'],[k?.Automatisch,'var(--honey)']].map(([n,c])=>`<span style="width:${Math.min(100,100*(M.ratio(n,o.sent)||0))}%;background:${c}"></span>`).join('')}</div><p>${num(M.number(k?.Absage))} Absagen · ${num(M.number(k?.Automatisch))} automatische Antworten · ${num(o.noReply)} ohne Antwort</p><p class="note">Antwortquote ${o.share===null?'noch nicht geliefert':num(o.share*100)+' %'}</p><p class="muted">Zusagen-Referenz: ${o.reference===null?'nicht in der Versandübersicht enthalten':num(o.reference)}</p>`;
+    const o=v.outreach,k=o.kinds,withTask=M.number(k?.['Zusage mit Auftrag']),positive=M.number(o.positive)??M.number(k?.Zusage);
+    const body=o.state!=='ready'?empty(o.state):`<div class="steps3">${[[o.sent,'angeschrieben'],[o.answered,'geantwortet'],[positive,'Zusagen',withTask===null?'':`davon mit Auftrag ${num(withTask)}`]].map(([n,l,d=''])=>`<div class="s"><strong class="num">${num(n)}</strong><span>${l}</span>${d?`<span class="sub">${d}</span>`:''}</div>`).join('<span class="arr">›</span>')}</div><div class="stack" aria-hidden="true">${[[k?.Zusage,'var(--accent)'],[withTask,'var(--accent-soft)'],[k?.Absage,'var(--coral)'],[k?.Automatisch,'var(--honey)']].map(([n,c])=>`<span style="width:${Math.min(100,100*(M.ratio(n,o.sent)||0))}%;background:${c}"></span>`).join('')}</div><p>${num(M.number(k?.Absage))} Absagen · ${num(M.number(k?.Automatisch))} automatische Antworten · ${num(o.noReply)} ohne Antwort</p><p class="note">Antwortquote ${o.share===null?'noch nicht geliefert':num(o.share*100)+' %'}</p><p class="muted">Zusagen-Referenz: ${o.reference===null?'nicht in der Versandübersicht enthalten':num(o.reference)}</p>`;
     return card(v,'organizations','Organisationen','outreach',body,'Angeschrieben und Antworten','<p>Antwortquote = geantwortet / angeschrieben. Automatische Antworten zählen nicht als menschliche Antwort. Eine vermutete Fehlzuordnung wird nicht still korrigiert.</p>');
   }
   function waves(v) {

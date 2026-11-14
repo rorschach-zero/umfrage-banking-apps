@@ -18,7 +18,7 @@
     ...numeric('n target validShare quotaMinimum todayGain progress remaining remainingDays tempo'),
     yuh:numeric('n target share'),quotas:[quota],channels:[{id:enumOf(Object.keys(M.CHANNELS)),n:M.number}],
     people:numeric('coded without'),curve:[{day:M.day,...numeric('n total')}],dailyConsistent:bool,funnel:[M.number],funnelSince:time,
-    outreach:{state:metricState,...numeric('sent answered share noReply reference'),kinds:{Zusage:M.number,Absage:M.number,Automatisch:M.number}},
+    outreach:{state:metricState,...numeric('sent answered share noReply reference positive'),kinds:{Zusage:M.number,'Zusage mit Auftrag':M.number,Absage:M.number,Automatisch:M.number}},
     B:{state:metricState,...numeric('n target')},C:{state:metricState,...numeric('n planned'),cellTotals:numeric('n planned captured'),conflict:bool},
     counts:count,statusCounts:count,exportCounts:count,countConflict:bool,milestones:[milestone],next:milestone,checkpoint:milestone,fieldClose:M.day,horizon:M.day,
     states:{survey:metricState,project:metricState}

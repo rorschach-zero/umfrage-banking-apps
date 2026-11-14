@@ -403,3 +403,10 @@ body.bgl-leiste.b-page .b-fuss{right:56px}
 .is-uebung .b-suggest{display:none}
 .b-page .b-event .b-event-label,.b-page .b-event .b-event-time{color:inherit}
 .b-page .b-fuss{background:#fff}
+/* Einsatzplan der Leitung (13.11.2026): alle Kontakte, nur lesen. Gleiche Zeilen wie die eigene Liste, ohne Tippziel. */
+.b-plan-row{display:flex;align-items:center;gap:12px;padding:10px 14px;min-height:56px}
+.b-plan-row .b-row-time{width:74px;font-size:12.5px}
+.b-plan-row.is-late .b-row-time{color:#7A2E14}
+.b-plan-row.is-late{box-shadow:inset 3px 0 0 #E7B9A8}
+@media(max-width:480px){.b-plan-row .b-row-state.is-laufend{max-width:84px;white-space:normal;text-align:center;line-height:1.2;border-radius:12px;padding:4px 8px}.b-plan-row{gap:8px;padding:10px 12px}.b-plan-row .b-row-time{width:62px;font-size:12px}.b-plan-row .b-row-main b{font-size:14px}}
+
