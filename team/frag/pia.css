@@ -1,9 +1,9 @@
 @font-face{font-family:Nunito;src:url('../../fonts/Nunito.ttf') format('truetype');font-weight:200 1000;font-display:swap}
-.juno-page{--paper:#f8f8f5;--muted:#62666a;--purple:#665779;--soft-line:#e4e4de;background:var(--paper);font-size:16px}
+.juno-page{--paper:#f8f8f5;--muted:#62666a;--accent:#237E79;--accent-h:#17645F;--accent-soft:#7DB9B4;--tint:#E6F3F0;--surface2:#F1F3F0;--soft-line:#e4e4de;background:var(--paper);font-size:16px}
 .juno-page button,.juno-page textarea{font:inherit}
 .juno-page button{cursor:pointer}
 .juno-page button:disabled{cursor:default}
-.juno-page :focus-visible{outline:3px solid #736490;outline-offset:4px}
+.juno-page :focus-visible{outline:3px solid var(--accent);outline-offset:4px}
 .juno-page .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .juno-page .skip-link{position:fixed;left:16px;top:-100px;z-index:20;background:var(--ink);color:white;padding:12px;border-radius:8px}
 .juno-page .skip-link:focus{top:12px}
@@ -16,20 +16,20 @@
 .juno-page .project-label span{padding:0 12px;color:#a9aaa5}
 .juno-page .identity{display:flex;gap:10px;align-items:center}
 .juno-page .person{font-weight:750;font-size:13px;padding:9px 14px;border:1px solid var(--soft-line);border-radius:30px;background:white}
-.juno-page .role-toggle{font-size:12px;font-weight:750;border:1px solid #ccc4d4;border-radius:30px;padding:9px 12px;background:transparent;color:var(--purple)}
-.juno-page .role-toggle[aria-pressed=true]{background:var(--purple);color:white}
+.juno-page .role-toggle{font-size:12px;font-weight:750;border:1px solid var(--accent-soft);border-radius:30px;padding:9px 12px;background:transparent;color:var(--accent-h)}
+.juno-page .role-toggle[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:white}
 .juno-page .workspace{max-width:1192px;display:grid;grid-template-columns:272px minmax(0,1fr);gap:64px;padding:42px 24px 28px;align-items:start}
 .juno-page .companion{position:sticky;top:24px}
 .juno-page .companion-intro{background:#fff;border:1px solid var(--soft-line);border-radius:16px;padding:22px 24px 24px;box-shadow:0 4px 18px rgba(25,36,38,.045)}
 /* Juno has no face (decision 15.11.2026): a letter mark and one quiet status line instead of a figure. */
 .juno-page .juno-mark{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:10px;background:var(--ink);color:#fff;font-size:18px;font-weight:850;letter-spacing:0;line-height:1}
 .juno-page .juno-status{display:flex;align-items:center;gap:8px;margin:0 0 20px;padding-bottom:16px;border-bottom:1px solid var(--soft-line);font-size:12px;font-weight:650;color:var(--muted);min-height:20px}
-.juno-page .status-dot{width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0}
+.juno-page .status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0}
 .juno-page[data-state=thinking] .status-dot,.juno-page[data-state=writing] .status-dot{animation:status-pulse 1.6s ease-in-out infinite}
-.juno-page[data-state=error] .status-dot{background:#c2553a}
+.juno-page[data-state=error] .status-dot{background:#A9442F}
 .juno-page .eyebrow{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
 .juno-page .companion-copy h2{font-size:28px;line-height:1.18;letter-spacing:-1px;margin:0 0 12px;font-weight:800}
-.juno-page .companion-copy>p:last-child{font-size:14px;line-height:1.6;color:#625b6a;margin:0}
+.juno-page .companion-copy>p:last-child{font-size:14px;line-height:1.6;color:var(--muted);margin:0}
 .juno-page .privacy-block{padding:18px 4px 0;font-size:12px;line-height:1.65;color:var(--muted)}
 .juno-page #privacy{margin:0 0 13px}
 .juno-page .knowledge summary{font-size:12px;color:var(--ink);padding:8px 0;min-height:36px}
@@ -37,7 +37,7 @@
 .juno-page .knowledge-body ol{padding-left:20px}
 .juno-page .conversation{min-width:0;display:flex;flex-direction:column;min-height:716px}
 .juno-page .welcome{padding:8px 0 26px}
-.juno-page .welcome .eyebrow{color:var(--purple)}
+.juno-page .welcome .eyebrow{color:var(--accent-h)}
 .juno-page h1{font-size:36px;line-height:1.2;letter-spacing:-1.3px;margin:0;font-weight:800}
 .juno-page .welcome-subtitle{font-size:15px;color:var(--muted);margin:12px 0 0}
 .juno-page .suggestions>summary{font-size:12px;font-weight:750;color:var(--muted);margin-bottom:12px;list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:32px}
@@ -48,10 +48,10 @@
 .juno-page .prompt{display:flex;gap:13px;align-items:center;text-align:left;padding:17px 16px;background:#fff;border:1px solid var(--soft-line);border-radius:14px;min-height:100px;color:var(--ink);transition:background .18s,border-color .18s,transform .18s}
 .juno-page .prompt:hover{border-color:#b5aaa0;background:#fffdfa;transform:translateY(-2px)}
 .juno-page .prompt:disabled{opacity:.55;transform:none}
-.juno-page .prompt:first-child{grid-column:1/-1;background:#fff0e8;border-color:#ecd5c7;min-height:86px}
-.juno-page .prompt:first-child:hover{background:#ffe8d9;border-color:#c9997d}
+.juno-page .prompt:first-child{grid-column:1/-1;background:var(--tint);border-color:var(--accent-soft);min-height:86px}
+.juno-page .prompt:first-child:hover{background:var(--tint);border-color:var(--accent)}
 .juno-page .prompt-icon{width:36px;height:36px;display:grid;place-items:center;background:#f4f3f0;border-radius:10px;flex-shrink:0;color:#6e6460}
-.juno-page .prompt:first-child .prompt-icon{background:#f9dac8;color:#704b36}
+.juno-page .prompt:first-child .prompt-icon{background:#fff;color:var(--accent-h)}
 .juno-page .prompt-icon svg{width:20px;height:20px}
 .juno-page .prompt-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
 .juno-page .prompt-title{font-size:14px;font-weight:800;line-height:1.3}
@@ -65,36 +65,36 @@
 .juno-page .message{font-size:15px;line-height:1.75;overflow-wrap:anywhere;min-width:0}
 .juno-page .message-user{align-self:flex-end;max-width:88%;background:#ebe9e4;border-radius:16px 16px 4px 16px;padding:12px 18px;white-space:pre-wrap}
 .juno-page .message-assistant{display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px}
-.juno-page .message-avatar{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:10px;background:#efedf3;color:var(--purple);font-size:15px;font-weight:850;line-height:1}
+.juno-page .message-avatar{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:10px;background:var(--tint);color:var(--accent-h);font-size:15px;font-weight:850;line-height:1}
 .juno-page .message-author{font-weight:850;font-size:13px;margin:5px 0 10px;display:flex;gap:8px;align-items:center}
 .juno-page .message-author span{font-size:11px;font-weight:600;color:var(--muted)}
 .juno-page .answer-body{background:white;border:1px solid var(--soft-line);padding:18px 22px;border-radius:0 16px 16px 16px}
 .juno-page .answer-body p{margin:0 0 12px;white-space:pre-wrap}
 .juno-page .answer-body p:last-child{margin-bottom:0}
 .juno-page .answer-body strong{font-weight:850}
-.juno-page .source{border-top:1px solid #e5deed;background:#f5f1f8;padding:13px 16px;margin:16px -22px -18px;border-radius:0 0 16px 16px;font-size:12px;line-height:1.65;color:#5d5269}
+.juno-page .source{border-top:1px solid var(--soft-line);background:var(--surface2);padding:13px 16px;margin:16px -22px -18px;border-radius:0 0 16px 16px;font-size:12px;line-height:1.65;color:var(--muted)}
 .juno-page .source-label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:850;margin-bottom:5px}
 .juno-page .message-error .answer-body{background:#fff2ed;border-color:#e7bba9;color:#883c26}
 .juno-page .message-error .message-author{color:#883c26}
-.juno-page .thinking-content{border:1px solid #e3dce9;background:#f0ecf5;display:flex;align-items:center;gap:13px;border-radius:0 16px 16px 16px;padding:16px 20px;min-height:72px}
+.juno-page .thinking-content{border:1px solid var(--soft-line);background:var(--tint);display:flex;align-items:center;gap:13px;border-radius:0 16px 16px 16px;padding:16px 20px;min-height:72px}
 .juno-page .thinking-title{display:block;font-weight:750;font-size:14px}
-.juno-page .thinking-detail{display:block;font-size:12px;color:#665b70}
+.juno-page .thinking-detail{display:block;font-size:12px;color:var(--muted)}
 .juno-page .thinking-dots{display:flex;gap:4px}
-.juno-page .thinking-dots i{display:block;width:5px;height:5px;border-radius:50%;background:#81708f;animation:thinking-pulse 1.6s ease-in-out infinite}
+.juno-page .thinking-dots i{display:block;width:5px;height:5px;border-radius:50%;background:var(--accent);animation:thinking-pulse 1.6s ease-in-out infinite}
 .juno-page .thinking-dots i:nth-child(2){animation-delay:.2s}.juno-page .thinking-dots i:nth-child(3){animation-delay:.4s}
 
 
 .juno-page .composer-dock{margin-top:auto;padding-top:16px;position:sticky;bottom:0;z-index:4;background:linear-gradient(transparent,var(--paper) 16px);padding-bottom:5px}
 .juno-page .composer{background:white;border:1px solid #c7c6c0;border-radius:18px;padding:14px 14px 12px;box-shadow:0 4px 16px #22201806;transition:border-color .2s,box-shadow .2s}
-.juno-page .composer:focus-within{border-color:#81708f;box-shadow:0 0 0 3px #e6dfed}
+.juno-page .composer:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--tint)}
 .juno-page textarea{resize:none;width:100%;min-height:48px;max-height:160px;border:0;border-radius:3px;background:transparent;padding:0 4px;line-height:1.5;color:var(--ink);outline:none;font-size:16px}
 .juno-page textarea:focus-visible{outline:none}
 .juno-page textarea::placeholder{color:#6b6b68}
 .juno-page .composer-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
 .juno-page #input-hint{font-size:10px;color:var(--muted);padding-left:4px}
-.juno-page #senden{border:0;border-radius:11px;background:var(--ink);color:#fff;padding:10px 14px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:16px;min-height:42px}
-.juno-page #senden span{font-size:19px;line-height:1;color:#ff967a}
-.juno-page #senden:hover{background:#34313b}
+.juno-page #senden{border:0;border-radius:11px;background:var(--accent);color:#fff;padding:10px 14px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:16px;min-height:42px}
+.juno-page #senden span{font-size:19px;line-height:1;color:inherit}
+.juno-page #senden:hover{background:var(--accent-h)}
 .juno-page #senden:disabled{background:#e9e8e3;color:#777773}
 .juno-page #senden:disabled span{color:inherit}
 .juno-page .conversation-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted);min-height:42px}
