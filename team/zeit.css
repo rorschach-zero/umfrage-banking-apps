@@ -30,14 +30,15 @@ dialog.zeit-sheet[open]{display:flex;flex-direction:column}
 dialog.zeit-sheet::backdrop{background:rgba(25,36,38,.42)}
 dialog.zeit-sheet::before{content:'';position:absolute;top:8px;left:calc(50% - 18px);width:36px;height:4px;border-radius:4px;background:var(--zs-rand)}
 .zeit-sheet *,.zeit-sheet *::before,.zeit-sheet *::after{box-sizing:border-box}
-.zeit-sheet .zeit-sheet-kopf{position:static;padding:24px 20px 4px;flex:0 0 auto;background:#fff;border:0;backdrop-filter:none}
+.zeit-sheet .zeit-sheet-kopf{position:static;padding:24px 20px 12px;flex:0 0 auto;background:#fff;border:0;backdrop-filter:none}
 .zeit-sheet .zeit-sheet-auftrag{margin:0 0 4px;font-size:13px;font-weight:500;color:var(--zs-neben);overflow-wrap:anywhere}
 .zeit-sheet h2{margin:0;font:700 22px/1.25 "PA6 Jakarta","Plus Jakarta Sans",system-ui,sans-serif;letter-spacing:-.4px;color:var(--zs-text)}
 .zeit-sheet h2:focus{outline:none}
 .zeit-sheet .zeit-sheet-unter{margin:4px 0 0;font-size:14px;color:var(--zs-neben)}
 .zeit-sheet-host{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .zeit-ab{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-.zeit-inhalt{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 20px 20px}
+/* Review Paket 2 Nr. 1: Trennlinie zwischen festem Kopf und rollendem Inhalt, wie beim Fuss. */
+.zeit-inhalt{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 20px 20px;border-top:1px solid var(--zs-rand)}
 .zeit-block{padding:18px 0 0}
 .zeit-block+.zeit-block{margin-top:18px;border-top:1px solid var(--zs-rand)}
 .zeit-teil+.zeit-teil{margin-top:16px}
@@ -85,7 +86,7 @@ dialog.zeit-sheet::before{content:'';position:absolute;top:8px;left:calc(50% - 1
 @media (min-width:701px){
   dialog.zeit-sheet{inset:0;margin:auto;height:fit-content;width:min(560px,calc(100% - 48px));max-height:min(88dvh,860px);border-radius:16px;box-shadow:0 24px 70px rgba(25,36,38,.22)}
   dialog.zeit-sheet::before{display:none}
-  .zeit-sheet .zeit-sheet-kopf{padding:28px 28px 4px}
+  .zeit-sheet .zeit-sheet-kopf{padding:28px 28px 14px}
   .zeit-inhalt{padding:4px 28px 24px}
   .zeit-fuss{padding:12px 28px 20px}
   .zeit-wahlen-zwei{grid-template-columns:repeat(3,minmax(0,1fr))}

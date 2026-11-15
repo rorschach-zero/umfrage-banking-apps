@@ -281,7 +281,7 @@ function abschlussMount(container, opts) {
   const fragen = Object.assign({lief: true, ki: false}, opts.fragen || {});
   const gezaehlt = +opts.gezaehlt > 0 ? Math.round(+opts.gezaehlt * 100) / 100 : 0;
   const s = {zeit: null, gezaehlt: gezaehlt ? null : 'aus', lief: null, art: null, wieder: '', ki: null, werkzeug: null, zweck: null};
-  let busy = false, fehler = '', versucht = false, op = 0;
+  let busy = false, fehler = '', versucht = false, op = 0, neuLaden = false;
   const heute = todayIso();
   // Frage 1, 1a, 1b, 1c
   const q1Titel = mk('h3', {class: 'zeit-frage', id: 'zeit-q1'}, 'Wie lange hast du daran gearbeitet?');
@@ -334,9 +334,10 @@ function abschlussMount(container, opts) {
     mk('p', {class: 'zeit-unterfrage'}, 'Welche?'), werkzeugWahl.box, werkzeugFrei,
     mk('p', {class: 'zeit-unterfrage'}, 'Wofür?'), zweckWahl.box,
     mk('p', {class: 'zeit-unterfrage', id: 'zeit-q3c'}, 'Link zum Chat, wenn es einen gibt. Sonst leg ein Bildschirmfoto in den Ordner Schreibwerk.'), beleg);
-  const appFragen = Number.isInteger(opts.appFragen) && opts.appFragen >= 0 ? opts.appFragen : null;
+  // Review Paket 2 Nr. 2: 0 gilt als unbekannt (Zahl nur aus diesem Browser), die Zeile entfällt, bis Paket 3 die Zahl vom Server liefert.
+  const appFragen = Number.isInteger(opts.appFragen) && opts.appFragen > 0 ? opts.appFragen : null;
   const q3 = fragen.ki ? mk('section', {class: 'zeit-block'},
-    appFragen === null ? null : mk('p', {class: 'zeit-zeile'}, 'In der Team-App gezählt: ' + (appFragen === 1 ? '1 Frage' : appFragen + ' Fragen') + ' an die Schreibhilfe.'),
+    !(appFragen > 0) ? null : mk('p', {class: 'zeit-zeile'}, 'In der Team-App gezählt: ' + (appFragen === 1 ? '1 Frage' : appFragen + ' Fragen') + ' an die Schreibhilfe.'),
     mk('h3', {class: 'zeit-frage'}, 'Hast du dafür eine KI ausserhalb der Team-App benutzt?'), kiWahl.box, kiNachfrage,
     mk('p', {class: 'zeit-klein'}, 'Wir müssen KI-Hilfen am Schluss in der Arbeit angeben. Darum fragen wir.')) : null;
   // Fuss: Hinweis, was fehlt, und die zwei Knöpfe
@@ -404,14 +405,16 @@ function abschlussMount(container, opts) {
     kiWahl.set(s.ki); werkzeugWahl.set(s.werkzeug); zweckWahl.set(s.zweck);
     kiNachfrage.hidden = s.ki !== 'ja';
     werkzeugFrei.hidden = s.werkzeug !== 'andere';
-    finish.disabled = busy || !!offen || nurLesen;
-    finish.textContent = busy ? 'Wird gespeichert …' : versucht && fehler ? 'Nochmals versuchen' : 'Abschliessen';
+    finish.disabled = neuLaden ? busy : busy || !!offen || nurLesen;
+    // Review Paket 2 Nr. 4: Verlangt der Server ein Neuladen (conflict, forbidden), sagt der Knopf das und tut es.
+    finish.textContent = busy ? 'Wird gespeichert …' : neuLaden ? 'Seite neu laden' : versucht && fehler ? 'Nochmals versuchen' : 'Abschliessen';
     back.disabled = busy;
     hinweis.classList.toggle('is-fehler', !!fehler && !busy);
     hinweis.textContent = nurLesen ? 'Diese Ansicht ist nur zum Lesen.' : busy ? '' : fehler || offen;
   }
   back.addEventListener('click', () => { if (busy) return; op += 1; if (opts.onCancel) opts.onCancel(); });
   finish.addEventListener('click', async () => {
+    if (neuLaden && !busy) { try { location.reload(); } catch (e) {} return; }
     if (busy || fehlt() || window.PA6View?.active()) return;
     const mine = ++op;
     busy = true; versucht = true; fehler = ''; refresh();
@@ -421,7 +424,7 @@ function abschlussMount(container, opts) {
       busy = false; fehler = ''; refresh();
     } catch (error) {
       if (mine !== op) return;
-      busy = false; fehler = (error && error.message) || FEHLER_SPEICHERN; refresh();
+      busy = false; fehler = (error && error.message) || FEHLER_SPEICHERN; neuLaden = !!(error && (error.code === 'conflict' || error.code === 'forbidden')); refresh();
     }
   });
   container.replaceChildren(mk('div', {class: 'zeit-ab'},
@@ -485,26 +488,35 @@ function abschliessen(opts) {
       finally { speichert = false; }
       if (!r || r.ok !== true || r.zurueck || r.storniert || r.status !== 'in Prüfung') {
         const code = r && r.code;
-        throw Error(code === 'invalid' || code === 'conflict' || code === 'forbidden' ? (r.fehler || FEHLER_SPEICHERN) : FEHLER_SPEICHERN);
+        const fehlerObjekt = Error(code === 'invalid' || code === 'conflict' || code === 'forbidden' ? (r.fehler || FEHLER_SPEICHERN) : FEHLER_SPEICHERN);
+        fehlerObjekt.code = code || '';
+        throw fehlerObjekt;
       }
       fertig = true;
       schliessen();
       if (opts.onGespeichert) opts.onGespeichert(r);
+      // Review Paket 2 Nr. 3: Scheitert «Rückgängig» innerhalb der 5 Sekunden, bleibt der Knopf; danach sagt der Text, was gilt.
       let undoOffen = true;
+      const frist = Date.now() + 5000;
       const undo = mk('button', {type: 'button', class: 'zeit-toast-knopf'}, 'Rückgängig');
+      const gescheitert = text => {
+        if (Date.now() < frist) { undoOffen = true; undo.disabled = false; meldung(text || 'Das hat nicht geklappt. Bitte nochmals versuchen.', undo, Math.max(frist - Date.now(), 0) + 2000); }
+        else meldung('Das hat nicht geklappt. Die Meldung bleibt gespeichert. Salah kann sie dir zurückgeben.');
+      };
       undo.addEventListener('click', async () => {
         if (!undoOffen) return;
         undoOffen = false; undo.disabled = true;
         meldung('Wird zurückgenommen …', null, 30000);
         try {
           const z = await opts.senden({typ: 'abschluss_zurueck', id: auftrag.id, quelle: auftrag.quelle, vorgang}, {keepalive: true});
-          if (!z || z.ok !== true) { meldung((z && z.fehler) || 'Das hat nicht geklappt. Bitte nochmals versuchen.'); return; }
+          if (z && z.code === 'too_late') { meldung(z.fehler || 'Das geht nicht mehr.'); return; }
+          if (!z || z.ok !== true) { gescheitert(); return; }
           meldung('Meldung zurückgenommen.');
           if (opts.onZurueck) opts.onZurueck(z);
-        } catch (error) { meldung('Das hat nicht geklappt. Bitte nochmals versuchen.'); }
+        } catch (error) { gescheitert(); }
       });
       meldung(opts.selbst ? 'Danke, gespeichert. Der Auftrag steht bei dir unter Zur Abnahme.' : 'Danke. Salah schaut es sich an.', undo, 7000);
-      setTimeout(() => { undoOffen = false; undo.remove(); }, 5000);
+      setTimeout(() => { if (undoOffen) { undoOffen = false; undo.remove(); } }, 5000);
     }});
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
   const kopf = dlg.querySelector('#zeit-sheet-titel');
