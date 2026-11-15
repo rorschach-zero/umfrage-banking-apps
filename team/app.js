@@ -798,13 +798,20 @@ function rememberStart(row){
   const slot='pa6-aktiv:'+data.person+':'+row.id;
   try{if(!localStorage.getItem(slot))localStorage.setItem(slot,String(Date.now()));}catch{}
 }
+// Projektseite Paket 2 (Bauplan 4.4 Punkt 1): Vorwahl nur, wenn der Auftrag am selben Tag gestartet wurde. Nach einer Nacht keine 8 Stunden.
+function startSlot(row,who){return 'pa6-aktiv:'+(who||data.person)+':'+row.id;}
 function measuredHours(row){
   if(!window.PA6Zeit)return null;
-  let started=0;try{started=+localStorage.getItem('pa6-aktiv:'+data.person+':'+row.id)||0;}catch{}
-  if(!started)return null;
+  let started=0;try{started=+localStorage.getItem(startSlot(row))||0;}catch{}
+  if(!started||!Number.isFinite(started))return null;
+  const startTag=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Zurich',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(started));
+  if(startTag!==today())return null;
   const minutes=Math.min(480,Math.max(0,(Date.now()-started)/60000));
   return Math.min(8,PA6Zeit.roundQuarterMinutes(minutes));
 }
+// Gemerkte Startzeit nach dem Abschluss und nach einer Rückgabe löschen; Rückgängig legt sie wieder hin.
+function dropStart(row,who){let alt=null;try{alt=localStorage.getItem(startSlot(row,who));localStorage.removeItem(startSlot(row,who));}catch{}return alt;}
+function restoreStart(row,value,who){if(!value)return;try{localStorage.setItem(startSlot(row,who),value);}catch{}}
 // Auftragspfad (05.11.2026, Salah: «kein Textwall»): Start → ein Schritt nach dem anderen → Abschluss.
 // Sichtbar ist immer nur, was man jetzt braucht. Warum, Massstab und Plan sind einen Tipp entfernt.
 const DEST=[[/Team-App\s*›\s*Bewertungen/,()=>'/team/c/','Bewertungen öffnen'],[/Team-App\s*›\s*Servicetest/,()=>'/team/b/','Servicetest öffnen'],
@@ -986,6 +993,7 @@ function proceedReport(row,target='in Prüfung',opts){
       await postStatus(serverRow,serverRow.status,target,access,lead);
       if(pending!==operation||key!==access||data?.person!==identity)return;
       clearResponses(cacheNamespace);setLocalStatus(row.id,target);
+      if(returning)dropStart(serverRow,serverRow.owner||data.person);
       if(target==='in Prüfung')trackAuftrag(serverRow,'fertig_gemeldet','',operation.vorgang);
       toast(target==='fertig'?'✓ Prüfung abgeschlossen.':returning?'✓ Zur Bearbeitung zurückgegeben.':target==='läuft'?'✓ Bearbeitung gestartet.':'✓ Zur Prüfung gemeldet. Gut gemacht.');$('toast').classList.add('success');
     }catch(error){if(pending===operation&&key===access&&data?.person===identity){
@@ -995,6 +1003,38 @@ function proceedReport(row,target='in Prüfung',opts){
     }}
     finally{if(pending===operation){pending=null;await load();setTimeout(()=>$('toast').classList.remove('success'),700);}}
   },5000);
+}
+// Projektseite Paket 2 (Bauplan Abschnitt 4.2): ein Fenster, eine Anfrage «abschluss». Zeit, Antworten und Status gehen zusammen
+// und sofort (keepalive), der Dank erscheint erst nach der Antwort. «Rückgängig» schickt «abschluss_zurueck» mit derselben Kennung.
+async function abschlussRequest(body,access,opts){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),60000);
+  try{
+    const response=await fetch(config.endpoint,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(Object.assign({k:access},body)),keepalive:!!(opts&&opts.keepalive),signal:controller.signal,referrerPolicy:'no-referrer',cache:'no-store'});
+    return await response.json();
+  }finally{clearTimeout(timer);}
+}
+function abschlussOeffnen(row){
+  const access=key,identity=data.person,ea=row.source==='assignments',paket=PA6Zeit.taskPaket(row);
+  // Gezählte Zeit (Abschnitt 4.2, Zeile 1b): Arbeitspaket aus zeit.pakete, Erhebungsauftrag aus zeit.auftraege (automatische Zeilen im Zeitraum).
+  const gezaehlt=ea?+(data.zeit?.auftraege?.[row.ref||row.id]||0):paket?+(data.zeit?.pakete?.[paket]||0):0;
+  const darf=()=>key===access&&data?.person===identity&&!preview.active();
+  let gemerkterStart=null;
+  if($('detail').open)$('detail').close();
+  PA6Zeit.abschliessen({titel:shortTitle(row),auftrag:{id:row.id,quelle:row.source},fragen:{lief:true,ki:row.area==='writing'},
+    gezaehlt:Number.isFinite(gezaehlt)?gezaehlt:0,gezaehltText:ea?'in diesem Zeitraum':'für diese Arbeit',vorwahl:measuredHours(row),selbst:identity==='SA',
+    darf,
+    senden:async(body,opts)=>{pending={id:row.id,abschluss:true,timer:null};try{return await abschlussRequest(body,access,opts);}finally{pending=null;}},
+    onGespeichert:()=>{
+      if(!darf())return;
+      gemerkterStart=dropStart(row);row.status='in Prüfung';setLocalStatus(row.id,'in Prüfung');
+      clearResponses(cacheNamespace);render();load();
+    },
+    onZurueck:result=>{
+      if(!darf())return;
+      const zurueck=result&&result.status||'läuft';row.status=zurueck;setLocalStatus(row.id,zurueck);restoreStart(row,gemerkterStart);gemerkterStart=null;
+      clearResponses(cacheNamespace);render();load();
+    },
+    onAbbruch:()=>{if(darf()&&data)details(row);}});
 }
 function report(row,target='in Prüfung'){
   if(preview.active()||pending||noteSaving||state!=='ready'||(!canReport(row)&&!(canReview(row)&&['fertig','läuft'].includes(target))))return;
@@ -1007,13 +1047,7 @@ function report(row,target='in Prüfung'){
       toast('Die Zeiterfassung ist nicht geladen. Lade die Seite neu, bevor du den Auftrag abschliesst.');
       return;
     }
-    const paket=PA6Zeit.taskPaket(row);
-    const bisher=paket&&data.zeit?.pakete?.[paket]?+data.zeit.pakete[paket]:0;
-    const host=el('div',{id:'zeit-closure-host'});
-    modal('Arbeitszeit zum Auftrag',el('p',{class:'quiet-note'},'Ohne Zeitangabe kannst du den Auftrag nicht abschliessen.'),host);
-    PA6Zeit.closureMount(host,{row,person:data.person,paket,bisher,vorwahl:measuredHours(row),aufgabe:shortTitle(row),id:abschlussBuchung(row)||undefined,ref:paket?'':(row.ref||''),auftrag:paket?'':(row.id||''),save:projektSaveRequest,
-      onDone:info=>{$('detail').close();proceedReport(row,target,{zeit:info});},
-      onCancel:()=>{$('detail').close();details(row);}});
+    abschlussOeffnen(row);
     return;
   }
   proceedReport(row,target);

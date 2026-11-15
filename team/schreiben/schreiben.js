@@ -34,7 +34,7 @@ function readKey() {
   }
   try { return localStorage.getItem('pa6k') || ''; } catch { return ''; }
 }
-async function post(body, ms = 60000) {
+async function post(body, ms = 60000, opts) {
   if (viewing()) {
     if (!['team', 'lesen'].includes(body.typ)) throw Error('Diese Personenansicht ist nur zum Lesen.');
     body = PA6View.request(body);
@@ -42,7 +42,7 @@ async function post(body, ms = 60000) {
   if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(ENDPOINT)) throw Error('Der Projektzugang ist nicht verbunden.');
   const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), ms);
   try {
-    const r = await fetch(ENDPOINT, {method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(body), signal:ctrl.signal, referrerPolicy:'no-referrer', cache:'no-store'});
+    const r = await fetch(ENDPOINT, {method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(body), signal:ctrl.signal, referrerPolicy:'no-referrer', cache:'no-store', keepalive:!!(opts && opts.keepalive)});
     if (!r.ok) throw Error('Gerade nicht erreichbar.');
     return await r.json();
   } catch (e) { throw e.name === 'AbortError' ? Error('Die Verbindung dauert zu lange. Bitte nochmals versuchen.') : e; }
@@ -405,42 +405,30 @@ async function handover(c) {
   if (from === 'in Prüfung' || from === 'fertig') { announce(from === 'fertig' ? 'Das Kapitel ist schon fertig.' : 'Das Kapitel ist schon in der Prüfung.'); return; }
   if (from !== 'offen' && from !== 'läuft') { announce('Der Stand lässt sich so nicht übergeben.'); return; }
   if (!window.PA6Zeit) { announce('Die Zeiterfassung ist nicht geladen. Lade die Seite neu.'); return; }
-  const spot = document.getElementById('zeit-uebergabe') || el('div', {id:'zeit-uebergabe'});
-  const btn = [...document.querySelectorAll('button')].find(b => b.textContent === 'Zur Prüfung geben');
-  if (!spot.parentNode) (btn && btn.parentNode ? btn.parentNode : $('tab-auftrag')).append(spot);
-  const lead = state.person === 'SA' && state.lead === true;
-  // Eine Buchungskennung je Abschlussversuch: ein erneuter Abschluss nach Rückgabe legt eine neue Zeile an und ersetzt keine frühere Zeit.
-  const buchung = 'abschluss-' + String(c.id).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 56) + '-' + newVorgang().replace(/[^a-zA-Z0-9]/g, '').slice(0, 12);
-  // Zeitbuchung und Storno brauchen wie jede Schreibanfrage den persönlichen Zugang.
-  const saveZeit = async body => {
-    const saved = await post(Object.assign({}, body, {k: state.key}));
-    if (!saved || saved.ok === false) throw Error((saved && saved.fehler) || 'Nicht gespeichert.');
-    return saved;
-  };
-  PA6Zeit.closureMount(spot, {
-    person: state.person,
-    aufgabe: (c.ref ? c.ref + ' · ' : '') + (c.title || 'Kapitel'),
-    paket: '',
-    id: /^[a-zA-Z0-9_-]{16,80}$/.test(buchung) ? buchung : '',
-    quelle: 'schreibplatz',
-    ref: c.ref || '',
-    save: saveZeit,
-    onCancel: () => { spot.replaceChildren(); },
-    onDone: async info => {
-      try {
-        const r = await post({typ:'status', k:state.key, leitung:lead, id:c.id, from, to:'In Prüfung'});
-        if (!r || r.ok === false || (r.status !== 'In Prüfung' && r.status !== 'in Prüfung')) throw Error((r && r.fehler) || 'Nicht gemeldet.');
-        const weg = await post({typ:'auftragsweg', k:state.key, leitung:lead, id:c.id, ref:c.ref || '', quelle:'chapters', aktion:'fertig_gemeldet', wert:'', vorgang:newVorgang()});
-        if (!weg || weg.ok === false) throw Error((weg && weg.fehler) || 'Die Fertigmeldung wurde nicht gezählt.');
-        c.status = 'In Prüfung';
-        announce('Zur Prüfung gemeldet. Salah schaut es sich an.');
-        renderAll();
-      } catch (e) {
-        try { await saveZeit({typ:'projekt_save', formular:'arbeitszeit', id:info.id, felder:Object.assign({}, info.felder, {storniert:'ja'})}); } catch (ignore) {}
-        announce(e.message || 'Nicht gemeldet.');
-      }
-    }
+  // Projektseite Paket 2 (Bauplan 4.2): dasselbe Fenster wie in «Meine Arbeit», mit Frage 3 zur KI, und eine Anfrage «abschluss».
+  // Zeit, Antworten und Status gehen zusammen und sofort; der Server setzt Status und Auftragsweg selbst.
+  const alt = document.getElementById('zeit-uebergabe'); if (alt) alt.replaceChildren();
+  const vorher = c.status, key = state.key, wer = state.person;
+  PA6Zeit.abschliessen({
+    titel: c.title || 'Kapitel',
+    auftrag: {id: c.id, quelle: 'chapters'},
+    fragen: {lief: true, ki: true},
+    appFragen: schreibhilfeFragen(c),
+    selbst: wer === 'SA',
+    darf: () => state.key === key && state.person === wer && !viewing(),
+    senden: (body, opts) => post(Object.assign({k: key}, body), 60000, opts),
+    onGespeichert: () => { c.status = 'In Prüfung'; renderAll(); },
+    onZurueck: () => { c.status = vorher; renderAll(); },
+    onAbbruch: () => {}
   });
+}
+// Zahl der Fragen an die Schreibhilfe zu diesem Kapitel aus dem Stand des Schreibplatzes (Verlauf in diesem Browser).
+// Ist der Verlauf gekürzt (30 Einträge) oder nicht lesbar, ist die Zahl unbekannt und die Zeile entfällt.
+function schreibhilfeFragen(c) {
+  let verlauf = null;
+  try { verlauf = JSON.parse(localStorage.getItem('pa6-sp-chat:' + state.person + ':' + c.ref) || '[]'); } catch (e) { return null; }
+  if (!Array.isArray(verlauf) || verlauf.length >= 30) return null;
+  return verlauf.filter((m, i) => m && m.r === 'du' && verlauf[i + 1] && verlauf[i + 1].r === 'as' && !verlauf[i + 1].err).length;
 }
 // Schreibweg (Salah 03.11.2026, Seitenleiste neu 05.11.2026): ein Schritt im Fokus, ein Satz, ein Knopf.
 // Erledigte Schritte klappen zu, der Rest ist einen Tipp entfernt. «Weiter» lässt den Haken einrasten und öffnet dann den nächsten Schritt.

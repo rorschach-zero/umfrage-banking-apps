@@ -20,3 +20,82 @@
 .zeit-closure-actions .knopf[disabled]{opacity:.55;cursor:not-allowed}
 .zeit-hours button.chip.is-on{border-color:var(--accent,#151a21);background:var(--panel,#f5f5f2)}
 .zeit-details{margin-top:4px}
+/* Abschlussfenster (Projektseite Paket 2, Bauplan 4.2). Werte der Kommandozentrale (Bauplan 3.1). Handy: Blatt von unten, Hauptknopf klebt unten. */
+@font-face{font-family:"PA6 Inter";src:url(assets/Inter.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"PA6 Jakarta";src:url(assets/PlusJakartaSans.woff2) format("woff2");font-weight:200 800;font-display:swap}
+dialog.zeit-sheet{--zs-flaeche:#F8F9F6;--zs-text:#22282B;--zs-neben:#687276;--zs-rand:#E3E8E4;--zs-akzent:#237E79;--zs-akzent-hell:#E8F3F1;--zs-akzent-dunkel:#1B625E;--zs-fehler:#A23B32;
+  position:fixed;inset:auto 0 0 0;margin:0;width:100%;max-width:100%;height:auto;max-height:94dvh;padding:0;border:0;border-radius:16px 16px 0 0;background:#fff;color:var(--zs-text);
+  box-shadow:0 -8px 40px rgba(25,36,38,.14);overflow:hidden;font:15px/1.5 "PA6 Inter",Inter,system-ui,-apple-system,sans-serif;-webkit-text-size-adjust:100%}
+dialog.zeit-sheet[open]{display:flex;flex-direction:column}
+dialog.zeit-sheet::backdrop{background:rgba(25,36,38,.42)}
+dialog.zeit-sheet::before{content:'';position:absolute;top:8px;left:calc(50% - 18px);width:36px;height:4px;border-radius:4px;background:var(--zs-rand)}
+.zeit-sheet *,.zeit-sheet *::before,.zeit-sheet *::after{box-sizing:border-box}
+.zeit-sheet .zeit-sheet-kopf{position:static;padding:24px 20px 4px;flex:0 0 auto;background:#fff;border:0;backdrop-filter:none}
+.zeit-sheet .zeit-sheet-auftrag{margin:0 0 4px;font-size:13px;font-weight:500;color:var(--zs-neben);overflow-wrap:anywhere}
+.zeit-sheet h2{margin:0;font:700 22px/1.25 "PA6 Jakarta","Plus Jakarta Sans",system-ui,sans-serif;letter-spacing:-.4px;color:var(--zs-text)}
+.zeit-sheet h2:focus{outline:none}
+.zeit-sheet .zeit-sheet-unter{margin:4px 0 0;font-size:14px;color:var(--zs-neben)}
+.zeit-sheet-host{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.zeit-ab{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.zeit-inhalt{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 20px 20px}
+.zeit-block{padding:18px 0 0}
+.zeit-block+.zeit-block{margin-top:18px;border-top:1px solid var(--zs-rand)}
+.zeit-teil+.zeit-teil{margin-top:16px}
+.zeit-sheet h3.zeit-frage{margin:0 0 10px;font:600 16px/1.4 "PA6 Inter",Inter,system-ui,sans-serif;color:var(--zs-text);letter-spacing:0}
+.zeit-sheet p{margin:0;color:var(--zs-text);font-size:15px}
+.zeit-sheet .zeit-klein{margin:10px 0 0;font-size:13px;line-height:1.5;color:var(--zs-neben)}
+.zeit-sheet .zeit-zeile{margin:0 0 10px;font-size:14px;color:var(--zs-neben)}
+.zeit-sheet .zeit-unterfrage{margin:16px 0 8px;font-size:14px;font-weight:600;color:var(--zs-text)}
+.zeit-wahlen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.zeit-wahlen-zeit,.zeit-wahlen-drei{grid-template-columns:repeat(3,minmax(0,1fr))}
+.zeit-wahlen-liste{grid-template-columns:1fr}
+.zeit-sheet .zeit-wahl{min-height:44px;margin:0;padding:10px 12px;border:1px solid var(--zs-rand);border-radius:10px;background:#fff;color:var(--zs-text);font:500 15px/1.25 "PA6 Inter",Inter,system-ui,sans-serif;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:border-color .12s,background-color .12s}
+.zeit-wahlen-liste .zeit-wahl{text-align:left;padding-left:14px}
+.zeit-sheet .zeit-wahl:hover{border-color:#C7D2CD}
+.zeit-sheet .zeit-wahl[aria-checked="true"]{border-color:var(--zs-akzent);background:var(--zs-akzent-hell);color:var(--zs-akzent-dunkel);font-weight:600;box-shadow:inset 0 0 0 1px var(--zs-akzent)}
+.zeit-sheet .zeit-wahl:focus-visible,.zeit-sheet .zeit-haupt:focus-visible,.zeit-sheet .zeit-zurueck:focus-visible,.zeit-sheet summary:focus-visible,.zeit-sheet .zeit-feld:focus-visible{outline:3px solid rgba(35,126,121,.35);outline-offset:2px}
+.zeit-sheet .zeit-feld{display:block;width:100%;min-height:44px;margin:0;padding:10px 12px;border:1px solid var(--zs-rand);border-radius:10px;background:#fff;color:var(--zs-text);font:16px/1.4 "PA6 Inter",Inter,system-ui,sans-serif}
+.zeit-sheet textarea.zeit-feld{resize:vertical;min-height:64px}
+.zeit-sheet .zeit-feld::placeholder{color:#8A9497}
+.zeit-sheet input.zeit-feld+.zeit-unterfrage{margin-top:16px}
+.zeit-wahlen+.zeit-feld{margin-top:8px}
+.zeit-eigen{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:15px;color:var(--zs-neben)}
+.zeit-sheet .zeit-feld-kurz{width:7.5rem}
+.zeit-tag{margin-top:12px}
+.zeit-tag summary{display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:500;color:var(--zs-akzent-dunkel);cursor:pointer;list-style:none}
+.zeit-tag summary::-webkit-details-marker{display:none}
+.zeit-tag summary::after{content:'›';margin-left:6px;transition:transform .15s}
+.zeit-tag[open] summary::after{transform:rotate(90deg)}
+.zeit-label{display:grid;gap:6px;font-size:14px;color:var(--zs-neben);max-width:16rem}
+.zeit-nachfrage{margin-top:4px;padding:2px 0 4px}
+.zeit-fuss{flex:0 0 auto;border-top:1px solid var(--zs-rand);background:#fff;padding:10px 20px max(16px,env(safe-area-inset-bottom))}
+.zeit-sheet .zeit-hinweis{min-height:20px;margin:0 0 8px;font-size:13px;line-height:1.5;color:var(--zs-neben)}
+.zeit-sheet .zeit-hinweis.is-fehler{color:var(--zs-fehler);font-weight:600}
+.zeit-hinweis:empty{display:none}
+.zeit-knoepfe{display:flex;align-items:center;gap:12px}
+.zeit-sheet .zeit-haupt{flex:1 1 auto;min-height:52px;margin:0;padding:12px 18px;border:0;border-radius:10px;background:var(--zs-akzent);color:#fff;font:600 16px/1.2 "PA6 Inter",Inter,system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
+.zeit-sheet .zeit-haupt:hover{background:var(--zs-akzent-dunkel)}
+.zeit-sheet .zeit-haupt:disabled{background:#E3E8E4;color:#5E686B;cursor:not-allowed;opacity:1}
+.zeit-sheet .zeit-zurueck{flex:0 0 auto;min-height:52px;min-width:44px;margin:0;padding:0 8px;border:0;background:transparent;color:var(--zs-neben);font:500 15px "PA6 Inter",Inter,system-ui,sans-serif;cursor:pointer}
+.zeit-sheet .zeit-zurueck:disabled{opacity:.5;cursor:default}
+.zeit-sheet [hidden]{display:none!important}
+.zeit-toast{position:fixed;z-index:70;left:50%;bottom:96px;transform:translateX(-50%);display:flex;align-items:center;gap:16px;width:max-content;max-width:calc(100% - 32px);padding:10px 12px 10px 18px;border-radius:12px;background:#22282B;color:#fff;font:500 14px/1.4 "PA6 Inter",Inter,system-ui,sans-serif;box-shadow:0 10px 32px rgba(25,36,38,.25)}
+.zeit-toast[hidden]{display:none}
+.zeit-toast-knopf{min-height:44px;margin:0;padding:0 8px;border:0;background:transparent;color:#9FE0D6;font:700 14px "PA6 Inter",Inter,system-ui,sans-serif;cursor:pointer}
+@media (min-width:701px){
+  dialog.zeit-sheet{inset:0;margin:auto;height:fit-content;width:min(560px,calc(100% - 48px));max-height:min(88dvh,860px);border-radius:16px;box-shadow:0 24px 70px rgba(25,36,38,.22)}
+  dialog.zeit-sheet::before{display:none}
+  .zeit-sheet .zeit-sheet-kopf{padding:28px 28px 4px}
+  .zeit-inhalt{padding:4px 28px 24px}
+  .zeit-fuss{padding:12px 28px 20px}
+  .zeit-wahlen-zwei{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .zeit-sheet .zeit-haupt{flex:0 1 auto;min-width:200px}
+  .zeit-knoepfe{flex-direction:row-reverse;justify-content:flex-start}
+  .zeit-toast{bottom:32px}
+}
+@media (prefers-reduced-motion:no-preference){
+  dialog.zeit-sheet[open]{animation:zeit-hoch .22s cubic-bezier(.2,.8,.2,1)}
+  @media (min-width:701px){dialog.zeit-sheet[open]{animation:zeit-auf .18s ease-out}}
+}
+@keyframes zeit-hoch{from{transform:translateY(24px);opacity:.6}}
+@keyframes zeit-auf{from{transform:translateY(8px) scale(.985);opacity:0}}
