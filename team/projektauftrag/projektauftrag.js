@@ -52,7 +52,7 @@ async function speichern(antwort) {
   } catch (e) {
     await laden(true);
     if (stand && stand.eigene && stand.eigene.zeit !== vorher && stand.eigene.antwort === antwort) { einwandOffen = false; meldung(ok, 'ok'); }
-    else meldung('Nicht gespeichert. ' + (e && e.name !== 'AbortError' && !/zu lange gedauert/.test(e.message) ? e.message : 'Der Server hat nicht rechtzeitig geantwortet.') + ' Bitte versuch es noch einmal. Klappt es wieder nicht, schick Salah ein Bildschirmfoto.', 'fehler');
+    else meldung('Nicht gespeichert. ' + (e && e.name !== 'AbortError' && !/zu lange gedauert/.test(e.message) ? String(e.message).replace(/[.!?]?\s*$/, '.') : 'Der Server hat nicht rechtzeitig geantwortet.') + ' Bitte versuch es noch einmal. Klappt es wieder nicht, schick Salah ein Bildschirmfoto.', 'fehler');
   }
   finally { busy = false; render(); }
 }
