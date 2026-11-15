@@ -34,27 +34,26 @@ if (location.search) history.replaceState(null, '', location.pathname);
 let entryConsumed = false, entryRole = '';
 try {entryRole = sessionStorage.getItem('pa6_pia_role') || ''; sessionStorage.removeItem('pa6_pia_role');} catch {}
 let isLead = false, isBusy = false, isReady = false, person = '', messages = [], storageAvailable = true;
-let figureTimers = [];
-const FIGURE_LABELS = {waiting:'Ein Schritt nach dem anderen.', thinking:'Ich denke kurz nach.', writing:'Ich schaue in die Unterlagen.', happy:'Ein Stück weiter.', answering:'Hier ist dein nächster Schritt.', error:'Versuchen wir es nochmals.'};
-function setFigureState(state) {
-  figureTimers.forEach(clearTimeout); figureTimers = [];
+// Juno has no face (decision 15.11.2026): the state shows as one quiet status line with a dot.
+let statusTimers = [];
+const STATUS_LABELS = {waiting:'Ein Schritt nach dem anderen.', thinking:'Ich denke kurz nach.', writing:'Ich schaue in die Unterlagen.', happy:'Ein Stück weiter.', answering:'Hier ist dein nächster Schritt.', error:'Versuchen wir es nochmals.'};
+function setJunoState(state) {
+  statusTimers.forEach(clearTimeout); statusTimers = [];
   const apply = next => {
     document.body.dataset.state = next;
-    $('figure-status').textContent = FIGURE_LABELS[next];
-    window.PiaFigure?.setState(next);
+    $('juno-status').textContent = STATUS_LABELS[next];
   };
   apply(state);
   if (state === 'thinking') {
-    figureTimers.push(setTimeout(() => apply('writing'), 1800));
+    statusTimers.push(setTimeout(() => apply('writing'), 1800));
   }
   if (state === 'answering') {
-    figureTimers.push(setTimeout(() => apply('happy'), 2800));
-    figureTimers.push(setTimeout(() => apply('waiting'), 6500));
+    statusTimers.push(setTimeout(() => apply('happy'), 2800));
+    statusTimers.push(setTimeout(() => apply('waiting'), 6500));
   }
 }
 function messageAvatar() {
-  return el('span', {class:'message-avatar', 'aria-hidden':'true'},
-    el('img', {src:'assets/c/avatar.png', alt:'', width:'160', height:'160'}));
+  return el('span', {class:'message-avatar', 'aria-hidden':'true'}, 'J');
 }
 // Keep the full key and an explicit role boundary: equal prefixes must never share a history.
 const historyKey = () => 'pa6frag_v2_' + encodeURIComponent(accessKey) + (isLead ? '_lead' : '_member') + (taskContext ? '_ctx_' + taskContext : '');
@@ -142,7 +141,7 @@ function updateInput() {
 }
 function setBusy(busy) {
   isBusy = busy;
-  if (busy) setFigureState('thinking');
+  if (busy) setJunoState('thinking');
   $('leitung').disabled = busy;
   thread.setAttribute('aria-busy', String(busy));
   renderPrompts(); updateLayout(); updateInput();
@@ -157,7 +156,7 @@ async function ask(rawText) {
   const text = (rawText || '').trim();
   if (!text || isBusy || !isReady) return;
   if (text.length > 1000 || VERBOTEN.test(text)) {
-    setFigureState('error');
+    setJunoState('error');
     addMessage({rolle:'assistent', text:text.length > 1000 ? 'Bitte kürzer: maximal 1000 Zeichen.' : 'Bitte ohne Nummern, Mail- und Netzadressen fragen.', fehler:true});
     saveHistory(); scrollToLatest(); return;
   }
@@ -174,9 +173,9 @@ async function ask(rawText) {
     const reply = await sende({k:accessKey, typ:'frage', text, leitung:isLead, ctx:taskContext, verlauf:requestHistory}, 90000);
     if (typeof reply.antwort !== 'string' || !reply.antwort.trim()) throw new Error('Es kam keine Antwort an. Versuch es bitte nochmals.');
     thinking.remove(); addMessage({rolle:'assistent', text:reply.antwort});
-    setFigureState('answering');
+    setJunoState('answering');
   } catch (error) {
-    setFigureState('error');
+    setJunoState('error');
     thinking.remove(); addMessage({rolle:'assistent', text:error.name === 'AbortError' ? 'Die Antwort dauert gerade zu lange. Versuch es bitte nochmals.' : String(error.message || error), fehler:true});
   } finally {
     setBusy(false); saveHistory(); $('notice').textContent = '';
@@ -195,13 +194,13 @@ $('leitung').addEventListener('click', () => {
   $('leitung').setAttribute('aria-pressed', String(isLead));
   $('leitung').textContent = isLead ? 'Leitung an' : 'Leitung aus';
   input.value = ''; messages = readHistory(); renderPrompts(); renderHistory(); updateInput();
-  setFigureState('waiting');
+  setJunoState('waiting');
   $('notice').textContent = isLead ? 'Leitungsansicht geöffnet. Eigener Verlauf.' : 'Mitgliedsansicht geöffnet. Eigener Verlauf.';
 });
 $('neu').addEventListener('click', () => {
   if (isBusy) return;
   taskContext = ''; messages = []; input.value = ''; saveHistory(); renderHistory();
-  setFigureState('waiting'); $('notice').textContent = 'Neues Gespräch begonnen.';
+  setJunoState('waiting'); $('notice').textContent = 'Neues Gespräch begonnen.';
   input.focus({preventScroll:true});
 });
 $('datei').addEventListener('click', () => {
@@ -228,7 +227,7 @@ async function initialize() {
   } catch (error) { showAccessError(String(error.message || error)); }
 }
 function showAccessError(text) {
-  setFigureState('error');
+  setJunoState('error');
   $('wer').textContent = 'Kein Zugriff';
   $('suggestions').hidden = true; $('empty-note').hidden = true;
   document.querySelector('.composer-dock').hidden = true;

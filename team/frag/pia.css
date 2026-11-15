@@ -9,7 +9,7 @@
 .juno-page .skip-link:focus{top:12px}
 .juno-page .page-header{background:rgba(248,248,245,.96);border-bottom:1px solid var(--soft-line);position:relative}
 .juno-page .page-header .innen{max-width:1192px;height:88px;padding:14px 24px}
-.juno-page .brand{display:flex;align-items:center;gap:9px;color:var(--ink);text-decoration:none;font-weight:850;font-size:25px;line-height:1.15;letter-spacing:-.7px}
+.juno-page .brand{display:flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none;font-weight:850;font-size:25px;line-height:1.15;letter-spacing:-.7px}
 
 .juno-page .brand-caption{display:block;font-size:12px;font-weight:600;letter-spacing:0;color:var(--muted);margin-top:4px}
 .juno-page .project-label{font-size:12px;letter-spacing:.05em;color:var(--muted)}
@@ -20,13 +20,14 @@
 .juno-page .role-toggle[aria-pressed=true]{background:var(--purple);color:white}
 .juno-page .workspace{max-width:1192px;display:grid;grid-template-columns:272px minmax(0,1fr);gap:64px;padding:42px 24px 28px;align-items:start}
 .juno-page .companion{position:sticky;top:24px}
-.juno-page .companion-intro{background:#efeee4;border:1px solid #e3e2d4;border-radius:24px;padding:24px}
-.juno-page .portrait{display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;height:258px}
-.juno-page .portrait-orbit{position:absolute;width:174px;height:174px;border-radius:50%;background:#e4e6d6;top:18px}
-.juno-page .juno-figure{position:relative;z-index:1;display:block;width:220px;height:220px;flex-shrink:0}
-.juno-page .figure-status{font-size:11px;color:#665b70;margin-top:12px;letter-spacing:.01em}
+.juno-page .companion-intro{background:#fff;border:1px solid var(--soft-line);border-radius:16px;padding:22px 24px 24px;box-shadow:0 4px 18px rgba(25,36,38,.045)}
+/* Juno has no face (decision 15.11.2026): a letter mark and one quiet status line instead of a figure. */
+.juno-page .juno-mark{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:10px;background:var(--ink);color:#fff;font-size:18px;font-weight:850;letter-spacing:0;line-height:1}
+.juno-page .juno-status{display:flex;align-items:center;gap:8px;margin:0 0 20px;padding-bottom:16px;border-bottom:1px solid var(--soft-line);font-size:12px;font-weight:650;color:var(--muted);min-height:20px}
+.juno-page .status-dot{width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0}
+.juno-page[data-state=thinking] .status-dot,.juno-page[data-state=writing] .status-dot{animation:status-pulse 1.6s ease-in-out infinite}
+.juno-page[data-state=error] .status-dot{background:#c2553a}
 .juno-page .eyebrow{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
-.juno-page .companion-copy{border-top:1px solid #d8dccb;padding-top:24px}
 .juno-page .companion-copy h2{font-size:28px;line-height:1.18;letter-spacing:-1px;margin:0 0 12px;font-weight:800}
 .juno-page .companion-copy>p:last-child{font-size:14px;line-height:1.6;color:#625b6a;margin:0}
 .juno-page .privacy-block{padding:18px 4px 0;font-size:12px;line-height:1.65;color:var(--muted)}
@@ -64,7 +65,7 @@
 .juno-page .message{font-size:15px;line-height:1.75;overflow-wrap:anywhere;min-width:0}
 .juno-page .message-user{align-self:flex-end;max-width:88%;background:#ebe9e4;border-radius:16px 16px 4px 16px;padding:12px 18px;white-space:pre-wrap}
 .juno-page .message-assistant{display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px}
-.juno-page .message-avatar{width:36px;height:36px;background:#eeebf3;border-radius:11px}
+.juno-page .message-avatar{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:10px;background:#efedf3;color:var(--purple);font-size:15px;font-weight:850;line-height:1}
 .juno-page .message-author{font-weight:850;font-size:13px;margin:5px 0 10px;display:flex;gap:8px;align-items:center}
 .juno-page .message-author span{font-size:11px;font-weight:600;color:var(--muted)}
 .juno-page .answer-body{background:white;border:1px solid var(--soft-line);padding:18px 22px;border-radius:0 16px 16px 16px}
@@ -106,37 +107,28 @@
 .juno-page.has-conversation .welcome{padding-bottom:8px}
 .juno-page.has-conversation h1{font-size:26px}
 .juno-page.has-conversation .welcome-subtitle{display:none}
-@keyframes juno-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-@keyframes juno-think{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(2deg) translateY(-2px)}}
-@keyframes juno-nod{0%,100%{transform:rotate(0)}40%{transform:rotate(4deg) translateY(3px)}}
+@keyframes status-pulse{0%,100%{opacity:1}50%{opacity:.35}}
 @keyframes thinking-pulse{0%,80%,100%{opacity:.4;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
 @media(min-width:1100px){.juno-page .conversation{padding-right:16px}}
 @media(max-width:1000px){.juno-page .workspace{gap:32px;grid-template-columns:240px minmax(0,1fr)}.juno-page h1{font-size:30px}.juno-page .prompt{padding:14px 12px;gap:10px}.juno-page .prompt-icon{width:30px;height:30px}.juno-page .prompt-arrow{display:none}.juno-page #input-hint span{display:none}}
 @media(max-width:740px){
 .juno-page .page-header .innen{height:70px;padding:12px 20px;gap:8px}.juno-page .brand{font-size:23px;gap:7px}.juno-page .brand-caption{font-size:10px}.juno-page .project-label{display:none}.juno-page .identity{gap:6px}.juno-page .person{font-size:12px;padding:8px 11px}.juno-page .role-toggle{padding:8px 10px;font-size:11px}
-.juno-page .workspace{display:flex;flex-direction:column;padding:20px 20px 0;gap:20px;max-width:620px}.juno-page .companion{position:static;width:100%}.juno-page .companion-intro{padding:18px 18px 16px;border-radius:18px;position:relative;min-height:140px;display:flex;flex-direction:row-reverse;gap:8px;align-items:center}.juno-page .portrait{height:106px;flex-shrink:0;width:102px}.juno-page .portrait-orbit{height:96px;width:96px;top:3px}.juno-page .juno-figure{width:140px;height:140px;max-width:none}.juno-page .figure-status{display:none}.juno-page .companion-copy{padding:0;border:0;flex:1}.juno-page .companion-copy .eyebrow{font-size:9px;margin-bottom:7px}.juno-page .companion-copy h2{font-size:24px;letter-spacing:-.7px;margin-bottom:8px}.juno-page .companion-copy>p:last-child{font-size:12px;line-height:1.5}.juno-page .privacy-block{padding:12px 2px 0;font-size:12px;line-height:1.65}.juno-page #privacy{margin-bottom:2px}.juno-page .knowledge summary{font-size:11px;min-height:34px;padding:8px 0}.juno-page .knowledge-body{font-size:12px}
+.juno-page .workspace{display:flex;flex-direction:column;padding:20px 20px 0;gap:20px;max-width:620px}.juno-page .companion{position:static;width:100%}.juno-page .companion-intro{padding:16px 18px 18px;border-radius:14px}.juno-page .juno-status{margin-bottom:14px;padding-bottom:12px;font-size:11px}.juno-page .companion-copy .eyebrow{font-size:9px;margin-bottom:7px}.juno-page .companion-copy h2{font-size:24px;letter-spacing:-.7px;margin-bottom:8px}.juno-page .companion-copy>p:last-child{font-size:12px;line-height:1.5}.juno-page .privacy-block{padding:12px 2px 0;font-size:12px;line-height:1.65}.juno-page #privacy{margin-bottom:2px}.juno-page .knowledge summary{font-size:11px;min-height:34px;padding:8px 0}.juno-page .knowledge-body{font-size:12px}
 .juno-page .conversation{width:100%;min-height:0}.juno-page .welcome{padding:0 0 16px}.juno-page .welcome .eyebrow{font-size:10px;letter-spacing:.09em;margin-bottom:6px}.juno-page h1{font-size:26px;letter-spacing:-.9px}.juno-page .welcome-subtitle{display:none}.juno-page .suggestions>summary{display:none}.juno-page .prompt-grid{gap:7px}.juno-page .prompt{min-height:66px;padding:12px;gap:9px;border-radius:12px;align-items:flex-start}.juno-page .prompt:first-child{min-height:64px;align-items:center}.juno-page .prompt-icon{width:28px;height:28px;border-radius:8px}.juno-page .prompt-icon svg{width:17px;height:17px}.juno-page .prompt-title{font-size:13px;line-height:1.35}.juno-page .prompt-description{font-size:11px;line-height:1.4}.juno-page .prompt:not(:first-child) .prompt-description{display:none}.juno-page .prompt-copy{gap:3px}.juno-page .prompt-arrow{display:none}.juno-page .empty-note{margin:14px 0 2px;font-size:10px}
 .juno-page .composer-dock{padding-top:14px;margin-top:8px;padding-bottom:env(safe-area-inset-bottom,0px)}.juno-page .composer{padding:12px 12px 10px;border-radius:15px}.juno-page textarea{min-height:28px;height:28px;padding:0;font-size:16px}.juno-page .composer-bottom{margin-top:8px}.juno-page #input-hint{font-size:10px;padding:0}.juno-page #senden{padding:8px 12px;min-height:38px;font-size:12px;gap:12px}.juno-page .conversation-tools{min-height:40px}.juno-page .tool-buttons{gap:8px}.juno-page .tool-buttons button{font-size:11px}
-.juno-page.has-conversation .welcome{padding-bottom:12px}.juno-page.has-conversation .suggestions>summary{display:flex;margin:0;min-height:40px}.juno-page.has-conversation .thread-header{margin-top:8px;padding-top:16px}.juno-page .verlauf{gap:20px;margin-top:18px}.juno-page .message{font-size:14px;line-height:1.7}.juno-page .message-user{max-width:92%;padding:10px 14px}.juno-page .message-assistant{grid-template-columns:28px minmax(0,1fr);gap:8px}.juno-page .message-avatar{width:28px;height:28px;border-radius:9px}.juno-page .message-author{margin:2px 0 8px}.juno-page .answer-body{padding:14px 15px}.juno-page .source{margin:14px -15px -14px;padding:12px 15px;font-size:11px}.juno-page .thinking-content{padding:13px 14px;gap:10px}.juno-page .thinking-title{font-size:13px}.juno-page .thinking-detail{font-size:11px}
+.juno-page.has-conversation .welcome{padding-bottom:12px}.juno-page.has-conversation .suggestions>summary{display:flex;margin:0;min-height:40px}.juno-page.has-conversation .thread-header{margin-top:8px;padding-top:16px}.juno-page .verlauf{gap:20px;margin-top:18px}.juno-page .message{font-size:14px;line-height:1.7}.juno-page .message-user{max-width:92%;padding:10px 14px}.juno-page .message-assistant{grid-template-columns:28px minmax(0,1fr);gap:8px}.juno-page .message-avatar{width:28px;height:28px;border-radius:8px;font-size:13px}.juno-page .message-author{margin:2px 0 8px}.juno-page .answer-body{padding:14px 15px}.juno-page .source{margin:14px -15px -14px;padding:12px 15px;font-size:11px}.juno-page .thinking-content{padding:13px 14px;gap:10px}.juno-page .thinking-title{font-size:13px}.juno-page .thinking-detail{font-size:11px}
 }
 @media(max-width:360px){.juno-page .workspace{padding-left:14px;padding-right:14px}.juno-page .page-header .innen{padding-left:14px;padding-right:14px}.juno-page .prompt-icon{display:none}.juno-page .companion-copy h2{font-size:22px}}
 @media(prefers-reduced-motion:reduce){.juno-page *,.juno-page *:before,.juno-page *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(forced-colors:active){.juno-page button,.juno-page .composer,.juno-page .answer-body{border:1px solid ButtonText}.juno-page :focus-visible{outline:3px solid Highlight}}
 
-/* Complete pose images crossfade only after the replacement has loaded. */
-.juno-page [data-fennek]{pointer-events:none;isolation:isolate}
-.juno-page [data-fennek]>img{display:block;position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:contain;opacity:1;transition:opacity 320ms ease-in-out}
-.juno-page .fennek-avatar{display:block;position:relative;width:44px;height:44px;flex-shrink:0}
-.juno-page .fennek-avatar>img,.juno-page .message-avatar img{display:block;position:static;width:100%;height:100%;max-width:none;object-fit:contain}
-.juno-page .message-avatar{position:relative;display:block;background:transparent;flex-shrink:0}
 @media(max-width:740px){
   .juno-page .brand{flex-shrink:0}
   .juno-page .brand-caption{display:none}
-  .juno-page .fennek-avatar{width:38px;height:38px;border-radius:12px}
+  .juno-page .juno-mark{width:32px;height:32px;border-radius:9px;font-size:16px}
   .juno-page .identity{gap:8px;margin-left:auto;flex-shrink:0}
   .juno-page .person{border:0;background:none;padding:0;font-size:12px;white-space:nowrap}
   .juno-page .role-toggle{padding:7px 10px;min-height:40px;white-space:nowrap}
-  .juno-page .portrait-orbit{top:3px}
 }
 
 /* Keep the full answer readable above the follow-up field on phones. */
