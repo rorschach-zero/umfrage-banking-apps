@@ -32,23 +32,27 @@ function zustand() {
 function meldung(text, art) {
   nachricht = {text: text || '', art: art || ''};
   const m = $('pa-meldung'); if (!m) return;
-  m.textContent = nachricht.text; m.className = 'meldung' + (nachricht.art ? ' ' + nachricht.art : ''); m.hidden = !nachricht.text;
+  m.textContent = nachricht.text; m.className = 'meldung' + (nachricht.art ? ' ' + nachricht.art : ''); m.hidden = !nachricht.text; m.setAttribute('role', nachricht.art === 'fehler' ? 'alert' : 'status');
 }
 async function speichern(antwort) {
   if (busy || !stand || window.PA6View.active()) return;
   const einwand = antwort === 'einwand' ? String(($('pa-einwand') || {}).value || '').trim() : '';
   if (antwort === 'einwand' && einwand.length < 3) { meldung('Bitte schreib kurz, was dich stört.', 'fehler'); $('pa-einwand').focus(); return; }
   busy = true; render(); meldung('Wird gespeichert …');
+  // 15.11.2026: «Gespeichert» nur, wenn der Empfaenger die Zeile bestaetigt (ok und Zeitstempel); sonst eine klare Fehlermeldung.
+  const vorher = stand && stand.eigene ? stand.eigene.zeit : '';
+  const ok = antwort === 'ja' ? 'Gespeichert. Danke für deine Bestätigung!' : 'Gespeichert. Salah meldet sich bei dir.';
   try {
-    await sende({typ: 'bestaetigung', dokument: DOK, antwort, einwand});
+    const r = await sende({typ: 'bestaetigung', dokument: DOK, antwort, einwand}, 60000);
+    if (!r || r.ok !== true || !r.zeit) throw new Error('Der Empfänger hat die Bestätigung nicht quittiert.');
     einwandOffen = false;
     await laden(true);
-    meldung(antwort === 'ja' ? 'Gespeichert. Danke für deine Bestätigung!' : 'Gespeichert. Salah meldet sich bei dir.', 'ok');
+    if (stand && !(stand.eigene && stand.eigene.antwort === antwort && stand.eigene.zeit === r.zeit)) stand.eigene = {antwort, zeit: r.zeit};
+    meldung(ok, 'ok');
   } catch (e) {
-    const vorher = stand && stand.eigene ? stand.eigene.zeit : '';
     await laden(true);
-    if (stand && stand.eigene && stand.eigene.zeit !== vorher && stand.eigene.antwort === antwort) { einwandOffen = false; meldung(antwort === 'ja' ? 'Gespeichert. Danke für deine Bestätigung!' : 'Gespeichert. Salah meldet sich bei dir.', 'ok'); }
-    else meldung('Nicht gespeichert. ' + e.message, 'fehler');
+    if (stand && stand.eigene && stand.eigene.zeit !== vorher && stand.eigene.antwort === antwort) { einwandOffen = false; meldung(ok, 'ok'); }
+    else meldung('Nicht gespeichert. ' + (e && e.name !== 'AbortError' && !/zu lange gedauert/.test(e.message) ? e.message : 'Der Server hat nicht rechtzeitig geantwortet.') + ' Bitte versuch es noch einmal. Klappt es wieder nicht, schick Salah ein Bildschirmfoto.', 'fehler');
   }
   finally { busy = false; render(); }
 }
