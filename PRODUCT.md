@@ -31,7 +31,7 @@ Eine Studierendenumfrage, keine Marketingaktion: neutral, anonym, kurz, mit klar
 
 - **Instrument ist fix:** Fragen, Wortlaut, Reihenfolge, Antwortoptionen, Filterlogik und gespeicherte Felder dürfen sich durch Design nicht ändern; jede Gestaltungsänderung muss die gesendeten Daten byte-gleich lassen und wird so geprüft.
 - Keine Personendaten im Link, keine Tracking-Pixel, keine Drittanbieter-Skripte.
-- Team-App: Rollen (Mitglied, Leitung, «Ansicht von» nur lesend), Werkzeuge A/B/C, Fristen, Pia (Assistentin).
+- Team-App: Rollen (Mitglied, Leitung, «Ansicht von» nur lesend), Werkzeuge A/B/C, Fristen, Juno (Assistent).
 
 ## Brand Commitments
 

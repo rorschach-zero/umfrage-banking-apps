@@ -27,7 +27,7 @@ function bZeit(block){return block==='A'?'09–12 Uhr':'13–17 Uhr';}
 function bTag(day,lang){if(!day)return 'Tag offen';const d=new Date(day+'T12:00:00');return (day===heute()?'Heute, ':'')+new Intl.DateTimeFormat('de-CH',lang?{weekday:'long',day:'2-digit',month:'2-digit'}:{weekday:'short',day:'2-digit',month:'2-digit'}).format(d);}
 function bName(){return TEAM[daten?.person]||daten?.person||'dich';}
 function bEchte(){return (daten.plan||[]).filter(r=>!String(r.nr).startsWith('PROBE-B-')).sort((a,b)=>((a.tag||'9')+a.block).localeCompare((b.tag||'9')+b.block));}
-function bHilfe(text){const u=new URL('/team/frag/',location.origin);u.searchParams.set('q',('Ich bin im Servicetest bei «'+text+'». Wie mache ich das genau?').slice(0,400));return el('a',{class:'b-help',href:u.pathname+u.search,referrerpolicy:'no-referrer','data-read-navigation':true},'Frag Pia zu diesem Schritt');}
+function bHilfe(text){const u=new URL('/team/frag/',location.origin);u.searchParams.set('q',('Ich bin im Servicetest bei «'+text+'». Wie mache ich das genau?').slice(0,400));return el('a',{class:'b-help',href:u.pathname+u.search,referrerpolicy:'no-referrer','data-read-navigation':true},'Frag Juno zu diesem Schritt');}
 function bFehlendeKanaele(state){
   const plan=(daten.plan||[]).filter(r=>!String(r.nr).startsWith('PROBE-B-'));
   const noetig=[...new Set(plan.map(r=>r.anbieter+'|'+(r.kanal==='telefon'?'telefon':'schriftlich')))];

@@ -7,7 +7,7 @@
   const params = new URLSearchParams(location.search), publicView = params.get('public') === '1';
   const CONFIG = window.TEAM_CONFIG || {};
   // Name des Frage-Assistenten an genau einer Stelle; die Umstellung erfolgt über TEAM_CONFIG.assistantName.
-  const ASSISTANT = {name: CONFIG.assistantName || 'Pia', path: CONFIG.piaPath || '/team/frag/'};
+  const ASSISTANT = {name: CONFIG.assistantName || 'Juno', path: CONFIG.piaPath || '/team/frag/'};
   const TABS = [['marketing', 'Marketing'], ['pm', 'Projektmanagement']];
   let key = '', leadership = false, generation = 0, timer, last = null, tab = params.get('tab') === 'pm' ? 'pm' : 'marketing', range = 'feld', group = 'person', counted = false;
   try {

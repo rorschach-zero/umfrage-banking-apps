@@ -45,7 +45,7 @@
       back.addEventListener('click', api.back);
       banner.append(text, back);
       if (location.pathname.includes('/frag/')) {
-        const hint = document.createElement('span'); hint.textContent = 'Pia antwortet Salah als Leitung.'; banner.append(hint);
+        const hint = document.createElement('span'); hint.textContent = 'Juno antwortet Salah als Leitung.'; banner.append(hint);
       }
       (document.querySelector('.main-column') || document.body).prepend(banner);
     }

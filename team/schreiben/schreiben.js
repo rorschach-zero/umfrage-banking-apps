@@ -628,7 +628,7 @@ function renderInfos(g) {
     {titel:'Servicetest', wo:'Team-App', href:'/team/b/', inhalt:'Eure Testkontakte bei den Banken.'},
     {titel:'Bewertungen', wo:'Team-App', href:'/team/c/', inhalt:'Codierte öffentliche Bewertungen.'},
     {titel:'Dashboard', wo:'Team-App', href:'/team/dashboard/', inhalt:'Rücklauf und Stand der Erhebung.'},
-    {titel:'Pia fragen', wo:'Team-App', href:'/team/frag/', inhalt:'Fragen zu Regeln, Terminen und Unterlagen.'}];
+    {titel:'Juno fragen', wo:'Team-App', href:'/team/frag/', inhalt:'Fragen zu Regeln, Terminen und Unterlagen.'}];
   fill($('tab-infos'), 
     block('Hier findest du, was du brauchst', (g.infos || []).filter(i => !/notion/i.test(i.wo || '')).map(i => el('article', {class:'info'}, el('h3', {}, i.titel), el('p', {}, i.inhalt), publicPlace(i.wo) ? el('p', {class:'where'}, publicPlace(i.wo)) : null, safeLink(i.link) ? el('p', {}, safeLink(i.link)) : null))),
     block('Direkt in der Team-App', el('div', {class:'links'}, inApp.map(i => el('a', {class:'lnk', href:i.href}, el('b', {}, i.titel), el('span', {}, i.inhalt), el('i', {class:'go', 'aria-hidden':'true'}, '›'))))));

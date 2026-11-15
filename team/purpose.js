@@ -26,7 +26,7 @@
       ]
     }
   };
-  window.createPurposeCard = (area, onPia) => {
+  window.createPurposeCard = (area, onJuno) => {
     const content = areas[area];
     if (!content) return null;
     // Keep the current disclosure state during refreshes of the same view.
@@ -60,10 +60,10 @@
     const url = new URL(window.TEAM_CONFIG?.piaPath || '/team/frag/', location.origin);
     url.searchParams.set('q', 'Erklär mir in drei Sätzen, wozu wir ' + content.question + ' machen und wie es Yuh hilft.');
     link.href = url.pathname + url.search;
-    link.className = 'purpose-pia';
+    link.className = 'purpose-juno';
     link.referrerPolicy = 'no-referrer';
-    link.textContent = 'Mehr bei Pia';
-    link.addEventListener('click', onPia || (() => {
+    link.textContent = 'Mehr bei Juno';
+    link.addEventListener('click', onJuno || (() => {
       try { sessionStorage.setItem('pa6_pia_role', window.PA6View?.active() ? 'leitung' : 'mitglied'); } catch {}
     }));
     body.append(connection, link);

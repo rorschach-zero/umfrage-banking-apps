@@ -3,7 +3,7 @@
 const config = window.TEAM_CONFIG;
 const preview = window.PA6View;
 const names = {SA:'Salah',ES:'Ernes',MG:'Melisa',AM:'Arber',LB:'Leonie'};
-const labels = {sharing:'Umfrage teilen',today:'Heute',tasks:'Meine Arbeit',deadlines:'Fristen',pia:'Pia',documents:'Unterlagen',profile:'Profil'};
+const labels = {sharing:'Umfrage teilen',today:'Heute',tasks:'Meine Arbeit',deadlines:'Fristen',pia:'Juno',documents:'Unterlagen',profile:'Profil'};
 const paths = {documents:'M4 3h11l5 5v13H4zM14 3v6h6M8 13h8M8 17h6',profile:'M20 21v-2a7 7 0 0 0-14 0v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0',today:'M3 10 12 3l9 7M5 9v12h5v-7h4v7h5V9',tasks:'M9 6h12M9 12h12M9 18h12M3 6l1 1 2-3M3 12l1 1 2-3M3 18l1 1 2-3',deadlines:'M4 5h16v16H4zM4 10h16M8 3v4M16 3v4',pia:'M21 11a8 8 0 0 1-8 8H8l-5 3 1-6a8 8 0 1 1 17-5Z'};
 let view = new URLSearchParams(location.search).get('view') || 'today';
 if (view === 'writing') view = 'tasks';
@@ -62,13 +62,13 @@ function safeQuestion(value) {
   const privateText=/[\w.+-]+@[\w-]+\.[\w.-]+|https?:\/\/|www\.|(?:\+|00)?\d[\d\s/.-]{6,}\d|\b(?:Salah|Aouaj|Ernes|Softic|Melisa|Gjini|Arber|Maliqi|Leonie|Bytyqi)\b/i;
   return text && text!=='noch offen' && !privateText.test(text) ? text : 'Erklär mir Schritt für Schritt diesen Auftrag. Was ist zu tun und wann ist er fertig?';
 }
-function rememberPiaRole() {try {sessionStorage.setItem('pa6_pia_role',leadership||preview.active()?'leitung':'mitglied');} catch {}}
-function piaLink(row, label='Pia fragen') {
+function rememberJunoRole() {try {sessionStorage.setItem('pa6_pia_role',leadership||preview.active()?'leitung':'mitglied');} catch {}}
+function junoLink(row, label='Juno fragen') {
   const url=new URL(config.piaPath,location.origin);
   url.searchParams.set('q',safeQuestion(cardText(row,'Pia-Frage')));
   if(row.ctx)url.searchParams.set('ctx',row.ctx);
   else if (/^(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(row.id||'')) url.searchParams.set('ctx',row.id);
-  return el('a',{class:'button secondary pia-link',href:url.pathname+url.search,referrerpolicy:'no-referrer',onClick:rememberPiaRole},label);
+  return el('a',{class:'button secondary pia-link',href:url.pathname+url.search,referrerpolicy:'no-referrer',onClick:rememberJunoRole},label);
 }
 function plainLabel(value) {
   return String(value||'').replace(/Probecodierung|Schulungsfälle[n]?/gi,'Übungsbewertungen').replace(/Probe B/gi,'Übungskontakt').replace(/Arbeitspakete[n]?/gi,'Aufgaben').replace(/Servicebeobachtung B/g,'Kundenservice testen').replace(/Inhaltsanalyse C/g,'Bewertungen untersuchen').replace(/Maske B/g,'Kontaktmaske').replace(/Maske C/g,'Bewertungsmaske').replace(/\bPSP\b/g,'Aufgabenplan').replace(/in Notion/g,'in den Projektunterlagen').replace(/Notion/g,'Projektunterlagen').replace(/\s*\(C\d(?:, C\d)*\)/g,'');
@@ -127,11 +127,11 @@ function workLink(row) {
   const doc=url.protocol==='https:' && url.hostname==='docs.google.com' && /^\/document\//.test(url.pathname);
   const drive=url.protocol==='https:' && url.hostname==='drive.google.com';
   if(!internal&&!doc&&!drive&&!notionLink)return null;
-  const p=url.pathname,label=doc?'Kapitel-Doc öffnen':internal?(/^\/team\/b/.test(p)?'Kontaktmaske öffnen':/^\/team\/c/.test(p)?'Bewertungsmaske öffnen':/^\/team\/schreiben/.test(p)?'Schreibplatz öffnen':/^\/team\/projektauftrag/.test(p)?'Projektauftrag öffnen':/^\/team\/projekt/.test(p)?'Projekt öffnen':/^\/team\/(dashboard|zentrale)/.test(p)?'Kommandozentrale öffnen':/^\/team\/frag/.test(p)?'Pia fragen':url.search==='?view=sharing'?'Umfrage teilen':'Öffnen'):'Unterlagen öffnen';
+  const p=url.pathname,label=doc?'Kapitel-Doc öffnen':internal?(/^\/team\/b/.test(p)?'Kontaktmaske öffnen':/^\/team\/c/.test(p)?'Bewertungsmaske öffnen':/^\/team\/schreiben/.test(p)?'Schreibplatz öffnen':/^\/team\/projektauftrag/.test(p)?'Projektauftrag öffnen':/^\/team\/projekt/.test(p)?'Projekt öffnen':/^\/team\/(dashboard|zentrale)/.test(p)?'Kommandozentrale öffnen':/^\/team\/frag/.test(p)?'Juno fragen':url.search==='?view=sharing'?'Umfrage teilen':'Öffnen'):'Unterlagen öffnen';
   return el('a',{class:'button secondary work-link',...(notionLink?{target:'_blank'}:{}),href:internal?url.pathname+url.search:preview.active()&&doc?url.origin+url.pathname.replace(/(?:\/edit)?\/?$/, '/preview'):url.href,rel:'noopener noreferrer',referrerpolicy:'no-referrer'},label);
 }
 function steps(row,readOnly=false) {
-  if(cardText(row,"So geht's")==='noch offen')return el('p',{class:'field-open'},'Die Schritte sind noch nicht hinterlegt. Pia hilft dir weiter.');
+  if(cardText(row,"So geht's")==='noch offen')return el('p',{class:'field-open'},'Die Schritte sind noch nicht hinterlegt. Juno hilft dir weiter.');
   const values=stepValues(row);
   return el('ul',{class:'step-list'},values.map(value=>{
     const storageKey=stepKey(row,value), checked=stepDone(row,value);
@@ -526,7 +526,7 @@ function groupedTasks(rows,compact=false){
 function blockerNote(blocker){
   const module=(data.areas||[]).find(item=>item.id===blocker.area),row=allTasks().find(item=>item.id===blocker.taskId);
   const label=module?.title||'Arbeitsbereich', title=row?shortTitle(row):'';
-  return el('li',{class:'blocker-note'},el('div',{},el('strong',{},label),el('p',{},title?title+': '+blocker.text:blocker.text)),piaLink({ctx:blocker.ctx,'Pia-Frage':blocker.question},'Pia hilft'));
+  return el('li',{class:'blocker-note'},el('div',{},el('strong',{},label),el('p',{},title?title+': '+blocker.text:blocker.text)),junoLink({ctx:blocker.ctx,'Pia-Frage':blocker.question},'Juno hilft'));
 }
 function blockerList(blockers){
   return blockers.length?el('section',{class:'blocker-list','aria-label':'Hier hängt es'},el('ul',{},blockers.slice(0,3).map(blockerNote)),blockers.length>3?el('details',{class:'extra-hints'},el('summary',{},'Weitere anzeigen · '+(blockers.length-3)),el('ul',{},blockers.slice(3).map(blockerNote))):null):null;
@@ -614,7 +614,7 @@ function showTasks(){
       :el('section',{class:'work-group'},el('h2',{},head),ul);
   }):known?el('p',{class:'quiet-note'},workRole==='read'&&!leadership?'Keine Gegenlesungen in diesem Bereich.':leadership?'Keine Aufgaben in diesem Bereich.':'Keine Aufgaben für dich in diesem Bereich.'):null;
   return [el('div',{class:'heading work-head'},el('div',{},el('h1',{},leadership?'Arbeit der Gruppe':'Meine Arbeit'),el('p',{class:'subtitle'},(count(all)==='–'?'Anzahl unbekannt':count(all)+' offen')+(leadership?' · alle fünf':''))),roleSwitch),
-    tabs,el('div',{id:'work-panel',role:'tabpanel','aria-labelledby':'work-tab-'+(filter||'all'),tabindex:0},workHeader(filter),!known?unknown('Aufgabenquellen fehlen. Angezeigt werden nur die verfügbaren Aufgaben.'):null,list,filter?areaBlockers(filter):null,filter&&filter!=='tasks'?window.createPurposeCard(filter,rememberPiaRole):null)];
+    tabs,el('div',{id:'work-panel',role:'tabpanel','aria-labelledby':'work-tab-'+(filter||'all'),tabindex:0},workHeader(filter),!known?unknown('Aufgabenquellen fehlen. Angezeigt werden nur die verfügbaren Aufgaben.'):null,list,filter?areaBlockers(filter):null,filter&&filter!=='tasks'?window.createPurposeCard(filter,rememberJunoRole):null)];
 }
 function writingFolderLink(){
   return /^https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]+$/.test(data.writingFolder||'')
@@ -625,7 +625,7 @@ function documentRow(row,chapter=false){
   const url=chapter?row.doc:row.url;
   const valid=chapter?/^https:\/\/docs\.google\.com\/document\/d\/[A-Za-z0-9_-]+(?:\/edit)?$/.test(url||''):/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view$/.test(url||'');
   return el('li',{class:'document-row'},el('div',{class:'document-copy'},el('h3',{},row.title),el('p',{},chapter?((row.owner===data.person?'Du schreibst':row.reader===data.person?'Du liest gegen':'Leitungsübersicht')+' · '+(row.ref||'')):'Wozu: '+row.purpose)),
-    el('div',{class:'document-actions'},chapter&&valid&&!preview.active()&&row.ref?el('a',{class:'button secondary document-open',href:'/team/schreiben/?k='+encodeURIComponent(row.ref)},'Schreiben'):valid?el('a',{class:'button secondary document-open',href:preview.active()&&chapter?url.replace(/(?:\/edit)?$/, '/preview'):url,target:'_blank',rel:'noopener noreferrer'},'Öffnen'):el('button',{class:'button secondary',disabled:true,title:'Datei oder Leselink noch nicht verfügbar'},'Öffnen'),piaLink({...row,'Pia-Frage':'Erklär mir das Wichtigste aus '+row.title+'.'})),
+    el('div',{class:'document-actions'},chapter&&valid&&!preview.active()&&row.ref?el('a',{class:'button secondary document-open',href:'/team/schreiben/?k='+encodeURIComponent(row.ref)},'Schreiben'):valid?el('a',{class:'button secondary document-open',href:preview.active()&&chapter?url.replace(/(?:\/edit)?$/, '/preview'):url,target:'_blank',rel:'noopener noreferrer'},'Öffnen'):el('button',{class:'button secondary',disabled:true,title:'Datei oder Leselink noch nicht verfügbar'},'Öffnen'),junoLink({...row,'Pia-Frage':'Erklär mir das Wichtigste aus '+row.title+'.'})),
     valid?null:el('p',{class:'quiet-note'},'Datei oder Leselink noch nicht verfügbar.'));
 }
 function showDocuments(){
@@ -646,9 +646,9 @@ function profileAgreements(){
   return [
     fold('Deine Rolle und dein Lead',el('p',{},el('strong',{},current.role),' · ',current.sentence),el('p',{},'Dein Lead koordiniert. Bei A und C packen alle mit an; die Kontakte im Servicetest (B) '+(data.person==='AM'?'machst du zusammen mit Salah.':data.person==='SA'?'machst du zusammen mit Arber.':'machen Arber und Salah.')),el('p',{},'Deine Aufgaben, Schreibkarten und Fristen stehen weiter unten mit ihrem aktuellen Stand.')),
     fold('So arbeitest du',...['So läuft’s','Gern gesehen','Lieber nicht'].map((label,i)=>el('p',{},el('strong',{},label),el('br'),current.work[i]))),
-    fold('Wenn’s klemmt',el('p',{},el('strong',{},'Pia → zuständiger Lead → Salah')),el('p',{},"A Arber · B Ernes · C Melisa · Schreiben Leonie"),el('p',{},data.person==='SA'?'Offene Vorgaben klärst du mit der Quelle oder der zuständigen Ansprechperson.':'Als Lead gehst du bei offenen Fragen zu Salah. Zugang oder Ausfall direkt Salah.'),el('a',{class:'button secondary',href:'/team/frag/'},'Pia öffnen →')),
-    fold('Was wir voneinander erwarten',el('ul',{},["Wir halten Fristen ein oder melden früh, wenn es klemmt.", "Wir fragen für den Einstieg Pia und klären offene Punkte mit dem Lead.", "Wir beobachten und codieren ergebnisoffen; Zugänge und private Daten bleiben geschützt.", "Wir setzen den Stand ehrlich auf «in Prüfung», solange die Prüfung offen ist.", "Wir schauen wöchentlich auf den Stand und erfassen ab 16.11. unsere echte Arbeitszeit."].map(text=>el('li',{},text)))),
-    fold('Was du Salah fragen kannst',...[["Entscheide & Zuteilungen", "Wer übernimmt was? Was gilt bei zwei Vorschlägen?"], ["Ausfälle & Zugang", "Du fällst aus oder kommst nicht rein? Direkt zu Salah."], ["Unklarer Auftrag", "Vorgaben fehlen oder widersprechen sich? Salah klärt sie."]].map(([label,text])=>el('p',{},el('strong',{},label),el('br'),text)),el('p',{class:'quiet-note'},"Pia erklärt Schritte und Quellen. Zuteilungen, Ausfälle und Freigaben klärt Salah; Zielcodes und Wunschresultate bleiben draussen.")),
+    fold('Wenn’s klemmt',el('p',{},el('strong',{},'Juno → zuständiger Lead → Salah')),el('p',{},"A Arber · B Ernes · C Melisa · Schreiben Leonie"),el('p',{},data.person==='SA'?'Offene Vorgaben klärst du mit der Quelle oder der zuständigen Ansprechperson.':'Als Lead gehst du bei offenen Fragen zu Salah. Zugang oder Ausfall direkt Salah.'),el('a',{class:'button secondary',href:'/team/frag/'},'Juno öffnen →')),
+    fold('Was wir voneinander erwarten',el('ul',{},["Wir halten Fristen ein oder melden früh, wenn es klemmt.", "Wir fragen für den Einstieg Juno und klären offene Punkte mit dem Lead.", "Wir beobachten und codieren ergebnisoffen; Zugänge und private Daten bleiben geschützt.", "Wir setzen den Stand ehrlich auf «in Prüfung», solange die Prüfung offen ist.", "Wir schauen wöchentlich auf den Stand und erfassen ab 16.11. unsere echte Arbeitszeit."].map(text=>el('li',{},text)))),
+    fold('Was du Salah fragen kannst',...[["Entscheide & Zuteilungen", "Wer übernimmt was? Was gilt bei zwei Vorschlägen?"], ["Ausfälle & Zugang", "Du fällst aus oder kommst nicht rein? Direkt zu Salah."], ["Unklarer Auftrag", "Vorgaben fehlen oder widersprechen sich? Salah klärt sie."]].map(([label,text])=>el('p',{},el('strong',{},label),el('br'),text)),el('p',{class:'quiet-note'},"Juno erklärt Schritte und Quellen. Zuteilungen, Ausfälle und Freigaben klärt Salah; Zielcodes und Wunschresultate bleiben draussen.")),
     el('a',{class:'button secondary',href:'/team/spielregeln.html',target:'_blank',rel:'noopener noreferrer'},'Unsere Spielregeln →')
   ];
 }
@@ -669,7 +669,7 @@ function showProfile(){
   return [heading('Dein Profil','Deine Rolle im gemeinsamen Projekt.'),el('section',{class:'profile-intro'},el('span',{class:'avatar-large'},names[data.person].slice(0,1)),el('div',{},el('h2',{},profile.role||'Rolle noch offen'),el('p',{},profile.text||'Dein Lead-Blatt ist noch nicht erreichbar.'),el('small',{class:'source'},profile.source||'Lead-Blatt'))),
     aufwandCard(),
     ...profileAgreements(),
-    piaLink({'Pia-Frage':'Erklär mir meine Rolle und meinen Lead-Bereich. Wofür bin ich verantwortlich?'},'Pia erklärt dir deine Rolle'),
+    junoLink({'Pia-Frage':'Erklär mir meine Rolle und meinen Lead-Bereich. Wofür bin ich verantwortlich?'},'Juno erklärt dir deine Rolle'),
     button('Unterlagen öffnen',()=>navigate('documents'),'button secondary'),button('Umfrage teilen',()=>navigate('sharing'),'button secondary'),
     section('Kapitel, die du schreibst',chapters.filter(r=>r.owner===data.person)),section('Kapitel, die du gegenliest',chapters.filter(r=>r.reader===data.person)),
     section('Deine Erhebungsaufträge',(data.assignments||[]).filter(r=>r.owner===data.person)),section('Deine nächsten drei Fristen',sortRows(dedupeChapterTasks(own.filter(r=>!completed(r)&&r.due))).slice(0,3))];
@@ -683,7 +683,7 @@ function timeline(rows, origin) {
   if (rows===null) return unknown();
   if (!rows.length) return empty('Keine Fristen hinterlegt.','Für diesen Bereich sind aktuell keine Termine eingetragen.');
   const groups=new Map(); sortRows(rows).forEach(row=>{const key=day(row.due)||'unbekannt'; if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);});
-  return el('div',{class:'timeline'},[...groups].map(([key,entries])=>el('section',{class:'timeline-group'},el('h3',{class:'timeline-label'},key==='unbekannt'?'Datum unbekannt':date(key)),entries.map(row=>el('div',{class:'card'},el('button',{class:'row',onClick:()=>details(row,row.source||origin)},el('span',{class:'row-copy'},el('span',{class:'row-title'},shortTitle(row)),el('span',{class:'row-sub'},date(row.due,true),' · ',row.source||origin,overdue(row)&&row.status?' · Überfällig':'')),el('span',{class:'row-arrow','aria-hidden':'true'},'›')),el('div',{class:'deadline-actions'},piaLink(row)))))));
+  return el('div',{class:'timeline'},[...groups].map(([key,entries])=>el('section',{class:'timeline-group'},el('h3',{class:'timeline-label'},key==='unbekannt'?'Datum unbekannt':date(key)),entries.map(row=>el('div',{class:'card'},el('button',{class:'row',onClick:()=>details(row,row.source||origin)},el('span',{class:'row-copy'},el('span',{class:'row-title'},shortTitle(row)),el('span',{class:'row-sub'},date(row.due,true),' · ',row.source||origin,overdue(row)&&row.status?' · Überfällig':'')),el('span',{class:'row-arrow','aria-hidden':'true'},'›')),el('div',{class:'deadline-actions'},junoLink(row)))))));
 }
 // Deadline overview with calendar groups and read-only planning details.
 let deadlineFilter='all';
@@ -743,12 +743,12 @@ function showDeadlines(){
     past.length?el('details',{class:'dl-group dl-past'},el('summary',{},'Vergangen',el('span',{class:'work-count'},String(past.length))),el('ul',{class:'dl-list'},dlItems(past.reverse()))):null,
     el('p',{class:'quiet-note dl-source'},'Stand der Projektplanung. Schultermine laut Termine.md (Stand 01.11.2026), abgeglichen mit Moodle und Stundenplan; kein Live-Kalender. Bei Abweichung gilt der Schultermin.')];
 }
-function showPia() {
-  return [heading('Frag Pia.','Ein guter nächster Schritt beginnt mit einer Frage.'),el('section',{class:'pia-entry'},el('img',{src:'assets/pia.png',alt:'Pia, deine Projektkollegin',width:180,height:180}),el('p',{class:'eyebrow'},'Für unsere PA6'),el('h2',{},'Ich erkläre. Du entscheidest.'),el('p',{},'Deine Aufgaben, Fristen und Regeln. Zusammen bringen wir Ordnung rein.'),button(config.demo?'Pia-Einstieg ansehen →':'Pia öffnen →',openPia),el('p',{class:'privacy-copy'},'Keine Namen, Nummern oder Adressen eingeben. Vor einer Frage beachte den Verarbeitungshinweis auf der Pia-Seite. Ihr Verlauf bleibt in deinem Browser; die Nutzung ist freiwillig.'),config.demo?el('p',{class:'source'},'Lokaler Nachbau: Es wird keine Frage versendet.'):null)];
+function showJuno() {
+  return [heading('Frag Juno.','Ein guter nächster Schritt beginnt mit einer Frage.'),el('section',{class:'pia-entry'},el('img',{src:'assets/pia.png',alt:'',width:180,height:180}),el('p',{class:'eyebrow'},'Für unsere PA6'),el('h2',{},'Ich erkläre. Du entscheidest.'),el('p',{},'Deine Aufgaben, Fristen und Regeln. Zusammen bringen wir Ordnung rein.'),button(config.demo?'Juno-Einstieg ansehen →':'Juno öffnen →',openJuno),el('p',{class:'privacy-copy'},'Keine Namen, Nummern oder Adressen eingeben. Vor einer Frage beachte den Verarbeitungshinweis auf der Juno-Seite. Der Verlauf bleibt in deinem Browser; die Nutzung ist freiwillig.'),config.demo?el('p',{class:'source'},'Lokaler Nachbau: Es wird keine Frage versendet.'):null)];
 }
-function openPia() {
-  if (config.demo) return modal('Mit Pia klären',el('p',{},'Im Echtbetrieb öffnet dieser Einstieg deine bestehende Pia-Seite mit demselben persönlichen Zugang.'),el('p',{},'Beispiel für deinen Einstieg: «Was steht als Nächstes an?»'),el('p',{},'Dies ist die lokale Vorschau. Es wurde keine Verbindung aufgebaut.'),button('Zurück zu Heute',()=>{$('detail').close();navigate('today');}));
-  rememberPiaRole(); location.assign(config.piaPath);
+function openJuno() {
+  if (config.demo) return modal('Mit Juno klären',el('p',{},'Im Echtbetrieb öffnet dieser Einstieg deine bestehende Juno-Seite mit demselben persönlichen Zugang.'),el('p',{},'Beispiel für deinen Einstieg: «Was steht als Nächstes an?»'),el('p',{},'Dies ist die lokale Vorschau. Es wurde keine Verbindung aufgebaut.'),button('Zurück zu Heute',()=>{$('detail').close();navigate('today');}));
+  rememberJunoRole(); location.assign(config.piaPath);
 }
 function modal(title,...content) {$('detail').classList.remove('task-detail');$('detail-body').replaceChildren(el('h2',{id:'detail-title'},title),...content.flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false)); if(!$('detail').open)$('detail').showModal();}
 function statusSteps(row) {
@@ -829,7 +829,7 @@ function stepHelp(row,i,text){
   const url=new URL(config.piaPath,location.origin);
   url.searchParams.set('q',safeQuestion('Ich bin beim Auftrag «'+shortTitle(row)+'», Schritt '+(i+1)+': «'+text+'». Wie mache ich das genau?'));
   if(/^(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.test(row.id||''))url.searchParams.set('ctx',row.id);
-  return el('a',{class:'text-button path-help',href:url.pathname+url.search,referrerpolicy:'no-referrer',onClick:rememberPiaRole},'Hilfe zu diesem Schritt');
+  return el('a',{class:'text-button path-help',href:url.pathname+url.search,referrerpolicy:'no-referrer',onClick:rememberJunoRole},'Hilfe zu diesem Schritt');
 }
 function moreBlock(label,...kids){return el('details',{class:'path-more'},el('summary',{},label),el('div',{},...kids));}
 function stepOverview(row,values,onJump){
@@ -1067,14 +1067,14 @@ function showSharing(){
     return el('button',{type:'button',id:'share-tile-'+channel,class:'share-tile'+(on?' is-on':'')+(n?' is-done':''),'aria-pressed':String(on),onClick:()=>{shareSel=on?'':channel;render();const target=shareSel?document.getElementById('share-panel'):document.getElementById('share-tile-'+channel);target?.focus({preventScroll:true});target?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:shareSel?'start':'nearest'});}},
       el('span',{class:'share-tile-name'},shareChannels[channel]),n?el('span',{class:'share-tile-done'},'✓ geteilt'):null);};
   const goal=el('div',{class:'share-goal'},[0,1].map(i=>el('span',{class:'share-dot'+(Number.isFinite(done)&&done>i?' is-on':'')})),el('b',{},Number.isFinite(done)?done+' von 2 Kanälen':'Stand unbekannt'),el('span',{class:'quiet-note'},Number.isFinite(done)&&done>=2?'Ziel erreicht. Jeder weitere Kanal hilft.':'Ziel sind zwei verschiedene Kanäle.'));
-  return [heading('Umfrage teilen',''),goal,window.createPurposeCard('a',rememberPiaRole),
+  return [heading('Umfrage teilen',''),goal,window.createPurposeCard('a',rememberJunoRole),
     el('div',{class:'share-step'},el('span',{class:'share-num'},'1'),el('h2',{},'Wo erreichst du Leute?')),
     ...groups.map(([label,list])=>el('div',{class:'share-group'},el('h3',{},label),el('div',{class:'share-tiles'},list.map(tile)))),
     shareSel?sharePanel(shareSel):el('p',{class:'quiet-note share-hint'},'Tippe auf einen Kanal. Dann bekommst du Text, Link und QR-Code.'),
     el('p',{class:'quiet-note share-privacy'},'Der Link enthält keinen Namen, nur dein Kürzel. So zählen wir Antworten je Kanal und je Person aus der Gruppe. Über die Befragten sagt das nichts. Gruppengrössen sind Schätzungen.')];
 }
 function privacy() {
-  modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten aus den geschützten Projektunterlagen. Der Team-Abruf sendet keine Daten an den Antwortdienst von Pia.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Pia in diesem Browser gespeichert. Der letzte Projektstand bleibt für deine Person und Ansicht auf diesem Gerät gespeichert, damit er beim Wiederöffnen sofort erscheint. Beim Abmelden werden diese gespeicherten Projektstände gelöscht. Nutze dafür ein persönliches Gerät. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden in der Projektplanung gespeichert und protokolliert. Der Server speichert Antworten höchstens 600 Sekunden zwischen.'),el('p',{},'Auf der Pia-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Pia-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Beim Teilen speichert das Verteilungsprotokoll deine Person, den Kanal, das Datum und eine freiwillige Reichweitenschätzung. Es verknüpft keine Umfrageantwort mit dir. Dein geteilter Link trägt dein Kürzel, damit wir Antworten je Person aus der Gruppe zählen können, ohne etwas über die Befragten zu erfahren. QR-Codes werden auf deinem Gerät erzeugt.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
+  modal('Datenschutz & Zugang',el('p',{},'Verantwortlich ist Salah Aouaj. Die Team-App liest Planungsdaten aus den geschützten Projektunterlagen. Der Team-Abruf sendet keine Daten an den Antwortdienst von Juno.'),el('p',{},'Dein persönlicher Zugang bleibt wie bei Juno in diesem Browser gespeichert. Der letzte Projektstand bleibt für deine Person und Ansicht auf diesem Gerät gespeichert, damit er beim Wiederöffnen sofort erscheint. Beim Abmelden werden diese gespeicherten Projektstände gelöscht. Nutze dafür ein persönliches Gerät. Abgehakte Schritte werden lokal je Person gespeichert. Statusmeldungen werden nach fünf Sekunden in der Projektplanung gespeichert und protokolliert. Der Server speichert Antworten höchstens 600 Sekunden zwischen.'),el('p',{},'Auf der Juno-Seite gilt deren Verarbeitungshinweis vor dem Absenden einer Frage. Keine Namen, Nummern oder Adressen eingeben. Bestehende Juno-Verläufe kannst du dort löschen. Die Nutzung ist freiwillig.'),el('p',{},'Beim Teilen speichert das Verteilungsprotokoll deine Person, den Kanal, das Datum und eine freiwillige Reichweitenschätzung. Es verknüpft keine Umfrageantwort mit dir. Dein geteilter Link trägt dein Kürzel, damit wir Antworten je Person aus der Gruppe zählen können, ohne etwas über die Befragten zu erfahren. QR-Codes werden auf deinem Gerät erzeugt.'),el('p',{},'Projektbezogene Daten werden gemäss bestehender Gruppenregel nach der Benotung gelöscht.'),button('Von diesem Browser abmelden',logout,'button secondary'));
 }
 function logout() {try{for(const name of Object.keys(localStorage))if(name.startsWith('pa6-field-v1:'))localStorage.removeItem(name);}catch{}if(pending){clearTimeout(pending.timer);pending=null;}$('toast').hidden=true;clearResponses();cacheNamespace='';refreshing=false;if(activeRequest)activeRequest.abort();preview.clear();dropCompanion();try{localStorage.removeItem('pa6k');}catch{} key=''; generation++; data=null; state='unauthorized'; leadership=false; $('detail').close(); render();}
 function renderViewSelector() {
@@ -1106,7 +1106,7 @@ function render() {
   const notices=[];
   if(state==='stale')notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Verbindung unterbrochen. Veralteter Stand vom '+date(data.fetchedAt,true)+'. Aktuelle Aufgaben sind unbekannt.'),button('Erneut laden',()=>load(),'text-button')));
   if(view!=='today'&&Object.values(data.sources).some(source=>source.state!=='ready'))notices.push(el('div',{class:'notice',role:'status'},el('p',{},'Ein Teil des Projektstands ist unbekannt. Fehlende Quellen zählen nicht als leer.'),button('Erneut laden',()=>load(),'text-button')));
-  const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showPia,profile:showProfile,documents:showDocuments,sharing:showSharing};
+  const screens={today:showToday,tasks:showTasks,deadlines:showDeadlines,pia:showJuno,profile:showProfile,documents:showDocuments,sharing:showSharing};
   content.replaceChildren(...[...notices,...screens[view]()].flat(Infinity).filter(node=>node!==null&&node!==undefined&&node!==false));
   const tabs=content.querySelector('.work-tabs'),selected=tabs?.querySelector('[aria-selected="true"]');
   if(selected)tabs.scrollLeft+=selected.getBoundingClientRect().left-tabs.getBoundingClientRect().left-3;

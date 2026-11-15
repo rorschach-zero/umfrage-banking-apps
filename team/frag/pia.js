@@ -109,9 +109,9 @@ function answerBody(text, error) {
 }
 function messageElement(message) {
   if (message.rolle === 'du') return el('div', {class:'message message-user', 'aria-label':'Deine Frage'}, message.text);
-  return el('article', {class:'message message-assistant' + (message.fehler ? ' message-error' : ''), 'aria-label':message.fehler ? 'Fehlermeldung' : 'Antwort von Pia'},
+  return el('article', {class:'message message-assistant' + (message.fehler ? ' message-error' : ''), 'aria-label':message.fehler ? 'Fehlermeldung' : 'Antwort von Juno'},
     messageAvatar(),
-    el('div', {}, el('div', {class:'message-author'}, 'Pia', el('span', {}, message.fehler ? 'Das hat nicht geklappt' : 'Für dich nachgeschaut')), answerBody(message.text, message.fehler)));
+    el('div', {}, el('div', {class:'message-author'}, 'Juno', el('span', {}, message.fehler ? 'Das hat nicht geklappt' : 'Für dich nachgeschaut')), answerBody(message.text, message.fehler)));
 }
 function updateLayout() {
   const hasMessages = messages.length > 0;
@@ -163,12 +163,12 @@ async function ask(rawText) {
   }
   const requestHistory = messages.filter(item => !item.fehler).slice(-6);
   addMessage({rolle:'du', text}); input.value = ''; setBusy(true); saveHistory();
-  const thinking = el('div', {id:'thinking', class:'message message-assistant', 'aria-label':'Pia schaut nach'},
+  const thinking = el('div', {id:'thinking', class:'message message-assistant', 'aria-label':'Juno schaut nach'},
     messageAvatar(),
-    el('div', {}, el('div', {class:'message-author'}, 'Pia'), el('div', {class:'thinking-content'},
+    el('div', {}, el('div', {class:'message-author'}, 'Juno'), el('div', {class:'thinking-content'},
       el('span', {class:'thinking-dots', 'aria-hidden':'true'}, el('i'), el('i'), el('i')),
       el('span', {}, el('span', {class:'thinking-title'}, 'Ich schaue kurz nach.'), el('span', {class:'thinking-detail'}, 'Aufgaben, Regeln, Fundstellen.')))));
-  thread.append(thinking); $('notice').textContent = 'Pia schaut in den Unterlagen nach.'; scrollToLatest();
+  thread.append(thinking); $('notice').textContent = 'Juno schaut in den Unterlagen nach.'; scrollToLatest();
   try {
     // Pin the key and role to this request, including when browser storage is unavailable.
     const reply = await sende({k:accessKey, typ:'frage', text, leitung:isLead, ctx:taskContext, verlauf:requestHistory}, 90000);
@@ -206,17 +206,17 @@ $('neu').addEventListener('click', () => {
 });
 $('datei').addEventListener('click', () => {
   if (isBusy || !messages.length) return;
-  const text = 'Pia, Verlauf vom ' + new Date().toLocaleString('de-CH') + '\n' + (isLead ? 'Leitungsansicht' : 'Mitgliedsansicht') + '\n\n' + messages.map(item => (item.rolle === 'du' ? 'Frage: ' : item.fehler ? 'Fehler: ' : 'Antwort: ') + item.text).join('\n\n');
+  const text = 'Juno, Verlauf vom ' + new Date().toLocaleString('de-CH') + '\n' + (isLead ? 'Leitungsansicht' : 'Mitgliedsansicht') + '\n\n' + messages.map(item => (item.rolle === 'du' ? 'Frage: ' : item.fehler ? 'Fehler: ' : 'Antwort: ') + item.text).join('\n\n');
   const url = URL.createObjectURL(new Blob([text], {type:'text/plain;charset=utf-8'}));
-  const link = el('a', {href:url, download:'Pia_Verlauf.txt'});
+  const link = el('a', {href:url, download:'Juno_Verlauf.txt'});
   document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 async function initialize() {
   renderPrompts(); renderHistory();
-  if (!accessKey) { showAccessError('Öffne Pia über deinen persönlichen Link. Wenn er dir fehlt, frag Salah.'); return; }
+  if (!accessKey) { showAccessError('Öffne Juno über deinen persönlichen Link. Wenn er dir fehlt, frag Salah.'); return; }
   try {
     const reply = await sende({k:accessKey, typ:'lesen', a:'info'});
-    if (!TEAM[reply.person]) throw new Error('Kein Zugriff. Öffne Pia über deinen persönlichen Link.');
+    if (!TEAM[reply.person]) throw new Error('Kein Zugriff. Öffne Juno über deinen persönlichen Link.');
     person = reply.person; isReady = true;
     isLead = person === 'SA' && (entryRole === 'leitung' || window.PA6View.active());
     $('leitung').setAttribute('aria-pressed',String(isLead));
