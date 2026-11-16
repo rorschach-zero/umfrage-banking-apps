@@ -495,6 +495,9 @@ function abschliessen(opts) {
       fertig = true;
       schliessen();
       if (opts.onGespeichert) opts.onGespeichert(r);
+      // 16.11.2026 (t17): Kam die Antwort erst nach einem Wechsel des Zugangs an, weder Dank noch Rückgängig zeigen: Rückgängig
+      // würde abschluss_zurueck mit dem alten Schlüssel für die frühere Person senden. Gespeichert ist die Meldung trotzdem.
+      if (opts.darf && !opts.darf()) return;
       // Review Paket 2 Nr. 3: Scheitert «Rückgängig» innerhalb der 5 Sekunden, bleibt der Knopf; danach sagt der Text, was gilt.
       let undoOffen = true;
       const frist = Date.now() + 5000;
@@ -505,6 +508,7 @@ function abschliessen(opts) {
       };
       undo.addEventListener('click', async () => {
         if (!undoOffen) return;
+        if (opts.darf && !opts.darf()) { undoOffen = false; undo.remove(); meldung('Dein Zugang hat gewechselt. Bitte lade die Seite neu.'); return; }
         undoOffen = false; undo.disabled = true;
         meldung('Wird zurückgenommen …', null, 30000);
         try {
