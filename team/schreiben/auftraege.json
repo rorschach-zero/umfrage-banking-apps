@@ -1474,8 +1474,8 @@
     "quelle": "Konzept PA6, S. 7 (Raster Reflexion und Ausblick)"
    },
    {
-    "punkt": "Ein eigener Absatz «Ausblick PA6b» mit ausdrücklichem Bezug.",
-    "quelle": "Konzept PA6, S. 7; Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+    "punkt": "Ein eigener Absatz «Ausblick PA6b», der zeigt, wie die 6b auf der 6a aufbaut.",
+    "quelle": "Konzept PA6, S. 4, Pflichtteil 7; Berichtsgrundlage 6a"
    },
    {
     "punkt": "Je Person ein Absatz mit Schwierigkeit und Learning.",
@@ -1490,7 +1490,7 @@
    {
     "code": "R7",
     "punkte": 5,
-    "volle_punkte_wenn": "Die Reflexion ist kritisch und umfassend, nennt Schwierigkeiten im Detail mit dem Learning, enthält eine konkrete Retrospektive und einen ausdrücklichen Bezug zur 6b."
+    "volle_punkte_wenn": "Die Reflexion ist kritisch und umfassend, nennt Schwierigkeiten im Detail mit dem Learning und enthält eine konkrete Retrospektive. Der Bezug zum ersten Teil der Arbeit ist ausdrücklich erkennbar."
    },
    {
     "code": "R9",
