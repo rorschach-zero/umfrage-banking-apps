@@ -12,7 +12,8 @@ function schluessel() {
   try { return localStorage.getItem("pa6k") || ""; } catch (e) { return ""; }
 }
 // Gelesen wird per POST: der Schluessel steht nur im Inhalt der Anfrage, nie in einer Adresse.
-async function hole(a) { return sende({ typ: "lesen", a: a }); }
+// 16.11.2026: Lesen hat 60 s Zeit (vorher 20 s); ein kalter Aufbau der Warteschlange dauert neben laufendem Speichern länger.
+async function hole(a) { return sende({ typ: "lesen", a: a }, 60000); }
 async function sende(obj, ms) {
   if (fieldPending && !['lesen','team','frage'].includes(obj.typ)) throw Error('Bitte warte auf den aktuellen Stand.');
   window.PA6View.assertRead(obj); obj = window.PA6View.request(obj);
@@ -90,6 +91,14 @@ async function fieldStart(area, apply) {
   try { const value = JSON.parse(localStorage.getItem(fieldSlot)); if (fieldValid(value, area)) previous = value; } catch {}
   if (previous) { fieldSetPending(true); fieldValue = previous; apply(previous, true); }
   fieldNotice(previous ? 'Stand ' + fieldStamp(previous) + ' · aktualisiert …' : 'Stand wird geladen …');
+  // 16.11.2026 (Ernes 15:34–15:43): Scheitert das Lesen (Server beschäftigt, Zeitüberschreitung), versucht die Seite es selbst
+  // wieder (5, 10, 20, 30 s, danach alle 30 s) und sagt «Wird geladen …» statt «offline». Eine leere oder fehlende Warteschlange
+  // wird nie als «nichts mehr zu tun» gezeigt: angezeigt wird nur eine vollständige Antwort. Nur ein verweigerter Zugang hört auf.
+  // fieldStart kehrt wie bisher nach dem ersten Versuch zurück (Aufrufer wie «Weitere Fälle übernehmen» warten darauf);
+  // die Wiederholungen laufen im Hintergrund und enden, sobald ein neuer Abruf beginnt oder der Schlüssel wechselt.
+  await fieldTry(area, apply, ticket, access, previous, 0);
+}
+async function fieldTry(area, apply, ticket, access, previous, versuch) {
   try {
     const value = await hole(area);
     if (ticket !== fieldGeneration || access !== schluessel()) return;
@@ -99,11 +108,31 @@ async function fieldStart(area, apply) {
     fieldNotice('aktualisiert ' + new Intl.DateTimeFormat('de-CH', {hour:'2-digit',minute:'2-digit',timeZone:'Europe/Zurich'}).format(new Date(value.fetchedAt)));
   } catch (error) {
     if (ticket !== fieldGeneration || access !== schluessel()) return;
-    if (error.denied) { try { localStorage.removeItem(fieldSlot); } catch {} previous = null; fieldValue = null; }
     fieldSetPending(true);
-    if (!previous) { document.getElementById('main').replaceChildren(el('h1', {}, 'Keine Verbindung'), el('p', {class:'leise'}, error.message)); document.getElementById('fuss').hidden = true; }
-    fieldNotice(previous ? 'Stand ' + fieldStamp(previous) + ' · offline · nur lesen' : 'Aktueller Stand nicht verfügbar');
+    if (error.denied) {
+      try { localStorage.removeItem(fieldSlot); } catch {}
+      fieldValue = null;
+      document.getElementById('main').replaceChildren(el('h1', {}, 'Kein Zugang'), el('p', {class:'leise'}, error.message));
+      document.getElementById('fuss').hidden = true;
+      fieldNotice('Aktueller Stand nicht verfügbar');
+      return;
+    }
+    const sekunden = FIELD_RETRY_S[Math.min(versuch, FIELD_RETRY_S.length - 1)];
+    if (!previous) fieldLoading(sekunden, () => fieldStart(area, apply));
+    fieldNotice((previous ? 'Stand ' + fieldStamp(previous) + ' · ' : '') + 'Wird geladen … neuer Versuch in ' + sekunden + ' s');
+    setTimeout(() => {
+      if (ticket !== fieldGeneration || access !== schluessel()) return;
+      fieldNotice((previous ? 'Stand ' + fieldStamp(previous) + ' · ' : '') + 'Wird geladen …');
+      fieldTry(area, apply, ticket, access, previous, versuch + 1);
+    }, sekunden * 1000);
   }
+}
+const FIELD_RETRY_S = [5, 10, 20, 30];
+function fieldLoading(sekunden, again) {
+  document.getElementById('main').replaceChildren(el('h1', {}, 'Wird geladen …'),
+    el('p', {class:'leise'}, 'Der Server ist gerade beschäftigt, zum Beispiel weil jemand speichert. Die Seite versucht es in ' + sekunden + ' s selbst wieder. Deine Bewertungen und Kontakte sind nicht weg.'),
+    el('button', {type:'button', class:'knopf', 'data-read-navigation':true, on:{click: again}}, 'Jetzt neu versuchen'));
+  document.getElementById('fuss').hidden = true;
 }
 // A cached view is navigable but cannot edit or submit until confirmed.
 document.addEventListener('click', event => {
