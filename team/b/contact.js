@@ -21,6 +21,21 @@ let bDirektOffen = false;
 let daten = null, aktiv = null, z = {}, belastung = {}, savePending = false;
 
 function frei(s) { return (s || "").replace(/\s+/g, " ").trim(); }
+// 18.11.2026 (Korrekturliste A12): Notizen sperren nur Telefonnummern, Mailadressen, Links und Kontonummern, nicht Uhrzeiten,
+// Daten und kleine Zahlen. Gleiche Regel wie der Empfänger (notizVerboten in Code.js).
+function notizVerboten(text) {
+  const roh = String(text || "");
+  // Astro B1: Telefonnummern zuerst am Rohtext erkennen (vor dem Entfernen von Daten), auch mit Klammern und Punkten.
+  if ((roh.match(/(?:\+|\b00)\s*\(?\d[\d\s.\/()-]*\d/g) || []).some(m => m.replace(/\D/g, "").length >= 9)) return true;
+  if (/\(?\b0\d{2}\)?[\s.\/-]*\d{3}[\s.\/-]*\d{2}[\s.\/-]*\d{2}\b/.test(roh) || /\b0[89]\d{2}[\s.\/-]*\d{3}[\s.\/-]*\d{3}\b/.test(roh)) return true;
+  const t = roh.replace(/\b\d{4}-\d{2}-\d{2}\b/g, " | ").replace(/\b\d{1,2}\.\d{1,2}\.(?:\d{4}|\d{2}\b)?/g, " | ").replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g, " | ");
+  if (/[\w.+-]+@[\w-]+\.[\w.-]+/.test(t) || /https?:\/\/|\bwww\./i.test(t) || /\b[\w-]+\.(ch|com|net|org|de|io|app|li)\b/i.test(t)) return true;
+  if (/\bCH\d{2}\s?\d{4}/i.test(t)) return true;
+  return (t.match(/\+?\(?\d[\d\s\/.()-]*\d/g) || []).some(m => m.replace(/\D/g, "").length >= 9);
+}
+const NOTIZ_FEHLER = "Notizen ohne Telefonnummern, Mailadressen, Links und Kontonummern";
+// 18.11.2026 (Korrekturliste A13): Die Leitung erfasst Kontakte anderer stellvertretend. aktiv.fuer = zugeteilte Person.
+function fuerWen() { return aktiv && aktiv.fuer && aktiv.fuer !== daten?.person ? aktiv.fuer : ""; }
 async function start() {
   if (!schluessel()) { document.getElementById("main").replaceChildren(el("h1", {}, "Persönlicher Link fehlt"), el("p", {}, "Öffne die Seite über den Link, den du von Salah bekommen hast. Er enthält deinen Schlüssel.")); return; }
   const selectedStep = bOffen;
@@ -31,8 +46,9 @@ async function start() {
     // Direktlink je Kontakt: team/b/?nr=B05#k=… öffnet diesen Kontakt. Der Stand kommt zweimal (Zwischenspeicher,
     // dann frisch vom Server); ist der Zielkontakt schon offen, bleibt er offen und bekommt nur den frischen Stand.
     const ziel = new URLSearchParams(location.search).get("nr") || new URLSearchParams(location.hash.slice(1)).get("nr");
-    const zielZeile = ziel ? (daten.plan || []).find(x => x.nr === ziel) : null;
-    if (zielZeile && bDirektOffen && aktiv && aktiv.nr === ziel) { aktiv.erfasst = zielZeile.erfasst || aktiv.erfasst; return; }
+    const zielZeile = ziel ? (daten.plan || []).concat(daten.vertretung || []).find(x => x.nr === ziel) : null;
+    // 18.11.2026: nach dem frischen Stand die Knöpfe neu freigeben (vorher blieb «Start» über einen Direktlink gesperrt, bis man neu lud).
+    if (zielZeile && bDirektOffen && aktiv && aktiv.nr === ziel) { aktiv.erfasst = zielZeile.erfasst || aktiv.erfasst; bUpdateReadiness(); return; }
     liste();
     if (zielZeile && !bDirektOffen) { bDirektOffen = true; openForm(zielZeile); }
   });
@@ -78,7 +94,9 @@ function zeile(stand) {
   ["t_start", "t_auto", "t_mensch", "t_antwort", "t_ende"].forEach(k => { if (o[k]) o[k] = o[k].replace("T", " "); });
   o.datum = (o.t_start || "").slice(0, 10);
   o.verlauf = frei(o.verlauf); o.bemerkung = frei(o.bemerkung);
-  delete o.hinweise; delete o.auto_selbst; delete o.anderer_kanal; delete o.erfasst;
+  delete o.hinweise; delete o.auto_selbst; delete o.anderer_kanal; delete o.erfasst; delete o.fuer;
+  // A12: «Stimmt die Antwort?» ist freiwillig; ohne Angabe «offen» (die Auswertung prüft).
+  if (o.code === "durchgefuehrt" && !o.richtig) o.richtig = "offen";
   if (z.start_korrektur) o.start_korrektur = true;
   return o;
 }
@@ -96,7 +114,7 @@ function fehlt() {
   }
   if (o.code === "durchgefuehrt") {
     const NAMEN = { kanal_angeboten: "Gibt es diesen Kontaktweg", mensch_status: "Wer hat geantwortet", vollstaendig: "Ist die Antwort vollständig", fcr: "Beim ersten Kontakt beantwortet",
-      richtig: "Stimmt die Antwort", weiterverlauf: "wie geht es weiter", hoeflichkeit: "Höflichkeit", rueckfragen: "Rückfragen der Bank", beibehalten: "Blieb die Bank bei Deutsch", standort: "Standort genannt" };
+      weiterverlauf: "wie geht es weiter", hoeflichkeit: "Höflichkeit", rueckfragen: "Rückfragen der Bank", beibehalten: "Blieb die Bank bei Deutsch", standort: "Standort genannt" };
     Object.keys(NAMEN).forEach(k => !String(o[k] || "") && f.push(NAMEN[k]));
     if (["richtig", "teils", "falsch"].includes(o.richtig) && (!/^https:\/\//.test(o.quelle_url || "") || !echt(o.quelle_datum) || o.quelle_datum > heute())) f.push("Link zur Hilfeseite (https) und Datum");
   } else if (o.code && !o.ausfall_grund) f.push("Grund");
@@ -105,7 +123,7 @@ function fehlt() {
   if ([t[1], t[2], t[3]].some(x => x !== null && ((t[0] !== null && x < t[0]) || (t[4] !== null && x > t[4])))) f.push("Zeiten in falscher Reihenfolge (Start zuerst, Ende zuletzt)");
   if (t[2] !== null && t[3] !== null && t[3] < t[2]) f.push("Vollständige Antwort liegt vor der ersten Antwort einer Person");
   ["nachrichten_anbieter", "minuten_anbieter"].forEach(k => { const v = String(o[k] === undefined || o[k] === null ? "" : o[k]); if (v && (!/^\d{1,3}$/.test(v) || +v > 500)) f.push("Anzahl als ganze Zahl von 0 bis 500"); });
-  if (VERBOTEN.test([o.verlauf, o.bemerkung, o.ausfall_grund, o.abbruch_grund].join(" "))) f.push("Notizen ohne Nummern, Mailadressen und Links");
+  if (notizVerboten([o.verlauf, o.bemerkung, o.ausfall_grund, o.abbruch_grund].join(" "))) f.push(NOTIZ_FEHLER);
   return f;
 }
 // Invalidate earlier refreshes as soon as a new write begins.
@@ -114,13 +132,13 @@ async function speichern(stand) {
   if(window.PA6View.active() || fieldPending || savePending)return;
   const msg = document.getElementById("meldung"); msg.className = "meldung";
   if (stand === "abgeschlossen") { const f = fehlt(); if (f.length) { msg.className = "meldung fehler"; msg.textContent = "Fehlt noch: " + f.join(", "); return; } }
-  if (stand === "laufend" && VERBOTEN.test([z.verlauf, z.bemerkung].join(" "))) { msg.className = "meldung fehler"; msg.textContent = "Notizen ohne Nummern, Mailadressen und Links"; return; }
+  if (stand === "laufend" && notizVerboten([z.verlauf, z.bemerkung].join(" "))) { msg.className = "meldung fehler"; msg.textContent = NOTIZ_FEHLER; return; }
   const row = aktiv, planRow = daten.plan.find(item => item.nr === row.nr) || row;
   const previous = planRow.erfasst, payload = zeile(stand), nummer = ++bSpeicherNr;
   savePending = true; bUpdateReadiness(); row.erfasst = planRow.erfasst = payload;
   msg.textContent = "Speichert …";
   try {
-    const result = await sende({ typ: "beobachtung", maske: "b4", simulation: aktiv.nr.startsWith("PROBE-B-"), zeile: payload, start_korrektur: payload.start_korrektur === true });
+    const result = await sende(Object.assign({ typ: "beobachtung", maske: "b4", simulation: aktiv.nr.startsWith("PROBE-B-"), zeile: payload, start_korrektur: payload.start_korrektur === true }, fuerWen() ? { fuer: fuerWen() } : {}));
     delete z.start_korrektur;
     window.dispatchEvent(new Event("workspace-saved"));
     row.erfasst = planRow.erfasst = payload; try { localStorage.removeItem("b-" + row.nr); } catch (e) {}
@@ -232,10 +250,14 @@ function channelSource() {
 function fillChannelSource() {
   const source=channelSource(); z.quelle_url ||= source.url; z.quelle_datum ||= source.date;
 }
+// A14 (18.11.2026): Start ausserhalb des geplanten Blocks ist erlaubt; der Empfänger setzt den Vermerk «ausserhalb Zeitfenster».
+function ausserhalbBlock(row,zeit){const t=String(zeit||jetztLokal()).slice(11,16);if(!row||!t)return false;return row.block==='A'?t<'09:00'||t>'12:00':t<'13:00'||t>'17:00';}
+function vertretungHinweis(){const wer=fuerWen();return wer?el('p',{class:'contact-note','data-vertretung':wer},'Du erfasst stellvertretend für '+(TEAM[wer]||wer)+'. Der Kontakt bleibt '+(TEAM[wer]||wer)+' zugeteilt; im Blatt steht «erfasst durch '+(TEAM[daten.person]||daten.person)+' für '+(TEAM[wer]||wer)+'».'):null;}
 function contactPreparation() {
   const script=contactScript(),source=channelSource(),phone=source.text.match(/^(\+?\d[\d ]{6,}\d)/)?.[1].replace(/ /g,'');
   return [
     isPractice()?el('p',{class:'contact-note'},'Übe mit der erfundenen Musterbank. Lies die Nachrichten und halte fest, was passiert. Etwa 2 Minuten.'):null,
+    !isPractice()&&ausserhalbBlock(aktiv)?el('p',{class:'contact-note','data-zeitfenster':'ausserhalb'},'Jetzt ist ausserhalb des geplanten Zeitfensters ('+(aktiv.block==='A'?'09–12 Uhr':'13–17 Uhr')+'). Du kannst trotzdem starten; der Kontakt wird als «ausserhalb Zeitfenster» gekennzeichnet.'):null,
     el('blockquote',{class:'contact-question'},script.frage),
     isPractice()?null:el('p',{class:'contact-way'},source.text || 'Öffne den bestätigten Kontaktweg deiner Bank.',source.url?el('a',{href:source.url,target:'_blank',rel:'noopener','data-read-navigation':true},'Kontaktinfo öffnen'):null),
     aktiv.kanal==='telefon'&&phone?el('a',{class:'contact-button',href:'tel:'+phone,'aria-disabled':String(!canEditContact()),on:{click:event=>{if(!canEditContact())event.preventDefault();}}},'Anrufen'):
@@ -251,11 +273,11 @@ async function beginContact() {
   startPending=true;bUpdateReadiness();
   try {
     if(!isPractice()&&!aktiv.erfasst?.t_start) {
-      await sende({typ:'b_begin',nr});
+      await sende(Object.assign({typ:'b_begin',nr},fuerWen()?{fuer:fuerWen()}:{}));
       // A successful begin is retained even if the following plan refresh fails.
       z.t_start ||= jetztLokal();contactUI.startedAt=started;persistContact();
       try {
-        const fresh=await hole('plan'),row=fresh.plan.find(r=>r.nr===nr);
+        const fresh=await hole('plan'),row=fresh.plan.find(r=>r.nr===nr)||(fresh.vertretung||[]).find(r=>r.nr===nr);
         daten=fresh;belastung=fresh.belastung || {};
         if(row){aktiv=row;if(row.erfasst?.t_start)z.t_start=String(row.erfasst.t_start).replace(' ','T').slice(0,16);}
       } catch { document.getElementById('meldung').textContent='Start gespeichert. Der Plan wird später abgeglichen.'; }
@@ -269,6 +291,7 @@ async function beginContact() {
 }
 function eventContact(key) {
   if(!canEditContact()||!z.t_start||z[key])return;
+  if(key==='t_mensch'&&contactUI.botAnswer&&z.t_antwort)return;
   z[key]=jetztLokal();
   if(isPractice()){contactUI.taps ||= {};contactUI.taps[key]=Date.now()-contactUI.practiceStartedAt;}
   if(['t_auto','t_mensch'].includes(key))deriveContactResponder();
@@ -278,13 +301,41 @@ function eventContact(key) {
 function undoContact(key) {
   if(!canEditContact())return;
   z[key]='';
+  // Astro B3: schriftlich hängt «Frage beantwortet» an der Antwort; wer die Antwort zurücknimmt, nimmt auch Antwortzeit und Ende zurück.
+  if(key==='t_mensch'&&['mail','formular'].includes(aktiv.kanal)&&z.t_antwort){z.t_antwort='';z.t_ende='';delete contactUI.endedAt;}
   if(['t_auto','t_mensch'].includes(key))deriveContactResponder();
   if(key==='t_antwort'){z.t_ende='';delete contactUI.endedAt;}
   if(contactUI.taps)delete contactUI.taps[key];
   persistContact();formular();
 }
 function deriveContactResponder() {
-  if(!contactUI.responderEdited)z.mensch_status=z.t_mensch?'Mensch':z.t_auto?'Automat':'';
+  // Bei Mail und Formular ist t_auto die automatische Eingangsbestätigung, keine Antwort (A7); sie macht niemanden zum «Bot».
+  const written=['mail','formular'].includes(aktiv?.kanal);
+  if(!contactUI.responderEdited)z.mensch_status=z.t_mensch?'Mensch':z.t_auto&&!written?'Automat':'';
+}
+// A5/A7 (18.11.2026): schriftlich (Mail, Formular) drei klare Ereignisse statt Telefon-Knöpfen: Eingangsbestätigung (zählt nicht),
+// Antwort erhalten von Mensch oder Bot, Antwort per Rückruf (Kanalwechsel durch die Bank, wie B25).
+const RUECKRUF='Antwort per telefonischem Rückruf (Kanalwechsel durch die Bank).';
+function writtenStamp(time,label,undo,key){return el('div',{class:'contact-event-stamp'},el('span',{},'Erfasst um '+time.slice(11,16)),contactButton('Rückgängig',undo,{class:'contact-button contact-undo','aria-label':label+' rückgängig','data-undo':key}));}
+// Astro B2: nach einer Bot-Antwort ist keine spätere «Antwort erhalten · Mensch» mehr möglich (sonst Antwort nach dem Ende).
+function writtenMensch(){const row=contactEvent('t_mensch','Antwort erhalten · Mensch');const b=row.querySelector('[data-event="t_mensch"]');if(b&&contactUI.botAnswer&&z.t_antwort)b.disabled=true;return row;}
+function writtenBot() {
+  const set=!!contactUI.botAnswer&&!!z.t_antwort;
+  return el('div',{class:'contact-event-row'},contactButton('Antwort erhalten · Bot',()=>{
+      if(!canEditContact()||!z.t_start||z.t_antwort||z.t_mensch)return;
+      z.t_antwort=jetztLokal();z.t_ende=z.t_antwort;z.mensch_status='Automat';contactUI.responderEdited=true;contactUI.botAnswer=true;contactUI.endedAt=Date.now();persistContact();formular();
+    },{class:'contact-button contact-event'+(set?' is-set':''),disabled:!!z.t_antwort||!!z.t_mensch||!canEditContact(),'data-event':'bot'}),
+    set?writtenStamp(z.t_antwort,'Antwort Bot',()=>{if(!canEditContact())return;z.t_antwort='';z.t_ende='';delete contactUI.botAnswer;delete contactUI.endedAt;contactUI.responderEdited=false;deriveContactResponder();persistContact();formular();},'bot'):null);
+}
+function writtenRueckruf() {
+  const set=!!contactUI.rueckruf&&!!z.t_mensch;
+  return el('div',{class:'contact-event-row'},contactButton('Antwort per Rückruf',()=>{
+      if(!canEditContact()||!z.t_start||z.t_mensch||z.t_antwort)return;
+      z.t_mensch=jetztLokal();z.anderer_kanal=true;contactUI.rueckruf=true;
+      if(!String(z.bemerkung||'').includes(RUECKRUF))z.bemerkung=frei(RUECKRUF+' '+(z.bemerkung||''));
+      deriveContactResponder();persistContact();formular();
+    },{class:'contact-button contact-event'+(set?' is-set':''),disabled:!!z.t_mensch||!!z.t_antwort||!canEditContact(),'data-event':'rueckruf'}),
+    set?writtenStamp(z.t_mensch,'Antwort per Rückruf',()=>{if(!canEditContact())return;z.t_mensch='';z.t_antwort='';z.t_ende='';delete contactUI.endedAt;z.anderer_kanal=false;delete contactUI.rueckruf;z.bemerkung=frei(String(z.bemerkung||'').replace(RUECKRUF,''));deriveContactResponder();persistContact();formular();},'rueckruf'):null);
 }
 function contactEvent(key,label) {
   return el('div',{class:'contact-event-row'},contactButton(label,()=>eventContact(key),{class:'contact-button contact-event'+(z[key]?' is-set':''),disabled:!!z[key]||!canEditContact(),'data-event':key}),
@@ -304,8 +355,20 @@ function updateContactClock() {
   const seconds=Math.max(0,Math.floor((end-origin)/1000));
   const clock=document.getElementById('contact-clock');if(clock)clock.textContent=String(Math.floor(seconds/3600)).padStart(2,'0')+':'+String(Math.floor(seconds/60)%60).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   const deadline=document.getElementById('contact-deadline');
-  if(deadline&&!isPractice()){const d=contactDeadline();deadline.textContent=z.t_ende?'Kontakt beendet':d.expired?'Wartezeit vorbei – Ergebnis festhalten':(d.humanLate?'Noch keine Person erreicht. ':'')+'noch '+d.remaining+' Min.';}
+  if(deadline&&!isPractice()){const d=contactDeadline();deadline.textContent=['mail','formular'].includes(aktiv.kanal)?writtenStatus(d):z.t_ende?'Kontakt beendet':d.expired?'Wartezeit vorbei – Ergebnis festhalten':(d.humanLate?'Noch keine Person erreicht. ':'')+'noch '+d.remaining+' Min.';}
   if(isPractice())updatePracticeChat();
+}
+// 18.11.2026 (Korrekturliste A5): Bei Mail und Formular wartet man auf eine Antwort; Text und Knöpfe sprechen nicht vom Telefon.
+// Die Uhr läuft weiter (gemessen wird die Zeit bis zur Antwort). Hinweis erst nach der 24-Stunden-Frist (FRIST.mensch).
+function writtenTime(value){const t=String(value||'');if(!t)return '';const tag=t.slice(0,10),heuteTag=jetztLokal().slice(0,10);return (tag===heuteTag?'':Number(t.slice(8,10))+'.'+Number(t.slice(5,7))+'. ')+t.slice(11,16);}
+function writtenStatus(d){
+  if(z.t_ende)return 'Kontakt beendet';
+  if(z.t_antwort)return 'Antwort erhalten um '+writtenTime(z.t_antwort)+' · Frage beantwortet';
+  if(z.t_mensch)return 'Antwort erhalten um '+writtenTime(z.t_mensch);
+  const gesendet='Gesendet um '+writtenTime(z.t_start)+', wartet auf Antwort'+(z.t_auto?' (nur automatische Eingangsbestätigung)':'');
+  if(d.expired)return gesendet+'. Die Beobachtungszeit von 72 Stunden ist vorbei: Ergebnis festhalten.';
+  if(d.humanLate)return gesendet+'. Die 24-Stunden-Frist ist abgelaufen, noch keine Antwort eines Menschen.';
+  return gesendet+'.';
 }
 function updatePracticeChat() {
   const chat=document.getElementById('practice-chat');if(!chat)return;
@@ -335,18 +398,22 @@ function contactRunning() {
   const written=['mail','formular'].includes(aktiv.kanal),probe=isPractice();
   return [el('div',{class:'contact-clock-wrap'},el('output',{id:'contact-clock','aria-label':'Zeit seit Start',class:'contact-clock'},'00:00:00'),el('p',{id:'contact-deadline',class:'contact-hint'},probe?'Übung · keine echte Bank':'')),
     probe?el('section',{class:'practice-chat','aria-label':'Probe-Chat mit der Musterbank'},el('h3',{},'Musterbank · Chat'),el('div',{id:'practice-chat',role:'log','aria-live':'polite','aria-relevant':'additions'},el('p',{class:'practice-question'},contactScript().frage)),el('p',{id:'practice-wait',class:'contact-hint'},'Nachricht gesendet …')):null,
-    contactEvent('t_auto',aktiv.kanal==='telefon'?'Ansage / Bot antwortet':'Bot antwortet'),contactEvent('t_mensch','Mensch antwortet'),contactEvent('t_antwort','Frage beantwortet'),
+    contactEvent('t_auto',aktiv.kanal==='telefon'?'Ansage / Bot antwortet':written?'Automatische Eingangsbestätigung':'Bot antwortet'),
+    written&&!probe?el('p',{class:'contact-hint','data-hint':'auto'},'Eine automatische Bestätigung («automatisch erstellte Nachricht») zählt nicht als Antwort.'):null,
+    written&&!probe?[contactUI.rueckruf?null:writtenMensch(),writtenBot(),writtenRueckruf(),z.t_mensch?contactEvent('t_antwort','Frage beantwortet'):null]
+      :[contactEvent('t_mensch','Mensch antwortet'),contactEvent('t_antwort','Frage beantwortet')],
     probe?el('section',{id:'practice-feedback',class:'practice-feedback','aria-live':'polite'}):null,
     probe?el('p',{id:'practice-timeout',hidden:true,class:'contact-note'},'Du kannst die Übung jetzt mit deiner Bewertung abschliessen.'):null,
     z.t_antwort||probe?contactButton('Weiter zur Bewertung',()=>probe?finishPractice():goContact(2),{class:'contact-button contact-primary',id:'contact-rate'}):null,
     probe?el('p',{id:'practice-next-hint',class:'contact-hint',role:'status'}):null,
-    !probe?contactButton('Gespräch beendet · Bewerten',()=>{z.t_ende ||= jetztLokal();contactUI.endedAt=Date.now();persistContact();goContact(2);},{class:'contact-button',hidden:!!z.t_antwort}):null,
-    !probe?el('div',{class:'contact-exits'},contactButton('Keine Antwort / Warteschleife zu lang',()=>{z.code='erfolglos';z.ausfall_grund='Keine Antwort / Warteschleife zu lang';z.t_ende=jetztLokal();contactUI.endedAt=Date.now();persistContact();goContact(2);},{class:'contact-button contact-exit'}),contactButton('Diesen Weg gibt es nicht',()=>{z.code='nicht angeboten';z.kanal_angeboten='nein';z.ausfall_grund='Kontaktweg nicht angeboten';fillChannelSource();persistContact();goContact(3);},{class:'contact-button contact-exit'})):null,
+    !probe?contactButton(written?'Kontakt beenden · Bewerten':'Gespräch beendet · Bewerten',()=>{z.t_ende ||= jetztLokal();contactUI.endedAt=Date.now();persistContact();goContact(2);},{class:'contact-button',hidden:!!z.t_antwort}):null,
+    !probe?el('div',{class:'contact-exits'},contactButton(written?'Keine Antwort in der Frist':'Keine Antwort / Warteschleife zu lang',()=>{z.code='erfolglos';z.ausfall_grund=written?'Keine Antwort eines Menschen in der Frist':'Keine Antwort / Warteschleife zu lang';z.t_ende=jetztLokal();contactUI.endedAt=Date.now();persistContact();goContact(2);},{class:'contact-button contact-exit'}),contactButton('Diesen Weg gibt es nicht',()=>{z.code='nicht angeboten';z.kanal_angeboten='nein';z.ausfall_grund='Kontaktweg nicht angeboten';fillChannelSource();persistContact();goContact(3);},{class:'contact-button contact-exit'})):null,
     !probe&&written?contactButton('Antwort kommt später – Zwischenstand speichern',()=>speichern('laufend'),{class:'contact-button contact-save-later'}):null,
     !probe&&written?el('p',{class:'contact-hint'},'Der Kontakt bleibt offen. Schau bis 72 Stunden nach dem Start wieder nach.'):null,
-    !probe?contactDetails('Zeiten korrigieren',...['t_start','t_auto','t_mensch','t_antwort','t_ende'].map((key,index)=>contactTimeInput(key,['Start','Bot / Ansage','Mensch','Frage beantwortet','Ende'][index]))):null
+    !probe?contactDetails('Zeiten korrigieren',...['t_start','t_auto','t_mensch','t_antwort','t_ende'].map((key,index)=>contactTimeInput(key,zeitLabels()[index]))):null
   ];
 }
+function zeitLabels(){return ['mail','formular'].includes(aktiv?.kanal)?['Gesendet (Start)','Automatische Eingangsbestätigung','Antwort (Mensch oder Rückruf)','Frage beantwortet','Ende']:['Start','Bot / Ansage','Mensch','Frage beantwortet','Ende'];}
 function contactTimeInput(key,label) {
   return el('div',{class:'contact-field'},el('label',{for:'time-'+key},label),el('input',{id:'time-'+key,class:'t',type:'datetime-local',value:z[key]||'',on:{change:event=>{if(!canEditContact())return;z[key]=event.target.value;if(key==='t_start'){z.start_korrektur=true;delete contactUI.startedAt;}if(key==='t_ende')delete contactUI.endedAt;persistContact();bUpdateReadiness();updateContactClock();}}}));
 }
@@ -396,7 +463,7 @@ function contactRating() {
     contactChoice('standort','Von wo antwortet die Bank?',[['nicht genannt','Nicht gesagt'],['Schweiz','Schweiz'],['Ausland','Ausland']]),
     contactDetails('Notiz · freiwillig',contactInput('bemerkung','Notiz','textarea','Keine Namen, Kontodaten oder Zitate.')),
     contactDetails('Antwort prüfen · freiwillig',ratingOpinion()),
-    contactDetails('Weitere Angaben · freiwillig',contactInput('verlauf','Verlauf in Stichworten','textarea'),contactInput('abbruch_grund','Abbruchgrund'),contactChoice('kanal_angeboten','War der Kontaktweg erreichbar?',[['ja','Ja'],['nicht erreichbar','Nicht erreichbar'],['nein','Gibt es nicht']]),contactChoice('code','Wie lief der Kontakt?',[['durchgefuehrt','Hat stattgefunden'],['erfolglos','Keine Antwort'],['nicht angeboten','Gibt es nicht'],['nicht zugaenglich','Kein Zugang'],['ausgefallen','Ausgefallen']]),...['t_start','t_auto','t_mensch','t_antwort','t_ende'].map((key,index)=>contactTimeInput(key,['Start','Bot / Ansage','Mensch','Frage beantwortet','Ende'][index]))),
+    contactDetails('Weitere Angaben · freiwillig',contactInput('verlauf','Verlauf in Stichworten','textarea'),contactInput('abbruch_grund','Abbruchgrund'),contactChoice('kanal_angeboten','War der Kontaktweg erreichbar?',[['ja','Ja'],['nicht erreichbar','Nicht erreichbar'],['nein','Gibt es nicht']]),contactChoice('code','Wie lief der Kontakt?',[['durchgefuehrt','Hat stattgefunden'],['erfolglos','Keine Antwort'],['nicht angeboten','Gibt es nicht'],['nicht zugaenglich','Kein Zugang'],['ausgefallen','Ausgefallen']]),...['t_start','t_auto','t_mensch','t_antwort','t_ende'].map((key,index)=>contactTimeInput(key,zeitLabels()[index]))),
     ratingNavigation(()=>{if(!missingRatingChoices().length)prepareSummary();}),
     el('p',{id:'contact-rating-missing',class:'contact-hint',role:'status'})
   ];
@@ -419,7 +486,9 @@ function prepareSummary() {
 }
 function contactSummary() {
   const unavailable=z.code==='nicht angeboten',probe=isPractice();
-  const rows=[['Kontakt',(probe?'Musterbank':aktiv.anbieter)+' · '+(B_KANAL[aktiv.kanal]||aktiv.kanal)],['Ergebnis',{'durchgefuehrt':'gemessen','erfolglos':'keine Antwort in der Frist','nicht angeboten':'Weg gibt es nicht','nicht zugaenglich':'Kein Zugang','ausgefallen':'Ausgefallen'}[z.code]||z.code],['Zeit',z.t_start?(z.t_start.slice(11,16)+' – '+(z.t_ende?.slice(11,16)||'offen')):'Kein Gespräch'],['Antwort',{'vorhanden':'Ganz','teilweise':'Teilweise','fehlt':'Nicht beantwortet'}[z.vollstaendig]||'Keine Antwort erfasst']];
+  const rows=[['Kontakt',(probe?'Musterbank':aktiv.anbieter)+' · '+bKanalName(aktiv.anbieter,aktiv.kanal)],['Ergebnis',{'durchgefuehrt':'gemessen','erfolglos':'keine Antwort in der Frist','nicht angeboten':'Weg gibt es nicht','nicht zugaenglich':'Kein Zugang','ausgefallen':'Ausgefallen'}[z.code]||z.code],['Zeit',z.t_start?(z.t_start.slice(11,16)+' – '+(z.t_ende?.slice(11,16)||'offen')):'Kein Gespräch'],['Antwort',{'vorhanden':'Ganz','teilweise':'Teilweise','fehlt':'Nicht beantwortet'}[z.vollstaendig]||'Keine Antwort erfasst']];
+  if(!probe&&(z.zeitfenster||(z.t_start&&ausserhalbBlock(aktiv,z.t_start.replace('T',' ')))))rows.push(['Zeitfenster','ausserhalb (gekennzeichnet)']);
+  if(!probe&&(z.vermerk||fuerWen()))rows.push(['Erfasst',z.vermerk||'stellvertretend für '+(TEAM[fuerWen()]||fuerWen())]);
   return [el('dl',{class:'contact-summary'},rows.map(([label,value])=>el('div',{},el('dt',{},label),el('dd',{},value)))),
     unavailable&&!contactSaved?el('div',{class:'contact-unavailable'},contactInput('ausfall_grund','Grund'),contactInput('quelle_url','Quelle · vorausgefüllt','url'),z.quelle_url?el('a',{href:/^https:\/\//.test(z.quelle_url)?z.quelle_url:null,target:'_blank',rel:'noopener','data-read-navigation':true},'Quelle öffnen'):null,contactInput('quelle_datum','Geprüft am','date')):null,
     !unavailable&&!contactSaved?amountInput():null,
@@ -452,7 +521,7 @@ function editMissingContact() {
   } else if(missing==='Stimmt die Antwort'||missing.startsWith('Link zur Hilfeseite')){
     page=1;details='Antwort prüfen · freiwillig';selector=missing==='Stimmt die Antwort'?'[data-opinion]':'#contact-quelle_url';
   } else if(missing.startsWith('Notizen ohne')){
-    const key=['verlauf','bemerkung','ausfall_grund','abbruch_grund'].find(key=>VERBOTEN.test(z[key]||''));
+    const key=['verlauf','bemerkung','ausfall_grund','abbruch_grund'].find(key=>notizVerboten(z[key]||''));
     page=1;details=key==='bemerkung'?'Notiz · freiwillig':'Weitere Angaben · freiwillig';selector='#contact-'+key;
     if(key==='ausfall_grund'){screen=z.code==='nicht angeboten'?3:2;details='';}
   }
@@ -502,14 +571,15 @@ function formular() {
   const focusValue=focusKey?focused.getAttribute(focusKey):null;
   document.body.classList.add('b-form-open');
   const main=document.getElementById('main');main.classList.toggle('is-uebung',isPractice());
-  const lateAnswer=z.t_antwort&&vorschlaege().inFrist===false&&!isPractice();
+  const lateAnswer=z.t_antwort&&z.t_mensch&&vorschlaege().inFrist===false&&!isPractice();   // 18.11.: eine Bot-Antwort hat keine Wartezeit auf einen Menschen
   const rating=contactScreen===2&&z.code==='durchgefuehrt';
   main.classList.toggle('contact-rating',rating);
   main.classList.toggle('contact-rating-more',rating&&contactUI.ratingPage===1);
   const title=contactSaved?'Fertig':z.code==='nicht angeboten'?'Diesen Weg gibt es nicht':rating?(contactUI.ratingPage===1?'Noch kurz':'Die Antwort'):CONTACT_SCREENS[contactScreen];
   const content=contactScreen===0?contactPreparation():contactScreen===1?contactRunning():contactScreen===2?contactRating():contactSummary();
   fuelle(main,contactButton('Alle meine Kontakte',()=>{if(canEditContact()&&!contactSaved)persistContact();liste();},{class:'contact-button b-back','data-read-navigation':true}),
-    el('p',{class:'contact-eyebrow'},(isPractice()?'Übung · Musterbank':aktiv.anbieter)+' · '+(B_KANAL[aktiv.kanal]||aktiv.kanal)),
+    el('p',{class:'contact-eyebrow'},(isPractice()?'Übung · Musterbank':aktiv.anbieter)+' · '+bKanalName(aktiv.anbieter,aktiv.kanal)+(fuerWen()?' · für '+(TEAM[fuerWen()]||fuerWen()):'')),
+    vertretungHinweis(),
     z.code!=='nicht angeboten'?el('ol',{class:'contact-progress','aria-label':'Ablauf'},CONTACT_SCREENS.map((label,index)=>el('li',{'aria-current':index===contactScreen?'step':null},el('span',{},index===2&&rating?(contactUI.ratingPage===1?'3b':'3a'):index+1),label))):null,
     el('h1',{class:'b-form-title',tabindex:'-1'},title),
     gesperrt()?el('p',{role:'alert',class:'b-alert'},'Diese Bank wurde schon genug kontaktiert. Bitte Salah melden.'):null,
@@ -520,7 +590,7 @@ function formular() {
   document.getElementById('b-step-status').textContent=window.PA6View.active()?'Nur lesen':'';
   fuelle(document.getElementById('b-nav-back'),contactScreen===2&&!rating?contactButton('Zurück zum Kontakt',()=>goContact(1),{'data-read-navigation':true}):null);
   fuelle(document.getElementById('b-nav-next'));
-  const finish=document.getElementById('fertig');finish.hidden=contactScreen!==3||contactSaved;finish.textContent='Speichern';
+  const finish=document.getElementById('fertig');finish.hidden=contactScreen!==3||contactSaved;finish.textContent='Speichern und abschliessen';
   if(activeId)document.getElementById(activeId)?.focus({preventScroll:true});
   else if(focusKey)[...document.querySelectorAll('['+focusKey+']')].find(node=>node.getAttribute(focusKey)===focusValue)?.focus({preventScroll:true});
   bUpdateReadiness();

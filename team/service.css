@@ -410,3 +410,6 @@ body.bgl-leiste.b-page .b-fuss{right:56px}
 .b-plan-row.is-late{box-shadow:inset 3px 0 0 #E7B9A8}
 @media(max-width:480px){.b-plan-row .b-row-state.is-laufend{max-width:84px;white-space:normal;text-align:center;line-height:1.2;border-radius:12px;padding:4px 8px}.b-plan-row{gap:8px;padding:10px 12px}.b-plan-row .b-row-time{width:62px;font-size:12px}.b-plan-row .b-row-main b{font-size:14px}}
 
+/* 18.11.2026 (A13): Leitung erfasst stellvertretend aus dem Einsatzplan */
+.b-plan-row .b-vertretung{flex:none;margin-left:auto;font-size:12.5px;white-space:nowrap}
+@media(max-width:480px){.b-plan-row{flex-wrap:wrap}.b-plan-row .b-vertretung{margin-left:70px}}

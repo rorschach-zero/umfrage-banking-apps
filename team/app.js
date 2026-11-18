@@ -112,7 +112,7 @@ function nextActions(rows) {
   });
   (data.areas||[]).filter(module=>module.next&&module.next.date).forEach(module=>{
     const next=module.next;
-    actions.push({due:next.date,title:module.title,description:'Nächster Kontakt · '+(next.block==='A'?'Vormittag':'Nachmittag')+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Formular'}[next.channel]||next.channel),tool:module.tool});
+    actions.push({due:next.date,title:module.title,description:'Nächster Kontakt · '+(next.block==='A'?'Vormittag':'Nachmittag')+' · '+next.provider+' '+({chat:'Chat',mail:'Mail',telefon:'Telefon',formular:'Kontaktformular'}[next.channel]||next.channel),tool:module.tool});
   });
   return sortRows(actions);
 }

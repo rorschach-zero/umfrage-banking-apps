@@ -13,11 +13,15 @@ const bFieldNotice0=fieldNotice;fieldNotice=function(text){bFieldNotice0(text);d
 let bKanalWahl={};
 let bOffen=null, startDay='', bListeOffen='', bZuteilung=null, bZuteilungFehler='', bAuswahl=null;
 const B_ANLIEGEN={Karte:'Karte im Ausland verloren',Anmeldung:'App auf neuem Handy einrichten',Zahlung:'Ist meine Zahlung angekommen?',Kontodokumente:'Kontoauszug für die Steuer'};
-const B_KANAL={chat:'Chat',mail:'E-Mail',formular:'Formular',telefon:'Telefon',keiner:'Gibt es nicht',schriftlich:'Schriftlich'};
+const B_KANAL={chat:'Chat',mail:'E-Mail',formular:'Kontaktformular',telefon:'Telefon',keiner:'Gibt es nicht',schriftlich:'Schriftlich'};
 const B_ICONS={check:'M5 12.5l4.2 4.2L19 7',chev:'M9 6l6 6-6 6',back:'M15 6l-6 6 6 6',ext:'M14 5h5v5M19 5l-8 8M18 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4',alert:'M12 8v5M12 16.5v.5M10.3 4.2 3 17a2 2 0 0 0 1.7 3h14.6a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0z'};
 function bIcon(name){const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),path=document.createElementNS(ns,'path');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('aria-hidden','true');svg.setAttribute('class','b-ico b-ico-'+name);path.setAttribute('d',B_ICONS[name]);svg.append(path);return svg;}
 function bWas(row){return row.anbieter+' · '+(B_ANLIEGEN[row.anliegen]||row.anliegen);}
-function bKanalText(row){return B_KANAL[row.kanal]||row.kanal;}
+// 18.11.2026 (Korrekturliste A4): Zak hat keinen Chat, schriftlich gibt es nur das Kontaktformular (Testprotokoll, Nachtrag 15.11.;
+// Plan und Beobachtung seit 18.11. mit kanal «formular»). Ein alter Eintrag «chat» bei Zak heisst darum ebenfalls Kontaktformular.
+// Überall, wo ein Kanal angezeigt wird, über diese eine Funktion.
+function bKanalName(anbieter,kanal){return anbieter==='Zak'&&kanal==='chat'?B_KANAL.formular:B_KANAL[kanal]||kanal;}
+function bKanalText(row){return bKanalName(row.anbieter,row.kanal);}
 // Feste Zuteilung (ab 13.11.2026, Yuh und Zak, ein Durchgang): Der Empfänger liefert service.fixed und service.planned
 // (Anbieter der eigenen Kontakte). Ohne fixed gilt der bisherige Ablauf unverändert.
 function bFest(state){state=state||daten?.service;return !!state&&state.fixed===true&&Array.isArray(state.planned);}
@@ -209,14 +213,17 @@ function bEinsatzplan(state){
   const stand=r=>['laufend','abgeschlossen'].includes(r.stand)?r.stand:'offen',spaet=r=>!!r.tag&&r.tag<heute()&&stand(r)==='offen';
   const fertig=rows.filter(r=>stand(r)==='abgeschlossen').length,laeuft=rows.filter(r=>stand(r)==='laufend').length,zuSpaet=rows.filter(spaet).length;
   const box=el('details',{class:'b-list b-plan'},el('summary',{},'Einsatzplan · alle '+rows.length+' Kontakte',el('span',{class:'b-count'},fertig+' erledigt'+(laeuft?' · '+laeuft+' läuft':'')+(zuSpaet?' · '+zuSpaet+' überfällig':'')),bIcon('chev')),
-    el('div',{},el('ul',{},rows.map(r=>el('li',{class:'b-row b-plan-row'+(spaet(r)?' is-late':'')},
+    el('div',{},el('ul',{},rows.map(r=>{const v=bVertretungZeile(r);return el('li',{class:'b-row b-plan-row'+(spaet(r)?' is-late':''),'data-nr':r.nr},
       el('span',{class:'b-row-time'},bTag(r.tag).replace(/^Heute, /,'')),
       el('span',{class:'b-row-main'},el('b',{},bWas(r)),el('small',{},(TEAM[r.person]||r.person||'noch niemand')+' · '+bKanalText(r)+(spaet(r)?' · überfällig':''))),
-      el('span',{class:'b-row-state is-'+stand(r)},stand(r)==='abgeschlossen'?'erledigt':stand(r)==='laufend'?'läuft, Antwort offen':'offen')))),
-      el('p',{class:'b-foot-note'},'Nur zum Lesen. Jede Person erfasst und verschiebt ihre Kontakte selbst.')));
+      el('span',{class:'b-row-state is-'+stand(r)},stand(r)==='abgeschlossen'?'erledigt':stand(r)==='laufend'?'läuft, Antwort offen':'offen'),
+      v?el('button',{type:'button',class:'chip b-vertretung','data-read-navigation':true,on:{click:()=>oeffne(v)}},(stand(r)==='offen'?'Für ':stand(r)==='laufend'?'Weiter für ':'Ansehen für ')+(TEAM[r.person]||r.person)+(stand(r)==='offen'?' erfassen':'')):null);})),
+      el('p',{class:'b-foot-note'},Array.isArray(daten?.vertretung)?'Kontakte anderer erfasst du stellvertretend; sie bleiben der Person zugeteilt, im Blatt steht «erfasst durch …».':'Nur zum Lesen. Jede Person erfasst und verschiebt ihre Kontakte selbst.')));
   box.open=!bPlanZu;box.addEventListener('toggle',()=>{bPlanZu=!box.open;});
   return box;
 }
+// A13 (18.11.2026): Die Leitung bekommt vom Empfänger «vertretung» (Kontakte der anderen mit Erfassung) und kann sie hier öffnen.
+function bVertretungZeile(r){if(window.PA6View.active())return null;return (Array.isArray(daten?.vertretung)?daten.vertretung:[]).find(v=>v.nr===r.nr&&v.person&&v.person!==daten.person)||null;}
 function bKontaktliste(echte){
   const offen=echte.filter(r=>statusVon(r)!=='abgeschlossen'),fertig=echte.filter(r=>statusVon(r)==='abgeschlossen'),tage=[...new Set(offen.map(r=>r.tag||''))];
   const box=el('details',{class:'b-list'},el('summary',{},'Alle '+echte.length+' Kontakte',el('span',{class:'b-count'},offen.length+' offen'),bIcon('chev')),
@@ -235,7 +242,7 @@ const KANAELE_BELEGT={
        telefon:[{kanal:'telefon',text:'+41 44 825 87 89 · Mo–Fr 08–19 Uhr',quelle:'https://www.yuh.com/de/contact/'}]},
   Neon:{schriftlich:[{kanal:'chat',text:'In-App-Hilfe, laut Neon KI-gestützt',quelle:'https://www.neon-free.ch/blog/der-neon-kundenservice-ganz-ohne-filiale'},{kanal:'mail',text:'service@neon-free.ch · von der hinterlegten Adresse schreiben · Antwort innert zwei Arbeitstagen',quelle:'https://www.neon-free.ch/kontakt'}],
         telefon:[{kanal:'keiner',text:'Gratis-Plan · kein Telefonservice laut Neon',quelle:'https://www.neon-free.ch/faq/wie-erreiche-ich-euch-am-besten'}]},
-  Zak:{schriftlich:[{kanal:'chat',text:'Nachricht in der App («Nachricht im DigitalBanking»)',quelle:'https://www.cler.ch/de/services/hilfe-und-kontakt/hilfethemen/zak'},{kanal:'formular',text:'Zak-Kontaktformular · nur Domizil Schweiz',quelle:'https://www.cler.ch/de/services/kontakt/kontaktformular-zak'}],
+  Zak:{schriftlich:[{kanal:'formular',text:'Zak-Kontaktformular · nur Domizil Schweiz',quelle:'https://www.cler.ch/de/services/kontakt/kontaktformular-zak'}],
        telefon:[{kanal:'telefon',text:'0848 845 245 · Mo–Fr 8–18 Uhr',quelle:'https://www.cler.ch/de/services/hilfe-und-kontakt/hilfethemen/zak'}]},
   Revolut:{schriftlich:[{kanal:'chat',text:'Chat in der App · Profil > Chats > Support · rund um die Uhr',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'}],
            telefon:[{kanal:'keiner',text:'Gratis-Plan · Anruf nur mit Ultra-Abo und deshalb nicht angeboten',quelle:'https://help.revolut.com/de-CH/help/profile-and-plan/how-can-i-contact-revolut-support/'}]}
@@ -252,7 +259,7 @@ function channelSetup(state,fehlend){
   // Darum nur die Wege der eigenen Kontakte anbieten; die Leitung (sie bekommt service.team) sieht alle.
   const paare=bKanalPaare(state),banken=paare?[...new Set(paare.map(p=>p.split('|')[0]))]:state.selected,arten=['schriftlich','telefon'].filter(art=>!paare||paare.some(p=>p.endsWith('|'+art)));
   const provider=el('select',{id:'channel-provider'},banken.map(a=>el('option',{value:a},a))),kind=el('select',{id:'channel-kind'},arten.map(art=>el('option',{value:art},art==='telefon'?'Telefon':'Schriftlich'))),
-    channel=el('select',{id:'channel-value'},['chat','mail','formular','telefon','keiner'].map(a=>el('option',{value:a},{chat:'Chat',mail:'E-Mail',formular:'Formular',telefon:'Telefon',keiner:'Gibt es nicht'}[a]))),source=el('input',{id:'channel-source',type:'url',placeholder:'https://…'}),date=el('input',{id:'channel-date',type:'date',max:heute(),value:heute()}),checked=el('input',{type:'checkbox',id:'channel-checked'});
+    channel=el('select',{id:'channel-value'},['chat','mail','formular','telefon','keiner'].map(a=>el('option',{value:a},{chat:'Chat',mail:'E-Mail',formular:'Kontaktformular',telefon:'Telefon',keiner:'Gibt es nicht'}[a]))),source=el('input',{id:'channel-source',type:'url',placeholder:'https://…'}),date=el('input',{id:'channel-date',type:'date',max:heute(),value:heute()}),checked=el('input',{type:'checkbox',id:'channel-checked'});
   const belegt=new Set((state.channels||[]).map(r=>r.anbieter+'|'+r.art));
   const vorschlaege=banken.flatMap(a=>['schriftlich','telefon'].filter(art=>!belegt.has(a+'|'+art)&&(!paare||paare.includes(a+'|'+art))).map(art=>({a,art,optionen:(KANAELE_BELEGT[a]||{})[art]||[]}))).filter(v=>v.optionen.length);
   const formular=el('div',{class:'channel-form'});
@@ -285,7 +292,7 @@ function channelSetup(state,fehlend){
         v.optionen.length>1?el('p',{class:'leise'},'Zwei Möglichkeiten. Was für dein Konto gilt, entscheidest du mit Ernes.'):null,
         v.optionen.map(o=>el('div',{class:'kanal-option'},el('span',{},o.text),el('a',{href:o.quelle,target:'_blank',rel:'noopener','data-read-navigation':true},'Quelle',bIcon('ext')),
           el('button',{type:'button',class:'chip',on:{click:()=>uebernehmen(v.a,v.art,o)}},'Übernehmen')))))):null,
-    state.channels.length?el('ul',{class:'channel-done'},state.channels.map(r=>el('li',{},bIcon('check'),r.anbieter+' · '+r.art+' · '+(B_KANAL[r.kanal]||r.kanal)+' · geprüft '+r.abruf))):null,
+    state.channels.length?el('ul',{class:'channel-done'},state.channels.map(r=>el('li',{},bIcon('check'),r.anbieter+' · '+r.art+' · '+bKanalName(r.anbieter,r.kanal)+' · geprüft '+r.abruf))):null,
     formular);
   if(!schnell&&!fehlend.length&&!state.channels.length)return alles;
   const mehr=el('details',{class:'b-more b-channel-more'},el('summary',{},schnell?'Anderer Kontaktweg oder alle Vorschläge':'Kontaktwege ansehen oder ändern'),el('div',{},alles));
