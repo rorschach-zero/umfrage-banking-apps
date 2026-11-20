@@ -4,7 +4,8 @@
   const status=document.getElementById('status'),identity=document.getElementById('identity'),refresh=document.getElementById('refresh');
   let key='',generation=0,controller=null,timer=null,view=null,mode='marketing',chosenMode=false,lane='offen',rules=[],memos=[],slot='',pending=true,stale=false,lastFocus=null,extraRules=[];
   const requestedMode=new URLSearchParams(location.search).get('mode');
-  if(['marketing','projekt','zeitplan'].includes(requestedMode)){mode=requestedMode;chosenMode=true;}
+  const wantMode=['marketing','projekt','zeitplan'].includes(requestedMode)?requestedMode:'';
+  if(wantMode){mode=wantMode;chosenMode=true;}
   const G=window.CentralGantt;
   let storageWarning=false,noticeTimer,cacheSlot='',cacheWarning=false;
   const target=()=>window.PA6View?.target()||'';
@@ -133,7 +134,7 @@
     }
   }
   function accessChanged() {
-    generation++;controller?.abort();clearTimeout(timer);view=null;memos=[];slot='';extraRules=[];identity.textContent='';chosenMode=false;key='';cacheSlot='';cacheWarning=false;
+    generation++;controller?.abort();clearTimeout(timer);view=null;memos=[];slot='';extraRules=[];identity.textContent='';chosenMode=!!wantMode;if(wantMode)mode=wantMode;key='';cacheSlot='';cacheWarning=false;
     const incoming=new URLSearchParams(location.hash.slice(1)).get('k');
     try{if(incoming){localStorage.setItem('pa6k',incoming);window.PA6View?.clear();}key=incoming||localStorage.getItem('pa6k')||'';}catch{key=incoming||'';}
     history.replaceState(null,'',location.pathname+location.search);main.innerHTML=R.skeleton(mode);load();
