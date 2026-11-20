@@ -1,0 +1,182 @@
+{
+  "readDate": "18.11.2026",
+  "date": "2026-11-18",
+  "source": "Gesamtprüfung Runde 1 vom 18.11.2026, Abschnitte 2–6; Termine.md",
+  "people": {
+    "SA": {
+      "name": "Salah",
+      "role": "Projektleitung",
+      "absence": null,
+      "task": {
+        "ref": "AP-008",
+        "sourceTitle": "Arbeitsplan und Zeitplan der Gruppe",
+        "sourceUrl": "https://app.notion.com/409b3063a12681d5b2cbfd94eacfada0",
+        "sourceDone": "Jedes Paket hat Verantwortliche, Aufwand, Termine und Risiken; der Zeitplan zeigt Phasen, Abhängigkeiten, Freigaben, Reserven und Abwesenheiten.",
+        "title": "Die nächsten Wochen absichern",
+        "next": "Kläre die Vertretung und die noch fehlende Verfügbarkeit.",
+        "steps": [
+          "Verfügbarkeit von Arber ergänzen",
+          "Vertretung für Leonie festhalten",
+          "Plan und offene Freigabe gemeinsam prüfen"
+        ],
+        "due": "2026-11-18",
+        "plannedHours": 5,
+        "done": "Jedes Paket hat Verantwortliche, Aufwand, Termine und Risiken; der Zeitplan zeigt Phasen, Abhängigkeiten, Freigaben, Reserven und Abwesenheiten.",
+        "criteriaProposed": false
+      },
+      "risk": "Ohne bestätigte Kapazität bleibt der Restplan unsicher. Halte Zusagen und offene Punkte getrennt fest.",
+      "memberRisk": "Daran arbeitet Salah gerade."
+    },
+    "ES": {
+      "name": "Ernes",
+      "role": "Servicebeobachtung",
+      "absence": null,
+      "task": {
+        "ref": "AP-035",
+        "sourceTitle": "Servicebeobachtung · Kontakte 19.–20.11. (neu inkl. Yuh-Telefon und B29), späte Antworten bis 23.11. begleiten (verantwortlich)",
+        "sourceUrl": "https://app.notion.com/40bb3063a1268193a859c28037bfc8a0",
+        "sourceDone": "Jeder Kontakt ist im Servicetest abgeschlossen oder als begründeter Ausfall markiert, und Antworten, die bis 23.11. eintreffen, sind nachgetragen.",
+        "title": "Die Servicekontakte zu Ende begleiten",
+        "next": "Prüfe die offenen Kontakte und die späten Antworten.",
+        "steps": [
+          "Offene Kontakte im Einsatzplan prüfen",
+          "Fehlende Angaben mit der ausführenden Person klären",
+          "Späte Antworten und Datenprüfung dokumentieren"
+        ],
+        "due": "2026-11-23",
+        "plannedHours": 2,
+        "done": "Jeder Kontakt ist im Servicetest abgeschlossen oder als begründeter Ausfall markiert, und Antworten, die bis 23.11. eintreffen, sind nachgetragen.",
+        "criteriaProposed": false
+      },
+      "risk": "Wartezeit auf Antworten ist keine Arbeitszeit. Die ausführende Person bestätigt ihre tatsächliche Zeit."
+    },
+    "MG": {
+      "name": "Melisa",
+      "role": "Bewertungen",
+      "absence": null,
+      "task": {
+        "ref": "AP-036",
+        "sourceTitle": "Bewertungen: Einordnen für alle abschliessen",
+        "sourceUrl": "https://app.notion.com/40bb3063a12681d1a2effc893a45769f",
+        "sourceDone": "Am 21.11. ist jede Bewertung zweimal eingeordnet, jeder Unterschied entschieden, und du hast notiert, bei welchen Themen die Gruppe oft verschieden entschieden hat.",
+        "title": "Bewertungen gemeinsam abschliessen",
+        "next": "Deine Einordnungen sind erfasst. Jetzt braucht die Gruppe deine Koordination.",
+        "steps": [
+          "Fehlende ersten und zweiten Einordnungen prüfen",
+          "Unterschiede erst nach unabhängiger Einordnung klären",
+          "Sprachkorrektur und Auswertungsstand prüfen"
+        ],
+        "due": "2026-11-21",
+        "plannedHours": 10,
+        "done": "Alle zugeteilten ersten und zweiten Einordnungen sind erfasst. Unterschiede sind nachvollziehbar geklärt; Sprachkorrekturen und die Anteil der unabhängig zweimal eingeordneten Bewertungen sind vor der Auswertung geprüft.",
+        "criteriaProposed": true
+      },
+      "risk": "60 offene Einordnungen liegen bei der bis 23.11. abwesenden Leonie. Salah muss eine unabhängige Vertretung festhalten.",
+      "memberRisk": "Daran arbeitet Salah gerade."
+    },
+    "AM": {
+      "name": "Arber",
+      "role": "Online-Befragung",
+      "absence": null,
+      "task": {
+        "ref": "AP-034",
+        "sourceTitle": "Online-Befragung · weiterführen, bis die Umfrage am 01.12. schliesst",
+        "sourceUrl": "https://app.notion.com/40bb3063a126815cb0c0fa3651c7355c",
+        "sourceDone": "Bis die Umfrage am 01.12. um 23:59 schliesst, hast du Salah gemeldet, wo verteilt wurde, wie viele Antworten kamen, wie weit ihr vom Ziel seid und was ansteht.",
+        "title": "Die Umfrage bis zum Ende der Erhebung begleiten",
+        "next": "Vergleiche den Stand mit dem Ziel und halte den nächsten Verteilort fest.",
+        "steps": [
+          "Antwortzahlen im Dashboard prüfen",
+          "Verteilorte und Zuständige ergänzen",
+          "Stand und nächste Schritte dokumentieren"
+        ],
+        "due": "2026-12-01",
+        "plannedHours": 12,
+        "done": "Bis die Umfrage am 01.12. um 23:59 schliesst, hast du Salah gemeldet, wo verteilt wurde, wie viele Antworten kamen, wie weit ihr vom Ziel seid und was ansteht.",
+        "criteriaProposed": false
+      },
+      "risk": "Deine Verfügbarkeit fehlt noch. Halte fest, wann du bis 12.12. arbeiten kannst."
+    },
+    "LB": {
+      "name": "Leonie",
+      "role": "Qualität und Formales",
+      "absence": "Bis 23.11. abwesend",
+      "task": {
+        "ref": "AP-039",
+        "sourceTitle": "Coachings vom 19.11. bis 08.12. vorbereiten und festhalten",
+        "sourceUrl": "https://app.notion.com/40bb3063a12681179334cce3af7f43cf",
+        "sourceDone": "Für jedes Coaching zwischen 19.11. und 08.12. stehen im Coaching-Protokoll Fragen, wer da war, Antworten und Folgeaufgaben mit Person und Frist, je innert 24 Stunden eingetragen.",
+        "title": "Das nächste Coaching vorbereiten",
+        "next": "Nach deiner Abwesenheit: Sammle offene Fragen und sichere die Antworten.",
+        "steps": [
+          "Bestätigten Termin und Fragen sammeln",
+          "Antworten und tatsächliche Teilnahme festhalten",
+          "Folgeaufgaben mit Person und Frist ergänzen"
+        ],
+        "due": "2026-12-08",
+        "plannedHours": 1,
+        "done": "Für jedes Coaching zwischen 19.11. und 08.12. stehen im Coaching-Protokoll Fragen, wer da war, Antworten und Folgeaufgaben mit Person und Frist, je innert 24 Stunden eingetragen.",
+        "criteriaProposed": false
+      },
+      "risk": "Während deiner Abwesenheit bis 23.11. liegen Fristen. Salah muss die Vertretung klären.",
+      "memberRisk": "Daran arbeitet Salah gerade."
+    }
+  },
+  "gate": {
+    "name": "Grundlagen freigeben",
+    "status": "offen",
+    "owner": "Salah",
+    "ref": "MS-05",
+    "url": "https://app.notion.com/40bb3063a12681579942f29103390817"
+  },
+  "deadlines": [
+    {
+      "date": "2026-11-21",
+      "title": "Bewertungen einordnen",
+      "detail": "Zugeteilte Rollen abschliessen",
+      "type": "Ende der Erhebung"
+    },
+    {
+      "date": "2026-11-23",
+      "title": "Späte Serviceantworten",
+      "detail": "Späte Antworten prüfen · Projektmanagement-Unterricht",
+      "type": "Intern / Unterricht"
+    },
+    {
+      "date": "2026-12-01",
+      "title": "Umfrage schliesst",
+      "detail": "23:59 Uhr · danach Daten sichern",
+      "type": "Ende der Erhebung"
+    },
+    {
+      "date": "2026-12-03",
+      "title": "Daten auswerten",
+      "detail": "Arber führt die Ergebnisse zusammen",
+      "type": "Interner Plan"
+    },
+    {
+      "date": "2026-12-05",
+      "title": "Stärken und Risiken ableiten",
+      "detail": "Ernes führt die Analyse zusammen",
+      "type": "Interner Plan"
+    },
+    {
+      "date": "2026-12-09",
+      "title": "Rohfassung zusammenführen",
+      "detail": "Salah prüft die Übergaben",
+      "type": "Interner Plan"
+    },
+    {
+      "date": "2026-12-10",
+      "title": "Kürzen und gegenlesen",
+      "detail": "Layout und Verzeichnisse prüfen",
+      "type": "Interner Plan"
+    },
+    {
+      "date": "2026-12-12",
+      "title": "PA6a abgeben",
+      "detail": "23:59 Uhr · Uploadbeleg sichern",
+      "type": "Schulfrist"
+    }
+  ]
+}

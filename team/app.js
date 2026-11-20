@@ -122,8 +122,9 @@ function workLink(row) {
   if (!url || url.username || url.password) return null;
   // Kapitel haben einen internen Schreibplatz; sonst keinen unpassenden Ersatzlink erfinden.
   const notionLink=url.protocol==='https:' && /(^|\.)notion\.(so|site)$|^app\.notion\.com$|^www\.notion\.so$/.test(url.hostname);
-  if (notionLink) return row.source==='chapters'||row.area==='writing'?el('a',{class:'button secondary work-link',href:row.source==='chapters'?chapterHref(row):'/team/schreiben/'},'Schreibplatz öffnen'):null;
-  const internal=(url.origin===location.origin || url.hostname==='umfrage.hydeout.ch') && (/^\/team\/(?:b|c|schreiben|projektauftrag|projekt|dashboard|frag)(?:\/|$)/.test(url.pathname)||(url.pathname==='/team/'&&/^\?view=(?:sharing|today|tasks)$/.test(url.search)));
+  if (notionLink && (row.source==='chapters'||row.area==='writing')) return el('a',{class:'button secondary work-link',href:row.source==='chapters'?chapterHref(row):'/team/schreiben/'},'Schreibplatz öffnen');
+  if (notionLink && !leadership) return null;
+  const internal=(url.origin===location.origin || url.hostname==='umfrage.hydeout.ch') && (/^\/team\/(?:b|c|schreiben|projektauftrag|projekt|dashboard|zentrale|frag)(?:\/|$)/.test(url.pathname)||(url.pathname==='/team/'&&/^\?view=(?:sharing|today|tasks)$/.test(url.search)));
   const doc=url.protocol==='https:' && url.hostname==='docs.google.com' && /^\/document\//.test(url.pathname);
   const drive=url.protocol==='https:' && url.hostname==='drive.google.com';
   if(!internal&&!doc&&!drive&&!notionLink)return null;
@@ -167,7 +168,12 @@ function relativeDue(row){
   return (row.status==='in Prüfung'?'In Prüfung':completed(row)?'Erledigt':diff<0?'Überfällig':diff===0?'Heute':diff===1?'Morgen':'in '+diff+' Tagen')+' · '+date(row.due,true);
 }
 function mayReport(row){return !preview.active() && ['psp','assignments'].includes(row.source) && ['offen','läuft'].includes(row.status) && (row.owner===data.person||leadership);}
-function canReport(row){return state==='ready' && mayReport(row);}
+function accessUnchanged(){
+  if(config.demo)return true;
+  const incoming=new URLSearchParams(location.hash.slice(1)).get('k');
+  try{return !!key && (incoming||localStorage.getItem('pa6k')||key)===key;}catch{return !!key&&!incoming;}
+}
+function canReport(row){return !!data && ['ready','cached','stale'].includes(state) && accessUnchanged() && data.sources?.[row.source]?.state==='ready' && mayReport(row);}
 function taskRow(row){
   const waiting=pending?.id===row.id;
   const check=button(completed(row)?'✓':row.status==='in Prüfung'?'·':'',()=>report(row),'task-check'+(waiting?' is-pending':'')+(completed(row)?' is-done':''));
@@ -414,11 +420,16 @@ function groupLine(){
 }
 function showToday(){
   if(leadership && data.person==='SA')return showLeadership();
-  const rows=dedupeChapterTasks(personalRows()),sunday=sundayIso(),open=rows.filter(r=>!completed(r)&&r.status!=='in Prüfung'),late=open.filter(overdue).length+fixedSteps.filter(s=>stepOpen(s)&&s.when&&daysUntil(s.when)<0).length;
+  const rows=dedupeChapterTasks(personalRows()),sunday=sundayIso(),open=rows.filter(r=>!completed(r)&&r.status!=='in Prüfung');
+  const late=dedupeChapterTasks(personalRows().filter(r=>r.owner===data.person)).filter(r=>!completed(r)&&r.status!=='in Prüfung'&&overdue(r)).length;
+  const lateRead=dedupeChapterTasks(personalRows().filter(r=>r.reader===data.person&&r.owner!==data.person)).filter(r=>!completed(r)&&r.status!=='in Prüfung'&&overdue(r)).length;
+  const lateSteps=fixedSteps.filter(s=>stepOpen(s)&&s.when&&daysUntil(s.when)<0).length;
   const due=open.filter(r=>r.due&&day(r.due)<=sunday).length+fixedSteps.filter(s=>s.when&&s.when<=sunday&&stepOpen(s)).length;
   const known=todayKnown();
   const parts=[due?el('b',{},due+(due===1?' Sache':' Dinge')+' bis Sonntag'):el('span',{},known?'Bis Sonntag nichts offen':'Stand unbekannt'),
-    late?button(late+' überfällig',()=>{area='';navigate('tasks');},'text-button summary-late'):null,
+    late?button(late+' eigene Aufgaben überfällig',()=>{area='';navigate('tasks');},'text-button summary-late'):null,
+    lateRead?button(lateRead+' Gegenlesungen überfällig',()=>{area='';navigate('tasks');workRole='read';render();},'text-button'):null,
+    lateSteps?el('span',{},lateSteps+' feste Schritte überfällig'):null,
     nextMeeting()?el('span',{},nextMeeting()):null].filter(Boolean);
   const summary=el('p',{class:'today-summary'});parts.forEach((p,i)=>{if(i)summary.append(el('span',{class:'sep','aria-hidden':'true'},' · '));summary.append(p);});
   const head=el('div',{class:'heading today-head'},el('div',{},el('h1',{},greeting()+', '+names[data.person]),summary),el('div',{class:'today-side'},el('span',{class:'date-label'},date(today())),awayButton()));
@@ -819,6 +830,12 @@ const DEST=[[/Team-App\s*›\s*Bewertungen/,()=>'/team/c/','Bewertungen öffnen'
   [/Schreibplatz\s*›\s*Kapitel\s*([\w.-]+)/,(m)=>'/team/schreiben/?k='+encodeURIComponent(m[1]),'Kapitel öffnen'],
   [/Schreibplatz|Kapitel-Doc/,(m,row)=>row.source==='chapters'&&row.ref?'/team/schreiben/?k='+encodeURIComponent(row.ref):'/team/schreiben/','Kapitel öffnen']];
 function stepDest(row,text){
+  if(/Coaching[- ]Protokoll/i.test(text))return{href:'/team/projekt/?formular=coaching',label:'Coaching-Protokoll öffnen'};
+  if(/Risikoregister|Risiko erfassen/i.test(text))return{href:'/team/projekt/?formular=risiko',label:'Risiko festhalten'};
+  if(/\bPSP\b|\bGantt\b|Terminplan/i.test(text)){
+    const plan=leadership?workLink(row):null;
+    return plan?{href:plan.getAttribute('href'),label:plan.textContent}:{href:'/team/zentrale/?mode=zeitplan',label:'Zeitplan öffnen'};
+  }
   for(const[re,href,label]of DEST){const m=re.exec(text);if(m)return{href:href(m,row),label};}
   const link=workLink(row);
   return link?{href:link.getAttribute('href'),label:link.textContent}:null;
@@ -959,9 +976,8 @@ function needsClosureZeit(row,target){
 function proceedReport(row,target='in Prüfung',opts){
   const relaxed=!!(opts&&opts.relaxed),note=opts&&opts.note||'';
   if(preview.active()||pending||noteSaving||!data||state==='unauthorized'||state==='loading')return;
-  if(!relaxed&&state!=='ready')return;
-  if(relaxed&&!['ready','stale','cached','error'].includes(state))return;
-  if(!mayReport(row)&&!(state==='ready'&&canReview(row)&&['fertig','läuft'].includes(target)))return;
+  if(!accessUnchanged())return;
+  if(!canReport(row)&&!(state==='ready'&&canReview(row)&&['fertig','läuft'].includes(target)))return;
   if(config.demo){toast('In der Vorschau wird kein Status gespeichert.');return;}
   const access=key,lead=leadership,identity=data.person;
   const before=structuredClone(data), serverRow={...row};
@@ -985,7 +1001,7 @@ function proceedReport(row,target='in Prüfung',opts){
   toast(note+(returning?'Zurückgeben':target==='läuft'?'Start':target==='fertig'?'Abnahme':'Fertigmeldung')+' wird in 5 Sekunden gespeichert.',undo);$('detail').close();render();
   operation.timer=setTimeout(async()=>{
     if(pending!==operation)return;
-    if(key!==access||data?.person!==identity){pending=null;toast('Zugang geändert. Meldung zurückgenommen.');return;}
+    if(key!==access||!accessUnchanged()||data?.person!==identity){pending=null;toast('Zugang geändert. Meldung zurückgenommen.');return;}
     toast('Wird gespeichert …');
     try{
       if(serverRow.status==='offen'&&target==='in Prüfung')await postStatus(serverRow,'offen','läuft',access,lead);
@@ -1017,7 +1033,7 @@ function abschlussOeffnen(row){
   const access=key,identity=data.person,ea=row.source==='assignments',paket=PA6Zeit.taskPaket(row);
   // Gezählte Zeit (Abschnitt 4.2, Zeile 1b): Arbeitspaket aus zeit.pakete, Erhebungsauftrag aus zeit.auftraege (automatische Zeilen im Zeitraum).
   const gezaehlt=ea?+(data.zeit?.auftraege?.[row.ref||row.id]||0):paket?+(data.zeit?.pakete?.[paket]||0):0;
-  const darf=()=>key===access&&data?.person===identity&&!preview.active();
+  const darf=()=>key===access&&accessUnchanged()&&data?.person===identity&&!preview.active()&&!['unauthorized','loading','error'].includes(state);
   let gemerkterStart=null;
   if($('detail').open)$('detail').close();
   PA6Zeit.abschliessen({titel:shortTitle(row),auftrag:{id:row.id,quelle:row.source},fragen:{lief:true,ki:row.area==='writing'},
@@ -1037,7 +1053,7 @@ function abschlussOeffnen(row){
     onAbbruch:()=>{if(darf()&&data)details(row);}});
 }
 function report(row,target='in Prüfung'){
-  if(preview.active()||pending||noteSaving||state!=='ready'||(!canReport(row)&&!(canReview(row)&&['fertig','läuft'].includes(target))))return;
+  if(preview.active()||pending||noteSaving||!accessUnchanged()||(!canReport(row)&&!(canReview(row)&&['fertig','läuft'].includes(target))))return;
   if(needsClosureZeit(row,target)&&!config.demo){
     if(leadership&&row.owner&&row.owner!==data.person){
       proceedReport(row,target,{note:'Die Arbeitszeit erfasst '+(names[row.owner]||'die ausführende Person')+' selbst. '});
