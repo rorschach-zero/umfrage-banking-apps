@@ -16,7 +16,6 @@ const forms={
  beitrag:{title:'6b-Beiträge',intro:'Ordnet deinen Textbeitrag einem Abschnitt der vorgegebenen 6b-Gliederung zu (eigener Beitrag zu einem 6b-Abschnitt).',fields:[['abschnitt','Abschnitt',ABSCHNITTE_6B.map(row=>row.id)],['beitrag','Beitrag','textarea'],['stand','Stand',['Entwurf','in Bearbeitung','zur Prüfung']]]}
 };
 let active=FORM_ORDER.includes(new URLSearchParams(location.search).get('formular'))?new URLSearchParams(location.search).get('formular'):FORM_ORDER[0],who='',saving=false,draft=null,receipts=[],loaded=false,pakete=[];
-let draftAccess='';
 const $=id=>document.getElementById(id),drafts=new Map();
 function abschnittLabel(id){return ABSCHNITTE_6B.find(row=>row.id===String(id))?.title||('Abschnitt '+id);}
 function newDraft(){return {id:crypto.randomUUID(),values:{},tasks:[],none:false,uncertain:false};}
@@ -65,7 +64,6 @@ function missing(){
  return result;
 }
 function update(){
- persistDraft();
  const absent=missing();$('project-save').disabled=saving||!loaded||draft.uncertain||absent.length>0;
  $('project-ready').textContent=draft.uncertain?'Der Eingang ist noch unbestätigt. Wiederhole denselben Speicherauftrag.':absent.length?(draft.touched&&[...draft.touched].some(k=>forms[active].fields.some(f=>f[0]===k&&fieldInvalid(f[0],f[1],f[2]||'text')))?'Bitte prüfe die markierten Felder.':'Füll die Felder aus, dann kannst du speichern.'):'Alle Pflichtfelder sind vollständig.';
  $('project-ready').className='project-ready'+(!absent.length?' ok':'');
@@ -86,14 +84,13 @@ function taskFields(){
  return box;
 }
 function renderForm(){
- persistDraft();
  const spec=forms[active];
  $('project-tabs').replaceChildren(...FORM_ORDER.map((key,index)=>{
   const unlocked=true;
-  return el('button',{type:'button',class:'chip','aria-pressed':String(key===active),disabled:saving||!unlocked,on:{click:()=>{active=key;draft=drafts.get(key)||restoreDraft(key)||newDraft();drafts.set(key,draft);renderForm();showNext();}}},String(index+1)+'. '+forms[key].title);
+  return el('button',{type:'button',class:'chip','aria-pressed':String(key===active),disabled:saving||!unlocked,on:{click:()=>{active=key;draft=drafts.get(key)||newDraft();drafts.set(key,draft);renderForm();showNext();}}},String(index+1)+'. '+forms[key].title);
  }));
  const fields=el('div',{class:'project-fields'},spec.fields.map(([key,label,type])=>field(key,label,type,draft.values[key],e=>{draft.values[key]=e.target.value;update();})),active==='coaching'?taskFields():null);
- const form=el('form',{novalidate:true,on:{submit:e=>{e.preventDefault();save();}}},el('h2',{},spec.title),el('p',{},spec.intro),el('p',{class:'leise'},(active==='arbeitszeit'?'Alle Felder ausser dem Arbeitspaket sind Pflichtfelder.':'Alle Felder sind Pflichtfelder.')+' Dein Entwurf bleibt auf diesem Gerät für deinen Zugang gespeichert.'),fields,el('p',{id:'project-ready',role:'status','aria-live':'polite'}),el('div',{class:'project-actions'},el('button',{id:'project-save',class:'knopf',type:'submit',disabled:true},draft.id&&receipts.some(r=>r.id===draft.id)?'Änderung speichern':'Speichern'),draft.uncertain?el('button',{type:'button',class:'knopf hell',on:{click:()=>save(true)}},'Speicherauftrag wiederholen'):null),el('p',{id:'project-message',class:'project-message',role:'status'}));
+ const form=el('form',{novalidate:true,on:{submit:e=>{e.preventDefault();save();}}},el('h2',{},spec.title),el('p',{},spec.intro),el('p',{class:'leise'},(active==='arbeitszeit'?'Alle Felder ausser dem Arbeitspaket sind Pflichtfelder.':'Alle Felder sind Pflichtfelder.')+' Deine Eingaben bleiben bis zum Speichern nur in diesem geöffneten Fenster.'),fields,el('p',{id:'project-ready',role:'status','aria-live':'polite'}),el('div',{class:'project-actions'},el('button',{id:'project-save',class:'knopf',type:'submit',disabled:true},draft.id&&receipts.some(r=>r.id===draft.id)?'Änderung speichern':'Speichern'),draft.uncertain?el('button',{type:'button',class:'knopf hell',on:{click:()=>save(true)}},'Speicherauftrag wiederholen'):null),el('p',{id:'project-message',class:'project-message',role:'status'}));
  $('project-form').replaceChildren(form);
  if(draft.uncertain)fields.querySelectorAll('input,textarea,select,button').forEach(n=>n.disabled=true);
  update();
@@ -143,15 +140,6 @@ function showSync(sync){
 function showNext(){
  $('project-next').replaceChildren(el('h2',{},'Was möchtest du festhalten?'),el('p',{},'Öffne das passende Formular direkt. Du musst keine anderen Formulare vorher ausfüllen.'),el('a',{href:'./'},'Zur Projektübersicht →'));
 }
-function draftStorageKey(type){return 'pa6-project-draft:'+who+':'+draftAccess+':'+type;}
-function persistDraft(){
- if(!who||!draft)return;
- try{localStorage.setItem(draftStorageKey(active),JSON.stringify({id:draft.id,values:draft.values,tasks:draft.tasks,none:draft.none,uncertain:draft.uncertain}));}catch{}
-}
-function restoreDraft(type){
- try{const d=JSON.parse(localStorage.getItem(draftStorageKey(type))||'null');return d&&typeof d.id==='string'&&d.values&&Array.isArray(d.tasks)?d:null;}catch{return null;}
-}
-
 function showServiceLink(){
  $('project-service-link').replaceChildren(
   el('h2',{},'Einsatzplan Servicetest'),
@@ -188,7 +176,7 @@ async function start(){
   const syncOk=data.sync&&typeof data.sync.enabled==='boolean'&&Array.isArray(data.sync.forms)&&data.sync.forms.length===keys.length&&data.sync.forms.every(row=>row&&forms[row.formular]&&typeof row.status==='string');
   const paketeOk=Array.isArray(data.pakete)&&data.pakete.every(row=>row&&/^AP-\d{3}$/.test(row.ref)&&typeof row.title==='string');
   if(!TEAM[data.person]||JSON.stringify(data.forms)!==JSON.stringify(keys)||!Array.isArray(data.receipts)||!data.receipts.every(receiptOk)||!syncOk||!paketeOk)throw Error('Der Projektbereich ist noch nicht bereitgestellt');
-  who=data.person;draftAccess=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(schluessel()))),b=>b.toString(16).padStart(2,'0')).join('');pakete=data.pakete;receipts=data.receipts;loaded=true;draft=restoreDraft(active)||newDraft();drafts.set(active,draft);$('wer').textContent=TEAM[who];$('project-loading').hidden=true;$('project-content').hidden=false;showNext();showServiceLink();renderForm();showReceipts();showSync(data.sync);
+  who=data.person;pakete=data.pakete;receipts=data.receipts;loaded=true;draft=newDraft();drafts.set(active,draft);$('wer').textContent=TEAM[who];$('project-loading').hidden=true;$('project-content').hidden=false;showNext();showServiceLink();renderForm();showReceipts();showSync(data.sync);
  }
  catch(error){$('project-loading').replaceChildren(el('span',{},error.message+' '),el('button',{type:'button',class:'chip',on:{click:start}},'Erneut laden'));}
 }
