@@ -3,6 +3,8 @@
   const M=window.CentralModel,R=window.CentralRender,C=window.CentralCache,main=document.getElementById('main'),overlay=document.getElementById('overlay');
   const status=document.getElementById('status'),identity=document.getElementById('identity'),refresh=document.getElementById('refresh');
   let key='',generation=0,controller=null,timer=null,view=null,mode='marketing',chosenMode=false,lane='offen',rules=[],memos=[],slot='',pending=true,stale=false,lastFocus=null,extraRules=[];
+  const requestedMode=new URLSearchParams(location.search).get('mode');
+  if(['marketing','projekt','zeitplan'].includes(requestedMode)){mode=requestedMode;chosenMode=true;}
   const G=window.CentralGantt;
   let storageWarning=false,noticeTimer,cacheSlot='',cacheWarning=false;
   const target=()=>window.PA6View?.target()||'';
@@ -172,4 +174,5 @@
   refresh.addEventListener('click',load);document.getElementById('tools').addEventListener('click',openTools);
   window.addEventListener('hashchange',accessChanged);window.addEventListener('storage',event=>{if(event.key==='pa6k')accessChanged();else if(event.key===slot){readMemos();render();}});
   accessChanged();
+  if(mode==='zeitplan')G.load().then(()=>{if(mode==='zeitplan'){render();G.scrollToday();}});
 })();
