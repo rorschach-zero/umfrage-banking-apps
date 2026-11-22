@@ -27,3 +27,8 @@ h1{max-width:20ch;text-wrap:balance;margin:6px 0 10px}
 .mp-abgabe{border-top:1px solid #d7ddd5;padding:14px 0}.mp-abgabe p{white-space:pre-wrap;margin:6px 0;line-height:1.5}
 button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #725298;outline-offset:3px}
 @media(max-width:620px){.mp-zwei{grid-template-columns:1fr}.mp-karte,.mp-anbieter{padding:16px}h1{font-size:30px}}
+.mp-aktionen .button,.mp-karte a.button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 18px;border-radius:9px;font:inherit;font-weight:800;text-decoration:none;cursor:pointer;border:1px solid #27684e}
+.mp-aktionen .button:not(.secondary){background:#27684e;color:#fff}
+.mp-aktionen .button.secondary,.mp-karte a.button.secondary{background:#fff;color:#1f5a40}
+.mp-aktionen .button:hover:not(:disabled){filter:brightness(.95)}
+.mp-aktionen .button:disabled{opacity:.6;cursor:wait}
