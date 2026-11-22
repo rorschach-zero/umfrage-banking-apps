@@ -10,11 +10,11 @@
       ]
     },
     b: {
-      question: 'die Servicebeobachtung',
+      question: 'die Service-Momentaufnahmen',
       lines: [
-        'Wir testen den Kundendienst von Yuh und Zak mit denselben Fragen, je sechs Kontakte.',
-        'eine kleine beschreibende Stichprobe mit Wartezeit und Lösung beim ersten Kontakt. Kein Beweis.',
-        'zeigt Beispiele und Auffälligkeiten, keine sichere Aussage über den ganzen Kundendienst.'
+        'Wir halten fest, was wir bei unseren Kontakten mit Yuh und Zak erlebt haben.',
+        'subjektive Momentaufnahmen mit wenigen Kontakten, in einem kurzen Zeitraum und von wenigen Personen.',
+        'liefert qualitative Hinweise und neue Fragen; keine Kennzahlen oder Rangfolge der Anbieter.'
       ]
     },
     c: {

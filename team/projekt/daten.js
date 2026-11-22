@@ -2,6 +2,8 @@
 (function(root,factory){if(typeof module==='object'&&module.exports)module.exports=factory();else root.ProjectData=factory();})(typeof globalThis!=='undefined'?globalThis:this,()=>{
 const names={SA:'Salah',ES:'Ernes',MG:'Melisa',AM:'Arber',LB:'Leonie'};
 function valid(result, as = '') {
+  if(result?.person!=='SA'&&result?.service?.evidence?.some(row=>Object.keys(row).some(k=>!['anbieter','kontaktweg','person','tag','state'].includes(k))))return false;
+
   const leadership = true;
   if (Date.parse(result?.fetchedAt) > Date.now()) return false;
   if (as ? result?.readOnly !== true || result?.viewer !== 'SA' || result?.person !== as || result?.role !== 'mitglied' : result?.readOnly || result?.viewer) return false;
@@ -21,12 +23,12 @@ function valid(result, as = '') {
     for(const row of result[name]||[])if(!row || typeof row.id!=='string' || ['Was','Warum','Fertig wenn',"So geht's",'Wo','Pia-Frage'].some(field=>row[field]!==undefined&&typeof row[field]!=='string'))return false;
   }
   if(result.areas!==undefined){
-    if(!Array.isArray(result.areas)||result.areas.some(a=>!a||!['b','c','writing','tasks'].includes(a.id)||typeof a.title!=='string'||!['ready','unknown'].includes(a.state)||!Array.isArray(a.taskIds)||a.taskIds.some(id=>typeof id!=='string')||['done','total','expected'].some(k=>a[k]!==null&&(!Number.isInteger(a[k])||a[k]<0))))return false;
+    if(!Array.isArray(result.areas)||result.areas.some(a=>!a||!['b','c','writing','tasks'].includes(a.id)||typeof a.title!=='string'||!['ready','unknown'].includes(a.state)||!Array.isArray(a.taskIds)||a.taskIds.some(id=>typeof id!=='string')||(a.id==='b'?a.method!=='qualitative_snapshot':['done','total','expected'].some(k=>a[k]!==null&&(!Number.isInteger(a[k])||a[k]<0)))))return false;
   }
   if(result.blockers!==undefined&&(!Array.isArray(result.blockers)||result.blockers.some(b=>!b||typeof b.text!=='string'||typeof b.question!=='string'||!/^hang:(overdue|dependency|backlog|contact|stop|consensus):([a-f0-9-]{32,36}|b|c|writing|tasks)$/.test(b.ctx)||result.role==='mitglied'&&b.owner!==result.person)))return false;
   if(result.leadership!==undefined&&result.leadership!==null){
     const count=v=>v===null||Number.isInteger(v)&&v>=0;
-    if(result.role!=='leitung'||!Array.isArray(result.leadership)||result.leadership.length!==5||new Set(result.leadership.map(row=>row.person)).size!==5||result.leadership.some(row=>!names[row.person]||!count(row.overdue)||!Number.isInteger(row.blockers)||row.blockers<0||!Number.isInteger(row.priority)||row.priority<0||row.priority>5||!['b','c','writing','tasks'].every(k=>row[k]===null||row[k]&&count(row[k].done)&&count(row[k].total))))return false;
+    if(result.role!=='leitung'||!Array.isArray(result.leadership)||result.leadership.length!==5||new Set(result.leadership.map(row=>row.person)).size!==5||result.leadership.some(row=>!names[row.person]||!count(row.overdue)||!Number.isInteger(row.blockers)||row.blockers<0||!Number.isInteger(row.priority)||row.priority<0||row.priority>5||!['c','writing','tasks'].every(k=>row[k]===null||row[k]&&count(row[k].done)&&count(row[k].total))||row.b?.method!=='qualitative_snapshot'))return false;
   }
   if(result.practice!==undefined&&result.practice!==null&&(!Number.isInteger(result.practice.total)||!Number.isInteger(result.practice.done)||result.practice.done<0||result.practice.done>result.practice.total))return false;
   if(result.documents!==undefined&&(!Array.isArray(result.documents)||result.documents.some(row=>!row||['id','group','title','purpose'].some(k=>typeof row[k]!=='string')||!['ready','unavailable'].includes(row.state)||(row.state==='ready'?!/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view$/.test(row.url||''):row.url!==null))))return false;
@@ -47,7 +49,7 @@ function clear(storage,ns){if(!ns)return;try{for(const key of keys(storage))if(k
 function plain(value){return String(value||'').replace(/:\s+/g,' · ').replace(/Doppelcodierquote/gi,'Anteil der unabhängig zweimal eingeordneten Bewertungen').replace(/Erst- und Zweitcodes/gi,'erste und zweite Einordnungen').replace(/Erstcodes/gi,'erste Einordnungen').replace(/Zweitcodes/gi,'zweite Einordnungen').replace(/Doppelcodierung/gi,'unabhängige Einordnung durch zwei Personen').replace(/Codierungen|Codes/gi,'Einordnungen').replace(/codieren/gi,'einordnen').replace(/Codierung/gi,'Einordnung').replace(/Feldschluss/gi,'Ende der Erhebung').replace(/Nachlauf/gi,'späte Antworten').replace(/Lesestand/gi,'Stand vom').replace(/\bTor\b/g,'Freigabe').replace(/\bPSP\b/g,'Aufgabenplan').replace(/\bPM\b/g,'Projektmanagement').replace(/\bPA6a\b/g,'erste Praxisarbeit').replace(/\bPA6b\b/g,'zweite Praxisarbeit').replace(/\bLead\b/gi,'verantwortlich').replace(/Präzisierter Vorschlag gemäss Codebuch/gi,'Vorschlag nach unseren Regeln für die Einordnung').replace(/im Arbeitsplan noch abzugleichen/gi,'noch gemeinsam zu bestätigen');}
 function memberText(value){return plain(value).split(/(?<=[.!?])\s+|\n/).map(line=>/(?:Salah|Projektleitung|Leitung)\s+(?:muss|soll|hat zu)|unabhängige Vertretung/i.test(line)?'Daran arbeitet Salah gerade.':line).join(' ');}
 const sort=rows=>[...rows].sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')||String(a.ref).localeCompare(String(b.ref)));
-const open=row=>!['fertig','erledigt'].includes(row.status);
+const open=row=>!['fertig','erledigt','entfällt'].includes(row.status);
 function project(raw){
  const person=raw.person,lead=person==='SA'&&raw.role==='leitung'&&!raw.readOnly,known=raw.sources.psp.state==='ready';
  const tasks=known?sort(raw.tasks.filter(row=>row.owner===person&&open(row))):[];

@@ -99,9 +99,14 @@
   return E('div',{class:'pv-action-area'},next,toolsNav());
  }
  function taskLink(task,label='Im Arbeitsbereich öffnen →'){return E('a',{class:'pv-button pv-primary',href:'../?view=tasks&auftrag='+encodeURIComponent(task.id)},label);}
+ function assignmentHours(){
+  const rows=(data.raw.assignments||[]).filter(row=>row.owner===data.person), hours=data.raw.zeit?.auftraege;
+  if(!rows.length)return null;
+  return E('section',{class:'pv-panel','data-assignment-hours':''},E('h2',{},'Erfasste Stunden je Auftrag'),E('dl',{class:'pv-facts'},rows.map(row=>E('div',{'data-assignment-ref':row.ref},E('dt',{},row.ref+' · '+M.memberText(row.title)),E('dd',{},typeof hours?.[row.ref]==='number'?new Intl.NumberFormat('de-CH',{maximumFractionDigits:2}).format(hours[row.ref])+' h':'Stand unbekannt')))));
+ }
  function liveOverview(){
   const gate=data.gate;
-  return [heading('FÜR '+user().name.toLocaleUpperCase('de-CH'),'Dein Projektwerkzeug'),actionArea(),E('div',{class:'pv-context'},liveDates(),gate?E('section',{class:'pv-panel pv-project-state'},label('GEMEINSAMER STAND'),E('h2',{},gate.name),E('p',{},isLead()?gate.status:'Daran arbeitet Salah gerade.')):null)];
+  return [heading('FÜR '+user().name.toLocaleUpperCase('de-CH'),'Dein Projektwerkzeug'),actionArea(),assignmentHours(),E('div',{class:'pv-context'},liveDates(),gate?E('section',{class:'pv-panel pv-project-state'},label('GEMEINSAMER STAND'),E('h2',{},gate.name),E('p',{},isLead()?gate.status:'Daran arbeitet Salah gerade.')):null)];
  }
  function liveTask(){
   const task=user().task;if(!task)return [heading('MEIN AUFTRAG','Dein nächster Auftrag ist noch offen.','Öffne «Meine Arbeit» oder aktualisiere den Stand.'),E('a',{href:'../?view=tasks',class:'pv-button'},'Meine Arbeit öffnen')];
@@ -110,7 +115,7 @@
  function liveLead(){
   if(!isLead())return liveOverview();
   const rows=(data.raw.tasks||[]).filter(row=>row.owner==='SA'&&!['fertig','erledigt'].includes(row.status));
-  return [heading('LEITUNG · '+user().name.toLocaleUpperCase('de-CH'),'Projekt leiten'),actionArea(),E('div',{class:'pv-lead-grid'},E('section',{class:'pv-decisions'},rows.length?rows.map(row=>E('article',{class:'pv-panel'},tag(row.due?'Bis '+shortDate(row.due):'Frist noch offen'),E('h2',{},row.id===user().task?.id?'Zum nächsten Auftrag':M.plain(row.title)),E('p',{},M.plain(row.Was)),E('h3',{},'Fertig, wenn'),E('p',{},M.plain(row['Fertig wenn'])||'Noch zu ergänzen'),taskLink(row))):E('p',{},data.known?'Keine offene Leitungsaufgabe im Plan.':'Der Aufgabenplan konnte nicht geladen werden.')),E('aside',{class:'pv-panel'},E('h2',{},'Bei einer Vertretung beachten'),E('p',{},'Eine Bewertung muss von zwei verschiedenen Personen unabhängig eingeordnet werden. Verteile nur Aufgaben, die die andere Person übernehmen kann.'),E('p',{},'Offene Zusagen, tatsächliche Stunden und die Freigabe für den nächsten Schritt bleiben getrennt.')))];
+  return [heading('LEITUNG · '+user().name.toLocaleUpperCase('de-CH'),'Projekt leiten'),actionArea(),assignmentHours(),E('div',{class:'pv-lead-grid'},E('section',{class:'pv-decisions'},rows.length?rows.map(row=>E('article',{class:'pv-panel'},tag(row.due?'Bis '+shortDate(row.due):'Frist noch offen'),E('h2',{},row.id===user().task?.id?'Zum nächsten Auftrag':M.plain(row.title)),E('p',{},M.plain(row.Was)),E('h3',{},'Fertig, wenn'),E('p',{},M.plain(row['Fertig wenn'])||'Noch zu ergänzen'),taskLink(row))):E('p',{},data.known?'Keine offene Leitungsaufgabe im Plan.':'Der Aufgabenplan konnte nicht geladen werden.')),E('aside',{class:'pv-panel'},E('h2',{},'Bei einer Vertretung beachten'),E('p',{},'Eine Bewertung muss von zwei verschiedenen Personen unabhängig eingeordnet werden. Verteile nur Aufgaben, die die andere Person übernehmen kann.'),E('p',{},'Offene Zusagen, tatsächliche Stunden und die Freigabe für den nächsten Schritt bleiben getrennt.')))];
  }
  function readAccess(){
   const query=new URLSearchParams(location.search),hash=new URLSearchParams(location.hash.slice(1));const incoming=hash.get('k')||query.get('k');

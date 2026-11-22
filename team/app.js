@@ -42,7 +42,7 @@ function date(value, time=false) {
   const text = new Intl.DateTimeFormat('de-CH',{timeZone:'Europe/Zurich',weekday:'short',day:'2-digit',month:'2-digit',...(time&&value.includes('T')?{hour:'2-digit',minute:'2-digit'}:{})}).format(new Date(value.includes('T')?value:value+'T12:00:00+01:00'));
   return text;
 }
-function completed(row) {return ['fertig','erledigt'].includes(row.status);}
+function completed(row) {return ['fertig','erledigt','entfällt'].includes(row.status);}
 function overdue(row) {return !completed(row) && row.due && (row.due.includes('T') ? Date.parse(row.due)<Date.parse(config.demo ? '2026-11-01T10:00:00+01:00' : new Date().toISOString()) : row.due<today());}
 function sortRows(rows) {return [...rows].sort((a,b)=>(a.due || '9999').localeCompare(b.due || '9999') || (a.ref||'').localeCompare(b.ref||''));}
 function ownTasks() {return data?.tasks?.filter(row=>row.owner===data.person) ?? null;}
@@ -71,9 +71,9 @@ function junoLink(row, label='Juno fragen') {
   return el('a',{class:'button secondary pia-link',href:url.pathname+url.search,referrerpolicy:'no-referrer',onClick:rememberJunoRole},label);
 }
 function plainLabel(value) {
-  return String(value||'').replace(/Probecodierung|Schulungsfälle[n]?/gi,'Übungsbewertungen').replace(/Probe B/gi,'Übungskontakt').replace(/Arbeitspakete[n]?/gi,'Aufgaben').replace(/Servicebeobachtung B/g,'Kundenservice testen').replace(/Inhaltsanalyse C/g,'Bewertungen untersuchen').replace(/Maske B/g,'Kontaktmaske').replace(/Maske C/g,'Bewertungsmaske').replace(/\bPSP\b/g,'Aufgabenplan').replace(/in Notion/g,'in den Projektunterlagen').replace(/Notion/g,'Projektunterlagen').replace(/\s*\(C\d(?:, C\d)*\)/g,'');
+  return String(value||'').replace(/Probecodierung|Schulungsfälle[n]?/gi,'Übungsbewertungen').replace(/Probe B/gi,'Übungskontakt').replace(/Arbeitspakete[n]?/gi,'Aufgaben').replace(/Servicebeobachtung B/g,'Service-Momentaufnahmen').replace(/Inhaltsanalyse C/g,'Bewertungen untersuchen').replace(/Maske B/g,'Service-Momentaufnahmen').replace(/Maske C/g,'Bewertungsmaske').replace(/\bPSP\b/g,'Aufgabenplan').replace(/in Notion/g,'in den Projektunterlagen').replace(/Notion/g,'Projektunterlagen').replace(/\s*\(C\d(?:, C\d)*\)/g,'');
 }
-function areaTitle(module) {return ({b:'Kundenservice testen',c:'Bewertungen untersuchen',writing:'Kapitel schreiben',tasks:'Weitere Aufgaben'})[module.id]||plainLabel(module.title);}
+function areaTitle(module) {return ({b:'Service-Momentaufnahmen',c:'Bewertungen untersuchen',writing:'Kapitel schreiben',tasks:'Weitere Aufgaben'})[module.id]||plainLabel(module.title);}
 function shortTitle(row) {
   let title=plainLabel(row.title || 'Aufgabe noch offen').replace(/^(?:AP|EA)-[\w-]+\s*[·:–-]?\s*/,'');
   const ownName=names[data?.person];
@@ -185,30 +185,22 @@ function taskRow(row){
 function taskList(rows,all=true){return rows===null?unknown():rows.length?el('ul',{class:'rows task-list'},sortRows(rows.filter(r=>all||!completed(r))).map(taskRow)):empty('Hier ist alles ruhig.','In diesem Bereich sind noch keine Aufgaben zugeteilt.');}
 function progress(done,total,label){return el('div',{class:'progress-block'},el('span',{},label||done+' von '+total+' erledigt'),el('progress',{max:Math.max(1,total||0),value:done||0,'aria-label':label||'Erledigte Aufgaben'}));}
 function areaRows(module){return allTasks().filter(r=>module.taskIds.includes(r.id));}
-// Servicetest ab 13.11.2026: feste Zuteilung. service.fixed und service.planned (Anbieter der eigenen Kontakte) kommen vom Empfänger;
-// planned leer oder Ziel 0 heisst «keine eigenen Kontakte». Ohne fixed gilt die alte Regel (zwei Banken wählen).
-function bFixed(s){return !!s&&s.fixed===true&&Array.isArray(s.planned);}
-function bNone(s){return bFixed(s)&&(!s.planned.length||!(s.config?.target>0));}
-function bMissing(s){const chosen=Array.isArray(s?.selected)?s.selected:[];return bFixed(s)?s.planned.filter(a=>!chosen.includes(a)).length:Math.max(0,2-chosen.length);}
-function bHalf(s){return s.next?.block==='A'?'Vormittag':'Nachmittag';}
-const B_NONE_TEXT='Keine eigenen Kontakte';
+function snapshotKnown(s){return s?.method==='qualitative_snapshot'&&s.state==='ready'&&Array.isArray(s.providers);}
+function snapshotSummary(s=data.service){return snapshotKnown(s)?s.providers.map(p=>p.provider+' · '+p.state).join(' · '):'Stand unbekannt';}
 function areaSummary(module){
   if(module.state!=='ready')return 'Stand teilweise unbekannt';
-  if(module.id==='b'&&!Number.isFinite(module.total))return 'Stand teilweise unbekannt';
-  if(module.id==='b'&&module.total===0&&bFixed(data.service))return B_NONE_TEXT;
+  if(module.id==='b')return snapshotSummary();
   const unit=module.id==='b'?'Kontakten':module.id==='c'?'Bewertungen':'Aufgaben';
   return module.done+' von '+module.total+' '+unit+(module.id==='c'?' · Soll bis heute '+module.expected:'');
 }
 function openArea(id){area=id;workRole='mine';navigate('tasks');}
-function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'↗':module.id==='c'?'≡':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},areaTitle(module)),el('small',{},areaSummary(module))),el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
+function areaLine(module){return el('button',{class:'area-line',onClick:()=>openArea(module.id)},el('span',{class:'area-symbol','aria-hidden':'true'},module.id==='b'?'↗':module.id==='c'?'≡':module.id==='writing'?'✎':'○'),el('span',{class:'area-copy'},el('strong',{},areaTitle(module)),el('small',{},areaSummary(module))),module.id==='b'?null:el('progress',{max:Math.max(1,module.total||0),value:module.done||0,'aria-label':module.title+' Fortschritt'}),el('span',{'aria-hidden':'true'},'›'));}
 function serviceCard(){
-  const s=data.service;if(!s||s.error)return null;
-  return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Kundenservice testen'),el('p',{},(s.probeDone?'Übungskontakt erledigt':'Übungskontakt jetzt möglich')+' · '+(bNone(s)?'keine eigenen Kontakte':s.done+' von '+s.config.target+' Kontakten')),el('small',{},'Die eigentlichen Kontakte beginnen am '+date(s.config.official))),el('a',{class:'button secondary',href:'/team/b/'},s.probeDone?'Kontakte öffnen':'Übungskontakt öffnen'));
+ return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Service-Momentaufnahmen'),el('p',{},snapshotSummary()),el('small',{},'Momentaufnahmen prüfen · Ernes · bis 24.11.2026')),el('a',{class:'button secondary',href:'/team/projekt/momentaufnahme/'},'Prüfung öffnen'));
 }
 function shareCard(){return el('section',{class:'practice-card'},el('div',{},el('strong',{},'Umfrage teilen'),el('p',{},(data.sharing?.done??'–')+' von 2 Kanälen · ohne Namen im Link')),button('Umfrage teilen',()=>navigate('sharing'),'button secondary'));}
 function fieldLeadership(){
   return el('section',{class:'field-leadership'},el('h2',{},'Erhebung und Verteilung'),
-    data.service?.open?el('p',{},bFixed(data.service)&&data.service.open.every(r=>!r.open)?'Alle Kontakte sind fest zugeteilt.':'Noch offene Kontakte · '+data.service.open.map(r=>r.provider+' '+r.open).join(' · ')):null,
     data.sharing?.people?el('ul',{},data.sharing.people.map(r=>el('li',{},names[r.person]+' · '+r.done+' von 2 Kanälen'))):null,
     el('details',{},el('summary',{},'Übernahmen · '+(data.transfers?.length||0)),el('ul',{},(data.transfers||[]).map(r=>{let change={};try{change=JSON.parse(r.change);}catch{}return el('li',{},r.date+' · '+r.nr+' · '+(names[change.alt]||'frei')+' → '+(names[change.neu]||r.person));}))));
 }
@@ -216,9 +208,9 @@ function practiceCard(){
   return data.practice?.total ? el('section',{class:'practice-card'},el('div',{},el('strong',{},'Übungsbewertungen'),el('p',{},data.practice.done+' von '+data.practice.total+' Übungen erledigt')),el('a',{class:'button secondary',href:'/team/c/'},'Bewerten üben')) : null;
 }
 // «keine eigenen» nur bei fester Zuteilung und genau 0 geplanten Kontakten; fehlt die Zahl, bleibt der Stand unbekannt.
-function leadNone(label,value){return label==='Kontakte'&&bFixed(data.service)&&value?.total===0;}
 function leadMetric(label,value,field=false){
-  return el('div',{class:'lead-metric'},el('dt',{},label),el('dd',{},value&&value.done!==null&&!(label==='Kontakte'&&!Number.isFinite(value.total))?(leadNone(label,value)?'keine eigenen':value.done+' / '+value.total):'unbekannt'),field&&value&&!(label==='Kontakte'&&(leadNone(label,value)||!Number.isFinite(value.total)))?el('small',{},'Soll '+value.expected+(label==='Kontakte'?' · davon erledigt '+value.expectedDone:'')):null);
+  if(label==='Kontakte')return el('div',{class:'lead-metric'},el('dt',{},'Momentaufnahmen'),el('dd',{},snapshotSummary(value)));
+  return el('div',{class:'lead-metric'},el('dt',{},label),el('dd',{},value&&value.done!==null&&!(label==='Kontakte'&&!Number.isFinite(value.total))?(value.done+' / '+value.total):'unbekannt'),field&&value&&!(label==='Kontakte'&&!Number.isFinite(value.total))?el('small',{},'Soll '+value.expected+(label==='Kontakte'?' · davon erledigt '+value.expectedDone:'')):null);
 }
 function takeOver(row){
   details(row,'Übernahme prüfen',true);
@@ -241,18 +233,10 @@ function weekRows(rows) {
 const fixedSteps=[
   {id:'probe-c',area:'c',title:'10 Übungsfälle codieren',why:'Alle codieren dieselben zehn Fälle. So sehen wir, wo das Codebuch noch unklar ist, bevor es zählt.',when:'2026-11-02',whenText:'nach dem Coaching',minutes:30,href:'/team/c/',cta:'Übung Bewertungen starten',
     skip:()=>!data.practice?.total,done:()=>data.practice.done>=data.practice.total,count:()=>data.practice.done+' von '+data.practice.total},
-  {id:'banken',area:'b',get when(){return bFixed(data.service)?'2026-11-16':'2026-11-06';},minutes:3,href:'/team/b/',
-    get title(){return bFixed(data.service)?'Konto für den Servicetest bestätigen':'Zwei Banken für den Servicetest wählen';},
-    get why(){const s=data.service;return bFixed(s)?'Du testest '+s.planned.join(' und ')+'. Bestätige, dass du dort ein eigenes, aktives Konto hast.':'Nur Banken mit eigenem, aktivem Konto. Danach teilt dir die App deine Kontakte zu.';},
-    get cta(){return bFixed(data.service)?'Konto bestätigen':'Banken wählen';},
-    skip:()=>!data.service||!!data.service.error||!Array.isArray(data.service.selected)||bNone(data.service),done:()=>bMissing(data.service)===0,
-    count:()=>{const s=data.service,n=bFixed(s)?s.planned.length:2;return (n-bMissing(s))+' von '+n;}},
-  {id:'probe-b',area:'b',title:'Übung Servicetest durchspielen',why:'Ein Übungskontakt ohne Bank. Danach sitzt das Erfassen beim echten Kontakt.',when:'2026-11-06',minutes:15,href:'/team/b/',cta:'Übung Servicetest starten',
-    skip:()=>!data.service||!!data.service.error||typeof data.service.probeDone!=='boolean'||bNone(data.service),done:()=>data.service.probeDone},
   {id:'teilen',area:'a',title:'Umfrage in zwei Kanälen teilen',why:'Jeder neue Kanal bringt andere Menschen in die Umfrage. Das macht die Antworten breiter.',minutes:5,view:'sharing',cta:'Kanal wählen',
     skip:()=>!Number.isFinite(data.sharing?.done),done:()=>data.sharing.done>=2,count:()=>data.sharing.done+' von 2'},
 ];
-const areaNames={a:'A · Umfrage',b:'B · Servicetest',c:'C · Bewertungen'};
+const areaNames={a:'A · Umfrage',b:'B · Service-Momentaufnahmen',c:'C · Bewertungen'};
 function nowMs(){return config.demo?Date.parse('2026-11-01T10:00:00+01:00'):Date.now();}
 function daysUntil(value){return Math.round((Date.parse(day(value)+'T12:00:00Z')-Date.parse(today()+'T12:00:00Z'))/86400000);}
 function whenWord(value){const d=daysUntil(value);return d<0?(-d===1?'1 Tag über':-d+' Tage über'):d===0?'heute':d===1?'morgen':'bis '+date(value);}
@@ -285,7 +269,7 @@ function openPath(row){
 function todayKnown(){
   const sv=data.service;
   return ['ready','cached'].includes(state)&&data.workspaceState==='ready'&&Object.values(data.sources).every(s=>s.state==='ready')&&
-    Number.isFinite(data.sharing?.done)&&!!sv&&!sv.error&&Number.isFinite(sv.done)&&Number.isFinite(sv.config?.target)&&Array.isArray(sv.selected)&&typeof sv.probeDone==='boolean'&&Number.isFinite(data.practice?.done)&&Number.isFinite(data.practice?.total)&&data.practice.total>0;
+    Number.isFinite(data.sharing?.done)&&snapshotKnown(sv)&&Number.isFinite(data.practice?.done)&&Number.isFinite(data.practice?.total)&&data.practice.total>0;
 }
 function dueMs(value){return Date.parse(value.includes('T')?value:value+'T23:59:59+01:00');}
 function nowItem(rows){
@@ -340,7 +324,8 @@ function threadsSection(){
   const sv=data.service&&!data.service.error?data.service:null,pr=data.practice,c=(data.areas||[]).find(m=>m.id==='c'),own=surveyOwn();
   const a=threadTile('a',own?.own,own?.target,'Antworten',surveyNote(own),()=>navigate('sharing'));
   if(own&&own.own>=own.target/2)a.classList.add('is-win');
-  const b=threadTile('b',sv?.done,sv?.config?.target,'Kontakte',!sv||!Number.isFinite(sv.done)||!sv.config||!Array.isArray(sv.selected)||typeof sv.probeDone!=='boolean'?'Stand unbekannt':bNone(sv)?'Seit 13.11. testen wir nur Yuh und Zak':bMissing(sv)?(bFixed(sv)?'Konto bestätigen':'Noch '+bMissing(sv)+(bMissing(sv)===1?' Bank':' Banken')+' wählen'):!sv.probeDone?'Übung offen · echte Kontakte ab '+date(sv.config.official):sv.next?'Nächster Kontakt '+date(sv.next.tag)+' · '+bHalf(sv):sv.done>=sv.config.target?'Ziel erreicht':bFixed(sv)?'Servicetest öffnen':'Kontakte zuteilen',()=>{location.href='/team/b/';},bNone(sv)?B_NONE_TEXT:null);
+  const b=el('button',{type:'button',class:'thread area-b',onClick:()=>{location.href='/team/projekt/momentaufnahme/';}},el('span',{class:'thread-head'},'B · Service-Momentaufnahmen'),el('span',{class:'thread-note'},snapshotSummary()),el('span',{class:'thread-note'},data.person==='ES'?'Momentaufnahmen prüfen · bis 24.11.2026':'Belege ansehen'));
+
   const cReady=c&&c.state==='ready'&&c.total>0;
   const cTile=cReady?threadTile('c',c.done,c.total,'Bewertungen',Number.isFinite(c.expected)?'Soll bis heute '+c.expected:'Soll bis heute unbekannt',()=>{location.href='/team/c/';})
     :threadTile('c',pr?.done,pr?.total,'Übungen',!Number.isFinite(pr?.done)||!pr?.total?'Stand unbekannt':today()<'2026-11-03'?'Eigene Fälle ab Di 03.11.':'Deine Bewertungen kommen nach der Verteilung',()=>{location.href='/team/c/';});
@@ -544,7 +529,7 @@ function blockerList(blockers){
 }
 function areaBlockers(id){return blockerList((data.blockers||[]).filter(b=>b.area===id));}
 // Filter work by area and responsibility, then group it by due date.
-const workFilters=[['','Alle'],['a','A · Umfrage'],['b','B · Servicetest'],['c','C · Bewertungen'],['writing','Schreibwerk'],['tasks','Projekt']];
+const workFilters=[['','Alle'],['a','A · Umfrage'],['b','B · Service-Momentaufnahmen'],['c','C · Bewertungen'],['writing','Schreibwerk'],['tasks','Projekt']];
 let workRole='mine';
 function workBucket(row){
   if(row.area==='b'||row.area==='c'||row.area==='writing')return row.area;
@@ -591,9 +576,7 @@ function workRow(row){
 }
 function workHeader(id){
   if(id==='a'){const sh=data.sharing;return el('section',{class:'work-tool area-a'},el('div',{},el('strong',{},'A · Umfrage'),el('span',{},Number.isFinite(sh?.done)?sh.done+' von 2 Kanälen geteilt':'Stand unbekannt')),button('Umfrage teilen',()=>navigate('sharing'),'button'));}
-  if(id==='b'){const value=data.service;const sv=value&&!value.error&&Number.isFinite(value.done)&&Number.isFinite(value.config?.target)&&(value.config.target>0||bNone(value))&&value.config.official&&Array.isArray(value.selected)&&typeof value.probeDone==='boolean'?value:null;
-    const line=!sv?'Stand unbekannt':bNone(sv)?B_NONE_TEXT+' · seit 13.11. testen wir nur Yuh und Zak':sv.done+' von '+sv.config.target+' Kontakten · '+(!sv.probeDone?'Übung offen':bMissing(sv)?(bFixed(sv)?'Konto bestätigen':'Banken wählen'):sv.next?'nächster '+date(sv.next.tag)+' · '+bHalf(sv):'echte Kontakte ab '+date(sv.config.official));
-    return el('section',{class:'work-tool area-b'},el('div',{},el('strong',{},'B · Servicetest'),el('span',{},line)),el('a',{class:'button',href:'/team/b/'},'Servicetest öffnen'));}
+  if(id==='b')return el('section',{class:'work-tool area-b'},el('div',{},el('strong',{},'B · Service-Momentaufnahmen'),el('span',{},snapshotSummary())),el('a',{class:'button',href:'/team/projekt/momentaufnahme/'},'Prüfung öffnen'));
   if(id==='c'){const c=(data.areas||[]).find(m=>m.id==='c'),pr=data.practice;
     const line=c&&c.state==='ready'&&Number.isFinite(c.done)&&c.total>0?c.done+' von '+c.total+' Bewertungen'+(Number.isFinite(c.expected)?' · Soll bis heute '+c.expected:' · Soll unbekannt'):Number.isFinite(pr?.done)&&pr?.total?pr.done+' von '+pr.total+' Übungen · eigene Fälle ab 03.11.':'Stand unbekannt';
     return el('section',{class:'work-tool area-c'},el('div',{},el('strong',{},'C · Bewertungen'),el('span',{},line)),el('a',{class:'button',href:'/team/c/'},'Bewertungen öffnen'));}
@@ -650,12 +633,12 @@ function showDocuments(){
       chapters===null||chapters===undefined?unknown('Die Kapitel konnten nicht geladen werden.'):chapters.length?el('ul',{class:'document-list'},[...chapters].sort((a,b)=>(a.ref||'').localeCompare(b.ref||'','de',{numeric:true})).map(row=>documentRow(row,true))):empty('Noch keine Kapitel zugeteilt.','Sobald deine Zuteilung hinterlegt ist, findest du hier deine Docs.'))];
 }
 function profileAgreements(){
-  const people={"SA": {"name": "Salah", "role": "Projektleitung und Yuh", "sentence": "Du hältst Entscheide, Verteilung und den Kontakt zu Schule und Yuh zusammen.", "work": ["Du hältst Entscheide mit Datum in den Projektunterlagen fest.", "Du verteilst offene Arbeit nach bestätigten Angaben neu.", "Ungeprüfte Zugänge oder Resultate als bestätigt behandeln."]}, "ES": {"name": "Ernes", "role": "Lead Servicebeobachtung B", "sentence": "Du koordinierst die Übung, Kontakte und Nachläufe; die Kontakte machen Arber und Salah.", "work": ["Du prüfst im Feld täglich Kontakte und Nachläufe.", "Du sammelst unklare Felder und holst Hilfe bei Salah.", "Bei einer Stoppregel weitere Kontakte starten."]}, "MG": {"name": "Melisa", "role": "Lead Bewertungen C", "sentence": "Du leitest die Übung und klärst Unterschiede nach den unabhängigen Erstcodes.", "work": ["Du hältst Erstcodes und Konsens getrennt fest.", "Du klärst Grenzfälle gemeinsam am Codebuch.", "Erstcodes angleichen oder durch Konsens ersetzen."]}, "AM": {"name": "Arber", "role": "Lead Umfrage A und Reichweite", "sentence": "Du koordinierst die Verteilung und hilfst der Gruppe bei Lücken in der Reichweite.", "work": ["Du schaust sonntags auf Kanäle und Zwischenziele.", "Du schlägst bei Lücken neue Verteilorte vor.", "Echte Umfrageantworten selbst ausfüllen oder lenken."]}, "LB": {"name": "Leonie", "role": "Lead Qualität und Formales", "sentence": "Du koordinierst Quellen, Zweitlesungen und die vollständige Abgabe.", "work": ["Du führst die Liste, wer welches Kapitel schreibt und wer es gegenliest.", "Du gibst fehlende Belege an die zuständige Person zurück.", "Quellen erfinden oder für andere unterschreiben."]}};
+  const people={"SA": {"name": "Salah", "role": "Projektleitung und Yuh", "sentence": "Du hältst Entscheide, Verteilung und den Kontakt zu Schule und Yuh zusammen.", "work": ["Du hältst Entscheide mit Datum in den Projektunterlagen fest.", "Du verteilst offene Arbeit nach bestätigten Angaben neu.", "Ungeprüfte Zugänge oder Resultate als bestätigt behandeln."]}, "ES": {"name": "Ernes", "role": "Lead Service-Momentaufnahmen", "sentence": "Du prüfst und bereitest die vorhandenen Momentaufnahmen bis 24.11.2026 auf.", "work": ["Du ordnest vorhandene Belege und trennst Ablauf, Antwort und Eindruck.", "Du sammelst unklare Felder und holst Hilfe bei Salah.", "Einzelne Eindrücke verallgemeinern oder fehlende Angaben erfinden."]}, "MG": {"name": "Melisa", "role": "Lead Bewertungen C", "sentence": "Du leitest die Übung und klärst Unterschiede nach den unabhängigen Erstcodes.", "work": ["Du hältst Erstcodes und Konsens getrennt fest.", "Du klärst Grenzfälle gemeinsam am Codebuch.", "Erstcodes angleichen oder durch Konsens ersetzen."]}, "AM": {"name": "Arber", "role": "Lead Umfrage A und Reichweite", "sentence": "Du koordinierst die Verteilung und hilfst der Gruppe bei Lücken in der Reichweite.", "work": ["Du schaust sonntags auf Kanäle und Zwischenziele.", "Du schlägst bei Lücken neue Verteilorte vor.", "Echte Umfrageantworten selbst ausfüllen oder lenken."]}, "LB": {"name": "Leonie", "role": "Lead Qualität und Formales", "sentence": "Du koordinierst Quellen, Zweitlesungen und die vollständige Abgabe.", "work": ["Du führst die Liste, wer welches Kapitel schreibt und wer es gegenliest.", "Du gibst fehlende Belege an die zuständige Person zurück.", "Quellen erfinden oder für andere unterschreiben."]}};
   const current=people[data.person];
   if(!current)return [];
   const fold=(label,...children)=>el('details',{class:'team-agreement'},el('summary',{},label),el('div',{class:'agreement-content'},...children));
   return [
-    fold('Deine Rolle und dein Lead',el('p',{},el('strong',{},current.role),' · ',current.sentence),el('p',{},'Dein Lead koordiniert. Bei A und C packen alle mit an; die Kontakte im Servicetest (B) '+(data.person==='AM'?'machst du zusammen mit Salah.':data.person==='SA'?'machst du zusammen mit Arber.':'machen Arber und Salah.')),el('p',{},'Deine Aufgaben, Schreibkarten und Fristen stehen weiter unten mit ihrem aktuellen Stand.')),
+    fold('Deine Rolle und dein Lead',el('p',{},el('strong',{},current.role),' · ',current.sentence),el('p',{},'Dein Lead koordiniert. Bei A und C packen alle mit an; die Kontakte im Service-Momentaufnahmen (B) '+(data.person==='AM'?'hast du mit Salah übergeben.':data.person==='SA'?'hast du mit Arber übergeben.':'haben Arber und Salah übergeben.')),el('p',{},'Deine Aufgaben, Schreibkarten und Fristen stehen weiter unten mit ihrem aktuellen Stand.')),
     fold('So arbeitest du',...['So läuft’s','Gern gesehen','Lieber nicht'].map((label,i)=>el('p',{},el('strong',{},label),el('br'),current.work[i]))),
     fold('Wenn’s klemmt',el('p',{},el('strong',{},'Juno → zuständiger Lead → Salah')),el('p',{},"A Arber · B Ernes · C Melisa · Schreiben Leonie"),el('p',{},data.person==='SA'?'Offene Vorgaben klärst du mit der Quelle oder der zuständigen Ansprechperson.':'Als Lead gehst du bei offenen Fragen zu Salah. Zugang oder Ausfall direkt Salah.'),el('a',{class:'button secondary',href:'/team/frag/'},'Juno öffnen →')),
     fold('Was wir voneinander erwarten',el('ul',{},["Wir halten Fristen ein oder melden früh, wenn es klemmt.", "Wir fragen für den Einstieg Juno und klären offene Punkte mit dem Lead.", "Wir beobachten und codieren ergebnisoffen; Zugänge und private Daten bleiben geschützt.", "Wir setzen den Stand ehrlich auf «in Prüfung», solange die Prüfung offen ist.", "Wir schauen wöchentlich auf den Stand und erfassen ab 16.11. unsere echte Arbeitszeit."].map(text=>el('li',{},text)))),
@@ -825,7 +808,7 @@ function dropStart(row,who){let alt=null;try{alt=localStorage.getItem(startSlot(
 function restoreStart(row,value,who){if(!value)return;try{localStorage.setItem(startSlot(row,who),value);}catch{}}
 // Auftragspfad (05.11.2026, Salah: «kein Textwall»): Start → ein Schritt nach dem anderen → Abschluss.
 // Sichtbar ist immer nur, was man jetzt braucht. Warum, Massstab und Plan sind einen Tipp entfernt.
-const DEST=[[/Team-App\s*›\s*Momentaufnahmen prüfen|Momentaufnahmen prüfen/,()=>'/team/projekt/momentaufnahme/','Prüfung öffnen'],[/Team-App\s*›\s*Bewertungen/,()=>'/team/c/','Bewertungen öffnen'],[/Team-App\s*›\s*Servicetest/,()=>'/team/b/','Servicetest öffnen'],
+const DEST=[[/Team-App\s*›\s*Momentaufnahmen prüfen|Momentaufnahmen prüfen/,()=>'/team/projekt/momentaufnahme/','Prüfung öffnen'],[/Team-App\s*›\s*Bewertungen/,()=>'/team/c/','Bewertungen öffnen'],[/Team-App\s*›\s*(?:Service-Momentaufnahmen|Servicetest)/,()=>'/team/projekt/momentaufnahme/','Service-Momentaufnahmen öffnen'],
   [/Team-App\s*›\s*Umfrage teilen/,()=>'/team/?view=sharing','Umfrage teilen öffnen'],[/Team-App\s*›\s*Dashboard|im Dashboard/,()=>'/team/zentrale/','Kommandozentrale öffnen'],
   [/Schreibplatz\s*›\s*Kapitel\s*([\w.-]+)/,(m)=>'/team/schreiben/?k='+encodeURIComponent(m[1]),'Kapitel öffnen'],
   [/Schreibplatz|Kapitel-Doc/,(m,row)=>row.source==='chapters'&&row.ref?'/team/schreiben/?k='+encodeURIComponent(row.ref):'/team/schreiben/','Kapitel öffnen']];
@@ -846,7 +829,7 @@ function liveLine(row){
   const area=row.source==='assignments'?(row.area||''):'';   // nur eigene Erhebungsaufträge; Leitungsaufträge betreffen die ganze Gruppe
   if(area==='c'){const c=(data.areas||[]).find(m=>m.id==='c');if(c&&c.state==='ready'&&c.total>0){const rest=Number.isFinite(c.expected)?Math.max(0,c.expected-c.done):null;
     return el('div',{class:'path-live'},el('strong',{},c.done+' von '+c.total),el('span',{},' Bewertungen eingeordnet'),rest===null?null:el('span',{class:rest>0?'path-today':'path-ok'},rest>0?'Heute dran: '+rest:'Du bist im Plan'));}}
-  if(area==='b'){const s=data.service;if(s&&!s.error&&Number.isFinite(s.done)&&s.config?.target)return el('div',{class:'path-live'},el('strong',{},s.done+' von '+s.config.target),el('span',{},' Kontakten gemacht'));}
+  if(area==='b')return el('div',{class:'path-live'},el('span',{},snapshotSummary()));
   return null;
 }
 function stepHelp(row,i,text){
@@ -1172,6 +1155,8 @@ function readKey() {
   try{return localStorage.getItem('pa6k')||key||'';}catch{return key||'';}
 }
 function validResponse(result) {
+  if(result?.person!=='SA'&&result?.service?.evidence?.some(row=>Object.keys(row).some(k=>!['anbieter','kontaktweg','person','tag','state'].includes(k))))return false;
+
   if(!result||result.ok!==true||!names[result.person]||!['mitglied','leitung'].includes(result.role)||!Number.isFinite(Date.parse(result.fetchedAt))||result.contract!=='t1-v1')return false;
   if(result.role==='leitung'&&(result.person!=='SA'||!leadership))return false;
   for(const name of ['psp','meetings'])if(!['ready','unknown'].includes(result.sources?.[name]?.state))return false;
@@ -1188,12 +1173,12 @@ function validResponse(result) {
     for(const row of result[name]||[])if(!row || typeof row.id!=='string' || ['Was','Warum','Fertig wenn',"So geht's",'Wo','Pia-Frage'].some(field=>row[field]!==undefined&&typeof row[field]!=='string'))return false;
   }
   if(result.areas!==undefined){
-    if(!Array.isArray(result.areas)||result.areas.some(a=>!a||!['b','c','writing','tasks'].includes(a.id)||typeof a.title!=='string'||!['ready','unknown'].includes(a.state)||!Array.isArray(a.taskIds)||a.taskIds.some(id=>typeof id!=='string')||['done','total','expected'].some(k=>a[k]!==null&&(!Number.isInteger(a[k])||a[k]<0))))return false;
+    if(!Array.isArray(result.areas)||result.areas.some(a=>!a||!['b','c','writing','tasks'].includes(a.id)||typeof a.title!=='string'||!['ready','unknown'].includes(a.state)||!Array.isArray(a.taskIds)||a.taskIds.some(id=>typeof id!=='string')||(a.id==='b'?a.method!=='qualitative_snapshot':['done','total','expected'].some(k=>a[k]!==null&&(!Number.isInteger(a[k])||a[k]<0)))))return false;
   }
   if(result.blockers!==undefined&&(!Array.isArray(result.blockers)||result.blockers.some(b=>!b||typeof b.text!=='string'||typeof b.question!=='string'||!/^hang:(overdue|dependency|backlog|contact|stop|consensus):([a-f0-9-]{32,36}|b|c|writing|tasks)$/.test(b.ctx)||result.role==='mitglied'&&b.owner!==result.person)))return false;
   if(result.leadership!==undefined&&result.leadership!==null){
     const count=v=>v===null||Number.isInteger(v)&&v>=0;
-    if(result.role!=='leitung'||!Array.isArray(result.leadership)||result.leadership.length!==5||new Set(result.leadership.map(row=>row.person)).size!==5||result.leadership.some(row=>!names[row.person]||!count(row.overdue)||!Number.isInteger(row.blockers)||row.blockers<0||!Number.isInteger(row.priority)||row.priority<0||row.priority>5||!['b','c','writing','tasks'].every(k=>row[k]===null||row[k]&&count(row[k].done)&&count(row[k].total))))return false;
+    if(result.role!=='leitung'||!Array.isArray(result.leadership)||result.leadership.length!==5||new Set(result.leadership.map(row=>row.person)).size!==5||result.leadership.some(row=>!names[row.person]||!count(row.overdue)||!Number.isInteger(row.blockers)||row.blockers<0||!Number.isInteger(row.priority)||row.priority<0||row.priority>5||!['c','writing','tasks'].every(k=>row[k]===null||row[k]&&count(row[k].done)&&count(row[k].total))||row.b?.method!=='qualitative_snapshot'))return false;
   }
   if(result.practice!==undefined&&result.practice!==null&&(!Number.isInteger(result.practice.total)||!Number.isInteger(result.practice.done)||result.practice.done<0||result.practice.done>result.practice.total))return false;
   if(result.documents!==undefined&&(!Array.isArray(result.documents)||result.documents.some(row=>!row||['id','group','title','purpose'].some(k=>typeof row[k]!=='string')||!['ready','unavailable'].includes(row.state)||(row.state==='ready'?!/^https:\/\/drive\.google\.com\/file\/d\/[A-Za-z0-9_-]+\/view$/.test(row.url||''):row.url!==null))))return false;

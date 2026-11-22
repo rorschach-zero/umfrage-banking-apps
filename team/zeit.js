@@ -165,7 +165,7 @@ async function autoBook(opts) {
   const id = 'auto-wb-' + String(opts.stornoKey || '').replace(/[^a-zA-Z0-9_-]/g, '-');
   const felder = {
     datum: opts.datum || todayIso(), person: opts.person, stunden: String(opts.stunden || 0.25),
-    aufgabe: opts.aufgabe || 'Servicetest', paket: opts.paket || servicePaket(opts.datum), storniert: '', quelle: 'werkzeug_b'
+    aufgabe: opts.aufgabe || 'Belegnachtrag', paket: opts.paket || servicePaket(opts.datum), storniert: '', quelle: 'werkzeug_b'
   };
   const receipt = node('p', {class: 'zeit-receipt', role: 'status'});
   async function undo() {

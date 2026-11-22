@@ -55,8 +55,8 @@ window.addEventListener("storage", event => { if (event.key === "pa6k") { try { 
 // Responses only: access is hashed for isolation, never stored in a snapshot.
 let fieldPending = false, fieldSlot = '', fieldValue = null, fieldGeneration = 0;
 function fieldValid(value, area) {
-  return value?.ok === true && Object.hasOwn(TEAM, value.person) && Array.isArray(value[area]) && value[area].every(row => row &&
-      (area === 'plan' ? !row.person || row.person === value.person : !row.eigen?.codiert_von || row.eigen.codiert_von === value.person)) &&
+  if(area==='plan'&&value?.person!=='SA'&&value?.service?.evidence?.some(row=>Object.keys(row).some(k=>!['anbieter','kontaktweg','person','tag','state'].includes(k))))return false;
+  return value?.ok === true && Object.hasOwn(TEAM, value.person) && (area === 'plan' ? value.service?.method==='qualitative_snapshot' && ['ready','unknown'].includes(value.service.state) && Array.isArray(value.service.evidence) && value.service.evidence.every(row=>['SA','ES'].includes(value.person)||row.person===value.person) : Array.isArray(value[area]) && value[area].every(row => row && (!row.eigen?.codiert_von || row.eigen.codiert_von === value.person))) &&
     Number.isFinite(Date.parse(value.fetchedAt)) && Date.parse(value.fetchedAt) <= Date.now() &&
     (window.PA6View.active() ? value.readOnly === true && value.viewer === 'SA' && value.person === window.PA6View.target() : !value.readOnly && !value.viewer);
 }
@@ -113,7 +113,7 @@ async function fieldTry(area, apply, ticket, access, previous, versuch) {
       try { localStorage.removeItem(fieldSlot); } catch {}
       fieldValue = null;
       document.getElementById('main').replaceChildren(el('h1', {}, 'Kein Zugang'), el('p', {class:'leise'}, error.message));
-      document.getElementById('fuss').hidden = true;
+      if(document.getElementById('fuss'))document.getElementById('fuss').hidden = true;
       fieldNotice('Aktueller Stand nicht verfügbar');
       return;
     }
@@ -132,7 +132,7 @@ function fieldLoading(sekunden, again) {
   document.getElementById('main').replaceChildren(el('h1', {}, 'Wird geladen …'),
     el('p', {class:'leise'}, 'Der Server ist gerade beschäftigt, zum Beispiel weil jemand speichert. Die Seite versucht es in ' + sekunden + ' s selbst wieder. Deine Bewertungen und Kontakte sind nicht weg.'),
     el('button', {type:'button', class:'knopf', 'data-read-navigation':true, on:{click: again}}, 'Jetzt neu versuchen'));
-  document.getElementById('fuss').hidden = true;
+  if(document.getElementById('fuss'))document.getElementById('fuss').hidden = true;
 }
 // A cached view is navigable but cannot edit or submit until confirmed.
 document.addEventListener('click', event => {

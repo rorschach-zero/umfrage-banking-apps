@@ -194,32 +194,17 @@
   }
 
   const FAIL_LABELS = {'nicht angeboten': 'nicht angeboten', 'nicht zugaenglich': 'nicht zugänglich', erfolglos: 'erfolglos', ausgefallen: 'ausgefallen'};
-  const bStarted = B => ready(B) && (B.n || Object.values(B.failures || {}).some(v => v > 0) || B.banks.some(b => b.stop || b.contacts || b.messages || b.minutes));
+  const bStarted = B => B?.method==='qualitative_snapshot';
   function pendingCell(data) {
     const B = data.methods.B.field, C = data.methods.C.field, rows = [];
-    if (ready(B) && !bStarted(B)) rows.push(row('Servicetest', 'noch kein Kontakt · keine Ausfälle · keine Belastung', '0 / ' + num(B.target)));
     if (ready(C) && !C.n) rows.push(row('Bewertungen codiert', 'doppelt codiert: noch keine · Übereinstimmung noch nicht berechenbar' + (C.consensus_state === 'unknown' ? ' · Konsensblatt unbekannt' : ''), '0 / ' + num(C.planned)));
     rows.push(`<div class="ln" id="karte-freigabe"><span>Ergebnisse der Umfrage<small>${data.released ? 'freigegeben' : 'erscheinen erst nach der Freigabe'}</small></span><span class="v">${data.released ? 'da' : 'ab ' + esc(dateWd(todayOf({generated_at: data.release_at})))}</span></div>`);
     return cell({id: 'ohne-abschluss', label: data.released ? 'Auswertung' : 'Noch ohne Abschluss', body: rows.join('')});
   }
-  // Servicetest: Ziel kommt aus den Daten. 48 = alter Plan (vier Anbieter, zwei Durchgänge), sonst der Plan ab 13.11.2026 (Yuh und Zak, ein Durchgang).
-  const serviceExplain = target => { const t = Number.isFinite(target) ? num(target) + ' ' : ''; return target === 48
-    ? `Nur durchgeführte Kontakte zählen gegen die ${t}geplanten (4 Anbieter × 3 Anliegen × 2 Kanäle × 2 Wiederholungen).`
-    : target === 12 ? `Nur durchgeführte Kontakte zählen gegen die ${t}geplanten (2 Anbieter × 3 Anliegen × 2 Kanäle, ein Durchgang). Am 13.11.2026 von 48 auf 12 reduziert: nur Yuh und Zak, ohne zweiten Durchgang.`
-    : `Nur durchgeführte Kontakte zählen gegen die ${t}geplanten.`; };
-  // Belastung je Anbieter: wirksam sind Nachrichten und Gesprächsminuten. Die Kontaktgrenze aus dem Testprotokoll ist eine Obergrenze,
-  // die mit wenigen geplanten Kontakten je Anbieter gar nicht erreicht werden kann; sie steht darum nur in der Erklärung.
-  const serviceLimits = f => { const l = f.limits || {}, c = Number.isFinite(l.contacts) ? l.contacts : 14, m = Number.isFinite(l.messages) ? l.messages : 42, min = Number.isFinite(l.minutes) ? l.minutes : 140;
-    const most = Math.max(0, ...(f.banks || []).map(b => Number.isFinite(b.planned) ? b.planned : 0));
-    return {c, m, min, text: `Belastung je Anbieter inklusive echter Proben: Stopp ab ${num(m)} Nachrichten oder ${num(min)} Gesprächsminuten. Das Testprotokoll nennt zudem eine Obergrenze von ${num(c)} Kontakten je Anbieter${most && most < c ? `; mit ${num(most)} geplanten wird sie nicht erreicht` : ''}.`}; };
   function serviceCell(data) {
-    const f = data.methods.B.field;
-    if (!ready(f)) return cell({id: 'servicetest', label: 'Servicetest', body: unknown()});
-    const failed = Object.entries(f.failures || {}).filter(([, v]) => v > 0), lim = serviceLimits(f);
-    return cell({id: 'servicetest', label: 'Servicetest', body: `<p class="say">${num(f.n)} von ${num(f.target)} Kontakten durchgeführt.</p><div class="two"><i style="width:${Math.min(100, f.n / f.target * 100)}%;background:var(--ink)"></i></div>
-      <p class="note">${failed.length ? 'Ausfälle, nicht im Soll: ' + failed.map(([k, v]) => `${FAIL_LABELS[k] || k} ${num(v)}`).join(' · ') : 'Keine Ausfälle.'}</p>
-      ${f.banks.map(b => row(esc(b.bank), `${num(b.messages)} von ${num(lim.m)} Nachrichten · ${num(b.minutes)} von ${num(lim.min)} Minuten`, `${num(b.n)} / ${num(b.planned)}${b.stop ? ' · Stopp' : ''}`)).join('')}`,
-      explain: `<p>${serviceExplain(f.target)} Ausfälle stehen je Code getrennt und füllen das Soll nie auf.</p><p>${lim.text}</p>`, source: 'Team-Blatt, Plan und Beobachtung; Testprotokoll B'});
+    const f=data.methods.B.field;
+    return cell({id:'servicetest',label:'Service-Momentaufnahmen',body:f?.method!=='qualitative_snapshot'||!ready(f)?unknown():`<p>Momentaufnahmen prüfen · Ernes · bis 24.11.2026</p>${f.providers.map(p=>row(esc(p.provider),esc(p.note),esc(p.state))).join('')}`,
+      explain:'<p>Subjektive Momentaufnahmen. Der Stand bewertet die Dokumentation, nicht den Kundendienst.</p>',source:'Vorhandene Belege und dokumentierte Prüfung'});
   }
   function codingCell(data) {
     const f = data.methods.C.field;
@@ -262,10 +247,7 @@
       <details class="more" data-key="alle-fragen"><summary>Alle Fragen mit Fallzahl</summary><div class="list">${A.main.questions.map(q => row(esc(question(q.question)), distribution(q), 'n = ' + num(q.n))).join('')}</div></details>
       <p class="note">Sensitivität ohne Dauerregel: n = ${num(A.sensitivity.n)}.</p>` : unknown(),
       explain: '<p>Anteile je Antwortkategorie mit der Fallzahl der Frage; der Nenner folgt der Route. «Kann ich nicht sagen» ist eine eigene Kategorie und wird nie gemittelt. Keine Intervalle und keine Tests: Die Stichprobe ist geeignet für die Fragestellung, aber keine Zufallsstichprobe.</p>', source: 'Umfrage, bereinigte Antworten'}));
-    const part = p => p.share == null ? `${num(p.x)} von ${num(p.n)}` : `${pct(p.share)} <small>(${num(p.x)} von ${num(p.n)})</small>`;
-    const CH = {telefon: 'Telefon', chat: 'Chat', mail: 'E-Mail', formular: 'Kontaktformular'};
-    out.push(cell({id: 'ergebnisse-b', cls: 'c12', label: 'Ergebnisse Servicetest', body: B && B.cells ? `<div class="table-wrap"><table class="plain result"><thead><tr><th scope="col">Anbieter · Kanal</th><th scope="col">n</th><th scope="col">Mensch in Frist</th><th scope="col">Mindestantwort in Folgefrist</th><th scope="col">Median bis Mensch</th><th scope="col">Erster Kontakt beantwortet</th><th scope="col">Richtig</th></tr></thead><tbody>${B.cells.map(c => `<tr><th scope="row">${esc(c.bank)} · ${esc(CH[c.channel] || c.channel)}</th><td>${num(c.n)}</td><td>${part(c.first_human)}</td><td>${part(c.minimum_answer)}</td><td>${c.time_to_human.median == null ? '–' : num(Math.round(c.time_to_human.median)) + ' min'}</td><td>${part(c.first_contact.yes)}</td><td>${part(c.correct)}</td></tr>`).join('')}</tbody></table></div>` : unknown(),
-      explain: `<p>Fristen je Ereignis: erste menschliche Antwort bei Telefon in 20 Minuten, Chat in 60 Minuten, E-Mail und Formular in 24 Stunden ab Start. «x von n» immer; ein Anteil erst ab n = ${B ? B.min_share_n : 4}, ein Median erst ab ${B ? B.min_median_n : 3} Werten. Explorative Beobachtung, keine Hochrechnung.</p>`, source: 'Team-Blatt, Beobachtung; Testprotokoll B'}));
+    out.push(cell({id:'ergebnisse-b',cls:'c12',label:'Service-Momentaufnahmen',body:B?.method==='qualitative_snapshot'&&B.providers.length?B.providers.map(p=>`<h3>${esc(p.provider)}</h3><p>${esc(p.summary)}</p><p>${esc(p.impression)}</p><p>${esc(p.limits)}</p>`).join(''):'<p>Geprüfte und bereinigte Anbietertexte liegen noch nicht vor.</p>',explain:'<p>Willkürliche Auswahl, nicht repräsentativ. Keine allgemeine Bewertung oder Rangfolge.</p>',source:'Geprüfte Anbietertexte'}));
     out.push(cell({id: 'ergebnisse-c', cls: 'c12', label: 'Themen je Auswertungszelle', body: C ? C.map(r => `<details class="more" data-key="c-${esc(r.cell.join('-'))}"><summary>${esc(r.cell.join(' · '))} · n = ${num(r.n)}</summary>${r.small_n ? '<p class="note">n unter 20: berichten, nicht vergleichen.</p>' : ''}<div class="list">${r.categories.map(c => row('Kategorie ' + num(c.category), '', `${num(c.count)} von ${num(c.n)} · ${pct(c.share)}`)).join('')}</div></details>`).join('') : unknown(),
       explain: '<p>Anteil Bewertungen mit der Kategorie an den codierten Bewertungen der Zelle. Verglichen wird nur gleich gegen gleich.</p>', source: 'Team-Blatt, Bewertungen mit Konsens'}));
     return out.join('');
@@ -284,7 +266,7 @@
     const cells = [safe('etappe', () => heroCell(data)), safe('naechste', () => nextCell(data)), safe('kanaele', () => channelsCell(data)), safe('quoten', () => quotaCell(data)), safe('organisationen', () => outreachCell(data))];
     // Halbe Zellen paarweise; bei ungerader Zahl wird die letzte ganz breit (keine Lücke im Raster).
     const halves = [safe('qualitaet', () => qualityCell(data))];
-    if (bStarted(B) || !ready(B)) halves.push(safe('servicetest', () => serviceCell(data)));
+    halves.push(safe('servicetest', () => serviceCell(data)));
     const cStarted = (ready(C) && C.n) || !ready(C);
     if (cStarted) halves.push(safe('codierung', () => codingCell(data)));
     halves.push(safe('ohne-abschluss', () => pendingCell(data)));

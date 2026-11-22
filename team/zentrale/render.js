@@ -16,7 +16,7 @@
     funnel:'Seit dem angegebenen Messbeginn zählen wir geöffnete, begonnene, vollständige und gültige Umfragen; die Prozentzahl vergleicht jeden Schritt mit dem vorherigen.',
     organizations:'Die Zahlen stammen aus der Versand- und Antwortliste der Organisationen; für die Antwortquote zählen nur menschliche Antworten. Zusagen zählen beide Arten von Ja. Zusage mit Auftrag: Selbstaushang erlaubt oder bedingte Zusage (wir bringen vorbei, hängen auf oder senden gedruckt).',
     waves:'Hier würden die Versandtage und die Zahl der angeschriebenen Organisationen stehen; diese Angaben fehlen derzeit in der gelieferten Versandübersicht.',
-    'method-b':'Gezählt werden abgeschlossene echte Servicekontakte aus den Testprotokollen; Übungen zählen nicht zum Ziel.',
+    'method-b':'Vorhandene Belege bei Yuh und Zak werden qualitativ geprüft. Der Prüfstand bewertet nicht den Kundendienst.',
     'method-c':'Diese Zahl aus unserer Bewertungsliste zählt jede erstmals eingeordnete Bewertung einmal; in den Auswertungsgruppen kann sie mehrfach vorkommen.',
     packages:'Hier stehen die Aufgaben mit Frist und gemeldetem Status aus dem Projektplan; die Zuständigkeiten kommen aus den persönlichen Aufgabenlisten.',
     'own-packages':'Hier stehen deine Aufgaben mit Frist und gemeldetem Status aus deiner persönlichen Aufgabenliste.',
@@ -87,7 +87,7 @@
     return card(v,'waves','Wellen','outreach.waves',v.cached?'<p class="muted">Wellendetails werden nachgeladen.</p>':list?list.length?list.map(w=>`<p>${esc(w.label||w.id)} · ${esc(M.dateLabel(w.on))} · ${num(M.number(w.sent))} angeschrieben</p>`).join(''):empty('empty'):'<p class="muted">Versandtage und Zahlen je Welle sind in der aktuellen Datenlieferung nicht enthalten.</p>');
   }
   function methods(v) {
-    const b=card(v,'method-b','Servicebeobachtung B','methods.B.field.n; methods.B.field.target',`${v.B.state==='error'?empty('error','Servicebeobachtung'):''}<div class="progress-ring">${ring(M.ratio(v.B.n,v.B.target),'var(--sky)')}<p class="method-count">${num(v.B.n)} von ${num(v.B.target)} Kontakten</p></div><a class="btn" href="/team/b/">Protokoll öffnen</a>`, '', '<p>Abgeschlossene Kontakte und Ziel laut Testprotokoll. Fehlende Messwerte bleiben unbekannt.</p>');
+    const b=card(v,'method-b','Service-Momentaufnahmen','methods.B.field.providers',v.B.state!=='ready'?'<p>Stand unbekannt. Die Belegquelle konnte nicht gelesen werden.</p>':`<p>Momentaufnahmen prüfen · Ernes · bis 24.11.2026</p>${v.B.providers.map(p=>`<p><strong>${esc(p.provider)}</strong> · ${esc(p.state)}</p>`).join('')}<a class="btn" href="/team/b/">Belege ansehen</a>`,'','<p>Der Stand zeigt die Belegprüfung. Er bewertet nicht den Kundendienst.</p>');
     const c=card(v,'method-c','Bewertungen C','methods.C.field.n; planned; cells',`${v.C.state==='error'?empty('error','Bewertungen'):''}<div class="progress-ring">${ring(M.ratio(v.C.n,v.C.planned),'var(--lilac)')}<p class="method-count">${num(v.C.n)} von ${num(v.C.planned)} erstmals eingeordnet</p></div>${v.C.conflict?flag('nicht abgestimmt'):''}<p><a class="btn" href="/team/c/">Codierungen öffnen</a></p>`,'',`<p>${v.C.cellTotals?`Zellsummen: ${num(v.C.cellTotals.n)} eingeordnet; ${num(v.C.cellTotals.captured)} erfasst; ${num(v.C.cellTotals.planned)} geplant.`:'Zellsummen noch nicht geliefert.'} Bei Widerspruch bleibt die Kopfzahl gekennzeichnet.</p>`);
     return `<div class="cols c2 methods">${b}${c}</div>`;
   }
@@ -137,7 +137,7 @@
   }
   function skeleton(mode='marketing') {
     const module=(id,title)=>`<section class="card skeleton" id="${id}" aria-hidden="true"><div class="card-h"><h2>${title}</h2></div><div class="skeleton-lines"></div></section>`;
-    const modules=mode==='marketing'?`<div class="cols c2">${module('curve','Rücklauf')}${module('quotas','Quoten')}</div><div class="cols c3">${module('channels','Kanäle')}${module('funnel','Trichter')}${module('organizations','Organisationen')}</div>${module('tempo','Tempo')}${module('waves','Wellen')}<div class="cols c2 methods">${module('method-b','Servicebeobachtung B')}${module('method-c','Bewertungen C')}</div>`:`${module('schedule','Zeitplan')}${module('packages','Pakete')}<div class="cols c2">${module('team','Team und Stunden')}${module('risks','Risiken')}</div>`;
+    const modules=mode==='marketing'?`<div class="cols c2">${module('curve','Rücklauf')}${module('quotas','Quoten')}</div><div class="cols c3">${module('channels','Kanäle')}${module('funnel','Trichter')}${module('organizations','Organisationen')}</div>${module('tempo','Tempo')}${module('waves','Wellen')}<div class="cols c2 methods">${module('method-b','Service-Momentaufnahmen')}${module('method-c','Bewertungen C')}</div>`:`${module('schedule','Zeitplan')}${module('packages','Pakete')}<div class="cols c2">${module('team','Team und Stunden')}${module('risks','Risiken')}</div>`;
     return `<section class="lage skeleton" id="stand" aria-hidden="true">${['Stand','Engpass','Nächster Schritt'].map(label=>`<div><div class="step">${label}</div><div class="skeleton-lines"></div></div>`).join('')}</section><div class="grid"><div class="cols" id="modules">${modules}</div><aside class="juno skeleton" id="juno" aria-hidden="true"><div class="juno-h"><h2>Warteschlange</h2></div><div class="skeleton-lines"></div></aside></div>`;
   }
   return {esc,num,empty,info,card,ruleCard,page,tempo,packageRows,skeleton};

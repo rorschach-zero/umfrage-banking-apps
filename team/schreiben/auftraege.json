@@ -153,7 +153,7 @@
    }
   ],
   "nicht": [
-   "Ergebnisse aus Umfrage, Servicebeobachtung oder Bewertungsanalyse vor dem Feldschluss",
+   "Ergebnisse aus Umfrage, Service-Momentaufnahmen oder Bewertungsanalyse vor dem Feldschluss",
    "Massnahmen, Budget oder Marketing-Mix, diese gehören in die 6b",
    "Den Inhalt der Teilkapitel wiederholen, hier wird nur verbunden und eingeordnet"
   ],
@@ -321,7 +321,7 @@
   "seiten": 0.75,
   "fragen": [
    "Wie schützen wir die Daten der Befragten und Beobachteten?",
-   "Welche ethischen Regeln halten wir bei Testkontakten und Bewertungen ein?",
+   "Welche ethischen Regeln gelten für die vorhandenen Momentaufnahmen und Bewertungen?",
    "Wie prüfen wir, dass unsere Daten verlässlich sind?",
    "Warum ist Sicherheit beim Banking für die Kundschaft so wichtig?"
   ],
@@ -335,7 +335,7 @@
     "quelle": "Fachregeln R14; Berichtsgrundlage 6a, Gliederung 2.3"
    },
    {
-    "punkt": "Je Methode die ethischen Regeln, bei Testkontakten keine Vorinformation, keine Offenlegung der Identität, keine Aufzeichnung.",
+    "punkt": "Je Methode die ethischen Regeln dokumentieren: Privatdaten und Identitäten schützen, keine Aufzeichnungen veröffentlichen und die Grenzen der vorhandenen Belege offenlegen.",
     "quelle": "Fachregeln X1 bis X7; Berichtsgrundlage 6a, Gliederung 2.3"
    },
    {
@@ -366,9 +366,9 @@
   "gliederung": [],
   "infos": [
    {
-    "titel": "Servicebeobachtung",
-    "wo": "Team-App › Kundenservice testen",
-    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+    "titel": "Service-Momentaufnahmen",
+    "wo": "Team-App › Service-Momentaufnahmen",
+    "inhalt": "Qualitative Aufbereitung der vorhandenen Belege zu Yuh und Zak, mit getrenntem Ablauf, Eindruck und offenen Angaben."
    },
    {
     "titel": "Bewertungsanalyse",
@@ -459,9 +459,9 @@
     "inhalt": "Alle Sekundärquellen mit Q-Nummer und Angaben für das Literaturverzeichnis. Zahlen nur von dort übernehmen."
    },
    {
-    "titel": "Servicebeobachtung",
-    "wo": "Team-App › Kundenservice testen",
-    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+    "titel": "Service-Momentaufnahmen",
+    "wo": "Team-App › Service-Momentaufnahmen",
+    "inhalt": "Qualitative Aufbereitung der vorhandenen Belege zu Yuh und Zak, mit getrenntem Ablauf, Eindruck und offenen Angaben."
    },
    {
     "titel": "Bewertungsanalyse",
@@ -470,7 +470,7 @@
    }
   ],
   "nicht": [
-   "Ergebnisse aus Servicebeobachtung oder Bewertungen vor dem Feldschluss",
+   "Ergebnisse aus Service-Momentaufnahmen oder Bewertungen vor dem Feldschluss",
    "Massnahmen gegen Mitbewerber"
   ],
   "daten_ab": "Anbieterangaben sofort; Vergleich mit eigenen Ergebnissen ab 02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
@@ -504,7 +504,7 @@
     "quelle": "Konzept PA6, S. 4, Pflichtteil 3"
    },
    {
-    "punkt": "Umfrage und Servicebeobachtung als Primärdaten, Bewertungsanalyse als Sekundärdaten bezeichnen.",
+    "punkt": "Umfrage und Service-Momentaufnahmen als Primärdaten, Bewertungsanalyse als Sekundärdaten bezeichnen.",
     "quelle": "Berichtsgrundlage 6a, Auftrag und Raster (Datenbasis)"
    }
   ],
@@ -543,10 +543,10 @@
     "inhalt": "Alle Fragen und Antwortmöglichkeiten der Online-Befragung (Methode A)."
    },
    {
-    "titel": "Testprotokoll Servicetest",
+    "titel": "Historisches Testprotokoll · aktuelle Momentaufnahmen beachten",
     "wo": "Gruppenordner «PA6 Yuh» in der Drive › 10_pa6a › beobachtung › Testprotokoll",
     "link": "https://drive.google.com/drive/folders/1NYQseXrQ5kZ0ACW3YPKpf_Vgf5_s6f-4",
-    "inhalt": "Ablauf und Messregeln der standardisierten Servicebeobachtung (Methode B)."
+    "inhalt": "Historischer Messplan. Für Methode B gelten jetzt subjektive Momentaufnahmen; aktuelle Belege und Methodengrenzen stehen in der Team-App."
    },
    {
     "titel": "Codebuch Bewertungen",
@@ -597,7 +597,7 @@
     "quelle": "Fachregeln R16"
    },
    {
-    "punkt": "Umfrage als schriftliche Online-Befragung, Servicebeobachtung als Beobachtung mit Markttest-Elementen, ohne Ursache-Wirkungs-Behauptung.",
+    "punkt": "Umfrage als schriftliche Online-Befragung, Service-Momentaufnahmen als subjektive qualitative Beobachtung, ohne Ursache-Wirkungs-Behauptung.",
     "quelle": "Fachregeln R5, R11"
    },
    {
@@ -713,9 +713,9 @@
   "gliederung": [],
   "infos": [
    {
-    "titel": "Servicebeobachtung",
-    "wo": "Team-App › Kundenservice testen",
-    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+    "titel": "Service-Momentaufnahmen",
+    "wo": "Team-App › Service-Momentaufnahmen",
+    "inhalt": "Qualitative Aufbereitung der vorhandenen Belege zu Yuh und Zak, mit getrenntem Ablauf, Eindruck und offenen Angaben."
    },
    {
     "titel": "Bewertungsanalyse",
@@ -776,7 +776,7 @@
     "quelle": "Konzept PA6, S. 4, Pflichtteil 5; Fachregeln R10"
    },
    {
-    "punkt": "Belastungsgrenze der Testkontakte je Anbieter nennen.",
+    "punkt": "Willkürliche Auswahl, subjektive Eindrücke und fehlende Angaben als Grenzen nennen.",
     "quelle": "Fachregeln X2"
    }
   ],
@@ -800,9 +800,9 @@
     "inhalt": "Zeigt, wie viele Antworten die Umfrage hat. Daraus kommt die Ist-Zahl der Befragten."
    },
    {
-    "titel": "Servicebeobachtung",
-    "wo": "Team-App › Kundenservice testen",
-    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+    "titel": "Service-Momentaufnahmen",
+    "wo": "Team-App › Service-Momentaufnahmen",
+    "inhalt": "Qualitative Aufbereitung der vorhandenen Belege zu Yuh und Zak, mit getrenntem Ablauf, Eindruck und offenen Angaben."
    },
    {
     "titel": "Bewertungsanalyse",
@@ -894,7 +894,7 @@
   ],
   "gliederung": [
    "F1/F2 (Umfrage)",
-   "F3 (Servicebeobachtung)",
+   "F3 (Service-Momentaufnahmen)",
    "F4 (Bewertungsanalyse)"
   ],
   "infos": [
@@ -904,9 +904,9 @@
     "inhalt": "Zeigt, wie viele Antworten die Umfrage hat. Daraus kommt die Ist-Zahl der Befragten."
    },
    {
-    "titel": "Servicebeobachtung",
-    "wo": "Team-App › Kundenservice testen",
-    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
+    "titel": "Service-Momentaufnahmen",
+    "wo": "Team-App › Service-Momentaufnahmen",
+    "inhalt": "Qualitative Aufbereitung der vorhandenen Belege zu Yuh und Zak, mit getrenntem Ablauf, Eindruck und offenen Angaben."
    },
    {
     "titel": "Bewertungsanalyse",
@@ -1029,33 +1029,29 @@
  "6a-2.8-f3": {
   "titel": "F3",
   "teil": "6a",
-  "kurz": "Vergleiche das beobachtete Serviceverhalten von Yuh und den Mitbewerbern bei gleichen Anliegen und Kanälen.",
+  "kurz": "Welche Erfahrungen und persönlichen Eindrücke halten wir bei den dokumentierten Kontakten mit dem Kundendienst von Yuh und Zak fest, und welche Grenzen haben diese Momentaufnahmen?",
   "seiten": 1.5,
   "fragen": [
-   "Wie schnell und wie richtig antworten die Anbieter auf gleiche Anliegen?",
-   "Wie oft erreicht man einen Menschen, und wie oft ist das Anliegen beim ersten Kontakt erledigt?",
-   "Wo unterscheidet sich Yuh deutlich von den anderen?"
+   "Was ist bei den dokumentierten Kontakten tatsächlich geschehen?",
+   "Was ist eine persönliche Einschätzung, was bleibt unbelegt?",
+   "Welche Anschlussfragen ergeben sich, ohne den Kundendienst insgesamt zu bewerten?"
   ],
   "muss": [
    {
-    "punkt": "Zu Beginn drei Sätze zu Zweck, Art der Beobachtung und Beobachtetem.",
-    "quelle": "Berichtsgrundlage 6a, WIAR (Block 3, Folie 8)"
+    "punkt": "Methode B dokumentiert subjektive Momentaufnahmen des Kundendiensts bei Yuh und Zak. Die Auswahl der Anbieter, Personen, Zeitpunkte und Kontaktwege ist willkürlich und nicht repräsentativ. Die vorhandenen Kontakte werden qualitativ beschrieben; es gibt keine Sollzahl von Kontakten, keine quantitativen Kennzahlen oder Rangfolge der Anbieter. Beobachteter Ablauf, persönliche Einschätzung und offene Angaben stehen getrennt. Telefon, Kontaktformular und Chat werden nur dort beschrieben, wo Belege vorliegen; ein nicht beobachteter Kontaktweg gilt nicht als nicht angeboten. Ein Gespräch mit mehreren Anliegen bleibt ein Gespräch. Befragung A und Bewertungsanalyse C bleiben unverändert.",
+    "quelle": "Entscheid Salah 20.11.2026; Fachregeln R5, R8, R9, R10, R17"
    },
    {
-    "punkt": "Je Anbieter, Anliegen und Kanal gültiges n, Ausfälle, Anteil in der Frist erledigt, Median, Anteile beantwortet, Mensch erreicht und richtig.",
-    "quelle": "Lieferplan, Methode B"
+    "punkt": "Je Anbieter die tatsächlich beobachteten Kontaktwege beschreiben. Ablauf, Antwort, persönliche Einschätzung und fehlende Angaben getrennt halten. Keine quantitativen Kennzahlen, Notenmittel oder Rangfolge.",
+    "quelle": "Entscheid Salah 20.11.2026"
    },
    {
-    "punkt": "Als explorative Beobachtung von n Kontakten bezeichnen, ohne Hochrechnung.",
-    "quelle": "Lieferplan, Methode B"
+    "punkt": "Im Bericht keine identifizierbaren Einzelkontakte, Mitarbeitendennamen, exakten Kontaktuhrzeiten oder Kontodaten. Details bleiben interne Belege; keine Tabellen mit einer nur scheinbar anonymen Einzelperson.",
+    "quelle": "Fachregeln X1 bis X5; bestehende Berichtsgrenze"
    },
    {
-    "punkt": "Nur zusammengefasst berichten, kleinste Zelle ist Anbieter mal Kanal, nie einzelne Kontakte.",
-    "quelle": "Fachregeln X3"
-   },
-   {
-    "punkt": "Ein Satz, was Yuh mit dem Ergebnis tun kann.",
-    "quelle": "Berichtsgrundlage 6a, Abgleich mit dem offiziellen Raster"
+    "punkt": "Wenige Kontakte, ein kurzer Zeitraum und wenige beobachtende Personen; unterschiedliche Anliegen und Kontaktverläufe. Daraus lässt sich keine allgemeine Servicequalität und kein Leistungsunterschied zwischen den Anbietern ableiten.",
+    "quelle": "Tatsächlicher Verlauf gemäss Feldbelegen; Fachregeln R9 und R10"
    }
   ],
   "raster": [
@@ -1083,30 +1079,25 @@
   "gliederung": [],
   "infos": [
    {
-    "titel": "Servicebeobachtung",
-    "wo": "Team-App › Kundenservice testen",
-    "inhalt": "Erfassung der Testkontakte bei Yuh und den Mitbewerbern nach festem Ablauf."
-   },
-   {
-    "titel": "Arbeitspaket Auswertung",
-    "wo": "Notion › PA6 › Projektmanagement › PSP › Auswertung der drei Methoden (Kapitel 2.8)",
-    "inhalt": "Umfang und Abnahmekriterien der Auswertung."
+    "titel": "Momentaufnahmen",
+    "wo": "Team-App › Service-Momentaufnahmen",
+    "inhalt": "Vorhandene Belege, Dokumentationsstand und qualitative Zusammenfassungen; Zugang erst nach geprüftem Umbau."
    }
   ],
   "nicht": [
-   "Einzelne Kontakte oder Mitarbeitende beschreiben",
    "Ursache-Wirkungs-Aussagen",
-   "Werte ohne geprüfte Auswertung"
+   "Verallgemeinerungen oder Rangfolge der Anbieter",
+   "Eine gebündelte Anfrage als mehrere unabhängige Kontakte zählen"
   ],
-  "daten_ab": "02.12.2026 (Gesamtfeldschluss 01.12.2026, 23.59 Uhr, danach Auswertungspruefung und Freigabe)",
+  "daten_ab": "02.12.2026 (bestehende Ergebnisfreigabe bleibt; interne Belegprüfung bis 24.11.)",
   "fallen": [
-   "Ungleiche Anliegen oder Kanäle vergleichen",
-   "Abbrüche und offene Werte verschweigen",
-   "Kleine Fallzahlen verallgemeinern"
+   "Dokumentationslücke als Serviceausfall werten",
+   "Unbeobachteten Kanal als nicht angeboten bezeichnen",
+   "Den geplanten Yuh-Anruf als bereits durchgeführt darstellen"
   ],
   "apa": [
-   "Tabellen mit Nummer fett, Titel kursiv, Anmerkung «eigene Erhebung, n, Zeitraum» (Gruppenentscheid).",
-   "Beobachtungsdaten je Anbieter und Kanal im Anhang und im Text verweisen."
+   "Jede qualitative Aussage mit überprüfbarem Protokollverweis oder Beleg. Beobachtung und persönliche Einschätzung kennzeichnen.",
+   "Die interne Belegliste ist kein öffentlich freizugebendes Rohdatenverzeichnis. Quellenform nach dem Schulleitfaden prüfen."
   ]
  },
  "6a-2.8-f4": {

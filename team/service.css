@@ -427,3 +427,5 @@ dialog.zeit-sheet.contact-work-dialog{inset:0;margin:auto;width:min(520px,calc(1
 .contact-work{display:grid;gap:10px;margin:18px 0}
 .contact-work .contact-button{min-height:44px}
 @media(max-width:480px){dialog.zeit-sheet.contact-work-dialog{padding:20px}.contact-work-dialog h2{font-size:22px}.contact-work-dialog form{gap:10px}}
+
+.snapshot-original{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:.85rem;line-height:1.6}.snapshot-evidence{margin-top:1rem}.snapshot-evidence summary{cursor:pointer;overflow-wrap:anywhere}.snapshot-evidence label{display:block;margin:1rem 0}.snapshot-evidence textarea{display:block;box-sizing:border-box;width:100%;font:inherit;padding:.75rem;border:1px solid #b8bcc7;border-radius:8px}.snapshot-evidence button{margin:.3rem}.snapshot-provider p{overflow-wrap:anywhere}

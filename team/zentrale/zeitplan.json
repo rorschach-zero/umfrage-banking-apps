@@ -189,7 +189,7 @@
     },
     {
       "id": "AP-002",
-      "title": "Servicebeobachtung · Probelauf 06.11., Kontakte 17.–18.11.",
+      "title": "Service-Momentaufnahmen begleiten und Belege sichern",
       "phase": "PH-01",
       "stage": "a",
       "stages": [
@@ -198,11 +198,11 @@
       "kind": "package",
       "owner": "Ernes",
       "start": "2026-11-06",
-      "end": "2026-11-18",
+      "end": "2026-11-20",
       "startTime": "00:00",
       "endTime": "23:59",
       "effortHours": 13,
-      "durationDays": 13,
+      "durationDays": 15,
       "dependencies": [
         {
           "id": "AP-020",
@@ -211,13 +211,13 @@
         }
       ],
       "status": null,
-      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "source": "Planvorschau · Methodenentscheid und Bauauftrag 22.11.2026",
       "deliverables": [
         "L1",
         "L6"
       ],
       "notes": [
-        "Am 13.11.2026 reduziert: 12 Kontakte bei Yuh und Zak, ein Durchgang, Di 17. bis Do 19.11.; Fr 20.11. Reserve, späte Antworten bis 23.11. Zeitfenster des Pakets unverändert; der Planaufwand stammt noch vom alten Umfang (48 Kontakte)."
+        "Bisherige Planstunden bleiben historischer Planwert; Restaufwand noch zu schätzen."
       ]
     },
     {
@@ -1389,7 +1389,7 @@
     },
     {
       "id": "AP-035",
-      "title": "Servicebeobachtung · Kontakte 19.11., Reserve 20.11., späte Antworten bis 23.11.",
+      "title": "Späte Antworten zu bestehenden Kontakten nachtragen",
       "phase": "PH-02",
       "stage": "a",
       "stages": [
@@ -1416,12 +1416,12 @@
         }
       ],
       "status": null,
-      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "source": "Planvorschau · Methodenentscheid und Bauauftrag 22.11.2026",
       "deliverables": [
         "L1"
       ],
       "notes": [
-        "Am 13.11.2026 reduziert: 12 Kontakte bei Yuh und Zak, ein Durchgang, Di 17. bis Do 19.11.; Fr 20.11. Reserve, späte Antworten bis 23.11. Zeitfenster des Pakets unverändert; der Planaufwand stammt noch vom alten Umfang (48 Kontakte)."
+        "Bisherige Planstunden bleiben historischer Planwert; Restaufwand noch zu schätzen."
       ]
     },
     {
@@ -1574,7 +1574,7 @@
     },
     {
       "id": "AP-040",
-      "title": "Servicetest-Daten prüfen ab 21.11.",
+      "title": "Momentaufnahmen prüfen und aufbereiten",
       "phase": "PH-02",
       "stage": "a",
       "stages": [
@@ -1601,12 +1601,12 @@
         }
       ],
       "status": null,
-      "source": "Fristenausgleich 05.11.2026, Fassung 5, §§ 3 und 6; PSP-Snapshot 05.11.2026",
+      "source": "Planvorschau · Methodenentscheid und Bauauftrag 22.11.2026",
       "deliverables": [
         "L1"
       ],
       "notes": [
-        "AP-040 → 6a-2.8-f3 (FS)"
+        "Bisherige Planstunden bleiben historischer Planwert; Restaufwand noch zu schätzen."
       ]
     },
     {
@@ -2650,10 +2650,12 @@
       "dependencies": [],
       "status": null,
       "deliverables": [],
-      "notes": [],
+      "notes": [
+        "Aufgehobene Kontaktplanung; keine neue Kontaktpflicht."
+      ],
       "effortHours": null,
       "durationDays": 0,
-      "title": "Probelauf Servicebeobachtung B",
+      "title": "Historisch · früherer Kontaktplan B",
       "start": "2026-11-06",
       "end": "2026-11-06",
       "date": "2026-11-06",
@@ -2673,11 +2675,11 @@
       "status": null,
       "deliverables": [],
       "notes": [
-        "Am 13.11.2026 reduziert: 12 Kontakte bei Yuh und Zak, ein Durchgang, Di 17. bis Do 19.11., 09–12 Uhr. Alt: 09.–20.11., 48 Kontakte bei vier Anbietern."
+        "Aufgehobene Kontaktplanung; keine neue Kontaktpflicht."
       ],
       "effortHours": null,
       "durationDays": 0,
-      "title": "Kontaktfeld B beginnt",
+      "title": "Historisch · früherer Kontaktplan B",
       "start": "2026-11-17",
       "end": "2026-11-17",
       "date": "2026-11-17",
@@ -2697,11 +2699,11 @@
       "status": null,
       "deliverables": [],
       "notes": [
-        "Fr 20.11. ist Reserve; späte Antworten zählen bis 23.11."
+        "Aufgehobene Kontaktplanung; keine neue Kontaktpflicht."
       ],
       "effortHours": null,
       "durationDays": 0,
-      "title": "Kontaktfeld B endet",
+      "title": "Historisch · früherer Kontaktplan B",
       "start": "2026-11-19",
       "end": "2026-11-19",
       "date": "2026-11-19",
@@ -2720,10 +2722,12 @@
       "dependencies": [],
       "status": null,
       "deliverables": [],
-      "notes": [],
+      "notes": [
+        "Ernes prüft die vorhandenen Momentaufnahmen."
+      ],
       "effortHours": null,
       "durationDays": 0,
-      "title": "Datenprüfung / Auswertung B beginnt",
+      "title": "Belegprüfung beginnt",
       "start": "2026-11-21",
       "end": "2026-11-21",
       "date": "2026-11-21",
@@ -2742,10 +2746,12 @@
       "dependencies": [],
       "status": null,
       "deliverables": [],
-      "notes": [],
+      "notes": [
+        "Parallel zur Belegprüfung; keine neuen Kontakte."
+      ],
       "effortHours": null,
       "durationDays": 0,
-      "title": "72-h-Nachlauf B endet",
+      "title": "Ablagestichtag später bestehender Antworten",
       "start": "2026-11-23",
       "end": "2026-11-23",
       "date": "2026-11-23",
@@ -3427,10 +3433,12 @@
   ],
   "absenceNote": "Abwesenheiten: Leonie 16.–23.11. · Melisa 04.–07.12. und 23.12.–02.01. · Salah 24.12.–01.01. · Ernes keine · Arber noch offen",
   "notes": [
+    "Planvorschau 22.11.2026. Noch kein neuer Notion-Abzug. Nach Umstellung aus gemeinsamem PSP-, Aufgaben- und Kapitelabzug neu erzeugen.",
     "Planungsstand 13.11.2026; Status wird aus den vorhandenen Daten ergänzt.",
     "Servicebeobachtung B am 13.11.2026 reduziert: nur Yuh und Zak, ein Durchgang, 12 statt 48 Kontakte, Di 17. bis Do 19.11.; die Pakete AP-002, AP-035 und AP-040 behalten ihre Zeitfenster.",
     "Phasen nach Wasserfall; vorgezogene Vorbereitung und laufende Steuerung können Phasengrenzen überlappen.",
     "Planstunden sind geschätzter Aufwand; Balken zeigen Kalendertage, keine Vollzeitauslastung.",
     "Deck-Termin offen: Lieferplan 28.02. / AP-015 10.03.2027."
-  ]
+  ],
+  "preview": true
 }

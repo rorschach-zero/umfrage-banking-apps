@@ -201,7 +201,7 @@ function chooser() {
   const hero = el('header', {class:'ov-hero'},
     el('p', {class:'ov-eyebrow'}, 'PA6 · Praxisauftrag Yuh'),
     el('h2', {class:'ov-h'}, 'Ein Bericht in zwei Teilen'),
-    el('p', {class:'ov-lede'}, 'Yuh fragt, wie bekannt sein Schweizer Kundendienst ist und wie er wirkt. In der PA6a untersuchen wir das mit Umfrage, Servicetest und Bewertungen, in der PA6b machen wir daraus ein Marketingkonzept mit einer ausgearbeiteten Massnahme.'),
+    el('p', {class:'ov-lede'}, 'Yuh fragt, wie bekannt sein Schweizer Kundendienst ist und wie er wirkt. In der PA6a untersuchen wir das mit Umfrage, Service-Momentaufnahmen und Bewertungen, in der PA6b machen wir daraus ein Marketingkonzept mit einer ausgearbeiteten Massnahme.'),
     el('div', {class:'ov-facts'},
       el('div', {class:'fact wide'}, el('p', {class:'fk'}, complete ? 'Fortschritt' : 'Deine Kapitel'),
         el('p', {class:'fv'}, n ? d + ' von ' + n + (complete ? ' Kapiteln fertig' : ' fertig') : 'Noch kein Kapitel zugeteilt'), bar,
@@ -613,7 +613,7 @@ function copyBtnWide(text, label) {
 }
 function renderInfos(g) {
   const inApp = [
-    {titel:'Servicetest', wo:'Team-App', href:'/team/b/', inhalt:'Eure Testkontakte bei den Banken.'},
+    {titel:'Service-Momentaufnahmen', wo:'Team-App', href:'/team/b/', inhalt:'Vorhandene Belege und subjektive Eindrücke zu Yuh und Zak.'},
     {titel:'Bewertungen', wo:'Team-App', href:'/team/c/', inhalt:'Codierte öffentliche Bewertungen.'},
     {titel:'Dashboard', wo:'Team-App', href:'/team/dashboard/', inhalt:'Rücklauf und Stand der Erhebung.'},
     {titel:'Juno fragen', wo:'Team-App', href:'/team/frag/', inhalt:'Fragen zu Regeln, Terminen und Unterlagen.'}];

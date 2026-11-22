@@ -29,24 +29,24 @@
     },
     "ES": {
       "name": "Ernes",
-      "role": "Servicebeobachtung",
+      "role": "Service-Momentaufnahmen",
       "absence": null,
       "task": {
-        "ref": "AP-035",
-        "sourceTitle": "Servicebeobachtung · Kontakte 19.–20.11. (neu inkl. Yuh-Telefon und B29), späte Antworten bis 23.11. begleiten (verantwortlich)",
-        "sourceUrl": "https://app.notion.com/40bb3063a1268193a859c28037bfc8a0",
-        "sourceDone": "Jeder Kontakt ist im Servicetest abgeschlossen oder als begründeter Ausfall markiert, und Antworten, die bis 23.11. eintreffen, sind nachgetragen.",
-        "title": "Die Servicekontakte zu Ende begleiten",
-        "next": "Prüfe die offenen Kontakte und die späten Antworten.",
+        "ref": "AP-040",
+        "sourceTitle": "Planvorschau · Momentaufnahmen prüfen und aufbereiten",
+        "sourceUrl": "",
+        "sourceDone": "Die Belege sind zugeordnet, Ablauf und Eindruck getrennt, offene Angaben dokumentiert.",
+        "title": "Momentaufnahmen prüfen · bis 24.11.2026",
+        "next": "Prüfe die vorhandenen Belege von Arber und Salah.",
         "steps": [
-          "Offene Kontakte im Einsatzplan prüfen",
-          "Fehlende Angaben mit der ausführenden Person klären",
-          "Späte Antworten und Datenprüfung dokumentieren"
+          "Belege zuordnen",
+          "Beobachtung und persönlichen Eindruck trennen",
+          "Offene Angaben und Belegprüfung dokumentieren"
         ],
-        "due": "2026-11-23",
-        "plannedHours": 2,
-        "done": "Jeder Kontakt ist im Servicetest abgeschlossen oder als begründeter Ausfall markiert, und Antworten, die bis 23.11. eintreffen, sind nachgetragen.",
-        "criteriaProposed": false
+        "due": "2026-11-24",
+        "plannedHours": null,
+        "done": "Die Belege sind zugeordnet, Ablauf und Eindruck getrennt, offene Angaben dokumentiert.",
+        "criteriaProposed": true
       },
       "risk": "Wartezeit auf Antworten ist keine Arbeitszeit. Die ausführende Person bestätigt ihre tatsächliche Zeit."
     },

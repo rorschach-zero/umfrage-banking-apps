@@ -142,9 +142,9 @@ function showNext(){
 }
 function showServiceLink(){
  $('project-service-link').replaceChildren(
-  el('h2',{},'Einsatzplan Servicetest'),
-  el('p',{},'Deine Kontakte planst und erfasst du im Servicetest. Dort siehst du nur deine Zeilen.'),
-  el('a',{href:'../b/',class:'knopf hell'},'Zum Servicetest →')
+  el('h2',{},'Service-Momentaufnahmen'),
+  el('p',{},'Vorhandene Belege ansehen und die Dokumentation prüfen.'),
+  el('a',{href:'../b/',class:'knopf hell'},'Belege ansehen →')
  );
 }
 function draftDirty(d){
