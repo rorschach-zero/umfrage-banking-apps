@@ -15,19 +15,19 @@
  const fmt=value=>!value?'Frist noch offen':new Intl.DateTimeFormat('de-CH',{day:'numeric',month:'long',timeZone:'Europe/Zurich'}).format(new Date(value.includes('T')?value:value+'T12:00:00Z'));
  const shortDate=value=>!value?'Frist noch offen':new Intl.DateTimeFormat('de-CH',{day:'2-digit',month:'short',timeZone:'Europe/Zurich'}).format(new Date(value.includes('T')?value:value+'T12:00:00Z'));
  const params=new URLSearchParams(location.search);
- let data,person=params.get('person')||'MG',view='overview';
+ let data,person=params.get('person')||'MG',view='overview',selected=null;
  const storageKey=kind=>'pa6-project-preview:'+kind+':'+person+':'+data.people[person].task.ref;
  const read=kind=>{try{return JSON.parse(localStorage.getItem(storageKey(kind))||'null');}catch{return null;}};
  const write=(kind,value)=>{localStorage.setItem(storageKey(kind),JSON.stringify(value));};
  const user=()=>data.people[person];
  const isLead=()=>demo?person==='SA':data?.lead===true;
  function setView(next){view=next;render();document.querySelector('main h1')?.focus({preventScroll:true});window.scrollTo?.({top:0,behavior:'instant'});}
- function navButton(name,key,number){return button([number,name].join('  '),()=>setView(key),'pv-nav-button',{'data-view':key,'aria-current':view===key?'page':null,hidden:key==='lead'&&!isLead()});}
+ function navButton(name,key,number){return button([number,name].join('  '),()=>setView(key),'pv-nav-button',{'data-view':key,'aria-current':view===key||key==='steckbriefe'&&view==='steckbrief'?'page':null,hidden:key==='lead'&&!isLead()||key==='steckbriefe'&&demo});}
  function shell(){
   document.body.classList.add('project-preview');
   const mark=E('span',{class:'pv-mark','aria-hidden':'true'},E('i'),E('i'),E('i'));
   const select=E('select',{id:'preview-person','aria-label':'Beispielperson',onchange:e=>{person=e.target.value;view='overview';render();}},Object.entries(data.people).map(([key,p])=>E('option',{value:key,selected:key===person},p.name)));
-  const sidebar=E('aside',{class:'pv-sidebar'},E('a',{href:'../',class:'pv-brand'},mark,E('span',{},'Unser Projekt',E('small',{},'Praxisarbeit 6 · Klasse 601/H25-B'))),E('nav',{'aria-label':'Projektansichten'},navButton(demo?'Überblick':'Werkzeuge','overview','01'),navButton('Mein Auftrag','task','02'),navButton('Leitung','lead','03')),E('div',{class:'pv-side-bottom'},E('span',{class:'pv-tiny'},demo?'LOKALE VORSCHAU':'DEIN PROJEKT'),demo?E('p',{},'Gemeinsam wissen,\nwas als Nächstes zählt.'):null,demo?E('label',{for:'preview-person'},'Beispielperson'):E('span',{},user().name),demo?select:null));
+  const sidebar=E('aside',{class:'pv-sidebar'},E('a',{href:'../',class:'pv-brand'},mark,E('span',{},'Unser Projekt',E('small',{},'Praxisarbeit 6 · Klasse 601/H25-B'))),E('nav',{'aria-label':'Projektansichten'},navButton(demo?'Überblick':'Werkzeuge','overview','01'),navButton('Mein Auftrag','task','02'),navButton('Leitung','lead','03'),navButton('Steckbriefe','steckbriefe','04')),E('div',{class:'pv-side-bottom'},E('span',{class:'pv-tiny'},demo?'LOKALE VORSCHAU':'DEIN PROJEKT'),demo?E('p',{},'Gemeinsam wissen,\nwas als Nächstes zählt.'):null,demo?E('label',{for:'preview-person'},'Beispielperson'):E('span',{},user().name),demo?select:null));
   const top=E('header',{class:'pv-top'},E('a',{href:'../'},'Meine Arbeit'),E('span',{'aria-hidden':'true'},'/'),E('strong',{},'Projekt'),E('span',{class:'pv-top-status'},E('i'),'Stand vom '+data.readDate+(phase==='cached'?' · wird aktualisiert':phase==='stale'?' · veraltet':'')),!demo&&phase==='ready'&&data.known?button('Aktualisieren',()=>load(),'pv-text-button'):null,E('span',{class:'pv-avatar','aria-label':user().name},user().name.slice(0,1)));
   const body=E('main',{id:'main',class:'pv-main'});
   document.body.replaceChildren(E('a',{class:'pv-skip',href:'#main'},'Zum Inhalt'),sidebar,E('div',{class:'pv-workspace'},top,body,E('footer',{class:'pv-footer'},E('span',{},demo?'Beispiel vom '+data.readDate+' · Änderungen bleiben auf diesem Gerät.':'Aufgaben und Fristen aus dem gemeinsamen Aufgabenplan'),E('span',{},'Studiengruppe · nicht im Namen von Yuh'))));
@@ -84,7 +84,7 @@
     return E('article',{class:'pv-panel pv-decision'},E('div',{class:'pv-card-top'},label('ENTSCHEID 0'+(i+1)),tag(d.tag,'warm')),E('h2',{},d.title),E('p',{},d.copy),E('div',{class:'pv-decision-next'},E('strong',{},'Jetzt tun'),E('p',{},d.next)),E('p',{class:'pv-caption'},d.owner),E('details',{},E('summary',{},'Entscheid vorbereiten'),note,button('Entwurf lokal sichern',()=>{try{write('decision-'+d.id,{note:note.value});status.textContent='Lokal gesichert · noch kein Gruppenentscheid.';}catch{status.textContent='Speichern nicht möglich. Lass das Fenster offen.';}},'pv-button'),status))
   })),E('aside',{},E('section',{class:'pv-panel'},label('NÄCHSTE KONTROLLE'),E('h2',{},'22. November'),E('p',{},'Risiken prüfen und die Wirkung der Massnahmen festhalten.'),E('p',{class:'pv-caption'},'Vergangene Lücken bleiben sichtbar. Eine Bestätigung ersetzt kein beobachtetes Ergebnis.')),E('section',{class:'pv-panel pv-lead-note'},E('h2',{},'Was noch belegt werden muss'),E('ul',{},E('li',{},'Tatsächliche Stunden je Person'),E('li',{},'Coaching vom 2. November'),E('li',{},'Freigabe und Versand des Wochenberichts')),E('p',{class:'pv-caption'},'Quelle: Gesamtprüfung vom 18.11. zu Risiken, Aufwand und Coaching.'))))];
  }
- function render(){const old=document.querySelector('main.pv-main');let target=shell();if(old){target.replaceWith(old);target=old;target.replaceChildren();}target.append(...[!demo?liveNotice():null,...(view==='task'?taskView():view==='lead'&&isLead()?leadView():overview()),demo?E('p',{class:'pv-caption pv-read-stand'},'Stand vom '+data.readDate+' · lokale Vorschau.'):null].filter(node=>node!=null&&node!==false));}
+ function render(){const old=document.querySelector('main.pv-main');let target=shell();if(old){target.replaceWith(old);target=old;target.replaceChildren();}target.append(...[!demo?liveNotice():null,...(view==='task'?taskView():view==='lead'&&isLead()?leadView():view==='steckbriefe'&&!demo?steckbriefList():view==='steckbrief'&&!demo?steckbriefDetail():overview()),demo?E('p',{class:'pv-caption pv-read-stand'},'Stand vom '+data.readDate+' · lokale Vorschau.'):null].filter(node=>node!=null&&node!==false));}
  if(demo)try{const response=await fetch('beispielstand.json');if(!response.ok)throw Error('Beispielstand nicht erreichbar');data=await response.json();if(!data.people[person])person='MG';render();}catch(error){main.replaceChildren(E('h1',{},'Vorschau nicht geladen'),E('p',{},error.message),button('Erneut versuchen',()=>location.reload()));}
 
  function toolsNav(){
@@ -98,6 +98,51 @@
   const next=E('section',{class:'pv-next pv-action-next'},E('div',{class:'pv-card-top'},label('DEIN NÄCHSTER SCHRITT'),task?tag(task.due?'Bis '+shortDate(task.due):'Frist noch offen'):null),E('h2',{},task?task.title:data.known?'Keine offene Aufgabe im Aufgabenplan':'Deine Aufgabe ist noch unbekannt'),E('p',{},task?'Schritte und Ziel für deinen Auftrag ansehen.':data.known?'Weitere Kontakte und Kapitel findest du unter «Meine Arbeit».':'Bitte lade den Aufgabenplan erneut.'),task?button('Auftrag öffnen →',()=>setView('task'),'pv-button pv-primary',{'data-next-task':task.ref}):E('a',{href:'../?view=tasks',class:'pv-button'},'Meine Arbeit öffnen'));
   return E('div',{class:'pv-action-area'},next,toolsNav());
  }
+
+ // 23.11.2026 Steckbrief je Arbeitspaket nach PM-Skript Block 2, Folie 25 (Aufwand und Dauer nach Folien 26 und 27).
+ const SB_PROJEKT='Kundendienst als Stärke positionieren',SB_NUMMER='PA6 · 601/H25-B';
+ const SB_LIEFER={umfrage:'Online-Befragung (Methode A)',umfrage_site:'Umfrage-Website',testprotokoll:'Belege Service-Momentaufnahmen (Methode B)',codebuch:'Einordnung der Bewertungen (Methode C)',pa6a_grundlage:'Projektgrundlage PA6a',pa6a_bericht:'Bericht PA6a',pa6a_swot:'SWOT-Analyse PA6a, Kapitel 2.9',pa6b_bericht:'Bericht PA6b',projektauftrag:'Projektauftrag',psp_gantt:'Projektstrukturplan und Gantt',risiko:'Risiko-Map und Risikoregister',controlling:'Projektsteuerung (Controlling, Coaching)',praesentation:'Präsentation',flipchart:'Flipchart',fachgespraech:'Vorbereitung Fachgespräch',massnahme:'Massnahme'};
+ const SB_KEINES={'AP-009':'Initiale Stakeholder-Map','AP-019':'Rückblick und geordnete Projektablage'};
+ const sbNum=(v,d=2)=>Number.isFinite(v)?new Intl.NumberFormat('de-CH',{maximumFractionDigits:d}).format(v):'–';
+ const sbChf=v=>Number.isFinite(v)?'CHF '+new Intl.NumberFormat('de-CH',{maximumFractionDigits:0}).format(v).replace(/[’‘]/g,"'"):'–';
+ const sbDate=v=>v?new Intl.DateTimeFormat('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'Europe/Zurich'}).format(new Date(v.includes('T')?v:v+'T12:00:00Z')):'–';
+ const sbText=v=>typeof v==='string'&&v.trim()&&v!=='noch offen'?v.trim():'';
+ const sbKey=code=>String(code||'9').split('.').map(n=>String(+n||0).padStart(3,'0')).join('.');
+ function sbPackages(){return (data?.raw?.tasks||[]).filter(r=>r&&r.source==='psp'&&r.type==='Arbeitspaket'&&r.steckbrief&&typeof r.steckbrief==='object'&&typeof r.steckbrief.code==='string').sort((a,b)=>sbKey(a.steckbrief.code).localeCompare(sbKey(b.steckbrief.code)));}
+ function sbOf(id){return sbPackages().find(r=>r.id===id)||null;}
+ function openSteckbrief(id){selected=id;setView('steckbrief');}
+ function sbSteps(text){return String(text||'').split(/\n+/).map(s=>s.trim()).filter(s=>s&&!/^(Methode B|Hinweis)\b/.test(s)).map(s=>s.replace(/^\d+[.)]\s*/,'')).slice(0,6);}
+ function sbLines(text){return String(text||'').split(/(?<=\.)\s+(?=(?:Personen|Werkzeuge|Mittel|Termine?):)/).map(s=>s.trim()).filter(Boolean);}
+ function sbMeasure(text){return String(text||'').split(/(?<=\.)\s+(?=\d+ %)/).map(s=>s.trim()).filter(Boolean);}
+ function sbCell(label,content,cls=''){return E('div',{class:'pv-sb-cell '+cls},E('span',{class:'pv-sb-label'},label),E('div',{class:'pv-sb-value'},content));}
+ function steckbriefList(){
+  const rows=sbPackages(),groups=new Map();
+  for(const r of rows){const g=r.steckbrief.teilaufgabe||r.steckbrief.code.split('.').slice(0,2).join('.');if(!groups.has(g))groups.set(g,[]);groups.get(g).push(r);}
+  const total=rows.reduce((s,r)=>s+(Number.isFinite(r.steckbrief.kosten)?r.steckbrief.kosten:0),0);
+  return [heading('STECKBRIEFE',isLead()?'Steckbriefe aller Arbeitspakete':'Steckbriefe deiner Arbeitspakete','Jedes Arbeitspaket auf einer Seite, nach dem Muster aus dem Projektmanagement-Unterricht. Der Code zeigt Phase, Teilaufgabe und Paket, zum Beispiel 2.3.1.'),
+   rows.length?E('div',{class:'pv-sb-list'},[...groups].map(([g,list])=>E('section',{class:'pv-panel pv-sb-group'},E('div',{class:'pv-panel-head'},E('h2',{},g),tag(list.length+(list.length===1?' Paket':' Pakete'))),E('ul',{},list.map(r=>E('li',{},E('button',{type:'button',class:'pv-sb-row','data-steckbrief':r.ref,onclick:()=>openSteckbrief(r.id)},E('strong',{class:'pv-sb-code'},r.steckbrief.code),E('span',{class:'pv-sb-title'},r.title,E('small',{},r.ref+' · '+(M.names[r.owner]||'offen')+' · '+sbDate(r.start)+' bis '+sbDate(r.due))),E('span',{class:'pv-sb-pt'},sbNum(r.steckbrief.pt)+' PT'),arrow()))))))):E('section',{class:'pv-panel'},E('p',{},data.known?'Die Steckbriefe sind im gelesenen Stand noch nicht enthalten. Aktualisiere den Stand.':'Der Aufgabenplan konnte nicht geladen werden.'),button('Aktualisieren',()=>load(),'pv-button')),
+   rows.length?E('p',{class:'pv-caption pv-sb-note'},rows.length+' Pakete · '+sbChf(total)+' kalkulatorisch. Annahme: CHF 1\'000 pro Personentag, 1 Personentag = 8 Personenstunden.'):null];
+ }
+ function steckbriefDetail(){
+  const r=sbOf(selected);if(!r)return steckbriefList();
+  const sb=r.steckbrief,lief=SB_KEINES[r.ref]||SB_LIEFER[r.deliverable]||'Kein eigenes Lieferobjekt',done=(t=>isLead()?t:M.memberText(t))(sbText(r['Fertig wenn'])),steps=sbSteps(r["So geht's"]),res=sbLines(sb.ressourcen),measure=sbMeasure(sb.messung);
+  const abw=Number.isFinite(sb.dauerAbweichung)?(sb.dauerAbweichung>0?'+':'')+sbNum(sb.dauerAbweichung,1):'–';
+  const people=Number.isFinite(sb.personen)?sbNum(sb.personen,0)+(sb.personen===1?' Person':' Personen'):'–';
+  const sheet=E('section',{class:'pv-panel pv-sb','aria-label':'Steckbrief '+sb.code},
+   E('div',{class:'pv-sb-grid pv-sb-three'},sbCell('Projektname',SB_PROJEKT),sbCell('Projektnummer',SB_NUMMER),sbCell('Datum','Stand '+data.readDate)),
+   E('div',{class:'pv-sb-grid pv-sb-three'},sbCell('Arbeitspaketname',r.title),sbCell('PSP-Code',[E('strong',{},sb.code),' · '+r.ref,E('small',{},sb.teilaufgabe||'')]),sbCell('AP-Verantwortliche',M.names[r.owner]||'offen')),
+   sbCell('Lieferobjekt',[E('strong',{},lief),done?E('p',{},done):null],'wide'),
+   sbCell('Aufgaben',steps.length?E('ol',{},steps.map(s=>E('li',{},s))):E('p',{},'Noch keine Schritte im Aufgabenplan.'),'wide'),
+   sbCell('Ressourcen',res.length?E('ul',{},res.map(s=>E('li',{},s))):E('p',{},'Noch offen.'),'wide'),
+   E('div',{class:'pv-sb-grid pv-sb-two'},
+    sbCell('Dauer (T)',[E('span',{class:'pv-sb-num'},sbNum(sb.dauer,0)+' T'),E('small',{},'Plan in Kalendertagen. Rechnerisch '+sbNum(sb.dauerRechnerisch,1)+' T bei '+people+' × '+sbNum(sb.stundenTag,1)+' h pro Tag, Abweichung '+abw+' T.'),sbText(sb.annahme)?E('small',{},'Annahme · '+sb.annahme):null]),
+    sbCell('Aufwand (PT)',[E('span',{class:'pv-sb-num'},sbNum(sb.pt)+' PT'),E('small',{},(Number.isFinite(r.planHours)?sbNum(r.planHours,1):'–')+' Personenstunden ÷ 8')]),
+    sbCell('Anfang',sbDate(r.start)),sbCell('Vorgänger',sb.vorgaenger||'–'),
+    sbCell('Ende',sbDate(r.due)),sbCell('Nachfolger',sb.nachfolger||'–'),
+    sbCell('Fortschrittsmessung',measure.length?E('ul',{class:'pv-sb-measure'},measure.map(s=>E('li',{},s))):'–'),
+    sbCell('Kosten',[E('span',{class:'pv-sb-num'},sbChf(sb.kosten)),E('small',{},'Annahme · kalkulatorisch CHF 1\'000 pro Personentag. Keine Geldkosten der Massnahme.')])));
+  return [button('← Alle Steckbriefe',()=>setView('steckbriefe'),'pv-text-button'),heading('STECKBRIEF · '+sb.code,r.title,'Arbeitsauftrag nach dem Muster aus dem Projektmanagement-Unterricht. Quelle ist der gemeinsame Aufgabenplan.'),sheet,E('div',{class:'pv-sb-actions'},taskLink(r),button('Alle Steckbriefe',()=>setView('steckbriefe'),'pv-button'))];
+ }
  function taskLink(task,label='Im Arbeitsbereich öffnen →'){return E('a',{class:'pv-button pv-primary',href:'../?view=tasks&auftrag='+encodeURIComponent(task.id)},label);}
  function assignmentHours(){
   const rows=(data.raw.assignments||[]).filter(row=>row.owner===data.person), hours=data.raw.zeit?.auftraege;
@@ -110,7 +155,7 @@
  }
  function liveTask(){
   const task=user().task;if(!task)return [heading('MEIN AUFTRAG','Dein nächster Auftrag ist noch offen.','Öffne «Meine Arbeit» oder aktualisiere den Stand.'),E('a',{href:'../?view=tasks',class:'pv-button'},'Meine Arbeit öffnen')];
-  return [button('← Zur Übersicht',()=>setView('overview'),'pv-text-button'),heading('MEIN AUFTRAG',task.title,task.next),E('div',{class:'pv-task-grid'},E('section',{class:'pv-panel'},E('h2',{},'So gehst du vor'),task.steps.length?E('ol',{class:'pv-work-steps'},task.steps.map((text,i)=>E('li',{},E('span',{class:'pv-step-number'},i+1),E('p',{},text)))):E('p',{},'Die einzelnen Schritte stehen noch nicht im Aufgabenplan.'),criteria(task),taskLink(task),E('p',{class:'pv-caption'},'Dort findest du die vorhandenen Schritte zum Erfassen, Prüfen und Abschliessen.')),E('aside',{class:'pv-panel'},E('h2',{},'Dein Auftrag'),E('dl',{class:'pv-facts'},E('div',{},E('dt',{},'Frist'),E('dd',{},fmt(task.due))),E('div',{},E('dt',{},'Geplante Gruppenstunden'),E('dd',{},task.plannedHours===null?'Noch offen':task.plannedHours+' Stunden')),E('div',{},E('dt',{},'Arbeitspaket'),E('dd',{},task.ref.replace(/^AP-/,'Arbeitspaket ')))),E('p',{},'Die Gruppenstunden sind keine Zusage deiner verfügbaren Zeit.'))),toolsNav()];
+  return [button('← Zur Übersicht',()=>setView('overview'),'pv-text-button'),heading('MEIN AUFTRAG',task.title,task.next),E('div',{class:'pv-task-grid'},E('section',{class:'pv-panel'},E('h2',{},'So gehst du vor'),task.steps.length?E('ol',{class:'pv-work-steps'},task.steps.map((text,i)=>E('li',{},E('span',{class:'pv-step-number'},i+1),E('p',{},text)))):E('p',{},'Die einzelnen Schritte stehen noch nicht im Aufgabenplan.'),criteria(task),taskLink(task),sbOf(task.id)?button('Steckbrief ansehen →',()=>openSteckbrief(task.id),'pv-button',{'data-steckbrief-open':task.ref}):null,E('p',{class:'pv-caption'},'Dort findest du die vorhandenen Schritte zum Erfassen, Prüfen und Abschliessen.')),E('aside',{class:'pv-panel'},E('h2',{},'Dein Auftrag'),E('dl',{class:'pv-facts'},E('div',{},E('dt',{},'Frist'),E('dd',{},fmt(task.due))),E('div',{},E('dt',{},'Geplante Gruppenstunden'),E('dd',{},task.plannedHours===null?'Noch offen':task.plannedHours+' Stunden')),E('div',{},E('dt',{},'Arbeitspaket'),E('dd',{},task.ref.replace(/^AP-/,'Arbeitspaket ')))),E('p',{},'Die Gruppenstunden sind keine Zusage deiner verfügbaren Zeit.'))),toolsNav()];
  }
  function liveLead(){
   if(!isLead())return liveOverview();
