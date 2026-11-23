@@ -203,7 +203,7 @@
   }
   function serviceCell(data) {
     const f=data.methods.B.field;
-    return cell({id:'servicetest',label:'Service-Momentaufnahmen',body:f?.method!=='qualitative_snapshot'||!ready(f)?unknown():`<p>Momentaufnahmen prüfen · Ernes · bis 24.11.2026</p>${f.providers.map(p=>row(esc(p.provider),esc(p.note),esc(p.state))).join('')}`,
+    return cell({id:'servicetest',label:'Service-Momentaufnahmen',body:f?.method!=='qualitative_snapshot'||!ready(f)?unknown():`<p>Momentaufnahmen prüfen · Ernes · bis 24.11.2026</p>${(Array.isArray(f.providers)?f.providers:[]).map(p=>row(esc(p.provider),esc(p.note),esc(p.state))).join('')}`,
       explain:'<p>Subjektive Momentaufnahmen. Der Stand bewertet die Dokumentation, nicht den Kundendienst.</p>',source:'Vorhandene Belege und dokumentierte Prüfung'});
   }
   function codingCell(data) {
@@ -247,7 +247,7 @@
       <details class="more" data-key="alle-fragen"><summary>Alle Fragen mit Fallzahl</summary><div class="list">${A.main.questions.map(q => row(esc(question(q.question)), distribution(q), 'n = ' + num(q.n))).join('')}</div></details>
       <p class="note">Sensitivität ohne Dauerregel: n = ${num(A.sensitivity.n)}.</p>` : unknown(),
       explain: '<p>Anteile je Antwortkategorie mit der Fallzahl der Frage; der Nenner folgt der Route. «Kann ich nicht sagen» ist eine eigene Kategorie und wird nie gemittelt. Keine Intervalle und keine Tests: Die Stichprobe ist geeignet für die Fragestellung, aber keine Zufallsstichprobe.</p>', source: 'Umfrage, bereinigte Antworten'}));
-    out.push(cell({id:'ergebnisse-b',cls:'c12',label:'Service-Momentaufnahmen',body:B?.method==='qualitative_snapshot'&&B.providers.length?B.providers.map(p=>`<h3>${esc(p.provider)}</h3><p>${esc(p.summary)}</p><p>${esc(p.impression)}</p><p>${esc(p.limits)}</p>`).join(''):'<p>Geprüfte und bereinigte Anbietertexte liegen noch nicht vor.</p>',explain:'<p>Willkürliche Auswahl, nicht repräsentativ. Keine allgemeine Bewertung oder Rangfolge.</p>',source:'Geprüfte Anbietertexte'}));
+    out.push(cell({id:'ergebnisse-b',cls:'c12',label:'Service-Momentaufnahmen',body:B?.method==='qualitative_snapshot'&&Array.isArray(B.providers)&&B.providers.length?B.providers.map(p=>`<h3>${esc(p.provider)}</h3><p>${esc(p.summary)}</p><p>${esc(p.impression)}</p><p>${esc(p.limits)}</p>`).join(''):'<p>Geprüfte und bereinigte Anbietertexte liegen noch nicht vor.</p>',explain:'<p>Willkürliche Auswahl, nicht repräsentativ. Keine allgemeine Bewertung oder Rangfolge.</p>',source:'Geprüfte Anbietertexte'}));
     out.push(cell({id: 'ergebnisse-c', cls: 'c12', label: 'Themen je Auswertungszelle', body: C ? C.map(r => `<details class="more" data-key="c-${esc(r.cell.join('-'))}"><summary>${esc(r.cell.join(' · '))} · n = ${num(r.n)}</summary>${r.small_n ? '<p class="note">n unter 20: berichten, nicht vergleichen.</p>' : ''}<div class="list">${r.categories.map(c => row('Kategorie ' + num(c.category), '', `${num(c.count)} von ${num(c.n)} · ${pct(c.share)}`)).join('')}</div></details>`).join('') : unknown(),
       explain: '<p>Anteil Bewertungen mit der Kategorie an den codierten Bewertungen der Zelle. Verglichen wird nur gleich gegen gleich.</p>', source: 'Team-Blatt, Bewertungen mit Konsens'}));
     return out.join('');

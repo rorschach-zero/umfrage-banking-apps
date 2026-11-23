@@ -3,7 +3,8 @@
   if (typeof module === 'object' && module.exports) module.exports = factory(require('./model.js'));
   else root.CentralCache = factory(root.CentralModel);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (M) {
-  const PREFIX = 'pa6-central-metrics-v2:';
+  const PREFIX = 'pa6-central-metrics-v3:';
+  const text = value => typeof value === 'string' ? value.slice(0,300) : null;
   const enumOf = values => value => values.includes(value) ? value : null;
   const bool = value => typeof value === 'boolean' ? value : null;
   const time = value => typeof value === 'string' && /^\d{4}-\d\d-\d\dT[\d:.]+Z$/.test(value) && Number.isFinite(Date.parse(value)) ? value : null;
@@ -19,7 +20,7 @@
     yuh:numeric('n target share'),quotas:[quota],channels:[{id:enumOf(Object.keys(M.CHANNELS)),n:M.number}],
     people:numeric('coded without'),curve:[{day:M.day,...numeric('n total')}],dailyConsistent:bool,funnel:[M.number],funnelSince:time,
     outreach:{state:metricState,...numeric('sent answered share noReply reference positive'),kinds:{Zusage:M.number,'Zusage mit Auftrag':M.number,Absage:M.number,Automatisch:M.number}},
-    B:{state:metricState,...numeric('n target')},C:{state:metricState,...numeric('n planned'),cellTotals:numeric('n planned captured'),conflict:bool},
+    B:{state:metricState,method:enumOf(['qualitative_snapshot']),providers:[{provider:text,state:text,note:text}],...numeric('n target')},C:{state:metricState,...numeric('n planned'),cellTotals:numeric('n planned captured'),conflict:bool},
     counts:count,statusCounts:count,exportCounts:count,countConflict:bool,milestones:[milestone],next:milestone,checkpoint:milestone,fieldClose:M.day,horizon:M.day,
     states:{survey:metricState,project:metricState}
   };
